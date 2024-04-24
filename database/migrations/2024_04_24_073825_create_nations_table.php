@@ -9,11 +9,11 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        Schema::create('academies', function (Blueprint $table) {
+        Schema::create('nations', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('slug')->unique();
-            $table->foreignId('nation_id')->constrained();
+            $table->string('code', 2)->unique();
+            $table->string('flag')->nullable();
             $table->timestamps();
         });
     }
@@ -22,6 +22,6 @@ return new class extends Migration {
      * Reverse the migrations.
      */
     public function down(): void {
-        Schema::dropIfExists('academies');
+        Schema::dropIfExists('nations');
     }
 };

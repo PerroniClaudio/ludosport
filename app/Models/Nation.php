@@ -5,24 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class School extends Model {
+class Nation extends Model {
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'nation_id',
-        'slug'
+        'code',
+        'flag'
     ];
 
-    public function nation() {
-        return $this->belongsTo(Nation::class);
+    public function academies() {
+        return $this->hasMany(Academy::class);
     }
 
     public function users() {
         return $this->hasMany(User::class);
-    }
-
-    public function academy() {
-        return $this->belongsTo(Academy::class);
     }
 }

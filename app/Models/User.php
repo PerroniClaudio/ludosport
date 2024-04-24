@@ -95,4 +95,16 @@ class User extends Authenticatable {
                 return [];
         }
     }
+
+    public function academy() {
+        return $this->belongsTo(Academy::class);
+    }
+
+    public function school() {
+        return $this->belongsTo(School::class);
+    }
+
+    public function nation() {
+        return $this->belongsTo(Nation::class);
+    }
 }
