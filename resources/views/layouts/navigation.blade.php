@@ -25,7 +25,7 @@
                             </x-nav-link>
                         @endforeach
                     @else
-                        <x-nav-link :href="route('dashboard')" :active="false">
+                        <x-nav-link :href="route('users.index')" :active="false">
                             {{ __('navigation.users') }}
                         </x-nav-link>
                         <x-nav-link :href="route('dashboard')" :active="false">
