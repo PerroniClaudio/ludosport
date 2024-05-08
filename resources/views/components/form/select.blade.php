@@ -1,4 +1,4 @@
-@props(['name','label', 'type' => 'text', 'required' => false, 'value' => '', 'options' => [], 'optgroups' => []])
+@props(['name','label', 'type' => 'text', 'required' => false, 'value' => '', 'options' => [], 'optgroups' => [], 'disabledOption' => []])
 
 <div>
     <x-input-label for="{{ $name }}" value="{{ $label }}" />

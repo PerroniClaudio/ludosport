@@ -22,7 +22,7 @@ class User extends Authenticatable {
         'role',
     ];
 
-    protected $allowedRoles = [
+    private $allowedRoles = [
         'admin',
         'user',
         'rettore',
@@ -106,5 +106,15 @@ class User extends Authenticatable {
 
     public function nation() {
         return $this->belongsTo(Nation::class);
+    }
+
+    public function getAllowedRolesWithoutAdmin(): array
+    {
+        $allowedRoles = $this->allowedRoles;
+        $key = array_search('admin', $allowedRoles);
+        if ($key !== false) {
+            unset($allowedRoles[$key]);
+        }
+        return array_values($allowedRoles);
     }
 }
