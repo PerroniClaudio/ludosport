@@ -6,6 +6,7 @@ return [
     'provenance' => 'Provenance',
     'nationality' => 'Nationality',
     'authorization' => 'Authorization',
+    'title' => 'Users',
     'role' => 'Role',
     'admin' => 'Admin',
     'user' => 'User',

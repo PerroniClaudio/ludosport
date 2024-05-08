@@ -10,11 +10,14 @@ use Illuminate\Support\Str;
 class UserController extends Controller
 {
 
-    
-   
     public function index()
     {
-        return view('users.index');
+
+        $users = User::orderBy('created_at', 'desc')->get();
+
+        return view('users.index', [
+            'users' => $users,
+        ]);
     }
 
     public function create()
@@ -43,17 +46,25 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8',
-            'role' => 'required|string|in:admin,editor,viewer',
+            'role' => 'required|string|in:user,rettore,preside,manager,tecnico,istruttore',
         ]);
+
 
         $user = new User();
         $user->name = $request->name;
+        $user->surname = $request->surname;
         $user->email = $request->email;
         $password = Str::password();
         $user->password = bcrypt($password);
         $user->role = $request->role;
+        $user->subscription_year = $request->year;
         $user->save();
+
+        $user->academy()->associate($request->academy_id);
+        $user->save();
+
+
+
 
         return redirect()->route('users.index');
     }

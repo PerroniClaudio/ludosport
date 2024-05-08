@@ -258,6 +258,7 @@
         $continents[$continent][] = $country;
     }
 
+
     foreach ($continents as $key => $value) {
         $options = [];
 
@@ -273,6 +274,11 @@
             "options" => $options
         ];
     }
+
+
+    $europe = $continents['Europe'];
+    unset($continents['Europe']);
+    $continents = ['Europe' => $europe] + $continents;
 
     $default = [
         [

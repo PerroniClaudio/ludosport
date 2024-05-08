@@ -25,6 +25,7 @@
                             'columnClasses' => '',
                             'rowClasses' => '',
                         ],
+     
                     ]" :rows="$rows">
                          <x-slot name="tableActions">
                             <div class="flex flex-wrap space-x-4">

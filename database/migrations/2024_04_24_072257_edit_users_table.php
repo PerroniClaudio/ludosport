@@ -18,9 +18,8 @@ return new class extends Migration {
             $table->timestamp('fee_payment_date')->nullable();
             $table->timestamp('fee_expires_at')->nullable();
             $table->integer('subscription_year')->default('1970');
-            $table->foreign('nation_id')->references('id')->on('nations')->onDelete('cascade');
-            $table->foreign('academy_id')->references('id')->on('academies')->onDelete('cascade');
-            $table->foreign('school_id')->references('id')->on('schools')->onDelete('cascade');
+
+
         });
     }
 
