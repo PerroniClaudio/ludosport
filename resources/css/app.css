@@ -126,3 +126,7 @@
         --accent-950: #f6f3ef;
     }
 }
+
+[x-cloak] {
+    display: none;
+}

@@ -15,9 +15,12 @@ return [
     'tecnico' => 'Technician',
     'istruttore' => 'Instructor',
     'academy' => 'Academy',
+    'select_academy' => 'Select Academy',
     'save' => 'Save',
     'create' => 'Create',
     'edit' => 'Edit',
     'delete' => 'Delete',
     'cancel' => 'Cancel',
+    'actions' => 'Actions',
+    'select' => 'Select',
 ];

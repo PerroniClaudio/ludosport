@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Academy;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -27,9 +28,13 @@ class UserController extends Controller
                 'label' => __("users.$role"),
             ];
         }, $roles);
+
+
+        $academies = Academy::all();
      
         return view('users.create', [
-            'roles' => $roles
+            'roles' => $roles,
+            'academies' => $academies,
         ]);
     }
 

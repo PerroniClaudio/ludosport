@@ -4,6 +4,7 @@
     'striped' => false,
     'actionText' => 'Action',
     'tableTextLinkLabel' => 'Link',
+    'isDialogTable' => false,
 ])
 
 <div x-data="{
@@ -56,7 +57,7 @@
     },
 
 }" x-cloak id="">
-    <div class="mb-5 overflow-x-auto bg-white dark:bg-background-900 rounded-lg shadow overflow-y-auto relative ">
+    <div class="mb-5 overflow-x-auto bg-white dark:bg-background-900 rounded-lg shadow overflow-y-auto relative {{ $isDialogTable ? "min-h-[800px] flex flex-col justify-between" : "" }}" >
         <div class="flex justify-between items-center p-6">
             <div class="flex items-center justify-end w-full">
                 <x-text-input type="text" x-on:input="searchByValue($event)" placeholder="Search..."
@@ -64,7 +65,7 @@
             </div>
         </div>
         <table
-            class="border-collapse table-auto w-full whitespace-no-wrap bg-white dark:bg-background-900 table-striped relative">
+            class="border-collapse table-auto w-full whitespace-no-wrap bg-white dark:bg-background-900 table-striped relative flex-1">
 
             <thead>
                 <tr class="text-left">
@@ -105,7 +106,7 @@
                         {{ $empty }}
                     @else
                         <tr>
-                            <td colspan="100%" class="text-center py-10 px-4 py-1 text-sm">
+                            <td colspan="100%" class="text-center text-background-500 dark:text-background-300 py-10 px-4 text-sm">
                                 No records found
                             </td>
                         </tr>
