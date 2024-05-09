@@ -62,4 +62,12 @@ class NationController extends Controller
     {
         //
     }
+
+    public function academies(Nation $nation)
+    {
+        //
+        return response($nation->academies);
+    }
+
+
 }

@@ -62,4 +62,10 @@ class AcademyController extends Controller
     {
         //
     }
+
+    public function schools(Academy $academy)
+    {
+        return response()->json($academy->schools);
+    }
+
 }
