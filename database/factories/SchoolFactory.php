@@ -16,8 +16,14 @@ class SchoolFactory extends Factory
      */
     public function definition(): array
     {
+        $number = fake()->randomNumber();
+
         return [
             //
+            'name' => 'School ' . $number,
+            "nation_id" => 2,
+            "slug" => "school-" . $number,
+            "academy_id" => fake()->numberBetween(1, 10)
         ];
     }
 }

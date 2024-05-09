@@ -9,6 +9,7 @@
         "blade-ui-kit/blade-icons": "^1.6",
         "laravel/breeze": "^2.0",
         "laravel/framework": "^11.0",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "mallardduck/blade-lucide-icons": "^1.21"
     },

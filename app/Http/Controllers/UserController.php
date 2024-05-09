@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Academy;
+use App\Models\Nation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -49,24 +50,30 @@ class UserController extends Controller
             'role' => 'required|string|in:user,rettore,preside,manager,tecnico,istruttore',
         ]);
 
+        $nation = Nation::where('name', $request->nationality)->first();
+        $user = User::create([
+            'name' => $request->name,
+            'surname' => $request->surname,
+            'email' => $request->email,
+            'password' => bcrypt(Str::random(10)),
+            'role' => $request->role,
+            'subscription_year' => $request->year,
+            'academy_id' => $request->academy_id,
+            'nation_id' => $nation->id,
+        ]);
 
-        $user = new User();
-        $user->name = $request->name;
-        $user->surname = $request->surname;
-        $user->email = $request->email;
-        $password = Str::password();
-        $user->password = bcrypt($password);
-        $user->role = $request->role;
-        $user->subscription_year = $request->year;
-        $user->save();
+        return redirect()->route('users.show', $user)->with('success', 'Utente creato con successo!');
+    }
 
-        $user->academy()->associate($request->academy_id);
-        $user->save();
+    public function show(User $user)
+    {
 
+        $academies = Academy::all();
 
-
-
-        return redirect()->route('users.index');
+        return view('users.show', [
+            'user' => $user,
+            'academies' => $academies,
+        ]);
     }
 
 }

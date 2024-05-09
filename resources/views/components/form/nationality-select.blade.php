@@ -1,3 +1,5 @@
+@props(['selectedvalue' =>  ''])
+
 @php
     $countries = [
         "AF" => ["country" => "Afghanistan", "continent" => "Asia"],
@@ -289,6 +291,6 @@
 @endphp
 
 <div>
-    <x-form.select name="nationality" label="{{ __('users.nationality') }}" :options="$default" :optgroups="$continents" />
+    <x-form.select name="nationality" label="{{ __('users.nationality') }}" :options="$default" :optgroups="$continents" value="{{ $selectedvalue }}" />
 </div>
 

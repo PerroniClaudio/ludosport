@@ -1,30 +1,30 @@
-@props(['academies' => [], 'selectedvalue' => null])
+@props(['schools' => [], 'selectedvalue' => null])
 
 @php 
-    $academies = $academies->map(function($academy) {
+    $schools = $schools->map(function($school) {
         return [
-            'id' => $academy->id,
-            'name' => $academy->name,
+            'id' => $school->id,
+            'name' => $school->name,
         ];
     });
 @endphp
 
 <div x-data="{
     isDialogOpen: false,
-    selectedAcademy: {{ $selectedvalue ? "'" . $selectedvalue . "'" : "'Select an academy'" }},
-    selectedAcademyId: null,
-    academies: {{ $academies }},
+    selectedschool: {{ $selectedvalue ? "'" . $selectedvalue . "'" : "'Select an school'" }},
+    selectedschoolId: null,
+    schools: {{ $schools }},
 }">
-    <x-input-label for="academy" value="{{ __('users.academy') }}" />
+    <x-input-label for="school" value="{{ __('users.school') }}" />
     <div class="flex w-full gap-2">
-        <input type="hidden" name="academy_id" x-model="selectedAcademyId">
-        <x-text-input disabled name="academy" class="flex-1" type="text" x-model="selectedAcademy" />
+        <input type="hidden" name="school_id" x-model="selectedschoolId">
+        <x-text-input disabled name="school" class="flex-1" type="text" x-model="selectedschool" />
         <div class="text-primary-500 hover:bg-background-500 dark:hover:bg-background-900 p-2 rounded-full cursor-pointer" x-on:click="isDialogOpen = true">
             <x-lucide-search class="w-6 h-6 text-primary-500 dark:text-primary-400" />
         
         </div>
     </div>
-    <x-input-error :messages="$errors->get('academy')" class="mt-2" />
+    <x-input-error :messages="$errors->get('school')" class="mt-2" />
 
     <div
         class="modal"
@@ -39,7 +39,7 @@
             <div class="flex items-center justify-center min-h-screen">
                 <div class="bg-background-100 dark:bg-background-800 rounded-lg shadow-lg p-6 w-full max-w-3xl">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-semibold text-background-500 dark:text-background-300">{{ __('users.select_academy') }}</h2>
+                        <h2 class="text-xl font-semibold text-background-500 dark:text-background-300">{{ __('users.select_school') }}</h2>
                         <div class="cursor-pointer" x-on:click="isDialogOpen = false">
                             <x-lucide-x class="w-6 h-6 text-background-500 dark:text-background-300" />
                         </div>
@@ -58,10 +58,10 @@
                                 'columnClasses' => '', // classes to style table th
                                 'rowClasses' => '', // classes to style table td
                             ],
-                        ]" :rows="$academies" isDialogTable="true">
+                        ]" :rows="$schools" isDialogTable="true">
                             <x-slot name="tableActions">
                                 <div class="flex flex-wrap space-x-4">
-                                    <x-primary-button type="button" x-on:click="selectedAcademy = row.name; selectedAcademyId = row.id; isDialogOpen = false;">{{ __('users.select') }}</x-primary-button>
+                                    <x-primary-button type="button" x-on:click="selectedschool = row.name; selectedschoolId = row.id; isDialogOpen = false;">{{ __('users.select') }}</x-primary-button>
                                 </div>
                             </x-slot>
                         </x-table>
