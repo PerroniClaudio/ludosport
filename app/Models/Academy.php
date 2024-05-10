@@ -21,4 +21,8 @@ class Academy extends Model {
     public function users() {
         return $this->hasMany(User::class);
     }
+
+    public function schools() {
+        return $this->hasMany(School::class);
+    }
 }

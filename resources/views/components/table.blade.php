@@ -57,7 +57,7 @@
     },
 
 }" x-cloak id="">
-    <div class="mb-5 overflow-x-auto bg-white dark:bg-background-900 rounded-lg shadow overflow-y-auto relative {{ $isDialogTable ? "min-h-[800px] flex flex-col justify-between" : "" }}" >
+    <div class="mb-5 overflow-x-auto bg-white dark:bg-background-900 rounded-lg shadow overflow-y-auto relative {{ $isDialogTable ? "min-h-[600px] flex flex-col justify-between" : "" }}" >
         <div class="flex justify-between items-center p-6">
             <div class="flex items-center justify-end w-full">
                 <x-text-input type="text" x-on:input="searchByValue($event)" placeholder="Search..."

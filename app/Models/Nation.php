@@ -9,9 +9,11 @@ class Nation extends Model {
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'name',
         'code',
-        'flag'
+        'flag',
+        'continent'
     ];
 
     public function academies() {

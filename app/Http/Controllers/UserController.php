@@ -62,18 +62,53 @@ class UserController extends Controller
             'nation_id' => $nation->id,
         ]);
 
-        return redirect()->route('users.show', $user)->with('success', 'Utente creato con successo!');
+        return redirect()->route('users.show', $user)->with('success', 'User created successfully!');
     }
 
-    public function show(User $user)
+    public function edit(User $user)
     {
 
-        $academies = Academy::all();
+        $nations = Nation::all();
 
-        return view('users.show', [
+        foreach ($nations as $nation) {
+            $countries[$nation['continent']][] = ['id' => $nation['id'], 'name' => $nation['name']];
+        }
+
+        $academy = Academy::find($user->academy->id);
+        $schools = $academy->schools;
+
+        return view('users.edit', [
             'user' => $user,
-            'academies' => $academies,
+            'academies' => $user->nation->academies ?? [],
+            'schools' => $schools,
+            'nations' => $countries,
         ]);
+    }
+
+    public function update(Request $request, User $user)
+    {
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'year' => 'required|integer',
+            'nationality' => 'required|string|exists:nations,id',
+            'academy_id' => 'required|integer|exists:academies,id',
+            'school_id' => 'required|integer|exists:schools,id',
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'surname' => $request->surname,
+            'email' => $request->email,
+            'subscription_year' => $request->year,
+            'nation_id' => $request->nationality,
+            'academy_id' => $request->academy_id,
+            'school_id' => $request->school_id,
+        ]);
+
+        return redirect()->route('users.index', $user)->with('success', 'User updated successfully!');
+
     }
 
 }

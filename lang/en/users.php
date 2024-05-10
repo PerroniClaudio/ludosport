@@ -17,6 +17,7 @@ return [
     'istruttore' => 'Instructor',
     'academy' => 'Academy',
     'select_academy' => 'Select Academy',
+    'select_school' => 'Select School',
     'save' => 'Save',
     'create' => 'Create',
     'edit' => 'Edit',
@@ -24,4 +25,6 @@ return [
     'cancel' => 'Cancel',
     'actions' => 'Actions',
     'select' => 'Select',
+    'school' => 'School',
+
 ];
