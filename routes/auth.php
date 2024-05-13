@@ -47,6 +47,10 @@ Route::middleware('auth')->group(function () {
                 ->middleware('throttle:6,1')
                 ->name('verification.send');
 
+    Route::post('email/verification-notification/{user}', [EmailVerificationNotificationController::class, 'verifyForUser'])
+                ->middleware(['auth', 'role:admin'])
+                ->name('verification.send-for-user');
+
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
                 ->name('password.confirm');
 

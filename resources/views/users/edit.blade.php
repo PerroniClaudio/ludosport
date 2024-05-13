@@ -41,6 +41,25 @@
                                 </div>
                             @endif
                         </div>
+                        <div>
+                            @if($user->is_verified)
+                                <div class="mt-1 text-sm text-background-600 dark:text-background-200 flex flex-row items-center gap-2">
+                                    <x-lucide-check-circle class="w-6 h-6 text-green-500" />
+                                    <span>{{ __('users.verified') }}</span>
+                                </div>
+                            @else
+                                <div class="mt-1 text-sm text-background-600 dark:text-background-200 flex flex-row items-center gap-2">
+                                    <x-lucide-x-circle class="w-6 h-6 text-red-500" />
+                                    <span>{{ __('users.not_verified') }}</span>
+                                    <form method="POST" action="{{ route('verification.send-for-user', $user->id) }}">
+                                        @csrf
+                                        <x-primary-button>
+                                           <span>{{ __('users.send_verification_email') }}</span>
+                                        </x-primary-button>
+                                    </form>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -62,7 +81,7 @@
                 <x-user.provenance-selector 
                     nationality="{{ $user->nation_id }}" 
                     selectedAcademyId="{{ $user->academy_id }}" 
-                    selectedAcademy="{{ $user->academy->name }}" 
+                    selectedAcademy="{{ $user->academy ? $user->academy->name : '' }}" 
                     selectedSchoolId="{{ $user->school_id }}"
                     selectedSchool="{{ $user->school ? $user->school->name : '' }}"
                     :academies="$academies" 

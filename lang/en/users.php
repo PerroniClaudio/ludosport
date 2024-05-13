@@ -34,4 +34,7 @@ return [
     'active' => 'Active',
     'fee_paid' => 'Fee Paid',
     'fee_not_paid' => 'Fee Not Paid',
+    'verified' => 'Mail Verified',
+    'not_verified' => 'Mail Not Verified',
+    'send_verification_email' => 'Send Verification Email',
 ];

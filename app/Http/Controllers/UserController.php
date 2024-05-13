@@ -82,8 +82,22 @@ class UserController extends Controller
             $countries[$nation['continent']][] = ['id' => $nation['id'], 'name' => $nation['name']];
         }
 
-        $academy = Academy::find($user->academy->id);
-        $schools = $academy->schools;
+        $countries = [
+            'Europe' => $countries['Europe'],
+            'Africa' => $countries['Africa'],
+            'Asia' => $countries['Asia'],
+            'North America' => $countries['North America'],
+            'Oceania' => $countries['Oceania'],
+        ];
+
+        if($user->academy) {
+            $academy = Academy::find($user->academy->id);
+            $schools = $academy->schools;
+        } else {
+            $schools = [];
+        }
+
+        $user->is_verified = $user->email_verified_at ? true : false;
 
         return view('users.edit', [
             'user' => $user,

@@ -333,4 +333,10 @@ Route::get('/populate-disabled' , function() {
     return response()->json($newCountries);
 });
 
+Route::get('/fake-verification', function() {
+    $user = App\Models\User::find(2);
+    $user->markEmailAsVerified();
+    return response()->json($user);
+});
+
 require __DIR__ . '/auth.php';
