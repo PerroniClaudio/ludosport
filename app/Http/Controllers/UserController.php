@@ -68,6 +68,14 @@ class UserController extends Controller
     public function edit(User $user)
     {
 
+        $roles = $user->getAllowedRolesWithoutAdmin();
+        $roles = array_map(function ($role) {
+            return [
+                'value' => $role,
+                'label' => __("users.$role"),
+            ];
+        }, $roles);
+
         $nations = Nation::all();
 
         foreach ($nations as $nation) {
@@ -82,6 +90,7 @@ class UserController extends Controller
             'academies' => $user->nation->academies ?? [],
             'schools' => $schools,
             'nations' => $countries,
+            'roles' => $roles,
         ]);
     }
 
@@ -105,10 +114,19 @@ class UserController extends Controller
             'nation_id' => $request->nationality,
             'academy_id' => $request->academy_id,
             'school_id' => $request->school_id,
+            'role' => $request->role ?? 'user'
         ]);
 
         return redirect()->route('users.index', $user)->with('success', 'User updated successfully!');
 
+    }
+
+    public function destroy(User $user)
+    {
+        $user->is_disabled = true;
+        $user->save();
+
+        return redirect()->route('users.index')->with('success', 'User disabled successfully!');
     }
 
 }

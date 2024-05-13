@@ -10,7 +10,42 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <form method="POST" action="{{ route('users.update', $user->id) }}" class="flex flex-col gap-4">
+            <div class="flex flex-col gap-4 mb-4">
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('users.status') }}</h3>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                    <div class="w-1/2 flex flex-col gap-2">
+                        <div>
+                            @if($user->has_paid_fee)
+                                <div class="mt-1 text-sm text-background-600 dark:text-background-200 flex flex-row items-center gap-2">
+                                    <x-lucide-check-circle class="w-6 h-6 text-green-500" />
+                                    <span>{{ __('users.fee_paid') }}</span>
+                                </div>
+                            @else
+                                <div class="mt-1 text-sm text-background-600 dark:text-background-200 flex flex-row items-center gap-2">
+                                    <x-lucide-x-circle class="w-6 h-6 text-red-500" />
+                                    <span>{{ __('users.fee_not_paid') }}</span>
+                                </div>
+                            @endif
+                        </div>
+                        <div>
+                            @if(!$user->is_disabled)
+                                <div class="mt-1 text-sm text-background-600 dark:text-background-200 flex flex-row items-center gap-2">
+                                    <x-lucide-check-circle class="w-6 h-6 text-green-500" />
+                                    <span>{{ __('users.active') }}</span>
+                                </div>
+                            @else
+                                <div class="mt-1 text-sm text-background-600 dark:text-background-200 flex flex-row items-center gap-2">
+                                    <x-lucide-x-circle class="w-6 h-6 text-red-500" />
+                                    <span>{{ __('users.disabled') }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('users.update', $user->id) }}" class="flex flex-col gap-4 mb-4">
                 @csrf
                 
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
@@ -35,6 +70,15 @@
                     :schools="$schools"
                 />
 
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('users.authorization') }}</h3>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                    <div class="w-1/2 flex flex-col gap-2">
+                        <x-form.select name="role" label="Role" required="{{ true }}" :options="$roles" value="{{ $user->role }}" />
+                    </div>
+                </div>
+
+
                 <div class="fixed bottom-8 right-32">
                     <x-primary-button type="submit">
                         <x-lucide-save class="w-6 h-6 text-white" />
@@ -42,6 +86,10 @@
                 </div>
 
             </form>
+
+            @if(!$user->is_disabled)
+                <x-user.disable-user-form :user="$user->id" />
+            @endif
         </div>
     </div>
 </x-app-layout>
