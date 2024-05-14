@@ -25,10 +25,10 @@
                             </x-nav-link>
                         @endforeach
                     @else
-                        <x-nav-link :href="route('users.index')" :active="false">
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                             {{ __('navigation.users') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" :active="false">
+                        <x-nav-link :href="route('nations.index')" :active="request()->routeIs('nations.*')">
                             {{ __('navigation.nazioni') }}
                         </x-nav-link>
                         <x-nav-link :href="route('dashboard')" :active="false">

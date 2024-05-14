@@ -41,7 +41,14 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('nation.academies.index');
     Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
+});
 
+Route::group(['middleware' => ['auth', 'role:admin']], function() {
+    Route::get('/nations', [App\Http\Controllers\NationController::class, 'index'])->name('nations.index');
+    Route::get('/nations/{nation}', [App\Http\Controllers\NationController::class, 'edit'])->name('nations.edit');
+    Route::post('/nations/{nation}', [App\Http\Controllers\NationController::class, 'update'])->name('nations.update');
+
+    Route::post('/nations/{nation}/academies', [App\Http\Controllers\NationController::class, 'associateAcademy'])->name('nations.academies.store');
 });
 
 Route::get('/populate-disabled' , function() {

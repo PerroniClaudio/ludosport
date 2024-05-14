@@ -62,7 +62,7 @@ class UserController extends Controller
             'nation_id' => $nation->id,
         ]);
 
-        return redirect()->route('users.show', $user)->with('success', 'User created successfully!');
+        return redirect()->route('users.edit', $user)->with('success', 'User created successfully!');
     }
 
     public function edit(User $user)
