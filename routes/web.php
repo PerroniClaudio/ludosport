@@ -31,6 +31,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+/** Users */
+
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('users.create');
@@ -43,13 +45,31 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
 });
 
+/** Nazioni */
+
 Route::group(['middleware' => ['auth', 'role:admin']], function() {
     Route::get('/nations', [App\Http\Controllers\NationController::class, 'index'])->name('nations.index');
     Route::get('/nations/{nation}', [App\Http\Controllers\NationController::class, 'edit'])->name('nations.edit');
     Route::post('/nations/{nation}', [App\Http\Controllers\NationController::class, 'update'])->name('nations.update');
 
     Route::post('/nations/{nation}/academies', [App\Http\Controllers\NationController::class, 'associateAcademy'])->name('nations.academies.store');
+    Route::put('/nations/{nation}/flag', [App\Http\Controllers\NationController::class, 'updateFlag'])->name('nations.flag.update');
 });
+
+/** Accademie */
+
+Route::resource('academies', App\Http\Controllers\AcademyController::class)
+    ->middleware(['auth', 'role:admin'])
+    ->name('index', 'academies.index')
+    ->name('create', 'academies.create')
+    ->name('store', 'academies.store')
+    ->name('show', 'academies.show')
+    ->name('edit', 'academies.edit')
+    ->name('update', 'academies.update')
+    ->name('destroy', 'academies.destroy');
+    
+
+/** Script */
 
 Route::get('/populate-disabled' , function() {
 

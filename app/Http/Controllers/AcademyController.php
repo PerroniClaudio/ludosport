@@ -13,6 +13,10 @@ class AcademyController extends Controller
     public function index()
     {
         //
+
+        return view('academy.index', [
+            'academies' => Academy::all(),
+        ]);
     }
 
     /**

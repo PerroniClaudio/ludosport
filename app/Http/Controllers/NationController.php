@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Academy;
 use App\Models\Nation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class NationController extends Controller
 {
@@ -66,6 +67,11 @@ class NationController extends Controller
 
         $academies = Academy::whereNotIn('id', $nation->academies->pluck('id'))->with('nation')->get();
 
+        $nation->flag = Storage::disk('gcs')->temporaryUrl(
+            $nation->flag,
+            now()->addMinutes(5)
+        );
+
 
        return view('nation.edit', [
             'nation' => $nation,
@@ -104,6 +110,33 @@ class NationController extends Controller
 
         return redirect()->route('nations.edit', $nation->id)->with('success', 'Academy associated successfully!');
     }
+
+    public function updateFlag($id, Request $request)
+    {
+        //
+        if ($request->file('flag') != null) {
+            $file = $request->file('flag');
+            $file_name = time() . '_' . $file->getClientOriginalName();
+            $path = "nations/" . $id . "/" . $file_name;
+
+            $storeFile = $file->storeAs("nations/" . $id . "/", $file_name, "gcs");
+
+            if ($storeFile) {
+                $nation = Nation::find($id);
+                $nation->flag = $path;
+                $nation->save();
+
+                return redirect()->route('nations.edit', $nation->id)->with('success', 'Flag uploaded successfully!');
+            } else {
+                return redirect()->route('nations.edit', $id)->with('error', 'Error uploading flag!');
+            }
+
+        } else {
+            return redirect()->route('nations.edit', $id)->with('error', 'Error uploading flag!');
+
+        }
+    }
+
 
 
 }
