@@ -56,6 +56,7 @@
         return this.rows.slice(start, end);
     },
 
+
 }" x-cloak id="">
     <div class="mb-5 overflow-x-auto bg-white dark:bg-background-900 rounded-lg shadow overflow-y-auto relative {{ $isDialogTable ? "min-h-[600px] flex flex-col justify-between" : "" }}" >
         <div class="flex justify-between items-center p-6">
@@ -81,10 +82,10 @@
 
                         <template x-for="(column, index) in columns">
                             <th :class="`${column.columnClasses}`"
-                                class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400">
-                                <div class="flex justify-between items-center" @click="sort(index)">
+                                class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 ">
+                                <div class="flex justify-between items-center" x-on:click="sort(index)">
                                     <p class="font-bold tracking-wider uppercase text-xs truncate" x-text="column.name"></p>
-                                    <x-lucide-arrow-down-up class="w-4 h-4 text-primary-500 dark:text-primary-400" />
+                                    <x-lucide-arrow-down-up class="w-4 h-4 text-primary-500 dark:text-primary-400 cursor-pointer hover:opacity-70"/>
                                 </div>
                             </th>
                         </template>

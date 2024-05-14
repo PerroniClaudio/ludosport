@@ -58,16 +58,19 @@ Route::group(['middleware' => ['auth', 'role:admin']], function() {
 
 /** Accademie */
 
-Route::resource('academies', App\Http\Controllers\AcademyController::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('index', 'academies.index')
-    ->name('create', 'academies.create')
-    ->name('store', 'academies.store')
-    ->name('show', 'academies.show')
-    ->name('edit', 'academies.edit')
-    ->name('update', 'academies.update')
-    ->name('destroy', 'academies.destroy');
-    
+Route::group(['middleware' => ['auth', 'role:admin']], function() {
+    Route::get('/academies', [App\Http\Controllers\AcademyController::class, 'index'])->name('academies.index');
+    Route::get('/academies/create', [App\Http\Controllers\AcademyController::class, 'create'])->name('academies.create');
+    Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'edit'])->name('academies.edit');
+
+    Route::post('/academies', [App\Http\Controllers\AcademyController::class, 'store'])->name('academies.store');
+    Route::post('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'update'])->name('academies.update');
+    Route::post('/academies/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'addSchool'])->name('academies.schools.store');
+    Route::post('/academies/{academy}/personnel', [App\Http\Controllers\AcademyController::class, 'addPersonnel'])->name('academies.personnel.store');
+    Route::post('/academies/{academy}/athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('academies.athlete.store');
+
+});
+
 
 /** Script */
 

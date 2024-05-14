@@ -31,7 +31,7 @@
                         <x-nav-link :href="route('nations.index')" :active="request()->routeIs('nations.*')">
                             {{ __('navigation.nazioni') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" :active="false">
+                        <x-nav-link :href="route('academies.index')" :active="request()->routeIs('academies.*')">
                             {{ __('navigation.accademie') }}
                         </x-nav-link>
                         <x-nav-link :href="route('dashboard')" :active="false">
