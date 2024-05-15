@@ -136,6 +136,7 @@ class SchoolController extends Controller {
             'athletes' => $athletes,
             'associated_personnel' => $associated_personnel,
             'associated_athletes' => $associated_athletes,
+            'academies' => $school->academy->nation->academies ?? [],
         ]);
     }
 
@@ -144,6 +145,20 @@ class SchoolController extends Controller {
      */
     public function update(Request $request, School $school) {
         //
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'nationality' => 'required|integer|exists:nations,id',
+            'academy_id' => 'required|integer|exists:academies,id',
+        ]);
+
+        $school->update([
+            'name' => $request->name,
+            'nation_id' => $request->nationality,
+            'academy_id' => $request->academy_id,
+        ]);
+
+        return redirect()->route('schools.edit', $school)->with('success', 'School updated successfully!');
     }
 
     /**

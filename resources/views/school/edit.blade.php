@@ -16,22 +16,9 @@
                     <div class="flex flex-col gap-2 w-1/2">
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                             value="{{ $school->name }}" placeholder="{{ fake()->company() }}" />
-                        <div>
-                            <x-input-label for="nationality" value="Nationality" />
-                            <select x-model="selectedNationality" x-on:change="updateNationId()" name="nationality"
-                                id="nationality"
-                                class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
-                                @foreach ($nations as $key => $nation)
-                                    <optgroup label="{{ $key }}"">
-                                        @foreach ($nation as $n)
-                                            <option value="{{ $n['id'] }}"
-                                                {{ $n['id'] == $school->nation_id ? 'selected' : '' }}>
-                                                {{ $n['name'] }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                @endforeach
-                            </select>
-                        </div>
+                        <x-school.academy nationality="{{ $school->nation_id }}"
+                            selectedAcademyId="{{ $school->academy_id }}" selectedAcademy="{{ $school->academy->name }}"
+                            :nations="$nations" :academies="$academies" />
                     </div>
 
                     <div class="fixed bottom-8 right-32">

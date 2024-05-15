@@ -6,6 +6,7 @@
     'academies' => [],
 ])
 
+
 <div x-data="{
     selectedNationality: '{{ $nationality }}',
     selectedAcademyId: '{{ $selectedAcademyId }}',
@@ -25,6 +26,7 @@
     },
     updateNationId() {
         this.selectedAcademyId = '';
+        this.selectedAcademy = '';
         this.getAcademies();
     },
     getAcademies() {
@@ -145,6 +147,13 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div>
+            <p>
+                <x-input-error :messages="$errors->get('academy_id')" />
+                <x-input-error :messages="$errors->get('nationality')" />
+            </p>
         </div>
     </div>
 
