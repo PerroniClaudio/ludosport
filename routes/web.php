@@ -71,6 +71,21 @@ Route::group(['middleware' => ['auth', 'role:admin']], function() {
 
 });
 
+/** Scuole */
+
+Route::group(['middleware' => ['auth', 'role:admin']], function() {
+    Route::get('/schools', [App\Http\Controllers\SchoolController::class, 'index'])->name('schools.index');
+    Route::get('/schools/create', [App\Http\Controllers\SchoolController::class, 'create'])->name('schools.create');
+    Route::get('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'edit'])->name('schools.edit');
+
+    Route::post('/schools', [App\Http\Controllers\SchoolController::class, 'store'])->name('schools.store');
+    Route::post('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'update'])->name('schools.update');
+    Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('schools.schools.store');
+    Route::post('/schools/{school}/personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('schools.personnel.store');
+    Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('schools.athlete.store');
+
+});
+
 
 /** Script */
 

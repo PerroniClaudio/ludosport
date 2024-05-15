@@ -25,4 +25,8 @@ class School extends Model {
     public function academy() {
         return $this->belongsTo(Academy::class);
     }
+
+    public function clan() {
+        return $this->hasMany(Clan::class);
+    }
 }

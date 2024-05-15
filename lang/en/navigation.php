@@ -16,6 +16,7 @@ return [
     'users' => 'Users',
     'eventi' => 'Events',
     'scuola' => 'School',
+    'scuole' => 'Schools',
     'accademie' => 'Academies',
     'customization' => 'Customization',
     'istruttori' => 'Instructors',
