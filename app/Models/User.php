@@ -114,8 +114,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->belongsTo(Nation::class);
     }
 
-    public function getAllowedRolesWithoutAdmin(): array
-    {
+    public function getAllowedRolesWithoutAdmin(): array {
         $allowedRoles = $this->allowedRoles;
         $key = array_search('admin', $allowedRoles);
         if ($key !== false) {
@@ -124,5 +123,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         return array_values($allowedRoles);
     }
 
-   
+    public function clans() {
+        return $this->belongsToMany(Clan::class, 'clans_users', 'user_id', 'clan_id');
+    }
 }

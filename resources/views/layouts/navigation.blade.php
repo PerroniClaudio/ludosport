@@ -37,7 +37,7 @@
                         <x-nav-link :href="route('schools.index')" :active="request()->routeIs('schools.*')">
                             {{ __('navigation.scuole') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" :active="false">
+                        <x-nav-link :href="route('clans.index')" :active="request()->routeIs('clans.*')">
                             {{ __('navigation.clan') }}
                         </x-nav-link>
                         <x-nav-link :href="route('dashboard')" :active="false">

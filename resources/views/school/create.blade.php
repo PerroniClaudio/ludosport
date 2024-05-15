@@ -22,7 +22,7 @@
                     </div>
 
                     <div class="flex items-center justify-end gap-2">
-                        <x-primary-button type="sumbit">
+                        <x-primary-button type="submit">
                             {{ __('school.create') }}
                         </x-primary-button>
                     </div>

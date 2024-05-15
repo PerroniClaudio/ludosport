@@ -84,6 +84,19 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('schools.athlete.store');
 });
 
+/** Clan */
+
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+    Route::get('/courses', [App\Http\Controllers\ClanController::class, 'index'])->name('clans.index');
+    Route::get('/courses/create', [App\Http\Controllers\ClanController::class, 'create'])->name('clans.create');
+    Route::get('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'edit'])->name('clans.edit');
+
+    Route::post('/courses', [App\Http\Controllers\ClanController::class, 'store'])->name('clans.store');
+    Route::post('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'update'])->name('clans.update');
+    Route::post('/courses/{clan}/instructors', [App\Http\Controllers\ClanController::class, 'addInstructor'])->name('clans.instructors.store');
+    Route::post('/courses/{clan}/athlete', [App\Http\Controllers\ClanController::class, 'addAthlete'])->name('clans.athletes.store');
+});
+
 
 /** Script */
 
