@@ -7,6 +7,7 @@ use App\Models\Nation;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SchoolController extends Controller {
     /**
@@ -31,6 +32,23 @@ class SchoolController extends Controller {
     public function create() {
         //
 
+        $nations = Nation::all();
+
+        foreach ($nations as $nation) {
+            $countries[$nation['continent']][] = ['id' => $nation['id'], 'name' => $nation['name']];
+        }
+
+        $countries = [
+            'Europe' => $countries['Europe'],
+            'Africa' => $countries['Africa'],
+            'Asia' => $countries['Asia'],
+            'North America' => $countries['North America'],
+            'Oceania' => $countries['Oceania'],
+        ];
+
+        return view('school.create', [
+            'nations' => $countries,
+        ]);
     }
 
     /**
@@ -38,6 +56,19 @@ class SchoolController extends Controller {
      */
     public function store(Request $request) {
         //
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $school = School::create([
+            'name' => $request->name,
+            'nation_id' =>  $request->nationality,
+            'slug' => Str::slug($request->name),
+            'academy_id' => $request->academy_id
+        ]);
+
+        return redirect()->route('schools.edit', $school)->with('success', 'School created successfully!');
     }
 
     /**
@@ -128,9 +159,30 @@ class SchoolController extends Controller {
 
     public function addPersonnel(School $school, Request $request) {
         //
+
+        $personnel = User::find($request->personnel_id);
+
+        if ($personnel->role === "user") {
+            return redirect()->route('schools.edit', $school)->with('error', 'Use this function for personnel only!');
+        }
+
+        $personnel->school_id = $school->id;
+        $personnel->save();
+
+        return redirect()->route('schools.edit', $school)->with('success', 'Personnel added successfully!');
     }
 
     public function addAthlete(School $school, Request $request) {
         //
+        $athlete = User::find($request->athlete_id);
+
+        if ($athlete->role !== "user") {
+            return redirect()->route('schools.edit', $school)->with('error', 'Use this function for athletes only!');
+        }
+
+        $athlete->school_id = $school->id;
+        $athlete->save();
+
+        return redirect()->route('schools.edit', $school)->with('success', 'Athlete added successfully!');
     }
 }

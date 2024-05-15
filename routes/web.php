@@ -47,7 +47,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 /** Nazioni */
 
-Route::group(['middleware' => ['auth', 'role:admin']], function() {
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/nations', [App\Http\Controllers\NationController::class, 'index'])->name('nations.index');
     Route::get('/nations/{nation}', [App\Http\Controllers\NationController::class, 'edit'])->name('nations.edit');
     Route::post('/nations/{nation}', [App\Http\Controllers\NationController::class, 'update'])->name('nations.update');
@@ -58,7 +58,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function() {
 
 /** Accademie */
 
-Route::group(['middleware' => ['auth', 'role:admin']], function() {
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/academies', [App\Http\Controllers\AcademyController::class, 'index'])->name('academies.index');
     Route::get('/academies/create', [App\Http\Controllers\AcademyController::class, 'create'])->name('academies.create');
     Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'edit'])->name('academies.edit');
@@ -68,28 +68,26 @@ Route::group(['middleware' => ['auth', 'role:admin']], function() {
     Route::post('/academies/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'addSchool'])->name('academies.schools.store');
     Route::post('/academies/{academy}/personnel', [App\Http\Controllers\AcademyController::class, 'addPersonnel'])->name('academies.personnel.store');
     Route::post('/academies/{academy}/athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('academies.athlete.store');
-
 });
 
 /** Scuole */
 
-Route::group(['middleware' => ['auth', 'role:admin']], function() {
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/schools', [App\Http\Controllers\SchoolController::class, 'index'])->name('schools.index');
     Route::get('/schools/create', [App\Http\Controllers\SchoolController::class, 'create'])->name('schools.create');
     Route::get('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'edit'])->name('schools.edit');
 
     Route::post('/schools', [App\Http\Controllers\SchoolController::class, 'store'])->name('schools.store');
     Route::post('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'update'])->name('schools.update');
-    Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('schools.schools.store');
+    Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('schools.clans.store');
     Route::post('/schools/{school}/personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('schools.personnel.store');
     Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('schools.athlete.store');
-
 });
 
 
 /** Script */
 
-Route::get('/populate-disabled' , function() {
+Route::get('/populate-disabled', function () {
 
     exit();
 
@@ -351,7 +349,7 @@ Route::get('/populate-disabled' , function() {
             $newCountries[] = ["id" => 2, "name" => $name, "code" => $code, "flag" => $flag, "continent" => $data["continent"]];
         } else {
 
-            if($id === 2) {
+            if ($id === 2) {
                 $idToUse = 244;
             } else {
                 $idToUse = $id;
@@ -378,7 +376,7 @@ Route::get('/populate-disabled' , function() {
     return response()->json($newCountries);
 });
 
-Route::get('/fake-verification', function() {
+Route::get('/fake-verification', function () {
     $user = App\Models\User::find(2);
     $user->markEmailAsVerified();
     return response()->json($user);

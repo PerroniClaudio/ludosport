@@ -5,7 +5,7 @@
                 {{ __('school.title') }}
             </h2>
             <div>
-                <x-create-new-button :href="route('academies.create')" />
+                <x-create-new-button :href="route('schools.create')" />
             </div>
         </div>
     </x-slot>

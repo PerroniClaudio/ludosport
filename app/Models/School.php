@@ -11,6 +11,7 @@ class School extends Model {
     protected $fillable = [
         'name',
         'nation_id',
+        'academy_id',
         'slug'
     ];
 
