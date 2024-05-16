@@ -10,19 +10,7 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-
-    $rows = [];
-
-    for ($i = 0; $i < 50; $i++) {
-        $rows[] = [
-            "name" => fake()->name(),
-            "email" => fake()->email(),
-        ];
-    }
-
-    return view('dashboard', [
-        'rows' => $rows
-    ]);
+    return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
