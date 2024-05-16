@@ -9,18 +9,16 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class AcademyController extends Controller
-{
+class AcademyController extends Controller {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
+    public function index() {
         //
 
-        $academies = Academy::with('nation')->orderBy('created_at', 'desc')->get();
-        
-        foreach($academies as $key => $academy) {
+        $academies = Academy::with('nation')->where('is_disabled', '0')->orderBy('created_at', 'desc')->get();
+
+        foreach ($academies as $key => $academy) {
             $academies[$key]->nation_name = $academy->nation->name;
         }
 
@@ -32,8 +30,7 @@ class AcademyController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
+    public function create() {
         //
 
         $nations = Nation::all();
@@ -46,8 +43,7 @@ class AcademyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         //
 
         $request->validate([
@@ -68,16 +64,14 @@ class AcademyController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Academy $academy)
-    {
+    public function show(Academy $academy) {
         //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Academy $academy)
-    {
+    public function edit(Academy $academy) {
         //
 
         $nations = Nation::all();
@@ -94,20 +88,20 @@ class AcademyController extends Controller
             'Oceania' => $countries['Oceania'],
         ];
 
-        $schools = School::whereNotIn('id',$academy->schools->pluck('id'))->with(['nation'])->get();
-        $personnel = User::where('role', '!=' , 'user')->whereNotIn('id', $academy->users->pluck('id'))->get();
-        $athletes = User::where('role', '=' , 'user')->whereNotIn('id', $academy->users->pluck('id'))->get();
+        $schools = School::whereNotIn('id', $academy->schools->pluck('id'))->where('is_disabled', '0')->with(['nation'])->get();
+        $personnel = User::where('role', '!=', 'user')->where('is_disabled', '0')->whereNotIn('id', $academy->users->pluck('id'))->get();
+        $athletes = User::where('role', '=', 'user')->where('is_disabled', '0')->whereNotIn('id', $academy->users->pluck('id'))->get();
 
-        foreach($personnel as $key => $person) {
-            $personnel[$key]->role = __('users.'.$person->role);
+        foreach ($personnel as $key => $person) {
+            $personnel[$key]->role = __('users.' . $person->role);
         }
 
         $associated_personnel = [];
         $associated_athletes = [];
 
-        foreach($academy->users as $person) {
+        foreach ($academy->users as $person) {
 
-            if($person->role === "user") {
+            if ($person->role === "user") {
                 $associated_athletes[] = [
                     'id' => $person->id,
                     'name' => $person->name,
@@ -120,11 +114,11 @@ class AcademyController extends Controller
                 'id' => $person->id,
                 'name' => $person->name,
                 'surname' => $person->surname,
-                'role' => __('users.'.$person->role),
+                'role' => __('users.' . $person->role),
             ];
-        } 
+        }
 
-        
+
 
         return view('academy.edit', [
             'academy' => $academy,
@@ -135,15 +129,12 @@ class AcademyController extends Controller
             'associated_personnel' => $associated_personnel,
             'associated_athletes' => $associated_athletes,
         ]);
-
-
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Academy $academy)
-    {
+    public function update(Request $request, Academy $academy) {
         //
 
         $request->validate([
@@ -158,37 +149,36 @@ class AcademyController extends Controller
         ]);
 
         return redirect()->route('academies.index', $academy)->with('success', 'Academy updated successfully!');
-
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Academy $academy)
-    {
+    public function destroy(Academy $academy) {
         //
+
+        $academy->is_disabled = true;
+        $academy->save();
+
+        return redirect()->route('academies.index')->with('success', 'Academy disabled successfully!');
     }
 
-    public function schools(Academy $academy)
-    {
+    public function schools(Academy $academy) {
         return response()->json($academy->schools);
     }
 
-    public function addSchool(Request $request, Academy $academy)
-    {
+    public function addSchool(Request $request, Academy $academy) {
         $school = School::find($request->school_id);
         $school->academy_id = $academy->id;
         $school->save();
 
         return redirect()->route('academies.edit', $academy)->with('success', 'School added successfully!');
-
     }
 
-    public function addPersonnel(Request $request, Academy $academy)
-    {
+    public function addPersonnel(Request $request, Academy $academy) {
         $personnel = User::find($request->personnel_id);
 
-        if($personnel->role === "user") {
+        if ($personnel->role === "user") {
             return redirect()->route('academies.edit', $academy)->with('error', 'Use this function for personnel only!');
         }
 
@@ -196,14 +186,12 @@ class AcademyController extends Controller
         $personnel->save();
 
         return redirect()->route('academies.edit', $academy)->with('success', 'Personnel added successfully!');
-
     }
 
-    public function addAthlete(Request $request, Academy $academy)
-    {
+    public function addAthlete(Request $request, Academy $academy) {
         $athlete = User::find($request->athlete_id);
 
-        if($athlete->role !== "user") {
+        if ($athlete->role !== "user") {
             return redirect()->route('academies.edit', $academy)->with('error', 'Use this function for athletes only!');
         }
 
@@ -211,7 +199,5 @@ class AcademyController extends Controller
         $athlete->save();
 
         return redirect()->route('academies.edit', $academy)->with('success', 'Athlete added successfully!');
-
     }
-
 }

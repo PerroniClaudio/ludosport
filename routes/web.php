@@ -50,6 +50,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/academies', [App\Http\Controllers\AcademyController::class, 'index'])->name('academies.index');
     Route::get('/academies/create', [App\Http\Controllers\AcademyController::class, 'create'])->name('academies.create');
     Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'edit'])->name('academies.edit');
+    Route::delete('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'destroy'])->name('academies.disable');
 
     Route::post('/academies', [App\Http\Controllers\AcademyController::class, 'store'])->name('academies.store');
     Route::post('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'update'])->name('academies.update');
@@ -64,6 +65,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/schools', [App\Http\Controllers\SchoolController::class, 'index'])->name('schools.index');
     Route::get('/schools/create', [App\Http\Controllers\SchoolController::class, 'create'])->name('schools.create');
     Route::get('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'edit'])->name('schools.edit');
+    Route::delete('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'destroy'])->name('schools.disable');
 
     Route::post('/schools', [App\Http\Controllers\SchoolController::class, 'store'])->name('schools.store');
     Route::post('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'update'])->name('schools.update');
@@ -78,6 +80,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/courses', [App\Http\Controllers\ClanController::class, 'index'])->name('clans.index');
     Route::get('/courses/create', [App\Http\Controllers\ClanController::class, 'create'])->name('clans.create');
     Route::get('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'edit'])->name('clans.edit');
+    Route::delete('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'destroy'])->name('clans.disable');
 
     Route::post('/courses', [App\Http\Controllers\ClanController::class, 'store'])->name('clans.store');
     Route::post('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'update'])->name('clans.update');

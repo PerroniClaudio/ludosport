@@ -15,7 +15,7 @@ class ClanController extends Controller {
     public function index() {
         //
 
-        $clans = Clan::orderBy('created_at', 'desc')->with(['school'])->get();
+        $clans = Clan::orderBy('created_at', 'desc')->where('is_disabled', '0')->with(['school'])->get();
 
         foreach ($clans as $key => $clan) {
             $clans[$key]->school_name = $clan->school->name;
@@ -69,7 +69,7 @@ class ClanController extends Controller {
             'slug' => Str::slug($request->name)
         ]);
 
-        return redirect()->route('clans.edit', $clan)->with('success', 'Clan created successfully.');
+        return redirect()->route('clans.edit', $clan)->with('success', 'Course created successfully.');
     }
 
     /**
@@ -100,11 +100,11 @@ class ClanController extends Controller {
             ];
         }
 
-        $associated_instructors = $clan->users()->where('role', 'istruttore')->get();
-        $associated_athletes = $clan->users()->where('role', 'user')->get();
+        $associated_instructors = $clan->users()->where('role', 'istruttore')->where('is_disabled', '0')->get();
+        $associated_athletes = $clan->users()->where('role', 'user')->where('is_disabled', '0')->get();
 
-        $instructors = User::where('role', 'istruttore')->whereNotIn('id', $clan->users->pluck('id'))->get();
-        $athletes = User::where('role', 'user')->whereNotIn('id', $clan->users->pluck('id'))->get();
+        $instructors = User::where('role', 'istruttore')->where('is_disabled', '0')->whereNotIn('id', $clan->users->pluck('id'))->get();
+        $athletes = User::where('role', 'user')->where('is_disabled', '0')->whereNotIn('id', $clan->users->pluck('id'))->get();
 
 
         return view('clan.edit', [
@@ -134,7 +134,7 @@ class ClanController extends Controller {
             'slug' => Str::slug($request->name)
         ]);
 
-        return redirect()->route('clans.edit', $clan)->with('success', 'Clan updated successfully.');
+        return redirect()->route('clans.edit', $clan)->with('success', 'Course updated successfully.');
     }
 
     /**
@@ -142,6 +142,11 @@ class ClanController extends Controller {
      */
     public function destroy(Clan $clan) {
         //
+
+        $clan->is_disabled = true;
+        $clan->save();
+
+        return redirect()->route('clans.index')->with('success', 'Course disabled successfully.');
     }
 
     public function addInstructor(Clan $clan, Request $request) {

@@ -93,6 +93,11 @@
                 ]" :rows="$associated_athletes" />
             </div>
 
+
+            @if (!$clan->is_disabled)
+                <x-clan.disable-form :clan="$clan->id" />
+            @endif
+
         </div>
     </div>
 </x-app-layout>

@@ -116,6 +116,11 @@
                     ],
                 ]" :rows="$school->clan" />
             </div>
+
+
+            @if (!$school->is_disabled)
+                <x-school.disable-form :school="$school->id" />
+            @endif
         </div>
     </div>
 </x-app-layout>

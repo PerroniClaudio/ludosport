@@ -15,7 +15,7 @@ class SchoolController extends Controller {
      */
     public function index() {
         //
-        $schools = School::with('nation')->orderBy('created_at', 'desc')->get();
+        $schools = School::with('nation')->where('is_disabled', '0')->orderBy('created_at', 'desc')->get();
 
         foreach ($schools as $key => $school) {
             $schools[$key]->nation_name = $school->nation->name;
@@ -98,9 +98,9 @@ class SchoolController extends Controller {
             'Oceania' => $countries['Oceania'],
         ];
 
-        $clans = Clan::whereNotIn('id', $school->clan->pluck('id'))->with(['nation'])->get();
-        $personnel = User::where('role', '!=', 'user')->whereNotIn('id', $school->users->pluck('id'))->get();
-        $athletes = User::where('role', '=', 'user')->whereNotIn('id', $school->users->pluck('id'))->get();
+        $clans = Clan::whereNotIn('id', $school->clan->pluck('id'))->where('is_disabled', '0')->with(['nation'])->get();
+        $personnel = User::where('role', '!=', 'user')->where('is_disabled', '0')->whereNotIn('id', $school->users->pluck('id'))->get();
+        $athletes = User::where('role', '=', 'user')->where('is_disabled', '0')->whereNotIn('id', $school->users->pluck('id'))->get();
 
         foreach ($personnel as $key => $person) {
             $personnel[$key]->role = __('users.' . $person->role);
@@ -166,10 +166,22 @@ class SchoolController extends Controller {
      */
     public function destroy(School $school) {
         //
+
+        $school->is_disabled = true;
+        $school->save();
+
+        return redirect()->route('schools.index')->with('success', 'School disabled successfully!');
     }
 
     public function addClan(School $school, Request $request) {
         //
+
+        $clan = Clan::find($request->clan_id);
+        $clan->school_id = $school->id;
+
+        $clan->save();
+
+        return redirect()->route('schools.edit', $school)->with('success', 'Course added successfully!');
     }
 
     public function addPersonnel(School $school, Request $request) {
