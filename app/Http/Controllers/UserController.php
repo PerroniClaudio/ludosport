@@ -8,21 +8,25 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class UserController extends Controller
-{
+class UserController extends Controller {
 
-    public function index()
-    {
+    public function index() {
 
         $users = User::orderBy('created_at', 'desc')->get();
 
+        $users_sorted_by_role = [];
+
+        foreach ($users as $user) {
+            $users_sorted_by_role[$user->role][] = $user;
+        }
+
+
         return view('users.index', [
-            'users' => $users,
+            'users' => $users_sorted_by_role,
         ]);
     }
 
-    public function create()
-    {
+    public function create() {
 
         $user = new User();
         $roles = $user->getAllowedRolesWithoutAdmin();
@@ -35,15 +39,14 @@ class UserController extends Controller
 
 
         $academies = Academy::all();
-     
+
         return view('users.create', [
             'roles' => $roles,
             'academies' => $academies,
         ]);
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -65,8 +68,7 @@ class UserController extends Controller
         return redirect()->route('users.edit', $user)->with('success', 'User created successfully!');
     }
 
-    public function edit(User $user)
-    {
+    public function edit(User $user) {
 
         $roles = $user->getAllowedRolesWithoutAdmin();
         $roles = array_map(function ($role) {
@@ -90,7 +92,7 @@ class UserController extends Controller
             'Oceania' => $countries['Oceania'],
         ];
 
-        if($user->academy) {
+        if ($user->academy) {
             $academy = Academy::find($user->academy->id);
             $schools = $academy->schools;
         } else {
@@ -108,8 +110,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $user)
-    {
+    public function update(Request $request, User $user) {
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -120,27 +121,37 @@ class UserController extends Controller
             'school_id' => 'required|integer|exists:schools,id',
         ]);
 
-        $user->update([
-            'name' => $request->name,
-            'surname' => $request->surname,
-            'email' => $request->email,
-            'subscription_year' => $request->year,
-            'nation_id' => $request->nationality,
-            'academy_id' => $request->academy_id,
-            'school_id' => $request->school_id,
-            'role' => $request->role ?? 'user'
-        ]);
+        if ($user->role != 'admin') {
+            $user->update([
+                'name' => $request->name,
+                'surname' => $request->surname,
+                'email' => $request->email,
+                'subscription_year' => $request->year,
+                'nation_id' => $request->nationality,
+                'academy_id' => $request->academy_id,
+                'school_id' => $request->school_id,
+                'role' => $request->role ?? 'user'
+            ]);
+        } else {
+            $user->update([
+                'name' => $request->name,
+                'surname' => $request->surname,
+                'email' => $request->email,
+                'subscription_year' => $request->year,
+                'nation_id' => $request->nationality,
+                'academy_id' => $request->academy_id,
+                'school_id' => $request->school_id,
+            ]);
+        }
+
 
         return redirect()->route('users.index', $user)->with('success', 'User updated successfully!');
-
     }
 
-    public function destroy(User $user)
-    {
+    public function destroy(User $user) {
         $user->is_disabled = true;
         $user->save();
 
         return redirect()->route('users.index')->with('success', 'User disabled successfully!');
     }
-
 }
