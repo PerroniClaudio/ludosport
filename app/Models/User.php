@@ -63,42 +63,84 @@ class User extends Authenticatable implements MustVerifyEmail {
     public function routes() {
         switch ($this->role) {
             case 'admin':
-                return [
-                    'any'
-                ];
+                return collect([
+                    (object)[
+                        'label' => 'any',
+                        'name' => 'admin.any.index',
+                    ]
+                ]);
             case 'user':
-                return [
-                    'customization'
-                ];
+                return collect([
+                    (object)[
+                        'label' => 'customization',
+                        'name' => 'user.customization.index',
+                    ]
+                ]);
             case 'rettore':
-                return [
-                    'users',
-                    'accademie',
-                ];
+                return collect([
+                    (object)[
+                        'label' => 'users',
+                        'name' => 'rettore.users.index',
+                    ],
+                    (object)[
+                        'label' => 'accademie',
+                        'name' => 'rettore.accademie.index',
+                    ]
+                ]);
             case 'preside':
-                return [
-                    'users',
-                    'scuola', // Solo la sua scuola!
-                ];
+                return collect([
+                    (object)[
+                        'label' => 'users',
+                        'name' => 'preside.users.index',
+                    ],
+                    (object)[
+                        'label' => 'scuola',
+                        'name' => 'preside.scuola.index',
+                    ]
+                ]);
             case 'manager':
-                return [
-                    'users',
-                    'scuola', // Solo la sua scuola!
-                ];
+                return collect([
+                    (object)[
+                        'label' => 'users',
+                        'name' => 'manager.users.index',
+                    ],
+                    (object)[
+                        'label' => 'scuola',
+                        'name' => 'manager.scuola.index',
+                    ]
+                ]);
             case 'tecnico':
-                return [
-                    'users',
-                    'eventi',
-                    'istruttori'
-                ];
+                return collect([
+                    (object)[
+                        'label' => 'users',
+                        'name' => 'technician.users.index',
+                    ],
+                    (object)[
+                        'label' => 'eventi',
+                        'name' => 'technician.events.index',
+                    ],
+                    (object)[
+                        'label' => 'istruttori',
+                        'name' => 'technician.teachers.index',
+                    ],
+                ]);
             case 'istruttore':
-                return [
-                    'users',
-                    'eventi',
-                    'clan',
-                ];
+                return collect([
+                    (object)[
+                        'label' => 'users',
+                        'name' => 'istruttore.users.index',
+                    ],
+                    (object)[
+                        'label' => 'eventi',
+                        'name' => 'istruttore.eventi.index',
+                    ],
+                    (object)[
+                        'label' => 'clan',
+                        'name' => 'istruttore.clan.index',
+                    ],
+                ]);
             default:
-                return [];
+                return collect([]);
         }
     }
 
