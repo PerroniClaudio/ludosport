@@ -4,6 +4,7 @@ import Alpine from "alpinejs";
 
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
 
 document.addEventListener("alpine:init", () => {
     Alpine.data("editor", (content) => {
@@ -24,10 +25,16 @@ document.addEventListener("alpine:init", () => {
                                 },
                             },
                         }),
+                        Link,
                     ],
                     content: content,
                     editable: true,
                     autofocus: true,
+                    editorProps: {
+                        attributes: {
+                            class: "w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:outline-none focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm",
+                        },
+                    },
                     onCreate({ editor }) {
                         _this.updatedAt = Date.now();
                     },
@@ -49,16 +56,16 @@ document.addEventListener("alpine:init", () => {
                 editor.chain().toggleHeading(opts).focus().run();
             },
             toggleBold() {
-                editor.chain().toggleBold().focus().run();
+                editor.chain().focus().toggleBold().run();
             },
             toggleItalic() {
-                editor.chain().toggleItalic().focus().run();
+                editor.chain().focus().toggleItalic().run();
             },
             toggleStrike() {
-                editor.chain().toggleStrike().focus().run();
+                editor.chain().focus().toggleStrike().run();
             },
             toggleParagraph() {
-                editor.chain().toggleParagraph().focus().run();
+                editor.chain().focus().toggleParagraph().run();
             },
             toggleBulletList() {
                 editor.chain().focus().toggleBulletList().run();
@@ -71,6 +78,19 @@ document.addEventListener("alpine:init", () => {
             },
             toggleHorizontalRule() {
                 editor.chain().focus().toggleHorizontalRule().run();
+            },
+            toggleLink() {
+                editor
+                    .chain()
+                    .focus()
+                    .toggleLink({ href: "https://example.com" })
+                    .run();
+            },
+            undo() {
+                editor.chain().focus().undo().run();
+            },
+            redo() {
+                editor.chain().focus().redo().run();
             },
         };
     });

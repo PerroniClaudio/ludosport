@@ -130,3 +130,77 @@
 [x-cloak] {
     display: none;
 }
+
+.editor-button {
+    @apply inline-flex 
+    items-center 
+    px-2 
+    py-1 
+    text-sm 
+    font-medium 
+    leading-5 
+    text-white 
+    transition-colors 
+    duration-150 
+    dark:bg-background-700 
+    border 
+    border-transparent 
+    rounded-md 
+    text-background-800 
+    dark:text-background-200;
+}
+
+.editor-button.is-active {
+    @apply inline-flex 
+    items-center 
+    px-2 
+    py-1 
+    text-sm 
+    font-medium 
+    leading-5 
+    text-white 
+    transition-colors 
+    duration-150 
+    dark:bg-background-900 
+    border 
+    border-transparent 
+    rounded-md 
+    text-background-800 
+    dark:text-background-200;
+}
+
+.tiptap h1 {
+    @apply text-4xl font-bold mb-4;
+}
+
+.tiptap h2 {
+    @apply text-3xl font-bold mb-3;
+}
+
+.tiptap h3 {
+    @apply text-2xl font-bold mb-2;
+}
+
+.tiptap h4 {
+    @apply text-xl font-bold mb-2;
+}
+
+.tiptap h5 {
+    @apply text-lg font-bold mb-1;
+}
+
+.tiptap h6 {
+    @apply text-base font-bold mb-1;
+}
+
+.tiptap ul {
+    @apply list-disc pl-6 mb-4;
+}
+
+.tiptap ol {
+    @apply list-decimal pl-6 mb-4;
+}
+
+.tiptap li {
+    @apply mb-2;
+}
