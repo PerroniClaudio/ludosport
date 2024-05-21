@@ -113,7 +113,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return collect([
                     (object)[
                         'label' => 'users',
-                        'name' => 'technician.users.index',
+                        'name' => 'dashboard',
                     ],
                     (object)[
                         'label' => 'eventi',
@@ -121,7 +121,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                     ],
                     (object)[
                         'label' => 'istruttori',
-                        'name' => 'technician.teachers.index',
+                        'name' => 'dashboard',
                     ],
                 ]);
             case 'istruttore':
@@ -132,7 +132,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                     ],
                     (object)[
                         'label' => 'eventi',
-                        'name' => 'istruttore.eventi.index',
+                        'name' => 'istruttore.events.index',
                     ],
                     (object)[
                         'label' => 'clan',

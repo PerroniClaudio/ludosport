@@ -5,7 +5,7 @@
                 {{ __('events.title') }}
             </h2>
             <div>
-                <x-create-new-button href="https://google.com" />
+                <x-create-new-button :href="route('technician.events.create')" />
             </div>
         </div>
     </x-slot>
@@ -68,13 +68,19 @@
                                     'columnClasses' => '', // classes to style table th
                                     'rowClasses' => '', // classes to style table td
                                 ],
-                                [
-                                    'name' => 'Location',
-                                    'field' => 'location',
-                                    'columnClasses' => '', // classes to style table th
-                                    'rowClasses' => '', // classes to style table td
-                                ],
-                            ]" :data="$pending_events" />
+                            ]" :rows="$pending_events">
+
+
+                                <x-slot name="tableActions">
+                                    <a x-bind:href="'/technician/events/' + row.id">
+                                        <x-lucide-pencil
+                                            class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                                    </a>
+                                </x-slot>
+
+
+                            </x-table>
+
                         </div>
                     </div>
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg"
@@ -103,13 +109,7 @@
                                     'columnClasses' => '', // classes to style table th
                                     'rowClasses' => '', // classes to style table td
                                 ],
-                                [
-                                    'name' => 'Location',
-                                    'field' => 'location',
-                                    'columnClasses' => '', // classes to style table th
-                                    'rowClasses' => '', // classes to style table td
-                                ],
-                            ]" :data="$approved_events" />
+                            ]" :rows="$approved_events" />
                         </div>
                     </div>
 

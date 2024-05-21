@@ -20,7 +20,7 @@
 
                     @if (Auth::user()->role !== 'admin')
                         @foreach (Auth::user()->routes() as $route)
-                            <x-nav-link :href="route('dashboard')" :active="false">
+                            <x-nav-link :href="route($route->name)" :active="false">
                                 {{ __('navigation.' . $route->label) }}
                             </x-nav-link>
                         @endforeach
