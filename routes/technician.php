@@ -9,6 +9,9 @@ Route::prefix('technician')->middleware('auth')->middleware('role:tecnico')->gro
     Route::get('events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('technician.events.edit');
     Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('technician.events.save.description');
     Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('technician.events.save.location');
+    Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('technician.events.update.thumbnail');
+    Route::post('events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('technician.events.update');
+
     // Route::post('events', [App\Http\Controllers\EventController::class, 'store'])->name();
     // Route::put('events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name();
     // Route::delete('events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])->name();

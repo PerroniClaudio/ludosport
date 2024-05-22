@@ -28,6 +28,9 @@ class Event extends Model {
         'academy_id',
         'school_id',
         'user_id',
-        'slug'
+        'slug',
+        'city',
+        'address',
+        'postal_code',
     ];
 }

@@ -8,8 +8,17 @@
     </x-slot>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
-            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.info') }}</h3>
+            <form method="POST" action={{ route('technician.events.update', $event->id) }}
+                class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                @csrf
+                <div class="flex items-center justify-between">
+                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.info') }}</h3>
+                    @if (!$event->is_approved)
+                        <x-primary-button type="sumbit">
+                            <x-lucide-save class="w-5 h-5 text-white" />
+                        </x-primary-button>
+                    @endif
+                </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
                 <div class="flex flex-col gap-2 w-1/2">
@@ -24,17 +33,13 @@
                         value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}" />
 
                 </div>
-            </div>
+            </form>
 
             <x-event.editor label="{{ __('events.promo') }}" value="{{ $event->description }}" :event="$event" />
 
-
             <x-event.map :event="$event" />
 
-            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.thumbnail') }}</h3>
-                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-            </div>
+            <x-event.thumbnail :event="$event" />
 
         </div>
     </div>

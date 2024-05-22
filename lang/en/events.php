@@ -13,4 +13,5 @@ return [
     'thumbnail' => 'Thumbnail',
     'promo' => 'Promotional Text',
     'preview_map' => 'Preview Map',
+    'upload_thumbnail' => 'Upload Thumbnail',
 ];

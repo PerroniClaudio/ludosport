@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Nation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller {
     /**
@@ -103,6 +105,15 @@ class EventController extends Controller {
             $view = 'event.edit';
         }
 
+        if ($event->thumbnail) {
+            $event->thumbnail = Storage::disk('gcs')->temporaryUrl(
+                $event->thumbnail,
+                now()->addMinutes(5)
+            );
+        }
+
+
+
         return view($view, [
             'event' => $event,
         ]);
@@ -117,9 +128,19 @@ class EventController extends Controller {
 
     public function saveLocation(Request $request, Event $event) {
         $event->location = $request->location;
+        $event->city = $request->city;
+        $event->address = $request->address;
+        $event->postal_code = $request->postal_code;
+
+        $nation = Nation::where('name', $request->nation)->first();
+
+        if ($nation) {
+            $event->nation_id = $nation->id;
+        }
+
         $event->save();
 
-        return redirect()->route('technician.events.edit', $event->id);
+        return redirect()->route('technician.events.edit', $event->id)->with('success', 'Location saved successfully');
     }
 
     /**
@@ -127,6 +148,20 @@ class EventController extends Controller {
      */
     public function update(Request $request, Event $event) {
         //
+
+        $request->validate([
+            'name' => 'required',
+            'start_date' => 'required',
+            'end_date' => 'required',
+        ]);
+
+        $event->name = $request->name;
+        $event->start_date = $request->start_date;
+        $event->end_date = $request->end_date;
+
+        $event->save();
+
+        return redirect()->route('technician.events.edit', $event->id)->with('success', 'Event saved successfully');
     }
 
     /**
@@ -170,5 +205,28 @@ class EventController extends Controller {
         $coordinates = $this->getCoordinates($request->address);
 
         return response()->json($coordinates);
+    }
+
+    public function updateThumbnail($id, Request $request) {
+        //
+        if ($request->file('thumbnail') != null) {
+            $file = $request->file('thumbnail');
+            $file_name = time() . '_' . $file->getClientOriginalName();
+            $path = "events/" . $id . "/" . $file_name;
+
+            $storeFile = $file->storeAs("events/" . $id . "/", $file_name, "gcs");
+
+            if ($storeFile) {
+                $event = Event::find($id);
+                $event->thumbnail = $path;
+                $event->save();
+
+                return redirect()->route('technician.events.edit', $event->id)->with('success', 'Thumbnail uploaded successfully!');
+            } else {
+                return redirect()->route('technician.events.edit', $id)->with('error', 'Error uploading thumbnail!');
+            }
+        } else {
+            return redirect()->route('technician.events.edit', $id)->with('error', 'Error uploading thumbnail!');
+        }
     }
 }
