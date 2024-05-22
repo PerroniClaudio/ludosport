@@ -88,6 +88,10 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/courses/{clan}/athlete', [App\Http\Controllers\ClanController::class, 'addAthlete'])->name('clans.athletes.store');
 });
 
+/** Eventi */
+
+Route::get('/events/location', [App\Http\Controllers\EventController::class, 'getLocationData'])->name('events.location');
+Route::get('/events/coordinates', [App\Http\Controllers\EventController::class, 'coordinates'])->name('events.coordinates');
 
 /** Script */
 

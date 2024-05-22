@@ -11,5 +11,6 @@ return [
     'info' => 'Event Information',
     'location' => 'Location',
     'thumbnail' => 'Thumbnail',
-    'promo' => 'Promotional Text'
+    'promo' => 'Promotional Text',
+    'preview_map' => 'Preview Map',
 ];

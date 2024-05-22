@@ -59,13 +59,9 @@ class EventController extends Controller {
 
         $request->validate([
             'name' => 'required',
-            'address' => 'required',
             'start_date' => 'required',
             'end_date' => 'required',
         ]);
-
-        $coordinates = $this->getCoordinates($request->address);
-
 
         $event = Event::create([
             'name' => $request->name,
@@ -73,7 +69,7 @@ class EventController extends Controller {
             'end_date' => $request->end_date,
             'description' => '',
             'user_id' => auth()->user()->id,
-            'location' => json_encode($coordinates),
+            'location' => '',
             'slug' => Str::slug($request->name),
         ]);
 
@@ -119,6 +115,13 @@ class EventController extends Controller {
         return redirect()->route('technician.events.edit', $event->id);
     }
 
+    public function saveLocation(Request $request, Event $event) {
+        $event->location = $request->location;
+        $event->save();
+
+        return redirect()->route('technician.events.edit', $event->id);
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -133,6 +136,24 @@ class EventController extends Controller {
         //
     }
 
+    public function getLocationData(Request $request) {
+
+        $coordinates = json_decode($request->location, true);
+
+        if (!isset($coordinates['lat'])) {
+            $coordinates = [
+                'lat' => '45.46404266357422',
+                'lng' => '9.1893892288208',
+            ];
+        }
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?latlng={$coordinates['lat']},{$coordinates['lng']}&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+
+        $response = file_get_contents($url);
+        $json = json_decode($response, true);
+
+        return response()->json($json['results'][0]);
+    }
+
     private function getCoordinates($address) {
         $address = str_replace(" ", "+", $address);
         $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
@@ -143,5 +164,11 @@ class EventController extends Controller {
             'lat' => $json['results'][0]['geometry']['location']['lat'],
             'lng' => $json['results'][0]['geometry']['location']['lng'],
         ];
+    }
+
+    public function coordinates(Request $request) {
+        $coordinates = $this->getCoordinates($request->address);
+
+        return response()->json($coordinates);
     }
 }

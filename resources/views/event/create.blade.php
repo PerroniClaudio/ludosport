@@ -25,9 +25,7 @@
                         <x-form.input name="end_date" label="End Date" type="datetime-local"
                             required="{{ true }}" value="{{ old('end_date') }}" />
 
-                        <x-form.input name="address" label="Location (Address)" type="text"
-                            required="{{ true }}" value="{{ old('address') }}"
-                            placeholder="{{ fake()->address() }}" />
+
 
                     </div>
 
