@@ -105,6 +105,25 @@ document.addEventListener("alpine:init", () => {
             redo() {
                 editor.chain().focus().redo().run();
             },
+            getActiveHeadingLevel(updatedAt) {
+                if (this.updatedAt !== updatedAt) {
+                    return;
+                }
+
+                return editor.isActive("heading", { level: 1 })
+                    ? 1
+                    : editor.isActive("heading", { level: 2 })
+                    ? 2
+                    : editor.isActive("heading", { level: 3 })
+                    ? 3
+                    : editor.isActive("heading", { level: 4 })
+                    ? 4
+                    : editor.isActive("heading", { level: 5 })
+                    ? 5
+                    : editor.isActive("heading", { level: 6 })
+                    ? 6
+                    : 0;
+            },
         };
     });
 });

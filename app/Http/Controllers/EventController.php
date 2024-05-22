@@ -60,20 +60,18 @@ class EventController extends Controller {
         $request->validate([
             'name' => 'required',
             'address' => 'required',
-            'date' => 'required',
-            'start' => 'required',
-            'end' => 'required',
+            'start_date' => 'required',
+            'end_date' => 'required',
         ]);
 
         $coordinates = $this->getCoordinates($request->address);
-        $start_time = $request->date . ' ' . $request->start;
-        $end_time = $request->date . ' ' . $request->end;
 
-        Event::create([
+
+        $event = Event::create([
             'name' => $request->name,
-            'start_date' => $start_time,
-            'end_date' => $end_time,
-            'description' => $request->name,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'description' => '',
             'user_id' => auth()->user()->id,
             'location' => json_encode($coordinates),
             'slug' => Str::slug($request->name),

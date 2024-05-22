@@ -28,7 +28,20 @@
 
         <template x-if="isLoaded()">
             <div class="menu flex items-center justify-between">
-                <div>
+                <div class="flex items-center gap-1">
+
+                    <!-- Dimensioni -->
+
+                    <select class="editor-button w-32" @change="toggleHeading({ level: parseInt($event.target.value)})"
+                        :value="getActiveHeadingLevel(updatedAt)">
+                        <option value="0" :selected="getActiveHeadingLevel(updatedAt) === 0">Normal </option>
+                        <option value="1" :selected="getActiveHeadingLevel(updatedAt) === 1">Heading 1 </option>
+                        <option value="2" :selected="getActiveHeadingLevel(updatedAt) === 2">Heading 2 </option>
+                        <option value="3" :selected="getActiveHeadingLevel(updatedAt) === 3">Heading 3 </option>
+                        <option value="4" :selected="getActiveHeadingLevel(updatedAt) === 4">Heading 4 </option>
+                        <option value="5" :selected="getActiveHeadingLevel(updatedAt) === 5">Heading 5 </option>
+                        <option value="6" :selected="getActiveHeadingLevel(updatedAt) === 6">Heading 6 </option>
+                    </select>
 
                     <!-- Stili scrittura -->
 
@@ -47,37 +60,12 @@
 
                     <!-- Paragrafo -->
 
-                    <button class="editor-button" @click="toggleParagraph()"
+                    {{-- <button class="editor-button" @click="toggleParagraph()"
                         :class="{ 'is-active': isActive('paragraph', updatedAt) }">
                         <x-lucide-pilcrow class="w-5 h-5  cursor-pointer" />
-                    </button>
+                    </button> --}}
 
-                    <!-- Dimensioni -->
 
-                    <button class="editor-button" @click="toggleHeading({ level: 1 })"
-                        :class="{ 'is-active': isActive('heading', { level: 1 }, updatedAt) }">
-                        <x-lucide-heading-1 class="w-5 h-5  cursor-pointer" />
-                    </button>
-                    <button class="editor-button" @click="toggleHeading({ level: 2 })"
-                        :class="{ 'is-active': isActive('heading', { level: 2 }, updatedAt) }">
-                        <x-lucide-heading-2 class="w-5 h-5  cursor-pointer" />
-                    </button>
-                    <button class="editor-button" @click="toggleHeading({ level: 3 })"
-                        :class="{ 'is-active': isActive('heading', { level: 3 }, updatedAt) }">
-                        <x-lucide-heading-3 class="w-5 h-5  cursor-pointer" />
-                    </button>
-                    <button class="editor-button" @click="toggleHeading({ level: 4 })"
-                        :class="{ 'is-active': isActive('heading', { level: 4 }, updatedAt) }">
-                        <x-lucide-heading-4 class="w-5 h-5  cursor-pointer" />
-                    </button>
-                    <button class="editor-button" @click="toggleHeading({ level: 5 })"
-                        :class="{ 'is-active': isActive('heading', { level: 5 }, updatedAt) }">
-                        <x-lucide-heading-5 class="w-5 h-5  cursor-pointer" />
-                    </button>
-                    <button class="editor-button" @click="toggleHeading({ level: 6 })"
-                        :class="{ 'is-active': isActive('heading', { level: 6 }, updatedAt) }">
-                        <x-lucide-heading-6 class="w-5 h-5  cursor-pointer" />
-                    </button>
 
                     <!-- Liste -->
 
