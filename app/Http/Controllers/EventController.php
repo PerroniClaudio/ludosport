@@ -82,6 +82,8 @@ class EventController extends Controller {
         return redirect()->route('technician.events.index');
     }
 
+
+
     /**
      * Display the specified resource.
      */
@@ -110,6 +112,13 @@ class EventController extends Controller {
         return view($view, [
             'event' => $event,
         ]);
+    }
+
+    public function saveDescription(Request $request, Event $event) {
+        $event->description = $request->description;
+        $event->save();
+
+        return redirect()->route('technician.events.edit', $event->id);
     }
 
     /**

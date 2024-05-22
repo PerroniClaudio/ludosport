@@ -6,6 +6,15 @@ import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 
+String.prototype.deentitize = function () {
+    var ret = this.replace(/&gt;/g, ">");
+    ret = ret.replace(/&lt;/g, "<");
+    ret = ret.replace(/&quot;/g, '"');
+    ret = ret.replace(/&apos;/g, "'");
+    ret = ret.replace(/&amp;/g, "&");
+    return ret;
+};
+
 document.addEventListener("alpine:init", () => {
     Alpine.data("editor", (content) => {
         let editor; // Alpine's reactive engine automatically wraps component properties in proxy objects. Attempting to use a proxied editor instance to apply a transaction will cause a "Range Error: Applying a mismatched transaction", so be sure to unwrap it using Alpine.raw(), or simply avoid storing your editor as a component property, as shown in this example.
@@ -27,7 +36,7 @@ document.addEventListener("alpine:init", () => {
                         }),
                         Link,
                     ],
-                    content: content,
+                    content: content.deentitize(),
                     editable: true,
                     autofocus: true,
                     editorProps: {
@@ -40,6 +49,10 @@ document.addEventListener("alpine:init", () => {
                     },
                     onUpdate({ editor }) {
                         _this.updatedAt = Date.now();
+                        const html = editor.getHTML();
+                        const element =
+                            document.querySelector("#editor-content");
+                        element.value = html;
                     },
                     onSelectionUpdate({ editor }) {
                         _this.updatedAt = Date.now();

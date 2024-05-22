@@ -15,7 +15,7 @@ class UserRoleMiddleware {
     public function handle(Request $request, Closure $next, string $role): Response {
 
         if (!$request->user() || $request->user()->role !== $role) {
-            return response('Unauthorized.', 401);
+            return redirect()->route('dashboard');
         }
 
         return $next($request);
