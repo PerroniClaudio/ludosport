@@ -90,6 +90,20 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 /** Eventi */
 
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+    Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');
+    Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('events.create');
+    Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('events.edit');
+    Route::delete('/events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])->name('events.disable');
+
+    Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('events.store');
+    Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('events.update');
+    Route::post('/events/{event}/approve', [App\Http\Controllers\EventController::class, 'approve'])->name('events.approve');
+    Route::post('/events/{event}/participants', [App\Http\Controllers\EventController::class, 'addParticipant'])->name('events.participants.store');
+    Route::post('/events/{event}/results', [App\Http\Controllers\EventController::class, 'addResult'])->name('events.results.store');
+
+});
+
 Route::get('/events/location', [App\Http\Controllers\EventController::class, 'getLocationData'])->name('events.location');
 Route::get('/events/coordinates', [App\Http\Controllers\EventController::class, 'coordinates'])->name('events.coordinates');
 

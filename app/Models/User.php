@@ -73,6 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return collect([
                     (object)[
                         'label' => 'customization',
+
                         'name' => 'user.customization.index',
                     ]
                 ]);
@@ -80,10 +81,12 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return collect([
                     (object)[
                         'label' => 'users',
+                        'active' => 'users.*',
                         'name' => 'rettore.users.index',
                     ],
                     (object)[
                         'label' => 'accademie',
+                        'active' => 'academies.*',
                         'name' => 'rettore.accademie.index',
                     ]
                 ]);
@@ -91,10 +94,12 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return collect([
                     (object)[
                         'label' => 'users',
+                        'active' => 'users.*',
                         'name' => 'preside.users.index',
                     ],
                     (object)[
                         'label' => 'scuola',
+                        'active' => 'schools.*',
                         'name' => 'preside.scuola.index',
                     ]
                 ]);
@@ -102,10 +107,12 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return collect([
                     (object)[
                         'label' => 'users',
+                        'active' => 'users.*',
                         'name' => 'manager.users.index',
                     ],
                     (object)[
                         'label' => 'scuola',
+                        'active' => 'schools.*',
                         'name' => 'manager.scuola.index',
                     ]
                 ]);
@@ -113,14 +120,17 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return collect([
                     (object)[
                         'label' => 'users',
+                        'active' => 'users.*',
                         'name' => 'dashboard',
                     ],
                     (object)[
                         'label' => 'eventi',
+                        'active' => 'events.*',
                         'name' => 'technician.events.index',
                     ],
                     (object)[
                         'label' => 'istruttori',
+                        'active' => 'istruttori.*',
                         'name' => 'dashboard',
                     ],
                 ]);
@@ -128,14 +138,17 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return collect([
                     (object)[
                         'label' => 'users',
+                        'active' => 'users.*',
                         'name' => 'istruttore.users.index',
                     ],
                     (object)[
                         'label' => 'eventi',
+                        'active' => 'events.*',
                         'name' => 'istruttore.events.index',
                     ],
                     (object)[
                         'label' => 'clan',
+                        'active' => 'clans.*',
                         'name' => 'istruttore.clan.index',
                     ],
                 ]);

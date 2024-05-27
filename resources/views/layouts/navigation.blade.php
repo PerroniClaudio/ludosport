@@ -20,7 +20,7 @@
 
                     @if (Auth::user()->role !== 'admin')
                         @foreach (Auth::user()->routes() as $route)
-                            <x-nav-link :href="route($route->name)" :active="false">
+                            <x-nav-link :href="route($route->name)" :active="request()->routeIs($route->active)">
                                 {{ __('navigation.' . $route->label) }}
                             </x-nav-link>
                         @endforeach
@@ -40,7 +40,7 @@
                         <x-nav-link :href="route('clans.index')" :active="request()->routeIs('clans.*')">
                             {{ __('navigation.clan') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" :active="false">
+                        <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
                             {{ __('navigation.eventi') }}
                         </x-nav-link>
                         <x-nav-link :href="route('dashboard')" :active="false">
