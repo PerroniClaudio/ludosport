@@ -154,4 +154,22 @@ class UserController extends Controller {
 
         return redirect()->route('users.index')->with('success', 'User disabled successfully!');
     }
+
+    public function setUserRoleForSession(Request $request) {
+        $request->validate([
+            'role' => 'required|string|exists:roles,label',
+        ]);
+
+        $authUser = auth()->user();
+        $user = User::find($authUser->id);
+
+        if ($user->hasRole($request->role)) {
+            session(['role' => $request->role]);
+        } else {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
+
+
+        return redirect()->route('dashboard');
+    }
 }

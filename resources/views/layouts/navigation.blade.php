@@ -18,7 +18,7 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    @if (Auth::user()->role !== 'admin')
+                    @if (Auth::user()->getRole() !== 'admin')
                         @foreach (Auth::user()->routes() as $route)
                             <x-nav-link :href="route($route->name)" :active="request()->routeIs($route->active)">
                                 {{ __('navigation.' . $route->label) }}

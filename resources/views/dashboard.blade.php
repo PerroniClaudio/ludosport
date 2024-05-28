@@ -11,7 +11,8 @@
                 <div class="p-6 text-background-900 dark:text-background-100">
                     <p>Welcome {{ auth()->user()->name }}!</p>
                     <p>You're logged in with the <span
-                            class="text-primary-600">{{ __('users.' . auth()->user()->role) }}</span> authorization!</p>
+                            class="text-primary-600">{{ __('users.' . auth()->user()->getRole()) }}</span> authorization!
+                    </p>
                 </div>
             </div>
         </div>

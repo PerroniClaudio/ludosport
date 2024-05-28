@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Role;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +15,10 @@ class UserRoleMiddleware {
      */
     public function handle(Request $request, Closure $next, string $role): Response {
 
-        if (!$request->user() || $request->user()->role !== $role) {
+        $selectedRole = Role::where('name', $role)->first();
+        $user = $selectedRole->users()->where('user_id', $request->user()->id)->get();
+
+        if (!$user) {
             return redirect()->route('dashboard');
         }
 

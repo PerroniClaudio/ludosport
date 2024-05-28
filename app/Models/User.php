@@ -61,7 +61,11 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function routes() {
-        switch ($this->role) {
+
+        $role = $this->getRole();
+
+
+        switch ($role) {
             case 'admin':
                 return collect([
                     (object)[
@@ -182,11 +186,29 @@ class User extends Authenticatable implements MustVerifyEmail {
         return array_values($allowedRoles);
     }
 
+    public function allowedRoles(): array {
+        return $this->roles()->get()->map(function ($role) {
+            return $role->name;
+        })->toArray();
+    }
+
     public function clans() {
         return $this->belongsToMany(Clan::class, 'clans_users', 'user_id', 'clan_id');
     }
 
     public function hasRole(string $role): bool {
-        return $this->role === $role;
+
+        $selectedRole = Role::where('name', $role)->first();
+        $user = $selectedRole->users()->where('user_id', $this->id)->get();
+
+        return $user->count() > 0;
+    }
+
+    public function roles() {
+        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
+    }
+
+    public function getRole() {
+        return session('role', $this->roles()->first()->name);
     }
 }
