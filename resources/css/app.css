@@ -131,76 +131,118 @@
     display: none;
 }
 
-.editor-button {
-    @apply inline-flex 
-    items-center 
-    px-2 
-    py-1 
-    text-sm 
-    font-medium 
-    leading-5 
-    text-white 
-    transition-colors 
-    duration-150 
-    dark:bg-background-700 
-    border 
-    border-transparent 
-    rounded-md 
-    text-background-800 
-    dark:text-background-200;
+/* TipTapEditor */
+
+    .editor-button {
+        @apply inline-flex 
+        items-center 
+        px-2 
+        py-1 
+        text-sm 
+        font-medium 
+        leading-5 
+        text-white 
+        transition-colors 
+        duration-150 
+        dark:bg-background-700 
+        border 
+        border-transparent 
+        rounded-md 
+        text-background-800 
+        dark:text-background-200;
+    }
+
+    .editor-button.is-active {
+        @apply inline-flex 
+        items-center 
+        px-2 
+        py-1 
+        text-sm 
+        font-medium 
+        leading-5 
+        text-white 
+        transition-colors 
+        duration-150 
+        dark:bg-background-900 
+        border 
+        border-transparent 
+        rounded-md 
+        text-background-800 
+        dark:text-background-200;
+    }
+
+    .tiptap h1 {
+        @apply text-4xl font-bold mb-4;
+    }
+
+    .tiptap h2 {
+        @apply text-3xl font-bold mb-3;
+    }
+
+    .tiptap h3 {
+        @apply text-2xl font-bold mb-2;
+    }
+
+    .tiptap h4 {
+        @apply text-xl font-bold mb-2;
+    }
+
+    .tiptap h5 {
+        @apply text-lg font-bold mb-1;
+    }
+
+    .tiptap h6 {
+        @apply text-base font-bold mb-1;
+    }
+
+    ul {
+        @apply list-disc pl-6 mb-4;
+    }
+
+    ol {
+        @apply list-decimal pl-6 mb-4;
+    }
+
+    .tiptap li {
+        @apply mb-2;
+    }
+
+    hr {
+        @apply border-b border-background-100 dark:border-background-700 my-2;
+    }
+
+/* FullCalendar */
+
+:root {
+    --fc-small-font-size: .85em;
+    --fc-page-bg-color: var(--background-900);
+    --fc-neutral-bg-color: hsla(0,0%,82%,.3);
+    --fc-neutral-text-color: grey;
+    --fc-border-color: var(--background-700);
+    --fc-button-text-color: #fff;
+    --fc-button-bg-color:  var(--primary-500);
+    --fc-button-border-color: var(--primary-500);
+    --fc-button-hover-bg-color: var(--primary-600);
+    --fc-button-hover-border-color: var(--primary-600);
+    --fc-button-active-bg-color: var(--primary-700);
+    --fc-button-active-border-color: var(--primary-700);
+    --fc-event-bg-color: var(--primary-500);
+    --fc-event-border-color: var(--primary-500);
+    --fc-event-text-color: #fff;
+    --fc-event-selected-overlay-color: rgba(0,0,0,.25);
+    --fc-more-link-bg-color: #d0d0d0;
+    --fc-more-link-text-color: inherit;
+    --fc-event-resizer-thickness: 8px;
+    --fc-event-resizer-dot-total-width: 8px;
+    --fc-event-resizer-dot-border-width: 1px;
+    --fc-non-business-color: hsla(0,0%,84%,.3);
+    --fc-bg-event-color: #8fdf82;
+    --fc-bg-event-opacity: 0.3;
+    --fc-highlight-color: rgba(188,232,241,.3);
+    --fc-today-bg-color: rgba(255,220,40,.15);
+    --fc-now-indicator-color: red;
 }
 
-.editor-button.is-active {
-    @apply inline-flex 
-    items-center 
-    px-2 
-    py-1 
-    text-sm 
-    font-medium 
-    leading-5 
-    text-white 
-    transition-colors 
-    duration-150 
-    dark:bg-background-900 
-    border 
-    border-transparent 
-    rounded-md 
-    text-background-800 
-    dark:text-background-200;
-}
-
-.tiptap h1 {
-    @apply text-4xl font-bold mb-4;
-}
-
-.tiptap h2 {
-    @apply text-3xl font-bold mb-3;
-}
-
-.tiptap h3 {
-    @apply text-2xl font-bold mb-2;
-}
-
-.tiptap h4 {
-    @apply text-xl font-bold mb-2;
-}
-
-.tiptap h5 {
-    @apply text-lg font-bold mb-1;
-}
-
-.tiptap h6 {
-    @apply text-base font-bold mb-1;
-}
-
-.tiptap ul {
-    @apply list-disc pl-6 mb-4;
-}
-
-.tiptap ol {
-    @apply list-decimal pl-6 mb-4;
-}
-
-.tiptap li {
-    @apply mb-2;
+.fc-daygrid-event-harness, .fc-h-event {
+    border: none !important
 }

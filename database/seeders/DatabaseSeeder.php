@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         // \App\Models\Academy::factory(10)->create();
-        \App\Models\School::factory(10)->create();
+        //\App\Models\School::factory(10)->create();
+
+        \App\Models\Event::factory(50)->create();
     }
 }

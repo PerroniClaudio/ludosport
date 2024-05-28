@@ -120,6 +120,7 @@ class EventController extends Controller {
     }
 
     public function saveDescription(Request $request, Event $event) {
+
         $event->description = $request->description;
         $event->save();
 
@@ -140,7 +141,13 @@ class EventController extends Controller {
 
         $event->save();
 
-        return redirect()->route('technician.events.edit', $event->id)->with('success', 'Location saved successfully');
+        $user = auth()->user();
+
+        if ($user->role === 'tecnico') {
+            return redirect()->route('technician.events.edit', $event->id)->with('success', 'Location saved successfully');
+        }
+
+        return redirect()->route('events.edit', $event->id)->with('success', 'Location saved successfully');
     }
 
     /**
@@ -228,5 +235,68 @@ class EventController extends Controller {
         } else {
             return redirect()->route('technician.events.edit', $id)->with('error', 'Error uploading thumbnail!');
         }
+    }
+
+    public function calendar(Request $request) {
+
+        header('Content-Type: application/json');
+
+        $events = Event::where('start_date', '>=', $request->start)
+            ->where('end_date', '<=', $request->end)
+            ->with('user')
+            ->get();
+
+        $events_data = [];
+
+        foreach ($events as $event) {
+
+            $classname = 'bg-primary-500';
+
+            if ($event->is_approved) {
+                $classname = $event->is_published ? 'bg-primary-500' : 'bg-primary-700';
+            } else {
+                $classname = 'bg-primary-800';
+            }
+
+            $events_data[] = [
+                'id' => $event->id,
+                'title' => $event->name,
+                'start' => $event->start_date,
+                'end' => $event->end_date,
+                'url' => "/events/{$event->id}",
+                'className' => $classname,
+                'is_approved' => $event->is_approved,
+                'is_published' => $event->is_published,
+                'user' => $event->user->name . " " . $event->user->surname,
+                'academy' => $event->academy->name,
+            ];
+        }
+
+        return response()->json($events_data);
+    }
+
+    public function review(Event $event) {
+
+        if ($event->is_approved) {
+            return redirect()->route('events.edit', $event->id)->with('error', 'This event has already been approved!');
+        }
+
+        return view('event.review', [
+            'event' => $event,
+        ]);
+    }
+
+    public function approve(Event $event) {
+        $event->is_approved = true;
+        $event->save();
+
+        return redirect()->route('events.edit', $event->id)->with('success', 'Event approved successfully!');
+    }
+
+    public function publish(Event $event) {
+        $event->is_published = true;
+        $event->save();
+
+        return redirect()->route('events.edit', $event->id)->with('success', 'Event published successfully!');
     }
 }

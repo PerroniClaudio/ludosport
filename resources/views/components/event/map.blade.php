@@ -6,46 +6,67 @@
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
     <div class="grid grid-cols-2 gap-4">
-        <form action="{{ route('technician.events.save.location', $event->id) }}" method="POST" class="h-96">
-            @csrf
-            <div>
-                <x-input-label value="City" />
-                <input type="text" id="eventCity" name="city" x-model="city"
-                    class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
-            </div>
-            <div>
-                <x-input-label value="Address" />
-                <input type="text" id="eventAddress" name="address" x-model="address"
-                    class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
-            </div>
-            <div>
-                <x-input-label value="Postal Code" />
-                <input type="text" id="eventPostalCode" name="postal_code" x-model="postal_code"
-                    class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
-            </div>
-            <div>
-                <x-input-label value="Country" />
-                <input type="text" id="eventCountry" name="nation" x-model="country"
-                    class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
-            </div>
-
-            @if (!$event->is_approved)
-                <div class="col-span-2 flex items-center gap-2 mt-8">
-                    <div class="flex-1">
-                        <x-primary-button type="button" class="w-full" @click="updateMap()">
-                            <div class="flex flex-col items-center justify-center w-full"><x-lucide-search
-                                    class="w-5 h-5 text-white" /></div>
-                        </x-primary-button>
-                    </div>
-                    <div class="flex-1">
-                        <input type="hidden" name="location" x-model="location">
-                        <x-primary-button class="w-full">
-                            <div class="flex flex-col items-center justify-center w-full"><x-lucide-save
-                                    class="w-5 h-5 text-white" /></div>
-                        </x-primary-button>
-                    </div>
+        
+            <form action="{{ route('technician.events.save.location', $event->id) }}" method="POST" class="h-96">
+                @csrf
+                <div>
+                    <x-input-label value="City" />
+                    <input type="text" id="eventCity" name="city" x-model="city"
+                        class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
                 </div>
-            @endif
+                <div>
+                    <x-input-label value="Address" />
+                    <input type="text" id="eventAddress" name="address" x-model="address"
+                        class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
+                </div>
+                <div>
+                    <x-input-label value="Postal Code" />
+                    <input type="text" id="eventPostalCode" name="postal_code" x-model="postal_code"
+                        class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
+                </div>
+                <div>
+                    <x-input-label value="Country" />
+                    <input type="text" id="eventCountry" name="nation" x-model="country"
+                        class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
+                </div>
+
+                @if (Auth::user()->hasRole('tecnico'))
+                    @if (!$event->is_approved)
+                        <div class="col-span-2 flex items-center gap-2 mt-8">
+                            <div class="flex-1">
+                                <x-primary-button type="button" class="w-full" @click="updateMap()">
+                                    <div class="flex flex-col items-center justify-center w-full"><x-lucide-search
+                                            class="w-5 h-5 text-white" /></div>
+                                </x-primary-button>
+                            </div>
+                            <div class="flex-1">
+                                <input type="hidden" name="location" x-model="location">
+                                <x-primary-button class="w-full">
+                                    <div class="flex flex-col items-center justify-center w-full"><x-lucide-save
+                                            class="w-5 h-5 text-white" /></div>
+                                </x-primary-button>
+                            </div>
+                        </div>
+                    @endif
+                @else 
+                    <div class="col-span-2 flex items-center gap-2 mt-8">
+                        <div class="flex-1">
+                            <x-primary-button type="button" class="w-full" @click="updateMap()">
+                                <div class="flex flex-col items-center justify-center w-full"><x-lucide-search
+                                        class="w-5 h-5 text-white" /></div>
+                            </x-primary-button>
+                        </div>
+                        <div class="flex-1">
+                            <input type="hidden" name="location" x-model="location">
+                            <x-primary-button class="w-full">
+                                <div class="flex flex-col items-center justify-center w-full"><x-lucide-save
+                                        class="w-5 h-5 text-white" /></div>
+                            </x-primary-button>
+                        </div>
+                    </div>
+                @endif
+            </form>
+        
         </form>
 
         <div>

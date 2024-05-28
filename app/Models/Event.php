@@ -33,4 +33,20 @@ class Event extends Model {
         'address',
         'postal_code',
     ];
+
+    public function nation() {
+        return $this->belongsTo(Nation::class);
+    }
+
+    public function academy() {
+        return $this->belongsTo(Academy::class);
+    }
+
+    public function school() {
+        return $this->belongsTo(School::class);
+    }
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 }

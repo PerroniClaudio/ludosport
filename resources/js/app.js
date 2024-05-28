@@ -2,9 +2,16 @@ import "./bootstrap";
 
 import Alpine from "alpinejs";
 
+// Tiptap Editor
+
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
+
+// FullCalendar
+
+import { Calendar } from '@fullcalendar/core'
+import dayGridPlugin from '@fullcalendar/daygrid'
 
 String.prototype.deentitize = function () {
     var ret = this.replace(/&gt;/g, ">");
@@ -16,6 +23,9 @@ String.prototype.deentitize = function () {
 };
 
 document.addEventListener("alpine:init", () => {
+
+    // TipTap Editor
+
     Alpine.data("editor", (content) => {
         let editor; // Alpine's reactive engine automatically wraps component properties in proxy objects. Attempting to use a proxied editor instance to apply a transaction will cause a "Range Error: Applying a mismatched transaction", so be sure to unwrap it using Alpine.raw(), or simply avoid storing your editor as a component property, as shown in this example.
 
@@ -90,7 +100,7 @@ document.addEventListener("alpine:init", () => {
                 editor.chain().focus().toggleBlockquote().run();
             },
             toggleHorizontalRule() {
-                editor.chain().focus().toggleHorizontalRule().run();
+                editor.chain().focus().setHorizontalRule().run();
             },
             toggleLink() {
                 editor
@@ -127,6 +137,8 @@ document.addEventListener("alpine:init", () => {
         };
     });
 
+    // Google Maps
+
     Alpine.data("googlemap", (location) => {
         //Idealmente è un array con latitudine e longitudine
 
@@ -147,7 +159,7 @@ document.addEventListener("alpine:init", () => {
         };
 
         return {
-            location: location,
+            location: location || JSON.stringify({ lat: 0, lng: 0 }),
             city: "",
             address: "",
             postal_code: "",
@@ -210,10 +222,12 @@ document.addEventListener("alpine:init", () => {
 
                     // Rimuovi tutti i marker
 
+
                     if (this.marker !== null) {
                         this.marker.setMap(null);
-                    }
+                    } 
 
+                  
                     // Aggiungi un marker
 
                     this.marker = new google.maps.Marker({
@@ -229,6 +243,71 @@ document.addEventListener("alpine:init", () => {
             },
         };
     });
+
+    // FullCalendar
+
+    Alpine.data("calendar", (eventSource) => {
+
+        return {
+            calendar: null,
+            approved_events: [],
+            pending_events: [],
+            init() {
+
+                /*
+
+                let calendarEvents = events.map((event) => {
+
+                    let eventStartDate = new Date(event.start_date);
+                    let eventEndDate = new Date(event.end_date);
+
+                    let eventStart = eventStartDate.toISOString();
+                    let eventEnd = eventEndDate.toISOString();
+
+                    return {
+                        id: event.id,
+                        title: event.name,
+                        start: eventStart,
+                        end: eventEnd,
+                        url: `/events/${event.id}`,
+                        className: event.is_approved ? event.is_published ? 'bg-primary-500' : 'bg-primary-700' : 'bg-primary-800',
+                    }
+                });
+
+                */
+
+                this.calendar = new Calendar(this.$refs.calendar, {
+                    plugins: [dayGridPlugin],
+                    initialView: 'dayGridMonth',
+                    events: eventSource,
+                    height: 'auto',
+                    eventClick: function (info) {
+                        window.location.href = info.event.url;
+                    },
+                    eventSourceSuccess: (content, response) => {
+
+                        this.approved_events = [];
+                        this.pending_events = [];
+
+                        content.map((event) => {
+                            if (event.is_approved) {
+                                this.approved_events.push(event);
+                            } else {
+                                this.pending_events.push(event);
+                            }
+                        })
+
+                        console.log(this.approved_events);
+
+                        return content.eventArray;
+                    }
+                });
+
+                this.calendar.render();
+            }
+        };
+    })
+   
 });
 
 window.Alpine = Alpine;

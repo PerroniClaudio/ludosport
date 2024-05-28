@@ -23,6 +23,7 @@
         "@tiptap/extension-paragraph": "^2.4.0",
         "@tiptap/extension-text": "^2.4.0",
         "@tiptap/pm": "^2.4.0",
-        "@tiptap/starter-kit": "^2.4.0"
+        "@tiptap/starter-kit": "^2.4.0",
+        "fullcalendar": "^6.1.13"
     }
 }
