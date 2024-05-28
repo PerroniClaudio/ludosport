@@ -45,13 +45,67 @@
                             <h3 class="text-background-800 dark:text-background-200 text-2xl">
                                 {{ __('users.authorization') }}</h3>
                             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                            <x-form.select name="role" label="Role" required="{{ true }}"
-                                :options="$roles" value="{{ old('role') }}" />
+
+
+                            <div class="flex flex-col gap-2 text-background-800 dark:text-background-200"
+                                x-data="{
+                                    selected: [],
+                                    selectRole(role) {
+                                        if (this.selected.includes(role)) {
+                                            this.selected = this.selected.filter(item => item !== role);
+                                        } else {
+                                            this.selected.push(role);
+                                        }
+                                    }
+                                }">
+                                @foreach ($roles as $role)
+                                    <div x-on:click="selectRole('{{ $role->label }}')"
+                                        class="border border-background-700 hover:border-primary-500 rounded-lg p-4 cursor-pointer flex items-center gap-2"
+                                        :class="{ 'border-primary-500': selected.includes('{{ $role->label }}') }">
+
+                                        @switch($role->label)
+                                            @case('admin')
+                                                <x-lucide-crown class="w-6 h-6 text-primary-500" />
+                                            @break
+
+                                            @case('athlete')
+                                                <x-lucide-swords class="w-6 h-6 text-primary-500" />
+                                            @break
+
+                                            @case('rector')
+                                                <x-lucide-graduation-cap class="w-6 h-6 text-primary-500" />
+                                            @break
+
+                                            @case('dean')
+                                                <x-lucide-book-marked class="w-6 h-6 text-primary-500" />
+                                            @break
+
+                                            @case('manager')
+                                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
+                                            @break
+
+                                            @case('technician')
+                                                <x-lucide-wrench class="w-6 h-6 text-primary-500" />
+                                            @break
+
+                                            @case('instructor')
+                                                <x-lucide-megaphone class="w-6 h-6 text-primary-500" />
+                                            @break
+
+                                            @default
+                                        @endswitch
+
+                                        <span>{{ __("users.{$role->label}") }}</span>
+                                    </div>
+                                @endforeach
+
+                                <input type="hidden" name="roles" x-model="selected">
+                            </div>
                         </div>
 
                     </div>
 
-                    <div class="flex items-center justify-end gap-2">
+                    <div class="flex items-center justify-end gap-2 mt-8">
                         <x-secondary-button type="button">
                             {{ __('users.cancel') }}
                         </x-secondary-button>

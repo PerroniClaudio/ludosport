@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Academy;
 use App\Models\Nation;
+use App\Models\Role;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -89,11 +90,27 @@ class AcademyController extends Controller {
         ];
 
         $schools = School::whereNotIn('id', $academy->schools->pluck('id'))->where('is_disabled', '0')->with(['nation'])->get();
-        $personnel = User::where('role', '!=', 'user')->where('is_disabled', '0')->whereNotIn('id', $academy->users->pluck('id'))->get();
-        $athletes = User::where('role', '=', 'user')->where('is_disabled', '0')->whereNotIn('id', $academy->users->pluck('id'))->get();
 
-        foreach ($personnel as $key => $person) {
-            $personnel[$key]->role = __('users.' . $person->role);
+        $personnel = collect();
+        $athletes = collect();
+
+        foreach (Role::all() as $role) {
+            if ($role->name === 'athlete') {
+                $athletes = $role->users()->where('is_disabled', '0')->whereNotIn('user_id', $academy->users->pluck('id'))->get();
+            } else {
+                $userswithrole = $role->users()->where('is_disabled', '0')->whereNotIn('user_id', $academy->users->pluck('id'))->get();
+
+                foreach ($userswithrole as $user) {
+                    if (!$personnel->contains('id', $user->id)) {
+                        $personnel->push([
+                            'id' => $user->id,
+                            'name' => $user->name,
+                            'surname' => $user->surname,
+                            'role' => implode(", ", $user->allowedRoles()),
+                        ]);
+                    }
+                }
+            }
         }
 
         $associated_personnel = [];
@@ -114,10 +131,9 @@ class AcademyController extends Controller {
                 'id' => $person->id,
                 'name' => $person->name,
                 'surname' => $person->surname,
-                'role' => __('users.' . $person->role),
+                'role' => 'lol',
             ];
         }
-
 
 
         return view('academy.edit', [

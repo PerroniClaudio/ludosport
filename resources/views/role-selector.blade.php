@@ -55,7 +55,7 @@
                                     @break
 
                                     @case('dean')
-                                        <x-lucide-graduation-cap class="w-6 h-6 text-primary-500" />
+                                        <x-lucide-book-marked class="w-6 h-6 text-primary-500" />
                                     @break
 
                                     @case('manager')

@@ -14,7 +14,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             <div class="grid grid-cols-12 gap-4" x-data="{
-                selectedRole: 'user',
+                selectedRole: 'athlete',
             }">
                 <div class="col-span-3">
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
@@ -24,16 +24,14 @@
                             </h3>
                             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                             <div class="flex flex-col gap-2">
-                                @foreach ($users as $key => $role)
+                                @foreach ($roles as $role)
                                     <button
                                         class="hover:text-background-800 dark:hover:text-background-300 focus:outline-none focus:text-primary-600 dark:focus:text-primary-600 text-left"
-                                        :class="{ 'text-primary-600': selectedRole == '{{ $key }}' }"
-                                        @click="selectedRole = '{{ $key }}'">
-                                        @if ($key == 'user')
-                                            {{ __('users.athletes_role') }}
-                                        @else
-                                            {{ __('users.' . $key . '_role') }}
-                                        @endif
+                                        :class="{ 'text-primary-600': selectedRole == '{{ $role->label }}' }"
+                                        @click="selectedRole = '{{ $role->label }}'">
+
+                                        {{ __('users.' . $role->label . '_role') }}
+
                                     </button>
                                 @endforeach
                             </div>
@@ -47,11 +45,9 @@
                             x-show="selectedRole == '{{ $key }}'" x-cloak>
                             <div class="p-6 text-background-900 dark:text-background-100">
                                 <h3 class="text-background-800 dark:text-background-200 text-2xl">
-                                    @if ($key == 'user')
-                                        {{ __('users.athletes_role') }}
-                                    @else
-                                        {{ __('users.' . $key . '_role') }}
-                                    @endif
+
+                                    {{ __('users.' . $key . '_role') }}
+
                                 </h3>
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                                 @if ($key == 'user')

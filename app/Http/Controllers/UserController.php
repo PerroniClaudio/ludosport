@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Academy;
 use App\Models\Nation;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -13,30 +14,24 @@ class UserController extends Controller {
     public function index() {
 
         $users = User::orderBy('created_at', 'desc')->get();
+        $roles = Role::all();
 
         $users_sorted_by_role = [];
 
-        foreach ($users as $user) {
-            $users_sorted_by_role[$user->role][] = $user;
+        foreach ($roles as $role) {
+            $users_sorted_by_role[$role->label] = $role->users;
         }
-
 
         return view('users.index', [
             'users' => $users_sorted_by_role,
+            'roles' => $roles,
         ]);
     }
 
     public function create() {
 
         $user = new User();
-        $roles = $user->getAllowedRolesWithoutAdmin();
-        $roles = array_map(function ($role) {
-            return [
-                'value' => $role,
-                'label' => __("users.$role"),
-            ];
-        }, $roles);
-
+        $roles = Role::all();
 
         $academies = Academy::all();
 
@@ -50,7 +45,7 @@ class UserController extends Controller {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|string|in:user,rettore,preside,manager,tecnico,istruttore',
+
         ]);
 
         $nation = Nation::where('name', $request->nationality)->first();
@@ -59,11 +54,22 @@ class UserController extends Controller {
             'surname' => $request->surname,
             'email' => $request->email,
             'password' => bcrypt(Str::random(10)),
-            'role' => $request->role,
             'subscription_year' => $request->year,
-            'academy_id' => $request->academy_id,
+            'academy_id' => $request->academy_id ?? 0,
             'nation_id' => $nation->id,
         ]);
+
+        $roles = explode(',', $request->roles);
+
+        foreach ($roles as $role) {
+
+            $roleElement = Role::where('label', $role)->first();
+
+            if ($roleElement) {
+                $user->roles()->attach($roleElement->id);
+            }
+        }
+
 
         return redirect()->route('users.edit', $user)->with('success', 'User created successfully!');
     }

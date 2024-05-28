@@ -7,6 +7,8 @@
     'isDialogTable' => false,
 ])
 
+
+
 <div x-data="{
     columns: {{ collect($columns) }},
     rows: {{ collect($rows) }},
@@ -58,7 +60,11 @@
 
 
 }" x-cloak id="">
-    <div class="mb-5 overflow-x-auto bg-white dark:bg-background-900 rounded-lg shadow overflow-y-auto relative {{ $isDialogTable ? "min-h-[600px] flex flex-col justify-between" : "" }}" >
+
+    <p x-text="rows.count"></p>
+
+    <div
+        class="mb-5 overflow-x-auto bg-white dark:bg-background-900 rounded-lg shadow overflow-y-auto relative {{ $isDialogTable ? 'min-h-[600px] flex flex-col justify-between' : '' }}">
         <div class="flex justify-between items-center p-6">
             <div class="flex items-center justify-end w-full">
                 <x-text-input type="text" x-on:input="searchByValue($event)" placeholder="Search..."
@@ -85,7 +91,8 @@
                                 class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 ">
                                 <div class="flex justify-between items-center" x-on:click="sort(index)">
                                     <p class="font-bold tracking-wider uppercase text-xs truncate" x-text="column.name"></p>
-                                    <x-lucide-arrow-down-up class="w-4 h-4 text-primary-500 dark:text-primary-400 cursor-pointer hover:opacity-70"/>
+                                    <x-lucide-arrow-down-up
+                                        class="w-4 h-4 text-primary-500 dark:text-primary-400 cursor-pointer hover:opacity-70" />
                                 </div>
                             </th>
                         </template>
@@ -107,7 +114,8 @@
                         {{ $empty }}
                     @else
                         <tr>
-                            <td colspan="100%" class="text-center text-background-500 dark:text-background-300 py-10 px-4 text-sm">
+                            <td colspan="100%"
+                                class="text-center text-background-500 dark:text-background-300 py-10 px-4 text-sm">
                                 No records found
                             </td>
                         </tr>
