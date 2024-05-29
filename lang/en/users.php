@@ -25,6 +25,7 @@ return [
     'admin_role' => 'Administrators',
     'roles' => 'Roles',
     'academy' => 'Academy',
+    'academies' => 'Academies',
     'select_academy' => 'Select Academy',
     'select_school' => 'Select School',
     'save' => 'Save',
@@ -35,6 +36,7 @@ return [
     'actions' => 'Actions',
     'select' => 'Select',
     'school' => 'School',
+    'schools' => 'Schools',
     'disable_user' => 'Disable User',
     'disable_user_message' => 'Once an user is disabled, he/she will not be able to login to the system, participate at any event nor enroll in new courses.',
     'disable_user_confirmation' => 'Are you sure you want to disable this user?',
@@ -49,4 +51,6 @@ return [
     'select_role' => 'Select Role',
     'select_role_tooltip' => 'Select the role you want to login with',
     'continue' => 'Continue',
+    'as_personnel' => 'As Personnel',
+    'as_athlete' => 'As Athlete',
 ];

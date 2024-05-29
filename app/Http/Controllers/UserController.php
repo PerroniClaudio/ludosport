@@ -30,7 +30,7 @@ class UserController extends Controller {
 
     public function create() {
 
-        $user = new User();
+
         $roles = Role::all();
 
         $academies = Academy::all();
@@ -67,6 +67,19 @@ class UserController extends Controller {
 
             if ($roleElement) {
                 $user->roles()->attach($roleElement->id);
+            }
+        }
+
+        $academy = Academy::find($request->academy_id);
+
+        if ($user->hasRole('athlete')) {
+            $academy->athletes()->attach($user->id);
+        }
+
+        foreach ($user->allowedRoles() as $role) {
+            if (in_array($role, ['rector', 'dean', 'instructor', 'manager'])) {
+                $academy->personnel()->attach($user->id);
+                break;
             }
         }
 
@@ -119,8 +132,6 @@ class UserController extends Controller {
             'email' => 'required|email|unique:users,email,' . $user->id,
             'year' => 'required|integer',
             'nationality' => 'required|string|exists:nations,id',
-            'academy_id' => 'required|integer|exists:academies,id',
-            'school_id' => 'required|integer|exists:schools,id',
         ]);
 
         if ($user->role != 'admin') {
@@ -130,8 +141,6 @@ class UserController extends Controller {
                 'email' => $request->email,
                 'subscription_year' => $request->year,
                 'nation_id' => $request->nationality,
-                'academy_id' => $request->academy_id,
-                'school_id' => $request->school_id,
             ]);
         } else {
             $user->update([
@@ -140,8 +149,6 @@ class UserController extends Controller {
                 'email' => $request->email,
                 'subscription_year' => $request->year,
                 'nation_id' => $request->nationality,
-                'academy_id' => $request->academy_id,
-                'school_id' => $request->school_id,
             ]);
         }
 

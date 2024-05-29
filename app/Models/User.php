@@ -27,16 +27,6 @@ class User extends Authenticatable implements MustVerifyEmail {
         'nation_id',
     ];
 
-    private $allowedRoles = [
-        'admin',
-        'user',
-        'rettore',
-        'preside',
-        'manager',
-        'tecnico',
-        'istruttore'
-    ];
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -57,6 +47,39 @@ class User extends Authenticatable implements MustVerifyEmail {
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+
+    public function nation() {
+        return $this->belongsTo(Nation::class);
+    }
+
+    public function events() {
+        return $this->hasMany(Event::class);
+    }
+
+    public function academies() {
+        return $this->belongsToMany(Academy::class, 'academies_personnel', 'user_id', 'academy_id');
+    }
+
+    public function academyAthletes() {
+        return $this->belongsToMany(Academy::class, 'academies_athletes', 'user_id', 'academy_id');
+    }
+
+    public function schools() {
+        return $this->belongsToMany(School::class, 'schools_personnel', 'user_id', 'school_id');
+    }
+
+    public function schoolAthletes() {
+        return $this->belongsToMany(School::class, 'schools_athletes', 'user_id', 'school_id');
+    }
+
+    public function clans() {
+        return $this->belongsToMany(Clan::class, 'clans_users', 'user_id', 'clan_id');
+    }
+
+    public function roles() {
+        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
 
     public function routes() {
@@ -80,7 +103,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'name' => 'user.customization.index',
                     ]
                 ]);
-            case 'rettore':
+            case 'rector':
                 return collect([
                     (object)[
                         'label' => 'users',
@@ -93,7 +116,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'name' => 'rettore.accademie.index',
                     ]
                 ]);
-            case 'preside':
+            case 'dean':
                 return collect([
                     (object)[
                         'label' => 'users',
@@ -119,7 +142,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'name' => 'manager.scuola.index',
                     ]
                 ]);
-            case 'tecnico':
+            case 'technician':
                 return collect([
                     (object)[
                         'label' => 'users',
@@ -137,7 +160,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'name' => 'dashboard',
                     ],
                 ]);
-            case 'istruttore':
+            case 'instructor':
                 return collect([
                     (object)[
                         'label' => 'users',
@@ -160,59 +183,16 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
     }
 
-    public function academies() {
-        return $this->belongsToMany(Academy::class, 'academies_personnel', 'user_id', 'academy_id');
-    }
-
-    public function academyAthletes() {
-        return $this->belongsToMany(Academy::class, 'academies_athletes', 'user_id', 'academy_id');
-    }
-
-    public function schools() {
-        return $this->belongsToMany(School::class, 'schools_personnel', 'user_id', 'school_id');
-    }
-
-    public function schoolAthletes() {
-        return $this->belongsToMany(School::class, 'schools_athletes', 'user_id', 'school_id');
-    }
-
-    public function nation() {
-        return $this->belongsTo(Nation::class);
-    }
-
-    public function events() {
-        return $this->hasMany(Event::class);
-    }
-
-    public function getAllowedRolesWithoutAdmin(): array {
-        $allowedRoles = $this->allowedRoles;
-        $key = array_search('admin', $allowedRoles);
-        if ($key !== false) {
-            unset($allowedRoles[$key]);
-        }
-        return array_values($allowedRoles);
-    }
-
     public function allowedRoles(): array {
         return $this->roles()->get()->map(function ($role) {
             return $role->name;
         })->toArray();
     }
 
-    public function clans() {
-        return $this->belongsToMany(Clan::class, 'clans_users', 'user_id', 'clan_id');
-    }
-
     public function hasRole(string $role): bool {
-
         $selectedRole = Role::where('name', $role)->first();
         $user = $selectedRole->users()->where('user_id', $this->id)->get();
-
         return $user->count() > 0;
-    }
-
-    public function roles() {
-        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
 
     public function getRole() {

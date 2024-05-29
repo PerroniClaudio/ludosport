@@ -16,7 +16,7 @@
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <div class="w-1/2 flex flex-col gap-2">
                         <div>
-                            @if ($user->role == 'user')
+                            @if ($user->hasRole('athlete'))
                                 @if ($user->has_paid_fee)
                                     <div
                                         class="mt-1 text-sm text-background-600 dark:text-background-200 flex flex-row items-center gap-2">
@@ -88,22 +88,34 @@
                             value="{{ $user->email }}" placeholder="{{ fake()->email() }}" />
                         <x-form.input name="year" label="Year" type="text" required="{{ true }}"
                             value="{{ $user->subscription_year }}" placeholder="{{ date('Y') }}" />
+
+                        <div>
+                            <x-input-label for="nationality" value="Nationality" />
+                            <select name="nationality" id="nationality"
+                                class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
+                                @foreach ($nations as $key => $nation)
+                                    <optgroup label="{{ $key }}"">
+                                        @foreach ($nation as $n)
+                                            <option value="{{ $n['id'] }}"
+                                                {{ $n['id'] == $user->nation_id ? 'selected' : '' }}>
+                                                {{ $n['name'] }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
+                        </div>
+
                     </div>
                 </div>
 
-                <x-user.provenance-selector nationality="{{ $user->nation_id }}"
-                    selectedAcademyId="{{ $user->academy_id }}"
-                    selectedAcademy="{{ $user->academy ? $user->academy->name : '' }}"
-                    selectedSchoolId="{{ $user->school_id }}"
-                    selectedSchool="{{ $user->school ? $user->school->name : '' }}" :academies="$academies" :nations="$nations"
-                    :schools="$schools" />
+
 
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">
                         {{ __('users.authorization') }}</h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                    <div class="flex flex-col gap-2 text-background-800 dark:text-background-200"
+                    <div class="grid grid-cols-4 gap-2 text-background-800 dark:text-background-200"
                         x-data="{
                             selected: {{ collect($user->roles) }},
                             selectRole(role) {
@@ -168,6 +180,76 @@
                 </div>
 
             </form>
+
+            <div class="grid grid-cols-2 gap-4">
+
+                <div
+                    class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 text-background-800 dark:text-background-200 ">
+                    <h3 class="text-2xl">
+                        {{ __('users.academies') }}</h3>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+
+                    <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
+
+                    <div class="flex flex-col gap-2">
+
+                        @foreach ($user->academies as $academy)
+                            <a href="{{ route('academies.edit', $academy->id) }}"
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
+                                <span>{{ $academy->name }}</span>
+                            </a>
+                        @endforeach
+
+                    </div>
+
+                    <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
+
+                    <div class="flex flex-col gap-2">
+                        @foreach ($user->academyAthletes as $academy)
+                            <a href="{{ route('academies.edit', $academy->id) }}"
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
+                                <span>{{ $academy->name }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 text-background-800 dark:text-background-200">
+                    <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                        {{ __('users.schools') }}</h3>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+
+                    <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
+
+                    <div class="flex flex-col gap-2">
+
+                        @foreach ($user->schools as $school)
+                            <a href="{{ route('schools.edit', $school->id) }}"
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
+                                <span>{{ $school->name }}</span>
+                            </a>
+                        @endforeach
+
+                    </div>
+
+                    <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
+
+                    <div class="flex flex-col gap-2">
+                        @foreach ($user->schoolAthletes as $schools)
+                            <a href="{{ route('schools.edit', $schools->id) }}"
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
+                                <span>{{ $schools->name }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
+            </div>
 
             @if (!$user->is_disabled)
                 <x-user.disable-user-form :user="$user->id" />
