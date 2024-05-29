@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function () {
 
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users.index');
+    Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('users.search');
     Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('users.create');
     Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
     Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('users.store');

@@ -100,10 +100,13 @@ class ClanController extends Controller {
             ];
         }
 
-        $associated_instructors = $clan->users()->where('role', 'istruttore')->where('is_disabled', '0')->get();
-        $associated_athletes = $clan->users()->where('role', 'user')->where('is_disabled', '0')->get();
+        $associated_instructors = $clan->personnel;
+        $associated_athletes = $clan->users()->where('is_disabled', '0')->get();
 
-        $instructors = User::where('role', 'istruttore')->where('is_disabled', '0')->whereNotIn('id', $clan->users->pluck('id'))->get();
+        $instructors = User::whereHas('roles', function ($query) {
+            $query->where('label', 'instructor');
+        })->whereNotIn('id', $clan->personnel->pluck('id'))->get();
+
         $athletes = User::where('role', 'user')->where('is_disabled', '0')->whereNotIn('id', $clan->users->pluck('id'))->get();
 
 
@@ -151,7 +154,7 @@ class ClanController extends Controller {
 
     public function addInstructor(Clan $clan, Request $request) {
         //
-        $clan->users()->attach($request->instructor_id);
+        $clan->personnel()->attach($request->instructor_id);
 
         return redirect()->route('clans.edit', $clan)->with('success', 'Instructor added successfully.');
     }

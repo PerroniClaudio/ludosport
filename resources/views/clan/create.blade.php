@@ -22,7 +22,7 @@
 
                     <div class="flex items-center justify-end gap-2">
                         <x-primary-button type="submit">
-                            {{ __('school.create') }}
+                            {{ __('clan.create') }}
                         </x-primary-button>
                     </div>
                 </form>

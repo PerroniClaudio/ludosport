@@ -99,34 +99,20 @@ class SchoolController extends Controller {
         ];
 
         $clans = Clan::whereNotIn('id', $school->clan->pluck('id'))->where('is_disabled', '0')->with(['nation'])->get();
-        $personnel = User::where('role', '!=', 'user')->where('is_disabled', '0')->whereNotIn('id', $school->users->pluck('id'))->get();
-        $athletes = User::where('role', '=', 'user')->where('is_disabled', '0')->whereNotIn('id', $school->users->pluck('id'))->get();
+        $associated_athletes = $school->athletes;
+        $associated_personnel = $school->personnel;
+
+        $personnel = User::where('is_disabled', '0')->whereNotIn('id', $school->personnel->pluck('id'))->with(['roles'])->get();
 
         foreach ($personnel as $key => $person) {
-            $personnel[$key]->role = __('users.' . $person->role);
+            $personnel[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {
+                return __('users.' . $role);
+            })->toArray());
         }
 
-        $associated_personnel = [];
-        $associated_athletes = [];
+        $athletes = User::whereNotIn('id', $school->athletes->pluck('id'))->where('is_disabled', '0')->get();
 
-        foreach ($school->users as $person) {
 
-            if ($person->role === "user") {
-                $associated_athletes[] = [
-                    'id' => $person->id,
-                    'name' => $person->name,
-                    'surname' => $person->surname,
-                ];
-                continue;
-            }
-
-            $associated_personnel[] = [
-                'id' => $person->id,
-                'name' => $person->name,
-                'surname' => $person->surname,
-                'role' => __('users.' . $person->role),
-            ];
-        }
 
         return view('school.edit', [
             'school' => $school,
@@ -189,12 +175,8 @@ class SchoolController extends Controller {
 
         $personnel = User::find($request->personnel_id);
 
-        if ($personnel->role === "user") {
-            return redirect()->route('schools.edit', $school)->with('error', 'Use this function for personnel only!');
-        }
+        $school->personnel()->attach($personnel);
 
-        $personnel->school_id = $school->id;
-        $personnel->save();
 
         return redirect()->route('schools.edit', $school)->with('success', 'Personnel added successfully!');
     }
@@ -203,12 +185,7 @@ class SchoolController extends Controller {
         //
         $athlete = User::find($request->athlete_id);
 
-        if ($athlete->role !== "user") {
-            return redirect()->route('schools.edit', $school)->with('error', 'Use this function for athletes only!');
-        }
-
-        $athlete->school_id = $school->id;
-        $athlete->save();
+        $school->athletes()->attach($athlete);
 
         return redirect()->route('schools.edit', $school)->with('success', 'Athlete added successfully!');
     }

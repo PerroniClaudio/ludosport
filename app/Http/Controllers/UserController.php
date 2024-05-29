@@ -175,6 +175,30 @@ class UserController extends Controller {
         return redirect()->route('users.index')->with('success', 'User disabled successfully!');
     }
 
+    public function search(Request $request) {
+
+        $request->validate([
+            'search' => 'required|string',
+        ]);
+
+        $searchTerms = explode(' ', $request->search);
+        $users = User::where(function ($query) use ($searchTerms) {
+            foreach ($searchTerms as $term) {
+                $query->orWhere('name', 'like', '%' . $term . '%')
+                    ->orWhere('surname', 'like', '%' . $term . '%');
+            }
+        })
+            ->orWhere('email', 'like', '%' . $request->search . '%')
+            ->with(['roles', 'academies', 'academyAthletes', 'nation'])
+            ->get();
+
+
+        return view('users.search-result', [
+            'users' => $users,
+
+        ]);
+    }
+
     public function setUserRoleForSession(Request $request) {
         $request->validate([
             'role' => 'required|string|exists:roles,label',

@@ -53,4 +53,6 @@ return [
     'continue' => 'Continue',
     'as_personnel' => 'As Personnel',
     'as_athlete' => 'As Athlete',
+    'search_title' => 'Search Users',
+    'search_result' => 'Search Results',
 ];

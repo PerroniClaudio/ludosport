@@ -22,6 +22,10 @@ class Clan extends Model {
         return $this->belongsToMany(User::class, 'clans_users', 'clan_id', 'user_id');
     }
 
+    public function personnel() {
+        return $this->belongsToMany(User::class, 'clans_personnel', 'clan_id', 'user_id');
+    }
+
     public function nation() {
         return $this->belongsTo(Nation::class);
     }
