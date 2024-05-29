@@ -160,12 +160,20 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
     }
 
-    public function academy() {
-        return $this->belongsTo(Academy::class);
+    public function academies() {
+        return $this->belongsToMany(Academy::class, 'academies_personnel', 'user_id', 'academy_id');
     }
 
-    public function school() {
-        return $this->belongsTo(School::class);
+    public function academyAthletes() {
+        return $this->belongsToMany(Academy::class, 'academies_athletes', 'user_id', 'academy_id');
+    }
+
+    public function schools() {
+        return $this->belongsToMany(School::class, 'schools_personnel', 'user_id', 'school_id');
+    }
+
+    public function schoolAthletes() {
+        return $this->belongsToMany(School::class, 'schools_athletes', 'user_id', 'school_id');
     }
 
     public function nation() {

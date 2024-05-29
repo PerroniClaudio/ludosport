@@ -76,14 +76,6 @@ class UserController extends Controller {
 
     public function edit(User $user) {
 
-        $roles = $user->getAllowedRolesWithoutAdmin();
-        $roles = array_map(function ($role) {
-            return [
-                'value' => $role,
-                'label' => __("users.$role"),
-            ];
-        }, $roles);
-
         $nations = Nation::all();
 
         foreach ($nations as $nation) {
@@ -106,6 +98,10 @@ class UserController extends Controller {
         }
 
         $user->is_verified = $user->email_verified_at ? true : false;
+
+        $roles = Role::all();
+        $user->roles = $user->roles->pluck('label')->toArray();
+
 
         return view('users.edit', [
             'user' => $user,
@@ -136,7 +132,6 @@ class UserController extends Controller {
                 'nation_id' => $request->nationality,
                 'academy_id' => $request->academy_id,
                 'school_id' => $request->school_id,
-                'role' => $request->role ?? 'user'
             ]);
         } else {
             $user->update([
@@ -150,6 +145,18 @@ class UserController extends Controller {
             ]);
         }
 
+        $user->roles()->detach();
+
+        $roles = explode(',', $request->roles);
+
+        foreach ($roles as $role) {
+
+            $roleElement = Role::where('label', $role)->first();
+
+            if ($roleElement) {
+                $user->roles()->attach($roleElement->id);
+            }
+        }
 
         return redirect()->route('users.index', $user)->with('success', 'User updated successfully!');
     }

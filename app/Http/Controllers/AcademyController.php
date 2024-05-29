@@ -90,51 +90,18 @@ class AcademyController extends Controller {
         ];
 
         $schools = School::whereNotIn('id', $academy->schools->pluck('id'))->where('is_disabled', '0')->with(['nation'])->get();
+        $associated_athletes = $academy->athletes;
+        $associated_personnel = $academy->personnel;
 
-        $personnel = collect();
-        $athletes = collect();
+        $personnel = User::where('is_disabled', '0')->whereNotIn('id', $academy->personnel->pluck('id'))->with(['roles'])->get();
 
-        foreach (Role::all() as $role) {
-            if ($role->name === 'athlete') {
-                $athletes = $role->users()->where('is_disabled', '0')->whereNotIn('user_id', $academy->users->pluck('id'))->get();
-            } else {
-                $userswithrole = $role->users()->where('is_disabled', '0')->whereNotIn('user_id', $academy->users->pluck('id'))->get();
-
-                foreach ($userswithrole as $user) {
-                    if (!$personnel->contains('id', $user->id)) {
-                        $personnel->push([
-                            'id' => $user->id,
-                            'name' => $user->name,
-                            'surname' => $user->surname,
-                            'role' => implode(", ", $user->allowedRoles()),
-                        ]);
-                    }
-                }
-            }
+        foreach ($personnel as $key => $person) {
+            $personnel[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {
+                return __('users.' . $role);
+            })->toArray());
         }
 
-        $associated_personnel = [];
-        $associated_athletes = [];
-
-        foreach ($academy->users as $person) {
-
-            if ($person->role === "user") {
-                $associated_athletes[] = [
-                    'id' => $person->id,
-                    'name' => $person->name,
-                    'surname' => $person->surname,
-                ];
-                continue;
-            }
-
-            $associated_personnel[] = [
-                'id' => $person->id,
-                'name' => $person->name,
-                'surname' => $person->surname,
-                'role' => 'lol',
-            ];
-        }
-
+        $athletes = User::whereNotIn('id', $academy->athletes->pluck('id'))->where('is_disabled', '0')->get();
 
         return view('academy.edit', [
             'academy' => $academy,
@@ -194,12 +161,7 @@ class AcademyController extends Controller {
     public function addPersonnel(Request $request, Academy $academy) {
         $personnel = User::find($request->personnel_id);
 
-        if ($personnel->role === "user") {
-            return redirect()->route('academies.edit', $academy)->with('error', 'Use this function for personnel only!');
-        }
-
-        $personnel->academy_id = $academy->id;
-        $personnel->save();
+        $academy->personnel()->attach($personnel);
 
         return redirect()->route('academies.edit', $academy)->with('success', 'Personnel added successfully!');
     }
@@ -207,12 +169,7 @@ class AcademyController extends Controller {
     public function addAthlete(Request $request, Academy $academy) {
         $athlete = User::find($request->athlete_id);
 
-        if ($athlete->role !== "user") {
-            return redirect()->route('academies.edit', $academy)->with('error', 'Use this function for athletes only!');
-        }
-
-        $athlete->academy_id = $academy->id;
-        $athlete->save();
+        $academy->athletes()->attach($athlete);
 
         return redirect()->route('academies.edit', $academy)->with('success', 'Athlete added successfully!');
     }

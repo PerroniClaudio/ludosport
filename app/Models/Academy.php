@@ -25,4 +25,12 @@ class Academy extends Model {
     public function schools() {
         return $this->hasMany(School::class);
     }
+
+    public function athletes() {
+        return $this->belongsToMany(User::class, 'academies_athletes', 'academy_id', 'user_id');
+    }
+
+    public function personnel() {
+        return $this->belongsToMany(User::class, 'academies_personnel', 'academy_id', 'user_id');
+    }
 }

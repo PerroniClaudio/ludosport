@@ -19,8 +19,12 @@ class School extends Model {
         return $this->belongsTo(Nation::class);
     }
 
-    public function users() {
-        return $this->hasMany(User::class);
+    public function athletes() {
+        return $this->belongsToMany(User::class, 'schools_athletes', 'school_id', 'user_id');
+    }
+
+    public function personnel() {
+        return $this->belongsToMany(User::class, 'schools_personnel', 'school_id', 'user_id');
     }
 
     public function academy() {
