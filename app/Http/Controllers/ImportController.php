@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Exports\TemplateExport;
+use App\Imports\UsersImport;
 use App\Models\Import;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ImportController extends Controller {
@@ -14,7 +16,7 @@ class ImportController extends Controller {
     public function index() {
         //
 
-        $imports = Import::with('user')->get();
+        $imports = Import::with('user')->orderBy('created_at', 'desc')->get();
 
         foreach ($imports as $key => $import) {
             $imports[$key]->type = __('imports.' . $import->type);
@@ -118,5 +120,42 @@ class ImportController extends Controller {
 
         $name = $type . time() . '.xlsx';
         return Excel::download(new TemplateExport($type), $name);
+    }
+
+    public function resolvePendingImports() {
+        $imports = Import::where('status', 'pending')->get();
+
+        foreach ($imports as $import) {
+            $import->status = 'processing';
+            $import->save();
+
+            $log = json_decode($import->log);
+
+
+            $log[] = "['File downloaded at " . now()->format('Y-m-d H:i:s') . "']";
+
+            switch ($import->type) {
+                case 'new_users':
+                    $log[] = "['Processing new users']";
+                    Excel::import(new UsersImport, $import->file, 'gcs');
+                    $log[] = "['Users imported at " . now()->format('Y-m-d H:i:s') . "']";
+
+                    $import->status = 'completed';
+                    $import->save();
+
+                    break;
+                case 'users_course':
+                    $log[] = "['Processing users course']";
+                    break;
+                case 'users_academy':
+                    $log[] = "['Processing users academy']";
+                    break;
+                case 'users_school':
+                    $log[] = "['Processing users school']";
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }

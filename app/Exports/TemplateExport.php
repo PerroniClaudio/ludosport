@@ -30,7 +30,7 @@ class TemplateExport implements FromArray {
                     "Name *",
                     "Surname *",
                     "Email *",
-                    "Nationality",
+                    "Nationality (Name of the country) *",
                     "Academy ID"
                 ];
 
