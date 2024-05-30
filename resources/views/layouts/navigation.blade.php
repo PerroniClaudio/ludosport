@@ -43,9 +43,13 @@
                         <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
                             {{ __('navigation.eventi') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('imports.index')" :active="false">
+                            {{ __('navigation.imports') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('dashboard')" :active="false">
                             {{ __('navigation.classifiche') }}
                         </x-nav-link>
+
                     @endif
 
                 </div>
@@ -74,6 +78,12 @@
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
+
+                        @if (count(Auth::user()->allowedRoles()) > 1)
+                            <x-dropdown-link :href="route('role-selector')">
+                                {{ __('users.select_role') }}
+                            </x-dropdown-link>
+                        @endif
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">

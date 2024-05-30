@@ -110,7 +110,6 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 Route::get('/events/location', [App\Http\Controllers\EventController::class, 'getLocationData'])->name('events.location');
 Route::get('/events/coordinates', [App\Http\Controllers\EventController::class, 'coordinates'])->name('events.coordinates');
 
-
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');
     Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('events.calendar');
@@ -125,6 +124,22 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/events/{event}/publish', [App\Http\Controllers\EventController::class, 'publish'])->name('events.publish');
     Route::post('/events/{event}/participants', [App\Http\Controllers\EventController::class, 'addParticipant'])->name('events.participants.store');
     Route::post('/events/{event}/results', [App\Http\Controllers\EventController::class, 'addResult'])->name('events.results.store');
+});
+
+/** Imports */
+
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+
+    Route::get('/imports', [App\Http\Controllers\ImportController::class, 'index'])->name('imports.index');
+    Route::get('/imports/create', [App\Http\Controllers\ImportController::class, 'create'])->name('imports.create');
+    Route::delete('/imports/{import}', [App\Http\Controllers\ImportController::class, 'destroy'])->name('imports.disable');
+
+
+    Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('imports.store');
+    Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('imports.update');
+    Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('imports.download');
+
+    Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('imports.template');
 });
 
 /** Script */

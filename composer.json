@@ -9,6 +9,7 @@
         "blade-ui-kit/blade-icons": "^1.6",
         "laravel/breeze": "^2.0",
         "laravel/framework": "^11.0",
+        "laravel/horizon": "^5.24",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "larswiegers/laravel-maps": "^0.18.0",

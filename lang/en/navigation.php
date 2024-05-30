@@ -22,5 +22,6 @@ return [
     'istruttori' => 'Instructors',
     'nazioni' => 'Nations',
     'classifiche' => 'Rankings',
-    'clan' => 'Courses'
+    'clan' => 'Courses',
+    'imports' => 'Imports',
 ];
