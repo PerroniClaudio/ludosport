@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Exports\TemplateExport;
+use App\Imports\UsersAcademyImport;
+use App\Imports\UsersCourseImport;
 use App\Imports\UsersImport;
+use App\Imports\UsersSchoolImport;
 use App\Models\Import;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -140,22 +143,31 @@ class ImportController extends Controller {
                     Excel::import(new UsersImport, $import->file, 'gcs');
                     $log[] = "['Users imported at " . now()->format('Y-m-d H:i:s') . "']";
 
-                    $import->status = 'completed';
-                    $import->save();
-
                     break;
                 case 'users_course':
                     $log[] = "['Processing users course']";
+                    Excel::import(new UsersCourseImport, $import->file, 'gcs');
+                    $log[] = "['Users course imported at " . now()->format('Y-m-d H:i:s') . "']";
+
                     break;
                 case 'users_academy':
                     $log[] = "['Processing users academy']";
+                    Excel::import(new UsersAcademyImport, $import->file, 'gcs');
+                    $log[] = "['Users academy imported at " . now()->format('Y-m-d H:i:s') . "']";
+
                     break;
                 case 'users_school':
                     $log[] = "['Processing users school']";
+                    Excel::import(new UsersSchoolImport, $import->file, 'gcs');
+                    $log[] = "['Users school imported at " . now()->format('Y-m-d H:i:s') . "']";
                     break;
                 default:
                     break;
             }
+
+            $import->log = json_encode($log);
+            $import->status = 'completed';
+            $import->save();
         }
     }
 }

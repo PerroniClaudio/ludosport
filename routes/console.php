@@ -12,4 +12,4 @@ Schedule::call(function () {
     $importController = new \App\Http\Controllers\ImportController();
 
     $importController->resolvePendingImports();
-})->everyHour();
+})->hourly();
