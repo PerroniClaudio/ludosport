@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Academy;
 use App\Models\Event;
 use App\Models\Nation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -36,7 +38,6 @@ class EventController extends Controller {
             }
         }
 
-
         return view($view, [
             'approved_events' => $approved,
             'pending_events' =>  $pending,
@@ -50,7 +51,18 @@ class EventController extends Controller {
     public function create() {
         //
 
-        return view('event.create');
+        $user = auth()->user();
+
+        if ($user->getRole() == "admin") {
+            $academies = Academy::all();
+        } else {
+            $academies = $user->academies()->get();
+        }
+
+
+        return view('event.create', [
+            'academies' => $academies
+        ]);
     }
 
     /**
@@ -73,6 +85,9 @@ class EventController extends Controller {
             'user_id' => auth()->user()->id,
             'location' => '',
             'slug' => Str::slug($request->name),
+            'is_approved' => 0,
+            'is_published' => 0,
+            'academy_id' => $request->academy_id,
         ]);
 
         return redirect()->route('technician.events.index');

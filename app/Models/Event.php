@@ -32,6 +32,7 @@ class Event extends Model {
         'city',
         'address',
         'postal_code',
+        'event_type'
     ];
 
     public function nation() {
@@ -48,5 +49,26 @@ class Event extends Model {
 
     public function user() {
         return $this->belongsTo(User::class);
+    }
+
+    public function eventTypes() {
+        return [
+            [
+                'value' => 0,
+                'label' => __('events.other_event')
+            ],
+            [
+                'value' => 1,
+                'label' => __('events.school_tournament')
+            ],
+            [
+                'value' => 2,
+                'label' => __('events.academy_tournament')
+            ],
+            [
+                'value' => 3,
+                'label' => __('events.national_tournament')
+            ]
+        ];
     }
 }

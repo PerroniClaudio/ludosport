@@ -59,6 +59,17 @@ class TemplateExport implements FromArray {
                 ];
 
                 break;
+
+            case 'event_results':
+
+                return [
+                    "Event ID *",
+                    "User Email *",
+                    "War Points",
+                    "Style Points",
+                ];
+
+                break;
             default:
                 break;
         }

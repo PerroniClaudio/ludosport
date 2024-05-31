@@ -26,4 +26,9 @@ return [
     'publishing_text' => 'This event has been approved but it has not been published yet. Would you like to publish it now?',
     'published_text' => 'This event has been approved and published. You can still edit the information.',
     'publish' => 'Publish',
+    'other_event' => 'Other Event',
+    'school_tournament' => 'School Tournament',
+    'academy_tournament' => 'Academy Tournament',
+    'national_tournament' => 'National Tournament',
+    'select_academy' => 'Select Academy',
 ];
