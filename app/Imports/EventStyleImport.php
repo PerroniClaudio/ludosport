@@ -37,7 +37,7 @@ class EventStyleImport implements ToCollection {
 
             $user = User::where('email', $row[1])->first();
 
-            $pointsEarned = round(($usersCount - $userPosition + 1) * $this->event->eventMultiplier(), 0, PHP_ROUND_HALF_UP);
+            $pointsEarned = round((($usersCount - $userPosition) + 1) * $this->event->eventMultiplier(), 0, PHP_ROUND_HALF_UP);
             $participation = EventResult::where('event_id', $this->event->id)->where('user_id', $user->id)->first();
 
             $participation->style_points = $pointsEarned;

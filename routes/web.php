@@ -142,6 +142,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('imports.template');
 });
 
+Route::get('/testchart', [App\Http\Controllers\ChartController::class, 'generateChart'])->name('testchart');
+
 /** Script */
 
 require __DIR__ . '/auth.php';

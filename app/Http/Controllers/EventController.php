@@ -129,10 +129,16 @@ class EventController extends Controller {
             );
         }
 
+        $results = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
 
+        foreach ($results as $key => $result) {
+
+            $results[$key]['user_fullname'] = $result->user['name'] . ' ' . $result->user['surname'];
+        }
 
         return view($view, [
             'event' => $event,
+            'results' => $results
         ]);
     }
 

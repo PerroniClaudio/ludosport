@@ -47,8 +47,12 @@ class Event extends Model {
         return $this->belongsTo(School::class);
     }
 
-    public function Results() {
+    public function results() {
         return $this->hasMany(EventResult::class);
+    }
+
+    public function user() {
+        return $this->belongsTo(User::class);
     }
 
     public function eventTypes() {

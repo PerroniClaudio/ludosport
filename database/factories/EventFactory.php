@@ -9,26 +9,24 @@ use Illuminate\Support\Str;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Event>
  */
-class EventFactory extends Factory
-{
+class EventFactory extends Factory {
     /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
-    {
+    public function definition(): array {
 
         $is_approved = $this->faker->boolean();
         $is_published = false;
         $name = 'Event ' . $this->faker->unique()->numberBetween(1, 100);
         $slug = Str::slug($name);
 
-        if($is_approved) {
+        if ($is_approved) {
             $is_published = $this->faker->boolean();
         }
 
-        $start_date = $this->faker->dateTimeBetween('-1 month', '+6 month');
+        $start_date = $this->faker->dateTimeBetween('-6 month', 'now');
         $daysToAdd = rand(0, 3);
         $end_date = (clone $start_date)->modify("+{$daysToAdd} days");
 
@@ -46,7 +44,8 @@ class EventFactory extends Factory
             'location' => '',
             'nation_id' => 2,
             'academy_id' => $this->faker->numberBetween(1, 11),
-            'school_id' => $this->faker->numberBetween(1, 10)
+            'school_id' => $this->faker->numberBetween(1, 10),
+            'event_type' => $this->faker->numberBetween(1, 3),
         ];
     }
 }
