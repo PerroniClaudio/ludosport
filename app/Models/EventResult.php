@@ -13,6 +13,17 @@ class EventResult extends Model {
         'user_id',
         'war_points',
         'style_points',
-        'total_points'
+        'bonus_war_points',
+        'bonus_style_points',
+        'total_war_points',
+        'total_style_points',
     ];
+
+    public function event() {
+        return $this->belongsTo(Event::class);
+    }
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 }

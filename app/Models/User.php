@@ -54,10 +54,6 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->belongsTo(Nation::class);
     }
 
-    public function events() {
-        return $this->hasMany(Event::class);
-    }
-
     public function academies() {
         return $this->belongsToMany(Academy::class, 'academies_personnel', 'user_id', 'academy_id');
     }
@@ -84,6 +80,10 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function imports() {
         return $this->hasMany(Import::class);
+    }
+
+    public function EventResults() {
+        return $this->hasMany(EventResult::class);
     }
 
     public function routes() {

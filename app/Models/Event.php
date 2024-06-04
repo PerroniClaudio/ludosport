@@ -47,8 +47,8 @@ class Event extends Model {
         return $this->belongsTo(School::class);
     }
 
-    public function user() {
-        return $this->belongsTo(User::class);
+    public function Results() {
+        return $this->hasMany(EventResult::class);
     }
 
     public function eventTypes() {
@@ -70,5 +70,102 @@ class Event extends Model {
                 'label' => __('events.national_tournament')
             ]
         ];
+    }
+
+    public function eventMultiplier() {
+        switch ($this->event_type) {
+            case 3:
+                return 2;
+                break;
+            default:
+                return 0.5;
+                break;
+        }
+    }
+
+    public function eventBonusPoints($type_of_bonus) {
+        switch ($type_of_bonus) {
+            case "FIRST_IN_WAR":
+                switch ($this->event_type) {
+                    case 1:
+                        return 15;
+                        break;
+                    case 2:
+                        return 45;
+                        break;
+                    case 3:
+                        return 75;
+                        break;
+                }
+                break;
+            case "SECOND_IN_WAR":
+                switch ($this->event_type) {
+                    case 1:
+                        return 10;
+                        break;
+                    case 2:
+                        return 30;
+                        break;
+                    case 3:
+                        return 50;
+                        break;
+                }
+                break;
+            case "THIRD_IN_WAR":
+                switch ($this->event_type) {
+                    case 1:
+                        return 5;
+                        break;
+                    case 2:
+                        return 15;
+                        break;
+                    case 3:
+                        return 25;
+                        break;
+                }
+                break;
+            case "FIRST_IN_STYLE":
+                switch ($this->event_type) {
+                    case 1:
+                        return 15;
+                        break;
+                    case 2:
+                        return 45;
+                        break;
+                    case 3:
+                        return 75;
+                        break;
+                }
+                break;
+            case "SECOND_IN_STYLE":
+                switch ($this->event_type) {
+                    case 1:
+                        return 10;
+                        break;
+                    case 2:
+                        return 30;
+                        break;
+                    case 3:
+                        return 50;
+                        break;
+                }
+                break;
+            case "THIRD_IN_STYLE":
+                switch ($this->event_type) {
+                    case 1:
+                        return 5;
+                        break;
+                    case 2:
+                        return 15;
+                        break;
+                    case 3:
+                        return 25;
+                        break;
+                }
+                break;
+            default:
+                return 0;
+                break;
+        }
     }
 }

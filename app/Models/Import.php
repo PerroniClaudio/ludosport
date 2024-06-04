@@ -20,7 +20,10 @@ class Import extends Model {
         'new_users',
         'users_course',
         'users_academy',
-        'users_school'
+        'users_school',
+        'event_participants',
+        'event_war',
+        'event_style',
     ];
 
     public function user() {
