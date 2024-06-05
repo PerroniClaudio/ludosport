@@ -47,7 +47,7 @@
                         <x-nav-link :href="route('imports.index')" :active="false">
                             {{ __('navigation.imports') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" :active="false">
+                        <x-nav-link :href="route('rankings.index')" :active="false">
                             {{ __('navigation.classifiche') }}
                         </x-nav-link>
 

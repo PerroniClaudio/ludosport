@@ -142,7 +142,13 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('imports.template');
 });
 
-Route::get('/testchart', [App\Http\Controllers\ChartController::class, 'generateChart'])->name('testchart');
+
+/** Rankings and Charts */
+
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+    Route::get('/rankings', [App\Http\Controllers\ChartController::class, 'index'])->name('rankings.index');
+    Route::get('/rankings/paginate', [App\Http\Controllers\ChartController::class, 'paginate'])->name('rankings.paginate');
+});
 
 /** Script */
 

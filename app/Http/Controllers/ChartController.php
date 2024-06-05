@@ -6,6 +6,7 @@ use App\Models\Chart;
 use App\Models\Event;
 use App\Models\EventResult;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class ChartController extends Controller {
@@ -14,6 +15,25 @@ class ChartController extends Controller {
      */
     public function index() {
         //
+
+        $latest_chart = Chart::orderBy('created_at', 'desc')->first();
+        $chart_data = json_encode($latest_chart->data);
+
+        return view('charts.index', [
+            'chart' => $latest_chart,
+            'chart_data' => $chart_data,
+        ]);
+    }
+
+    public function paginate(Request $request) {
+        $charts = Chart::where('created_at', 'LIKE', "%{$request->date}%")
+            ->orderBy('created_at', 'desc')->first();
+
+        if (!$charts) {
+            return response()->json([]);
+        }
+
+        return response()->json($charts->data);
     }
 
     /**
@@ -91,7 +111,7 @@ class ChartController extends Controller {
                 }
 
                 $total_chart_data[] = [
-                    'user' => User::find($user_id),
+                    'user' => User::find($user_id)->with('nation')->first(),
                     'total_war_points' => $total_war_points,
                     'total_style_points' => $total_style_points,
                 ];
