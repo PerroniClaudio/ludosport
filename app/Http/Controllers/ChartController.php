@@ -17,7 +17,12 @@ class ChartController extends Controller {
         //
 
         $latest_chart = Chart::orderBy('created_at', 'desc')->first();
-        $chart_data = json_encode($latest_chart->data);
+
+        if (!$latest_chart) {
+            $chart_data = json_encode([]);
+        } else {
+            $chart_data = json_encode($latest_chart->data);
+        }
 
         return view('charts.index', [
             'chart' => $latest_chart,
