@@ -198,6 +198,6 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function getRole() {
-        return session('role', 'athlete');
+        return session('role', $this->roles()->first()->name);
     }
 }
