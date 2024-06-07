@@ -26,6 +26,8 @@ class UserFactory extends Factory {
         $name = explode(' ', $fullname)[0];
         $surname = explode(' ', $fullname)[1];
 
+        $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
+
         return [
             'name' => $name,
             'surname' => $surname,
@@ -33,6 +35,8 @@ class UserFactory extends Factory {
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'subscription_year' => $this->faker->numberBetween(2020, 2024),
+            'unique_code' => $unique_code,
         ];
     }
 

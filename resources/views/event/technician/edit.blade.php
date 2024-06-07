@@ -41,6 +41,10 @@
 
             <x-event.thumbnail :event="$event" />
 
+            @if ($event->is_approved)
+                <x-event.participants :event="$event" />
+            @endif
+
         </div>
     </div>
 </x-app-layout>

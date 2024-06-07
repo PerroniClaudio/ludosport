@@ -1,0 +1,99 @@
+// Google Maps
+
+export const googlemap = (location) => {
+    //Idealmente è un array con latitudine e longitudine
+
+    const fetchLocation = async (location) => {
+        const response = await fetch(`/events/location?location=${location}`);
+        const data = await response.json();
+        return data;
+    };
+
+    const fetchCoordinates = async (address) => {
+        const response = await fetch(`/events/coordinates?address=${address}`);
+        const data = await response.json();
+        return data;
+    };
+
+    return {
+        location: location || JSON.stringify({ lat: 0, lng: 0 }),
+        city: "",
+        address: "",
+        postal_code: "",
+        country: "",
+        map: null,
+        marker: null,
+        init() {
+            fetchLocation(this.location).then((data) => {
+                data.address_components.forEach((element) => {
+                    if (element.types.includes("route")) {
+                        this.address = element.long_name + ", " + this.address;
+                    }
+
+                    if (element.types.includes("street_number")) {
+                        this.address += element.long_name;
+                    }
+
+                    if (element.types.includes("locality")) {
+                        this.city = element.long_name;
+                    }
+
+                    if (element.types.includes("country")) {
+                        this.country = element.long_name;
+                    }
+
+                    if (element.types.includes("postal_code")) {
+                        this.postal_code = element.long_name;
+                    }
+                });
+
+                this.map = new google.maps.Map(
+                    document.getElementById("eventGoogleMap"),
+                    {
+                        center: data.geometry.location,
+                        zoom: 15,
+                        height: "400px",
+                    }
+                );
+
+                this.marker = new google.maps.Marker({
+                    position: data.geometry.location,
+                    map: this.map,
+                });
+            });
+        },
+        updateMap: function () {
+            let newAddress =
+                this.address +
+                ", " +
+                this.city +
+                ", " +
+                this.postal_code +
+                ", " +
+                this.country;
+
+            fetchCoordinates(newAddress).then((data) => {
+                this.map.setCenter(data);
+                this.map.setZoom(15);
+
+                // Rimuovi tutti i marker
+
+                if (this.marker !== null) {
+                    this.marker.setMap(null);
+                }
+
+                // Aggiungi un marker
+
+                this.marker = new google.maps.Marker({
+                    position: data,
+                    map: this.map,
+                });
+
+                this.location = JSON.stringify({
+                    lat: data.lat,
+                    lng: data.lng,
+                });
+            });
+        },
+    };
+};

@@ -19,7 +19,7 @@ class EventController extends Controller {
 
         $user = auth()->user();
 
-        if ($user->role === 'tecnico') {
+        if ($user->getRole() === 'technician') {
             $view = 'event.technician.index';
             $events = Event::where('user_id', $user->id)->get();
         } else {
@@ -53,7 +53,7 @@ class EventController extends Controller {
 
         $user = auth()->user();
 
-        if ($user->getRole() == "admin") {
+        if ($user->getRole() === 'admin') {
             $academies = Academy::all();
         } else {
             $academies = $user->academies()->get();
@@ -112,7 +112,7 @@ class EventController extends Controller {
 
 
 
-        if ($user->role === 'tecnico') {
+        if ($user->getRole() === 'technician') {
             $view = 'event.technician.edit';
 
             if ($event->user_id !== $user->id) {
@@ -207,7 +207,7 @@ class EventController extends Controller {
 
         $coordinates = json_decode($request->location, true);
 
-        if (!isset($coordinates['lat'])) {
+        if ((!isset($coordinates['lat'])) || ($coordinates['lat'] == 0)) {
             $coordinates = [
                 'lat' => '45.46404266357422',
                 'lng' => '9.1893892288208',

@@ -13,13 +13,25 @@ class UserController extends Controller {
 
     public function index() {
 
-        $users = User::orderBy('created_at', 'desc')->get();
+
         $roles = Role::all();
 
         $users_sorted_by_role = [];
 
+
         foreach ($roles as $role) {
-            $users_sorted_by_role[$role->label] = $role->users;
+
+            $users = [];
+
+            foreach ($role->users as $user) {
+                if ($user->is_disabled) {
+                    continue;
+                }
+
+                $users[] = $user;
+            }
+
+            $users_sorted_by_role[$role->label] = $users;
         }
 
         return view('users.index', [
@@ -48,6 +60,13 @@ class UserController extends Controller {
 
         ]);
 
+        $code_valid = false;
+
+        while (!$code_valid) {
+            $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
+            $code_valid = User::where('unique_code', $unique_code)->count() == 0;
+        }
+
         $nation = Nation::where('name', $request->nationality)->first();
         $user = User::create([
             'name' => $request->name,
@@ -57,6 +76,7 @@ class UserController extends Controller {
             'subscription_year' => $request->year,
             'academy_id' => $request->academy_id ?? 0,
             'nation_id' => $nation->id,
+            'unique_code' => $unique_code,
         ]);
 
         $roles = explode(',', $request->roles);
@@ -70,11 +90,15 @@ class UserController extends Controller {
             }
         }
 
-        $academy = Academy::find($request->academy_id);
+        if ($request->academy_id) {
+            $academy = Academy::find($request->academy_id);
 
-        if ($user->hasRole('athlete')) {
-            $academy->athletes()->attach($user->id);
+            if ($user->hasRole('athlete')) {
+                $academy->athletes()->attach($user->id);
+            }
         }
+
+
 
         foreach ($user->allowedRoles() as $role) {
             if (in_array($role, ['rector', 'dean', 'instructor', 'manager'])) {

@@ -21,9 +21,9 @@
                                 {{ __('users.personal_details_message') }}</h3>
                             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                             <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                                value="{{ old('name') }}" placeholder="{{ fake()->firstName() }}" />
+                                value="{{ old('name') }}" placeholder="{!! fake()->firstName() !!}" />
                             <x-form.input name="surname" label="Surname" type="text" required="{{ true }}"
-                                value="{{ old('surname') }}" placeholder="{{ fake()->lastName() }}" />
+                                value="{{ old('surname') }}" placeholder="{!! fake()->lastName() !!}" />
                             <x-form.input name="email" label="Email" type="email" required="{{ true }}"
                                 value="{{ old('email') }}" placeholder="{{ fake()->email() }}" />
                             <x-form.input name="year" label="Year" type="text" required="{{ true }}"
