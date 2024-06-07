@@ -55,4 +55,6 @@ return [
     'as_athlete' => 'As Athlete',
     'search_title' => 'Search Users',
     'search_result' => 'Search Results',
+    'name' => 'Name',
+    'surname' => 'Surname',
 ];

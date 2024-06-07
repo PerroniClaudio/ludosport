@@ -31,4 +31,9 @@ return [
     'academy_tournament' => 'Academy Tournament',
     'national_tournament' => 'National Tournament',
     'select_academy' => 'Select Academy',
+    'participants' => 'Participants',
+    'select_participants' => 'Select Participants',
+    'export_participants' => 'Export Participants',
+    'available_users' => 'Available Users',
+    'selected_users' => 'Selected Users',
 ];

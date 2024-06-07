@@ -12,6 +12,12 @@ Route::prefix('technician')->middleware('auth')->middleware('role:tecnico')->mid
     Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('technician.events.update.thumbnail');
     Route::post('events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('technician.events.update');
 
+    Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('technician.events.participants');
+    Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('technician.events.available');
+
+    Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('technician.events.participants.add');
+    Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('technician.events.participants.export');
+
     // Route::post('events', [App\Http\Controllers\EventController::class, 'store'])->name();
     // Route::put('events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name();
     // Route::delete('events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])->name();

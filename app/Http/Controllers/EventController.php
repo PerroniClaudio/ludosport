@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\EventParticipantsExport;
 use App\Models\Academy;
 use App\Models\Event;
 use App\Models\Nation;
@@ -9,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EventController extends Controller {
     /**
@@ -323,5 +325,46 @@ class EventController extends Controller {
         $event->save();
 
         return redirect()->route('events.edit', $event->id)->with('success', 'Event published successfully!');
+    }
+
+    public function available(Event $event) {
+        $users = $event->academy->athletes()->get();
+        return response()->json($users);
+    }
+
+    public function participants(Event $event) {
+        $participants = $event->results()->with('user')->get();
+        $users = [];
+
+        foreach ($participants as $key => $participant) {
+            $users[] = $participant->user;
+        }
+
+        return response()->json($users);
+    }
+
+    public function selectParticipants(Request $request) {
+
+        $event = Event::find($request->event_id);
+
+        $participants = json_decode($request->participants);
+
+        $event->results()->delete();
+
+        foreach ($participants as $participant) {
+            $event->results()->create([
+                'user_id' => $participant,
+                'war_points' => 0,
+                'style_points' => 0,
+            ]);
+        }
+
+        return response()->json(['success' => 'Participants added successfully!']);
+    }
+
+    public function exportParticipants(Event $event) {
+        $name = "event_" . $event->name . '_participants.xlsx';
+
+        return Excel::download(new EventParticipantsExport($event->id), $name);
     }
 }
