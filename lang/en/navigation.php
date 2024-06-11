@@ -28,4 +28,5 @@ return [
     'register_message' => 'Are you a new user?',
     'login' => 'Login',
     'register' => 'Register',
+    'operations' => 'Operations',
 ];

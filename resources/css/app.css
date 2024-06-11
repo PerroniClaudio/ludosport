@@ -249,7 +249,8 @@ hr {
 }
 
 .children {
-    background: #fff;
+    background: var(--background-700);
+    z-index: 1000;
 }
 
 .children a,
@@ -261,10 +262,11 @@ hr {
 
 .children .separator {
     border-top-width: 2px;
+    border-color: var(--background-800);
 }
 
 .children a:hover {
-    color: #818cf8;
+    color: var(--primary-500);
 }
 
 @media (min-width: 768px) {

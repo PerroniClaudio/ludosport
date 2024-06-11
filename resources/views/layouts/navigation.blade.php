@@ -26,32 +26,38 @@
                             </x-nav-link>
                         @endforeach
                     @else
-                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
-                            {{ __('navigation.users') }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('nations.index')" :active="request()->routeIs('nations.*')">
-                            {{ __('navigation.nazioni') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('academies.index')" :active="request()->routeIs('academies.*')">
-                            {{ __('navigation.accademie') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('schools.index')" :active="request()->routeIs('schools.*')">
-                            {{ __('navigation.scuole') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('clans.index')" :active="request()->routeIs('clans.*')">
-                            {{ __('navigation.clan') }}
-                        </x-nav-link>
+                        <x-nav-link-parent :href="'#'" :active="request()->routeIs('users.*') ||
+                            request()->routeIs('nations.*') ||
+                            request()->routeIs('academies.*') ||
+                            request()->routeIs('schools.*') ||
+                            request()->routeIs('clans.*')">
+                            <x-slot name="name">{{ __('navigation.users') }}</x-slot>
+                            <x-slot name="children">
+                                <a href="{{ route('users.index') }}">{{ __('navigation.users') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('nations.index') }}">{{ __('navigation.nazioni') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('academies.index') }}">{{ __('navigation.accademie') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('schools.index') }}">{{ __('navigation.scuole') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('clans.index') }}">{{ __('navigation.clan') }}</a>
+                            </x-slot>
+                        </x-nav-link-parent>
                         <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
                             {{ __('navigation.eventi') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('imports.index')" :active="false">
-                            {{ __('navigation.imports') }}
                         </x-nav-link>
                         <x-nav-link :href="route('rankings.index')" :active="false">
                             {{ __('navigation.classifiche') }}
                         </x-nav-link>
-
+                        <x-nav-link-parent :href="'#'" :active="request()->routeIs('imports.*') || request()->routeIs('exports.*')">
+                            <x-slot name="name">{{ __('navigation.operations') }}</x-slot>
+                            <x-slot name="children">
+                                <a href="{{ route('imports.index') }}">{{ __('navigation.imports') }}</a>
+                                <span class="separator"></span>
+                                {{-- <a href="{{ route('exports.index') }}">{{ __('navigation.exports') }}</a> --}}
+                            </x-slot>
+                        </x-nav-link-parent>
                     @endif
 
                 </div>
