@@ -37,17 +37,28 @@
                                     <x-lucide-graduation-cap
                                         class="h-5 w-5 text-background-500 dark:text-background-400" />
                                     <div>
-                                        @foreach ($user->academies as $academy)
-                                            <span class="text-sm">{{ $academy->name }}</span>
-                                        @endforeach
+                                        @if (count($user->academies) > 0)
+                                            @foreach ($user->academies as $academy)
+                                                <span class="text-sm">{{ $academy->name }}</span>
+                                            @endforeach
+                                        @else
+                                            <span class="text-sm">{{ __('users.no_academies') }}</span>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <x-lucide-swords class="h-5 w-5 text-background-500 dark:text-background-400" />
                                     <div>
-                                        @foreach ($user->academies as $academy)
+                                        @foreach ($user->academyAthletes as $academy)
                                             <span class="text-sm">{{ $academy->name }}</span>
                                         @endforeach
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <x-lucide-flag class="h-5 w-5 text-background-500 dark:text-background-400" />
+                                    <div>
+                                        <span class="text-sm">{{ $user->nation->name }}</span>
                                     </div>
                                 </div>
 

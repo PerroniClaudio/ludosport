@@ -37,6 +37,7 @@ class UserFactory extends Factory {
             'remember_token' => Str::random(10),
             'subscription_year' => $this->faker->numberBetween(2020, 2024),
             'unique_code' => $unique_code,
+            'nation_id' => $this->faker->numberBetween(1, 10),
         ];
     }
 

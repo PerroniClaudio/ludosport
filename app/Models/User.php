@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Scout\Searchable;
 
 class User extends Authenticatable implements MustVerifyEmail {
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -27,6 +28,15 @@ class User extends Authenticatable implements MustVerifyEmail {
         'nation_id',
         'unique_code',
     ];
+
+    public function toSearchableArray() {
+        return [
+            'name' => $this->name,
+            'surname' => $this->surname,
+            'email' => $this->email,
+        ];
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -81,6 +91,10 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function imports() {
         return $this->hasMany(Import::class);
+    }
+
+    public function exports() {
+        return $this->hasMany(Export::class);
     }
 
     public function events() {

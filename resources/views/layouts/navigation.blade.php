@@ -55,7 +55,7 @@
                             <x-slot name="children">
                                 <a href="{{ route('imports.index') }}">{{ __('navigation.imports') }}</a>
                                 <span class="separator"></span>
-                                {{-- <a href="{{ route('exports.index') }}">{{ __('navigation.exports') }}</a> --}}
+                                <a href="{{ route('exports.index') }}">{{ __('navigation.exports') }}</a>
                             </x-slot>
                         </x-nav-link-parent>
                     @endif

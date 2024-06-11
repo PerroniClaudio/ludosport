@@ -24,6 +24,7 @@ return [
     'classifiche' => 'Rankings',
     'clan' => 'Courses',
     'imports' => 'Imports',
+    'exports' => 'Exports',
     'access_message' => 'Already registered?',
     'register_message' => 'Are you a new user?',
     'login' => 'Login',

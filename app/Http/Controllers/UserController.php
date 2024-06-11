@@ -6,6 +6,7 @@ use App\Models\Academy;
 use App\Models\Nation;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -205,21 +206,29 @@ class UserController extends Controller {
             'search' => 'required|string',
         ]);
 
-        $searchTerms = explode(' ', $request->search);
-        $users = User::where(function ($query) use ($searchTerms) {
-            foreach ($searchTerms as $term) {
-                $query->orWhere('name', 'like', '%' . $term . '%')
-                    ->orWhere('surname', 'like', '%' . $term . '%');
-            }
-        })
-            ->orWhere('email', 'like', '%' . $request->search . '%')
-            ->with(['roles', 'academies', 'academyAthletes', 'nation'])
-            ->get();
+
+
+        // $searchTerms = explode(' ', $request->search);
+        // $users = User::where(function ($query) use ($searchTerms) {
+        //     foreach ($searchTerms as $term) {
+        //         $query->orWhere('name', 'like', '%' . $term . '%')
+        //             ->orWhere('surname', 'like', '%' . $term . '%');
+        //     }
+        // })
+        //     ->orWhere('email', 'like', '%' . $request->search . '%')
+        //     ->with(['roles', 'academies', 'academyAthletes', 'nation'])
+        //     ->get();
+
+
+
+        $users = User::query()
+            ->when($request->search, function (Builder $q, $value) {
+                return $q->whereIn('id', User::search($value)->keys());
+            })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
 
 
         return view('users.search-result', [
             'users' => $users,
-
         ]);
     }
 

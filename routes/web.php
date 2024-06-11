@@ -144,6 +144,16 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 /** Exports */
 
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+    Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('exports.index');
+    Route::get('/exports/create', [App\Http\Controllers\ExportController::class, 'create'])->name('exports.create');
+    Route::delete('/exports/{export}', [App\Http\Controllers\ExportController::class, 'destroy'])->name('exports.disable');
+
+    Route::post('/exports', [App\Http\Controllers\ExportController::class, 'store'])->name('exports.store');
+    Route::post('/exports/{export}', [App\Http\Controllers\ExportController::class, 'update'])->name('exports.update');
+    Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('exports.download');
+});
+
 
 /** Rankings and Charts */
 
@@ -151,6 +161,19 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/rankings', [App\Http\Controllers\ChartController::class, 'index'])->name('rankings.index');
     Route::get('/rankings/paginate', [App\Http\Controllers\ChartController::class, 'paginate'])->name('rankings.paginate');
 });
+
+Route::get('/xdd', function () {
+
+    exit();
+
+    $users = User::all();
+
+    foreach ($users as $user) {
+        $user->nation_id = fake()->numberBetween(1, 10);
+        $user->save();
+    }
+});
+
 
 /** Script */
 

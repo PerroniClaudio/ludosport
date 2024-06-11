@@ -57,4 +57,5 @@ return [
     'search_result' => 'Search Results',
     'name' => 'Name',
     'surname' => 'Surname',
+    'no_academies' => 'No Academies',
 ];
