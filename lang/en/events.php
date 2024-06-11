@@ -36,4 +36,5 @@ return [
     'export_participants' => 'Export Participants',
     'available_users' => 'Available Users',
     'selected_users' => 'Selected Users',
+    'course_formation' => 'Training Course',
 ];

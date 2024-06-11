@@ -46,7 +46,6 @@ class EventController extends Controller {
         ]);
     }
 
-
     /**
      * Show the form for creating a new resource.
      */
@@ -94,8 +93,6 @@ class EventController extends Controller {
 
         return redirect()->route('technician.events.index');
     }
-
-
 
     /**
      * Display the specified resource.
@@ -185,13 +182,24 @@ class EventController extends Controller {
             'name' => 'required',
             'start_date' => 'required',
             'end_date' => 'required',
-            'event_type' => 'required',
         ]);
 
         $event->name = $request->name;
         $event->start_date = $request->start_date;
         $event->end_date = $request->end_date;
-        $event->event_type = $request->event_type;
+
+        if (Auth::user()->getRole() === 'admin') {
+
+            $event->event_type = $request->event_type;
+
+            if ($request->is_free == 'on') {
+                $event->is_free = true;
+                $event->price = 0;
+            } else {
+                $event->is_free = false;
+                $event->price = $request->price;
+            }
+        }
 
         $event->save();
 

@@ -72,6 +72,13 @@
                     <x-form.input name="end_date" label="End Date" type="datetime-local" required="{{ true }}"
                         value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}" />
 
+                    <x-form.checkbox id="is_free" name="is_free" label="Free Event"
+                        isChecked="{{ $event->is_free }}" />
+
+                    <x-form.input name="price" label="Price (include taxes)" type="number"
+                        value="{{ number_format($event->price, 2) }}"
+                        required="{{ $event->is_free ? false : true }}" />
+
                 </div>
             </form>
 

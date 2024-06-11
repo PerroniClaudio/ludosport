@@ -32,7 +32,9 @@ class Event extends Model {
         'city',
         'address',
         'postal_code',
-        'event_type'
+        'event_type',
+        'is_free',
+        'price',
     ];
 
     public function nation() {
@@ -72,7 +74,11 @@ class Event extends Model {
             [
                 'value' => 3,
                 'label' => __('events.national_tournament')
-            ]
+            ],
+            [
+                'value' => 4,
+                'label' => __('events.course_formation')
+            ],
         ];
     }
 
