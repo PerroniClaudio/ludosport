@@ -166,4 +166,41 @@ class ClanController extends Controller {
 
         return redirect()->route('clans.edit', $clan)->with('success', 'Athlete added successfully.');
     }
+
+    public function all(Request $request) {
+        //
+
+        $clans = Clan::orderBy('created_at', 'desc')->where('is_disabled', '0')->with(['school'])->get();
+        $formatted_clans = [];
+
+        foreach ($clans as $key => $clan) {
+            $formatted_clans[] = [
+                'id' => $clan->id,
+                'school' => $clan->school->name,
+                'name' => $clan->name
+            ];
+        }
+
+        return response()->json($formatted_clans);
+    }
+
+    public function search(Request $request) {
+        //
+
+        $clans = Clan::query()->when($request->search, function ($q, $search) {
+            return $q->whereIn('id', Clan::search($search)->keys());
+        })->with(['school'])->get();
+
+        $formatted_clans = [];
+
+        foreach ($clans as $key => $clan) {
+            $formatted_clans[] = [
+                'id' => $clan->id,
+                'school' => $clan->school->name,
+                'name' => $clan->name
+            ];
+        }
+
+        return response()->json($formatted_clans);
+    }
 }

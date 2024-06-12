@@ -95,6 +95,10 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/courses', [App\Http\Controllers\ClanController::class, 'index'])->name('clans.index');
     Route::get('/courses/create', [App\Http\Controllers\ClanController::class, 'create'])->name('clans.create');
+
+    Route::get('/courses/all', [App\Http\Controllers\ClanController::class, 'all'])->name('clans.all');
+    Route::get('/courses/search', [App\Http\Controllers\ClanController::class, 'search'])->name('clans.search');
+
     Route::get('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'edit'])->name('clans.edit');
     Route::delete('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'destroy'])->name('clans.disable');
 
@@ -162,17 +166,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/rankings/paginate', [App\Http\Controllers\ChartController::class, 'paginate'])->name('rankings.paginate');
 });
 
-Route::get('/xdd', function () {
 
-    exit();
-
-    $users = User::all();
-
-    foreach ($users as $user) {
-        $user->nation_id = fake()->numberBetween(1, 10);
-        $user->save();
-    }
-});
 
 
 /** Script */

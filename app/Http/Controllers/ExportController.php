@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Export;
+use App\Models\Role;
 use Illuminate\Http\Request;
 
 class ExportController extends Controller {
@@ -41,8 +42,15 @@ class ExportController extends Controller {
             ];
         }
 
+        $roles = Role::all();
+
+        foreach ($roles as $key => $role) {
+            $roles[$key]->name = __('users.' . $role->name);
+        }
+
         return view('export.create', [
-            'types' => $typesSelect
+            'types' => $typesSelect,
+            'roles' => $roles
         ]);
     }
 
@@ -50,7 +58,47 @@ class ExportController extends Controller {
      * Store a newly created resource in storage.
      */
     public function store(Request $request) {
-        //
+        //  
+
+        $export = new Export();
+        $exportTypes = $export->getExportTypes()->toArray();
+
+        $request->validate([
+            'type' => 'required|string|in:' . implode(',', $exportTypes)
+        ]);
+
+        $filters = [];
+
+        switch ($request->type) {
+            case 'users':
+                $filters = [
+                    'start_date' => $request->start_date,
+                    'end_date' => $request->end_date
+                ];
+                break;
+            case 'users_course':
+                $filters = [
+                    "users_type" => $request->users_type,
+                    "courses" => json_decode($request->filters, true),
+                ];
+                break;
+            default:
+
+
+
+                break;
+        }
+
+        $export->type = $request->type;
+        $export->status = 'pending';
+        $export->user_id = auth()->id();
+        $export->filters = json_encode($filters);
+        $export->file = '';
+        $export->log = "['Export requested at " . now()->format('Y-m-d H:i:s') . "']";
+
+        $export->save();
+
+        return redirect()->route('exports.index');
     }
 
     /**

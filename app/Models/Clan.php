@@ -4,15 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Clan extends Model {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = [
         'name',
         'school_id',
         'slug'
     ];
+
+    public function toSearchableArray() {
+        return [
+            'name' => $this->name,
+            'school' => $this->school->name,
+            'slug' => $this->slug
+        ];
+    }
 
     public function school() {
         return $this->belongsTo(School::class);

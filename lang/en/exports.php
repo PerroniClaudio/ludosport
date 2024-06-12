@@ -17,4 +17,13 @@ return [
     'completed' => 'Completed',
     'canceled' => 'Canceled',
     'processing' => 'Processing',
+    'users_filter_message' => 'Please select a starting date and an ending date to get the users that were created between those dates.',
+    'users_course_filter_message' => 'Please select a course to get the users that are enrolled in that course.',
+    'user_roles_filter_message' => 'Please select one or more roles to get the users that have those roles.',
+    'available_roles' => 'Available Roles',
+    'selected_roles' => 'Selected Roles',
+    'roles_name' => 'Role Name',
+    'actions' => 'Actions',
+    'available_courses' => 'Available Courses',
+    'selected_courses' => 'Selected Courses',
 ];

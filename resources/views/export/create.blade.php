@@ -10,12 +10,32 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-background-900 dark:text-background-100">
+                <div class="p-6 text-background-900 dark:text-background-100" x-data="{
+                    selectedType: '',
+                }">
                     <div class="flex flex-col gap-2 w-1/2">
                         <x-form.select name="type" label="Type" required="{{ true }}" :options="$types"
                             x-model="selectedType" shouldHaveEmptyOption="true" />
                     </div>
+
+                    <div>
+
+                        <div x-show="selectedType == 'users'">
+                            <x-exports.users />
+                        </div>
+
+                        <div x-show="selectedType == 'user_roles'">
+                            <x-exports.user-roles :roles="$roles" />
+                        </div>
+
+                        <div x-show="selectedType == 'users_course'">
+                            <x-exports.user-course />
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+
 </x-app-layout>
