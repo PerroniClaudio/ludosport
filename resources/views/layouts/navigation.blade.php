@@ -50,14 +50,14 @@
                         <x-nav-link :href="route('rankings.index')" :active="false">
                             {{ __('navigation.classifiche') }}
                         </x-nav-link>
-                        <x-nav-link-parent :href="'#'" :active="request()->routeIs('imports.*') || request()->routeIs('exports.*')">
+                        {{-- <x-nav-link-parent :href="'#'" :active="request()->routeIs('imports.*') || request()->routeIs('exports.*')">
                             <x-slot name="name">{{ __('navigation.operations') }}</x-slot>
                             <x-slot name="children">
                                 <a href="{{ route('imports.index') }}">{{ __('navigation.imports') }}</a>
                                 <span class="separator"></span>
                                 <a href="{{ route('exports.index') }}">{{ __('navigation.exports') }}</a>
                             </x-slot>
-                        </x-nav-link-parent>
+                        </x-nav-link-parent> --}}
                     @endif
 
                 </div>
