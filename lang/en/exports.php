@@ -32,4 +32,6 @@ return [
     'selected_academies' => 'Selected Academies',
     'available_schools' => 'Available Schools',
     'selected_schools' => 'Selected Schools',
+    'available_events' => 'Available Events',
+    'selected_events' => 'Selected Events',
 ];
