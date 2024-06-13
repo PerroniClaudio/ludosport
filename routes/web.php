@@ -65,6 +65,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/academies', [App\Http\Controllers\AcademyController::class, 'index'])->name('academies.index');
     Route::get('/academies/create', [App\Http\Controllers\AcademyController::class, 'create'])->name('academies.create');
+    Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('academies.all');
+    Route::get('/academies/search', [App\Http\Controllers\AcademyController::class, 'search'])->name('academies.search');
     Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'edit'])->name('academies.edit');
     Route::delete('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'destroy'])->name('academies.disable');
 

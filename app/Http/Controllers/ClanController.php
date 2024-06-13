@@ -188,7 +188,7 @@ class ClanController extends Controller {
         //
 
         $clans = Clan::query()->when($request->search, function ($q, $search) {
-            return $q->whereIn('id', Clan::search($search)->keys());
+            return $q->whereIn('id', Clan::search($search)->keys())->where('is_disabled', '0');
         })->with(['school'])->get();
 
         $formatted_clans = [];

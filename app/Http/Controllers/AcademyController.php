@@ -173,4 +173,40 @@ class AcademyController extends Controller {
 
         return redirect()->route('academies.edit', $academy)->with('success', 'Athlete added successfully!');
     }
+
+    public function all(Request $request) {
+        $academies = Academy::where('is_disabled', '0')->with(['nation'])->get();
+        $formatted_academies = [];
+
+        foreach ($academies as $key => $academy) {
+            $formatted_academies[] = [
+                'id' => $academy->id,
+                'nation' => $academy->nation->name,
+                'name' => $academy->name,
+            ];
+        }
+
+        return response()->json($formatted_academies);
+    }
+
+    public function search(Request $request) {
+        // $academies = Academy::where('name', 'like', '%' . $request->name . '%')->where('is_disabled', '0')->get();
+
+        $academies = Academy::query()->when($request->search, function ($q, $search) {
+            return $q->whereIn('id', Academy::search($search)->keys());
+        })->where('is_disabled', '0')->with(['nation'])->get();
+
+        $formatted_academies = [];
+
+        foreach ($academies as $key => $academy) {
+            $formatted_academies[] = [
+                'id' => $academy->id,
+                'nation' => $academy->nation->name,
+                'name' => $academy->name,
+            ];
+        }
+
+
+        return response()->json($formatted_academies);
+    }
 }

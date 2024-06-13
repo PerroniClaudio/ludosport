@@ -15,6 +15,14 @@ class Academy extends Model {
         'slug'
     ];
 
+    public function toSearchableArray() {
+        return [
+            'name' => $this->name,
+            'school' => $this->nation->name,
+            'slug' => $this->slug
+        ];
+    }
+
     public function nation() {
         return $this->belongsTo(Nation::class);
     }

@@ -20,10 +20,13 @@ return [
     'users_filter_message' => 'Please select a starting date and an ending date to get the users that were created between those dates.',
     'users_course_filter_message' => 'Please select a course to get the users that are enrolled in that course.',
     'user_roles_filter_message' => 'Please select one or more roles to get the users that have those roles.',
+    'users_academy_filter_message' => 'Please select an academy to get the users that are enrolled in that academy.',
     'available_roles' => 'Available Roles',
     'selected_roles' => 'Selected Roles',
     'roles_name' => 'Role Name',
     'actions' => 'Actions',
     'available_courses' => 'Available Courses',
     'selected_courses' => 'Selected Courses',
+    'available_academies' => 'Available Academies',
+    'selected_academies' => 'Selected Academies',
 ];
