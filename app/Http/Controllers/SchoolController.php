@@ -189,4 +189,40 @@ class SchoolController extends Controller {
 
         return redirect()->route('schools.edit', $school)->with('success', 'Athlete added successfully!');
     }
+
+    public function all(Request $request) {
+        $schools = School::where('is_disabled', '0')->with(['academy'])->get();
+        $formatted_schools = [];
+
+        foreach ($schools as $key => $school) {
+            $formatted_schools[] = [
+                'id' => $school->id,
+                'academy' => $school->academy->name,
+                'name' => $school->name,
+            ];
+        }
+
+        return response()->json($formatted_schools);
+    }
+
+    public function search(Request $request) {
+        // $academies = Academy::where('name', 'like', '%' . $request->name . '%')->where('is_disabled', '0')->get();
+
+        $schools = School::query()->when($request->search, function ($q, $search) {
+            return $q->whereIn('id', School::search($search)->keys());
+        })->where('is_disabled', '0')->with(['academy'])->get();
+
+        $formatted_schools = [];
+
+        foreach ($schools as $key => $school) {
+            $formatted_schools[] = [
+                'id' => $school->id,
+                'academy' => $school->academy->name,
+                'name' => $school->name,
+            ];
+        }
+
+
+        return response()->json($formatted_schools);
+    }
 }

@@ -1,59 +1,59 @@
 <form action="{{ route('exports.store') }}" method="POST" x-data="{
     filters: [],
     filtersJson: '[]',
-    selectedAcademies: [],
-    availableAcademies: [],
-    paginatedAcademies: [],
-    paginatedselectedAcademies: [],
+    selectedSchools: [],
+    availableSchools: [],
+    paginatedSchools: [],
+    paginatedselectedSchools: [],
     currentPage: 1,
     totalPages: 1,
     usersType: '',
     isSubmitEnabled: false,
-    getavailableAcademies: function() {
-        fetch('/academies/all')
+    getavailableSchools: function() {
+        fetch('/schools/all')
             .then(response => response.json())
             .then(data => {
-                this.availableAcademies = data;
-                this.paginatedAcademies = this.availableAcademies.slice(0, 10);
-                this.totalPages = Math.ceil(this.availableAcademies.length / 10);
+                this.availableSchools = data;
+                this.paginatedSchools = this.availableSchools.slice(0, 10);
+                this.totalPages = Math.ceil(this.availableSchools.length / 10);
             })
             .catch(error => {
                 console.error(error);
             });
     },
-    searchavailableAcademies: function(event) {
+    searchavailableSchools: function(event) {
 
         if (event.target.value.length >= 3) {
-            fetch('/academies/search?search=' + event.target.value)
+            fetch('/schools/search?search=' + event.target.value)
                 .then(response => response.json())
                 .then(data => {
-                    this.availableAcademies = data;
-                    this.paginatedAcademies = this.availableAcademies.slice(0, 10);
-                    this.totalPages = Math.ceil(this.availableAcademies.length / 10);
+                    this.availableSchools = data;
+                    this.paginatedSchools = this.availableSchools.slice(0, 10);
+                    this.totalPages = Math.ceil(this.availableSchools.length / 10);
                 })
                 .catch(error => {
                     console.error(error);
                 });
         } else {
-            this.getavailableAcademies();
+            this.getavailableSchools();
         }
     },
-    searchselectedAcademies: function(event) {
+    searchselectedSchools: function(event) {
         if (event.target.value.length >= 3) {
-            this.paginatedselectedAcademies = this.selectedAcademies.filter(course => course.name.toLowerCase().includes(event.target.value.toLowerCase()));
+            this.paginatedselectedSchools = this.selectedSchools.filter(course => course.name.toLowerCase().includes(event.target.value.toLowerCase()));
         } else {
-            this.paginatedselectedAcademies = this.selectedAcademies;
+            this.paginatedselectedSchools = this.selectedSchools;
         }
     },
-    addAcademy: function(id) {
-        let course = this.availableAcademies.find(course => course.id === id);
-        this.selectedAcademies.push(course);
-        this.paginatedselectedAcademies = this.selectedAcademies;
+    addSchool: function(id) {
+        let course = this.availableSchools.find(course => course.id === id);
+        this.selectedSchools.push(course);
+        this.paginatedselectedSchools = this.selectedSchools;
         this.updateFilterJson()
     },
-    removeAcademy: function(id) {
-        this.selectedAcademies = this.selectedAcademies.filter(course => course.id !== id);
-        this.paginatedselectedAcademies = this.selectedAcademies;
+    removeSchool: function(id) {
+        this.selectedSchools = this.selectedSchools.filter(course => course.id !== id);
+        this.paginatedselectedSchools = this.selectedSchools;
         this.updateFilterJson()
     },
     goToPage: function(page) {
@@ -62,14 +62,14 @@
         }
 
         this.currentPage = page;
-        this.paginatedAcademies = this.availableAcademies.slice((page - 1) * 10, page * 10);
+        this.paginatedSchools = this.availableSchools.slice((page - 1) * 10, page * 10);
     },
     updateFilterJson: function() {
-        this.filtersJson = JSON.stringify(this.selectedAcademies);
+        this.filtersJson = JSON.stringify(this.selectedSchools);
         this.validateForm()
     },
     validateForm: function() {
-        if ((this.selectedAcademies.length > 0) && (this.usersType !== '')) {
+        if ((this.selectedSchools.length > 0) && (this.usersType !== '')) {
             this.isSubmitEnabled = true;
             return;
         }
@@ -80,7 +80,7 @@
     },
 
     init: function() {
-        this.getavailableAcademies();
+        this.getavailableSchools();
 
         $watch('usersType', value => {
             this.validateForm()
@@ -103,18 +103,18 @@
 
     </div>
 
-    <p class="my-4">{{ __('exports.users_academy_filter_message') }}</p>
+    <p class="my-4">{{ __('exports.users_school_filter_message') }}</p>
 
     <div class="grid grid-cols-2 gap-2">
         <div class="bg-background-900 p-4 rounded">
             <div class="flex justify-between gap-2 items-center">
                 <div class="flex-1">
                     <h4 class="text-background-800 dark:text-background-200 text-lg">
-                        {{ __('exports.available_academies') }}
+                        {{ __('exports.available_schools') }}
                     </h4>
                 </div>
                 <div>
-                    <x-text-input type="text" x-on:input="searchavailableAcademies(event);" placeholder="Search..."
+                    <x-text-input type="text" x-on:input="searchavailableSchools(event);" placeholder="Search..."
                         class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" />
                 </div>
             </div>
@@ -126,22 +126,22 @@
                     <tr class="">
                         <th
                             class="text-left bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('academies.academy') }}</th>
+                            {{ __('school.name') }}</th>
                         <th
                             class="text-left bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('academies.nation') }}</th>
+                            {{ __('school.academy') }}</th>
                         <th
                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
                             {{ __('users.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <template x-for="(row, index) in paginatedAcademies">
+                    <template x-for="(row, index) in paginatedSchools">
                         <tr>
                             <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.name"></td>
-                            <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.nation"></td>
+                            <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.academy"></td>
                             <td class="text-background-500 dark:text-background-300 text-sm text-right p-1">
-                                <button type="button" @click="addAcademy(row.id)">
+                                <button type="button" @click="addSchool(row.id)">
                                     <x-lucide-plus
                                         class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
                                 </button>
@@ -187,13 +187,13 @@
             <div class="flex justify-between gap-2 items-center">
                 <div class="flex-1">
                     <h4 class="text-background-800 dark:text-background-200 text-lg">
-                        {{ __('exports.selected_academies') }}
+                        {{ __('exports.selected_schools') }}
                     </h4>
 
                 </div>
 
                 <div>
-                    <x-text-input type="text" x-on:input="searchavailableAcademies(event);" placeholder="Search..."
+                    <x-text-input type="text" x-on:input="searchavailableSchools(event);" placeholder="Search..."
                         class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" />
                 </div>
 
@@ -206,22 +206,22 @@
                     <tr class="">
                         <th
                             class="text-left bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('clan.name') }}</th>
+                            {{ __('school.name') }}</th>
                         <th
                             class="text-left bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('academies.nation') }}</th>
+                            {{ __('school.academy') }}</th>
                         <th
                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
                             {{ __('users.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <template x-for="(row, index) in paginatedselectedAcademies">
+                    <template x-for="(row, index) in paginatedselectedSchools">
                         <tr>
                             <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.name"></td>
-                            <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.nation"></td>
+                            <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.academy"></td>
                             <td class="text-background-500 dark:text-background-300 text-sm text-right p-1">
-                                <button type="button" @click="removeAcademy(row.id)">
+                                <button type="button" @click="removeSchool(row.id)">
                                     <x-lucide-minus
                                         class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
                                 </button>

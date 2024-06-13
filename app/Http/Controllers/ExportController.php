@@ -88,9 +88,13 @@ class ExportController extends Controller {
                     "academies" => json_decode($request->filters, true),
                 ];
                 break;
+            case 'users_school':
+                $filters = [
+                    "users_type" => $request->users_type,
+                    "schools" => json_decode($request->filters, true),
+                ];
+                break;
             default:
-
-
 
                 break;
         }
