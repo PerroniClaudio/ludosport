@@ -1,3 +1,5 @@
+@props(['type' => ''])
+
 <form action="{{ route('exports.store') }}" method="POST" x-data="{
     filters: [],
     filtersJson: '[]',
@@ -73,17 +75,21 @@
             return;
         }
 
-        console.log('here')
-
         this.isSubmitEnabled = false;
     },
-
+    formatDate: function(date) {
+        return new Date(date).toLocaleDateString();
+    },
     init: function() {
         this.getavailableEvents();
 
     }
 }">
     @csrf
+
+    <input name="type" type="hidden" value="{{ $type }}">
+    <input name="filters" type="hidden" x-model="filtersJson">
+
     <div class="grid grid-cols-2 gap-2 my-4">
         <div class="bg-background-900 p-4 rounded">
             <div class="flex justify-between gap-2 items-center">
@@ -118,7 +124,9 @@
                     <template x-for="(row, index) in paginatedEvents">
                         <tr>
                             <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.name"></td>
-                            <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.academy"></td>
+                            <td class="text-background-500 dark:text-background-300 text-sm"
+                                x-text="formatDate(row.start_date)"></td>
+                            </td>
                             <td class="text-background-500 dark:text-background-300 text-sm text-right p-1">
                                 <button type="button" @click="addEvent(row.id)">
                                     <x-lucide-plus
@@ -199,7 +207,9 @@
                     <template x-for="(row, index) in paginatedselectedEvents">
                         <tr>
                             <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.name"></td>
-                            <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.academy"></td>
+                            <td class="text-background-500 dark:text-background-300 text-sm"
+                                x-text="formatDate(row.start_date)">
+                            </td>
                             <td class="text-background-500 dark:text-background-300 text-sm text-right p-1">
                                 <button type="button" @click="removeEvent(row.id)">
                                     <x-lucide-minus
@@ -215,5 +225,12 @@
 
 
 
+    </div>
+
+    <div class="flex justify-end w-full my-4">
+        <button type="submit" :disabled="!isSubmitEnabled"
+            class="inline-flex items-center px-4 py-2 bg-primary-800 dark:bg-primary-400 border border-transparent rounded-md font-semibold text-xs text-white dark:text-background-800 uppercase tracking-widest hover:bg-background-700 dark:hover:bg-primary-600 focus:bg-background-700 dark:focus:bg-primary-500 active:bg-background-900 dark:active:bg-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-background-800 transition ease-in-out duration-150 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-60 ">
+            {{ __('exports.submit') }}
+        </button>
     </div>
 </form>

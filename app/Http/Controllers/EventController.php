@@ -375,4 +375,39 @@ class EventController extends Controller {
 
         return Excel::download(new EventParticipantsExport($event->id), $name);
     }
+
+    public function all() {
+        $events = Event::where('is_approved', 1)->get();
+
+        $formatted_events = [];
+
+        foreach ($events as $event) {
+            $formatted_events[] = [
+                'id' => $event->id,
+                'name' => $event->name,
+                'start_date' => $event->start_date
+            ];
+        }
+
+        return response()->json($events);
+    }
+
+    public function search(Request $request) {
+
+        $events = Event::query()->when($request->search, function ($q, $search) {
+            return $q->where('id', Event::search($search)->keys());
+        })->get();
+
+        $formatted_events = [];
+
+        foreach ($events as $event) {
+            $formatted_events[] = [
+                'id' => $event->id,
+                'name' => $event->name,
+                'start_date' => $event->start_date
+            ];
+        }
+
+        return response()->json($formatted_events);
+    }
 }

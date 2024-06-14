@@ -94,6 +94,12 @@ class ExportController extends Controller {
                     "schools" => json_decode($request->filters, true),
                 ];
                 break;
+
+            case 'event_participants':
+                $filters = [
+                    "filters" => json_decode($request->filters, true),
+                ];
+                break;
             default:
 
                 break;

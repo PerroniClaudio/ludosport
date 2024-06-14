@@ -41,7 +41,13 @@
                         </div>
 
                         <div x-show="selectedType == 'event_participants'">
-                            <x-exports.events />
+                            <x-exports.events type="event_participants" />
+                        </div>
+                        <div x-show="selectedType == 'event_war'">
+                            <x-exports.events type="event_war" />
+                        </div>
+                        <div x-show="selectedType == 'event_style'">
+                            <x-exports.events type="event_style" />
                         </div>
 
                     </div>

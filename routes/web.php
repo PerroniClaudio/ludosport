@@ -123,6 +123,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('events.calendar');
     Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('events.create');
     Route::get('/events/{event}/review', [App\Http\Controllers\EventController::class, 'review'])->name('events.review');
+    Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('events.all');
+    Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('events.search');
     Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('events.edit');
     Route::delete('/events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])->name('events.disable');
 
