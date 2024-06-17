@@ -5,7 +5,7 @@ namespace App\Exports;
 use App\Models\EventResult;
 use Maatwebsite\Excel\Concerns\FromArray;
 
-class EventParticipantsExport  implements FromArray {
+class EventParticipantsExport implements FromArray {
 
 
     private $event_id;
