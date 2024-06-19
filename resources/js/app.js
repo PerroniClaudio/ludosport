@@ -6,6 +6,7 @@ import { editor } from "./editor.js";
 import { googlemap } from "./googlemap.js";
 import { calendar } from "./calendar.js";
 import { participants } from "./participants.js";
+import { mapsearcher } from "./mapsearcher.js";
 
 String.prototype.deentitize = function () {
     var ret = this.replace(/&gt;/g, ">");
@@ -22,6 +23,7 @@ document.addEventListener("alpine:init", () => {
     Alpine.data("calendar", calendar);
     Alpine.data("chart", chart);
     Alpine.data("participants", participants);
+    Alpine.data("mapsearcher", mapsearcher);
 });
 
 window.Alpine = Alpine;

@@ -15,5 +15,5 @@ Schedule::call(function () {
 
 Schedule::call(function () {
     $exportController = new \App\Http\Controllers\ExportController();
-    // $exportController->resolvePendingExports();
+    $exportController->resolvePendingExports();
 })->hourly();

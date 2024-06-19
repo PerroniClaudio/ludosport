@@ -12,7 +12,13 @@ class Academy extends Model {
     protected $fillable = [
         'name',
         'nation_id',
-        'slug'
+        'slug',
+        'address',
+        'city',
+        'state',
+        'zip',
+        'country',
+        'coordinates'
     ];
 
     public function toSearchableArray() {
@@ -22,6 +28,8 @@ class Academy extends Model {
             'slug' => $this->slug
         ];
     }
+
+
 
     public function nation() {
         return $this->belongsTo(Nation::class);

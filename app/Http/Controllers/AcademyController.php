@@ -120,16 +120,39 @@ class AcademyController extends Controller {
     public function update(Request $request, Academy $academy) {
         //
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'nationality' => 'required|exists:nations,id',
-        ]);
+        if ($request->address) {
+            $address = $request->address . " " . $request->city . " "  . $request->zip;
+            $location = $this->getLocation($address);
 
-        $academy->update([
-            'name' => $request->name,
-            'nation_id' => $request->nationality,
-            'slug' => Str::slug($request->name),
-        ]);
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'nationality' => 'required|exists:nations,id',
+            ]);
+
+            $academy->update([
+                'name' => $request->name,
+                'nation_id' => $request->nationality,
+                'slug' => Str::slug($request->name),
+                'address' => $request->address,
+                'city' => $location['city'],
+                'state' => $location['state'],
+                'zip' => $request->zip,
+                'country' => $location['country'],
+                'coordinates' => json_encode(['lat' => $location['lat'], 'lng' => $location['lng']]),
+            ]);
+        } else {
+
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'nationality' => 'required|exists:nations,id',
+            ]);
+
+            $academy->update([
+                'name' => $request->name,
+                'nation_id' => $request->nationality,
+                'slug' => Str::slug($request->name),
+            ]);
+        }
 
         return redirect()->route('academies.index', $academy)->with('success', 'Academy updated successfully!');
     }
@@ -208,5 +231,88 @@ class AcademyController extends Controller {
 
 
         return response()->json($formatted_academies);
+    }
+
+    private function getLocation($address) {
+
+        $address = str_replace(" ", "+", $address);
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+        $response = file_get_contents($url);
+        $json = json_decode($response, true);
+
+
+        return [
+            'lat' => $json['results'][0]['geometry']['location']['lat'],
+            'lng' => $json['results'][0]['geometry']['location']['lng'],
+            'city' => $json['results'][0]['address_components'][2]['long_name'],
+            'state' => $json['results'][0]['address_components'][5]['long_name'],
+            'country' => $json['results'][0]['address_components'][6]['long_name'],
+        ];
+    }
+
+    /** Ricerca lato web */
+
+    private function getCoordinates($location) {
+        $location = urlencode($location);
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$location}&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+
+        $response = file_get_contents($url);
+        $data = json_decode($response, true);
+
+        if (isset($data['results'][0]['geometry']['location'])) {
+            $lat = $data['results'][0]['geometry']['location']['lat'];
+            $lng = $data['results'][0]['geometry']['location']['lng'];
+            return array($lat, $lng);
+        }
+        return array(null, null);
+    }
+
+    private function haversine($lat1, $lon1, $lat2, $lon2) {
+        $lat1 = deg2rad($lat1);
+        $lon1 = deg2rad($lon1);
+        $lat2 = deg2rad($lat2);
+        $lon2 = deg2rad($lon2);
+
+        $delta_lat = $lat2 - $lat1;
+        $delta_lon = $lon2 - $lon1;
+
+        $a = pow(sin($delta_lat / 2), 2) + cos($lat1) * cos($lat2) * pow(sin($delta_lon / 2), 2);
+        $c = 2 * asin(sqrt($a));
+        $r = 6371;
+
+        return ($c * $r);
+    }
+
+    private function findNearbyAcademies($acadmies, $locationLat, $locationLon, $radius) {
+        $nearbyAcademies = [];
+        foreach ($acadmies as $academy) {
+
+            if (!$academy->coordinates) continue; // Skip academies without coordinates (e.g. invalid addresses
+
+            $coordinates = json_decode($academy->coordinates, true);
+
+            $academyLat = $coordinates['lat'];
+            $academyLon = $coordinates['lng'];
+            $distance = $this->haversine($locationLat, $locationLon, $academyLat, $academyLon);
+            if ($distance <= $radius) {
+                $nearbyAcademies[] = $academy;
+            }
+        }
+        return $nearbyAcademies;
+    }
+
+    public function searchAcademies(Request $request) {
+
+        $location = $request->location;
+        $radius = $request->radius ? $request->radius : 10;
+
+        $coordinates = $this->getCoordinates($location);
+        $locationLat = $coordinates[0];
+        $locationLon = $coordinates[1];
+
+        $academies = Academy::where('is_disabled', '0')->whereNotNull('coordinates')->get();
+        $nearbyAcademies = $this->findNearbyAcademies($academies, $locationLat, $locationLon, $radius);
+
+        return response()->json($nearbyAcademies);
     }
 }

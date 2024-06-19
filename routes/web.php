@@ -1,15 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Models\Nation;
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
-
-Route::get('/', function () {
-    return view('welcome');
-});
 
 Route::get('/dashboard', function () {
 
@@ -179,3 +173,4 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/technician.php';
+require __DIR__ . '/site.php';
