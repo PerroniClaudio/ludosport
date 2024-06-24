@@ -27,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         'school_id',
         'nation_id',
         'unique_code',
+        'profile_picture',
     ];
 
     public function toSearchableArray() {

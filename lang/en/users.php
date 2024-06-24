@@ -58,4 +58,6 @@ return [
     'name' => 'Name',
     'surname' => 'Surname',
     'no_academies' => 'No Academies',
+    'profile_picture' => 'Profile Picture',
+    'upload_picture' => 'Upload Picture',
 ];

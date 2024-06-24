@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UserController extends Controller {
@@ -140,6 +141,11 @@ class UserController extends Controller {
         $roles = Role::all();
         $user->roles = $user->roles->pluck('label')->toArray();
 
+        $user->profile_picture = Storage::disk('gcs')->temporaryUrl(
+            $user->profile_picture,
+            now()->addMinutes(5)
+        );
+
 
         return view('users.edit', [
             'user' => $user,
@@ -248,5 +254,27 @@ class UserController extends Controller {
 
 
         return redirect()->route('dashboard');
+    }
+
+    public function picture($id, Request $request) {
+        if ($request->file('profilepicture') != null) {
+            $file = $request->file('profilepicture');
+            $file_name = time() . '_' . $file->getClientOriginalName();
+            $path = "users/" . $id . "/" . $file_name;
+
+            $storeFile = $file->storeAs("users/" . $id . "/", $file_name, "gcs");
+
+            if ($storeFile) {
+                $user = User::find($id);
+                $user->profile_picture = $path;
+                $user->save();
+
+                return redirect()->route('users.edit', $user->id)->with('success', 'Profile picture uploaded successfully!');
+            } else {
+                return redirect()->route('users.edit', $id)->with('error', 'Error uploading profile picture!');
+            }
+        } else {
+            return redirect()->route('users.edit', $id)->with('error', 'Error uploading profile picture!');
+        }
     }
 }

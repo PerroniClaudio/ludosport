@@ -72,22 +72,23 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('users.update', $user->id) }}" class="flex flex-col gap-4 mb-4">
+            <form method="POST" action="{{ route('users.update', $user->id) }}" class="grid grid-cols-2 gap-4">
                 @csrf
 
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">
                         {{ __('users.personal_details_message') }}</h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                    <div class="w-1/2 flex flex-col gap-2">
+                    <div class="flex flex-col gap-2">
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                             value="{{ $user->name }}" placeholder="{{ fake()->firstName() }}" />
                         <x-form.input name="surname" label="Surname" type="text" required="{{ true }}"
                             value="{{ $user->surname }}" placeholder="{{ fake()->lastName() }}" />
                         <x-form.input name="email" label="Email" type="email" required="{{ true }}"
                             value="{{ $user->email }}" placeholder="{{ fake()->email() }}" />
-                        <x-form.input name="year" label="Year" type="text" required="{{ true }}"
-                            value="{{ $user->subscription_year }}" placeholder="{{ date('Y') }}" />
+                        <x-form.input name="year" label="Subscription year" type="text"
+                            required="{{ true }}" value="{{ $user->subscription_year }}"
+                            placeholder="{{ date('Y') }}" />
 
                         <div>
                             <x-input-label for="nationality" value="Nationality" />
@@ -115,7 +116,7 @@
                         {{ __('users.authorization') }}</h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                    <div class="grid grid-cols-4 gap-2 text-background-800 dark:text-background-200"
+                    <div class="grid grid-cols-2 gap-2 text-background-800 dark:text-background-200"
                         x-data="{
                             selected: {{ collect($user->roles) }},
                             selectRole(role) {
@@ -180,6 +181,38 @@
                 </div>
 
             </form>
+
+            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4"
+                x-data="{}">
+                <div class="flex justify-between">
+                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('users.profile_picture') }}
+                    </h3>
+                    <div>
+                        <form method="POST" action="{{ route('users.picture.update', $user->id) }}"
+                            enctype="multipart/form-data" x-ref="pfpform">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="flex flex-col gap-4">
+                                <div class="flex flex-col gap-2">
+                                    <input type="file" name="profilepicture" id="profilepicture" class="hidden"
+                                        x-on:change="$refs.pfpform.submit()" />
+                                    <x-primary-button type="button"
+                                        onclick="document.getElementById('profilepicture').click()">
+                                        {{ __('users.upload_picture') }}
+                                    </x-primary-button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+
+                @if ($user->profile_picture)
+                    <img src="{{ $user->profile_picture }}" alt="{{ $user->name }}" class="w-1/3 rounded-lg">
+                @endif
+
+            </div>
 
             <div class="grid grid-cols-2 gap-4">
 

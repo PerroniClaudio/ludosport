@@ -26,8 +26,9 @@
                                 value="{{ old('surname') }}" placeholder="{!! fake()->lastName() !!}" />
                             <x-form.input name="email" label="Email" type="email" required="{{ true }}"
                                 value="{{ old('email') }}" placeholder="{{ fake()->email() }}" />
-                            <x-form.input name="year" label="Year" type="text" required="{{ true }}"
-                                value="{{ old('year') }}" placeholder="{{ date('Y') }}" />
+                            <x-form.input name="year" label="Subscription year" type="text"
+                                required="{{ true }}" value="{{ old('year') }}"
+                                placeholder="{{ date('Y') }}" />
                             <small
                                 class="text-background-800 dark:text-background-200"><i>{{ __('users.password_creation_message') }}</i></small>
                         </div>

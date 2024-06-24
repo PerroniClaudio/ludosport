@@ -10,17 +10,20 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
 
             @if (!$event->is_approved)
-                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                    <p class="text-background-800 dark:text-background-200 text-xl">{{ __('events.approvation_text') }}
-                    </p>
-                    <div class="flex justify-end">
-                        <a href="{{ route('events.review', $event->id) }}">
-                            <x-primary-button role="button">
-                                {{ __('events.review') }}
-                            </x-primary-button>
-                        </a>
+                @if ($event->nation_id != 0)
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                        <p class="text-background-800 dark:text-background-200 text-xl">
+                            {{ __('events.approvation_text') }}
+                        </p>
+                        <div class="flex justify-end">
+                            <a href="{{ route('events.review', $event->id) }}">
+                                <x-primary-button role="button">
+                                    {{ __('events.review') }}
+                                </x-primary-button>
+                            </a>
+                        </div>
                     </div>
-                </div>
+                @endif
             @endif
 
             @if ($event->is_approved)

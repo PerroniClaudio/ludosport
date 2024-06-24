@@ -41,6 +41,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.disable');
     Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('nation.academies.index');
     Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
+    Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('users.picture.update');
 });
 
 /** Nazioni */
