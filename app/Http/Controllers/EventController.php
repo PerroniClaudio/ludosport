@@ -78,6 +78,19 @@ class EventController extends Controller {
             'end_date' => 'required',
         ]);
 
+        $slug = Str::slug($request->name);
+
+        $slugExists = Event::where('slug', $slug)->exists();
+        if ($slugExists) {
+            $counter = 1;
+            while ($slugExists) {
+                $newSlug = $slug . '-' . $counter;
+                $slugExists = Event::where('slug', $newSlug)->exists();
+                $counter++;
+            }
+            $slug = $newSlug;
+        }
+
         $event = Event::create([
             'name' => $request->name,
             'start_date' => $request->start_date,
@@ -85,7 +98,7 @@ class EventController extends Controller {
             'description' => '',
             'user_id' => auth()->user()->id,
             'location' => '',
-            'slug' => Str::slug($request->name),
+            'slug' => $slug,
             'is_approved' => 0,
             'is_published' => 0,
             'academy_id' => $request->academy_id,
@@ -290,7 +303,7 @@ class EventController extends Controller {
             if ($event->is_approved) {
                 $classname = $event->is_published ? 'bg-primary-500' : 'bg-primary-700';
             } else {
-                $classname = 'bg-primary-800';
+                $classname = 'bg-background-500 dark:bg-background-700';
             }
 
             $events_data[] = [

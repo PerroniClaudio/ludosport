@@ -43,6 +43,18 @@
                         <option value="6" :selected="getActiveHeadingLevel(updatedAt) === 6">Heading 6 </option>
                     </select>
 
+                    <!-- Allineamento -->
+
+                    <select class="editor-button w-32" @change="toggleTextAlign($event.target.value)">
+                        <option value="left" :selected="getActiveTextalign(updatedAt) === 'left'">Left </option>
+                        <option value="center" :selected="getActiveTextalign(updatedAt) === 'center'">Center
+                        </option>
+                        <option value="right" :selected="getActiveTextalign(updatedAt) === 'right'">Right </option>
+                        <option value="justify" :selected="getActiveTextalign(updatedAt) === 'justify'">Justify
+                        </option>
+
+                    </select>
+
                     <!-- Stili scrittura -->
 
                     <button class="editor-button" @click="toggleBold()"

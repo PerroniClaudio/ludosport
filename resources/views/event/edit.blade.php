@@ -62,8 +62,11 @@
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                         value="{!! $event->name !!}" placeholder="{{ fake()->company() }}" />
 
-                    <x-form.select name="event_type" label="Event Type" required="{{ true }}"
-                        :options="$event->eventTypes()" value="{{ $event->event_type }}" />
+                    <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
+                        selected="{{ $event->type->name }}" />
+
+                    {{-- <x-form.select name="event_type" label="Event Type" required="{{ true }}"
+                        :options="$event->eventTypes()" value="{{ $event->event_type }}" /> --}}
 
                     <x-form.input name="start_date" label="Start Date" type="datetime-local"
                         required="{{ true }}" value="{{ $event->start_date }}"

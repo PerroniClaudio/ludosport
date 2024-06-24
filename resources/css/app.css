@@ -144,6 +144,7 @@
         text-white 
         transition-colors 
         duration-150 
+        bg-primary-200
         dark:bg-background-700 
         border 
         border-transparent 
@@ -163,6 +164,7 @@
         text-white 
         transition-colors 
         duration-150 
+        bg-primary-500
         dark:bg-background-900 
         border 
         border-transparent 
@@ -248,8 +250,11 @@ hr {
     border: none !important;
 }
 
+.fc-col-header-cell-cushion {
+    color: var(--text-100);
+}
+
 .children {
-    background: var(--background-700);
     z-index: 1000;
 }
 
@@ -262,7 +267,14 @@ hr {
 
 .children .separator {
     border-top-width: 2px;
-    border-color: var(--background-800);
+    border-color: var(--background-300);
+}
+
+@media (prefers-color-scheme: dark) {
+    .children .separator {
+        border-top-width: 2px;
+        border-color: var(--background-800);
+    }
 }
 
 .children a:hover {
@@ -275,4 +287,14 @@ hr {
         width: 155px;
         top: 70px;
     }
+}
+
+/* Tooltip */
+
+.tooltip {
+    @apply invisible absolute;
+}
+
+.has-tooltip:hover .tooltip {
+    @apply visible z-50;
 }

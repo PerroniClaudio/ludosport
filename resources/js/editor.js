@@ -3,6 +3,7 @@
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
+import TextAlign from "@tiptap/extension-text-align";
 
 export const editor = (content) => {
     let editor; // Alpine's reactive engine automatically wraps component properties in proxy objects. Attempting to use a proxied editor instance to apply a transaction will cause a "Range Error: Applying a mismatched transaction", so be sure to unwrap it using Alpine.raw(), or simply avoid storing your editor as a component property, as shown in this example.
@@ -22,7 +23,14 @@ export const editor = (content) => {
                             },
                         },
                     }),
-                    Link,
+                    Link.configure({
+                        openOnClick: false,
+                        autolink: false,
+                        defaultProtocol: "https",
+                    }),
+                    TextAlign.configure({
+                        types: ["heading", "paragraph"],
+                    }),
                 ],
                 content: content.deentitize(),
                 editable: true,
@@ -55,6 +63,10 @@ export const editor = (content) => {
         toggleHeading(opts) {
             editor.chain().toggleHeading(opts).focus().run();
         },
+        toggleTextAlign(opts) {
+            console.log(opts);
+            editor.chain().focus().setTextAlign(opts).run();
+        },
         toggleBold() {
             editor.chain().focus().toggleBold().run();
         },
@@ -80,10 +92,32 @@ export const editor = (content) => {
             editor.chain().focus().setHorizontalRule().run();
         },
         toggleLink() {
+            const previousUrl = editor.getAttributes("link").href;
+            const url = window.prompt("URL", previousUrl);
+
+            // cancelled
+            if (url === null) {
+                return;
+            }
+
+            // empty
+            if (url === "") {
+                editor
+                    .chain()
+                    .focus()
+                    .extendMarkRange("link")
+                    .unsetLink()
+                    .run();
+
+                return;
+            }
+
+            // update link
             editor
                 .chain()
                 .focus()
-                .toggleLink({ href: "https://example.com" })
+                .extendMarkRange("link")
+                .setLink({ href: url })
                 .run();
         },
         undo() {
@@ -110,6 +144,24 @@ export const editor = (content) => {
                 : editor.isActive("heading", { level: 6 })
                 ? 6
                 : 0;
+        },
+        getActiveTextalign(updatedAt) {
+            if (this.updatedAt !== updatedAt) {
+                return;
+            }
+
+            if (editor.isActive({ textAlign: "left" })) {
+                return "left";
+            }
+            if (editor.isActive({ textAlign: "center" })) {
+                return "center";
+            }
+            if (editor.isActive({ textAlign: "right" })) {
+                return "right";
+            }
+            if (editor.isActive({ textAlign: "justify" })) {
+                return "justify";
+            }
         },
     };
 };

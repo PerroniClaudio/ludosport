@@ -116,6 +116,17 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');
     Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('events.calendar');
     Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('events.create');
+
+    //Tipi 
+
+    Route::get('/event-types', [App\Http\Controllers\EventTypeController::class, 'index'])->name('events.list_types');
+    Route::post('/event-types/create', [App\Http\Controllers\EventTypeController::class, 'store'])->name('events.new_type');
+    Route::post('/event-types/{eventType}/associate', [App\Http\Controllers\EventTypeController::class, 'associate_event'])->name('events.associate_event');
+    Route::post('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'update'])->name('events.update_type');
+    Route::delete('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'destroy'])->name('events.type_disable');
+    Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('events.types');
+    Route::get('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'edit'])->name('events.edit_type');
+
     Route::get('/events/{event}/review', [App\Http\Controllers\EventController::class, 'review'])->name('events.review');
     Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('events.all');
     Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('events.search');

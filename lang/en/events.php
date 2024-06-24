@@ -37,4 +37,14 @@ return [
     'available_users' => 'Available Users',
     'selected_users' => 'Selected Users',
     'course_formation' => 'Training Course',
+    'types_create' => 'Create Event Type',
+    'event_types_title' => 'Event Types',
+    'event_types_edit' => 'Edit Event Type',
+    'type_info' => 'Event Type Information',
+    'type_associated_events' => 'Associated Events',
+    'associate_event' => 'Associate Event',
+    'disable_event_type' => 'Disable Event Type',
+    'disable_event_type_confirmation' => 'Are you sure you want to disable this event type?',
+    'disable_event_type_message' => 'This action will disable the event type, you cannot select this type for other events.',
+    'event_map_tooltip' => 'Insert all data, then click the magnifying glass. If the position is right you can save.'
 ];

@@ -58,29 +58,24 @@ class Event extends Model {
         return $this->belongsTo(User::class);
     }
 
+    public function type() {
+        return $this->belongsTo(EventType::class, 'event_type');
+    }
+
     public function eventTypes() {
-        return [
-            [
-                'value' => 0,
-                'label' => __('events.other_event')
-            ],
-            [
-                'value' => 1,
-                'label' => __('events.school_tournament')
-            ],
-            [
-                'value' => 2,
-                'label' => __('events.academy_tournament')
-            ],
-            [
-                'value' => 3,
-                'label' => __('events.national_tournament')
-            ],
-            [
-                'value' => 4,
-                'label' => __('events.course_formation')
-            ],
-        ];
+
+        $types = EventType::all();
+
+        $eventTypes = [];
+
+        foreach ($types as $type) {
+            $eventTypes[] = [
+                'value' => $type->id,
+                'label' => $type->name,
+            ];
+        }
+
+        return $eventTypes;
     }
 
     public function eventMultiplier() {
