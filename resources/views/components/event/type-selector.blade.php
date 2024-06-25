@@ -4,12 +4,6 @@
     'event_id' => null,
 ])
 
-
-{{-- <x-form.select name="event_type" label="Event Type" required="{{ true }}" :options="$types"
-    value="{{ $selected }}" /> --}}
-
-
-
 <div x-data="{
     newEventTypeName: '',
     event_id: '{{ $event_id }}',

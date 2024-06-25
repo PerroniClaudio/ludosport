@@ -14,4 +14,5 @@ return [
     'disable_clan_message' => 'Once a course is disabled it will not be possible to associate new instructors or athletes and it won\'t be displayed on the main page.',
     'school' => 'School',
     'name' => 'Name',
+    'select_school' => 'Select School',
 ];
