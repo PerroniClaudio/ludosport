@@ -66,6 +66,8 @@ class NationController extends Controller {
             now()->addMinutes(5)
         );
 
+        $nation->academies = $nation->academies()->orderBy('id', 'desc')->get();
+
         return view('nation.edit', [
             'nation' => $nation,
             'academies' => $academies,

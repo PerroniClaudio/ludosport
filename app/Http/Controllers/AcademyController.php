@@ -53,13 +53,47 @@ class AcademyController extends Controller {
 
         $nation = Nation::where('name', $request->nationality)->first();
 
+        $slug = Str::slug($request->name);
+
+        if (Academy::where('slug', $slug)->exists()) {
+            $slug = $slug . '-' . time();
+        }
+
         $academy = Academy::create([
             'name' => $request->name,
             'nation_id' => $nation->id,
-            'slug' => Str::slug($request->name),
+            'slug' =>  $slug
         ]);
 
         return redirect()->route('academies.edit', $academy)->with('success', 'Academy created successfully!');
+    }
+
+    public function storenation(Request $request) {
+
+        $should_go_to_edit = $request->go_to_edit === 'on' ? true : false;
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'nation_id' => 'required|exists:nations,id',
+        ]);
+
+        $slug = Str::slug($request->name);
+
+        if (Academy::where('slug', $slug)->exists()) {
+            $slug = $slug . '-' . time();
+        }
+
+        $academy = Academy::create([
+            'name' => $request->name,
+            'nation_id' => $request->nation_id,
+            'slug' => $slug
+        ]);
+
+        if ($should_go_to_edit) {
+            return redirect()->route('academies.edit', $academy)->with('success', 'Academy created successfully!');
+        } else {
+            return redirect()->route('nations.edit', $request->nation_id)->with('success', 'Academy created successfully!');
+        }
     }
 
     /**

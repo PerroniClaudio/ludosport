@@ -51,6 +51,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/nations/{nation}', [App\Http\Controllers\NationController::class, 'edit'])->name('nations.edit');
     Route::post('/nations/{nation}', [App\Http\Controllers\NationController::class, 'update'])->name('nations.update');
 
+    Route::post('/nations/{nation}/academies/create', [App\Http\Controllers\AcademyController::class, 'storenation'])->name('nations.academies.create');
     Route::post('/nations/{nation}/academies', [App\Http\Controllers\NationController::class, 'associateAcademy'])->name('nations.academies.store');
     Route::put('/nations/{nation}/flag', [App\Http\Controllers\NationController::class, 'updateFlag'])->name('nations.flag.update');
 });

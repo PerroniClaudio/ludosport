@@ -47,7 +47,10 @@
                     <div class="flex justify-between">
                         <h3 class="text-background-800 dark:text-background-200 text-2xl">
                             {{ __('navigation.accademie') }}</h3>
-                        <x-nations.academies :nation="$nation" :academies="$academies" />
+                        <div class="flex items-center gap-1">
+                            <x-nations.academies :nation="$nation" :academies="$academies" />
+                            <x-nations.create-academy :nation="$nation" />
+                        </div>
                     </div>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <x-table striped="false" :columns="[
