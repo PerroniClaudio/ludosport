@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Academy;
 use App\Models\Clan;
 use App\Models\Nation;
+use App\Models\Role;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -145,9 +146,15 @@ class SchoolController extends Controller {
             })->toArray());
         }
 
+        foreach ($associated_personnel as $key => $person) {
+            $associated_personnel[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {
+                return __('users.' . $role);
+            })->toArray());
+        }
+
         $athletes = User::whereNotIn('id', $school->athletes->pluck('id'))->where('is_disabled', '0')->get();
 
-
+        $roles = Role::all();
 
         return view('school.edit', [
             'school' => $school,
@@ -158,6 +165,7 @@ class SchoolController extends Controller {
             'associated_personnel' => $associated_personnel,
             'associated_athletes' => $associated_athletes,
             'academies' => $school->academy->nation->academies ?? [],
+            'roles' => $roles,
         ]);
     }
 

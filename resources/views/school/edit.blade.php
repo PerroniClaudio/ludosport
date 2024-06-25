@@ -33,7 +33,11 @@
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.personnel') }}
                     </h3>
-                    <x-school.personnel :school="$school" :personnel="$personnel" />
+                    <div class="flex items-center gap-1">
+                        <x-school.personnel :school="$school" :personnel="$personnel" />
+                        <x-school.create-user :school="$school->id" type="personnel" :roles="$roles" />
+                    </div>
+
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                 <x-table striped="false" :columns="[
@@ -69,7 +73,10 @@
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.athletes') }}
                     </h3>
-                    <x-school.athletes :school="$school" :athletes="$athletes" />
+                    <div class="flex items-center gap-1">
+                        <x-school.athletes :school="$school" :athletes="$athletes" />
+                        <x-school.create-user :school="$school->id" type="athlete" />
+                    </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                 <x-table striped="false" :columns="[
@@ -98,7 +105,10 @@
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('school.clans') }}
                     </h3>
-                    <x-school.clans :school="$school" :athletes="$clans" />
+                    <div class="flex items-center gap-1">
+                        <x-school.clans :school="$school" :athletes="$clans" />
+                        <x-school.create-clan :school="$school->id" />
+                    </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                 <x-table striped="false" :columns="[

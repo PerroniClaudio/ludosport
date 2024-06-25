@@ -17,4 +17,13 @@ return [
     'disable_school_message' => 'Once a school is disabled it will not be possible to associate new courses, personnel or athletes and it won\'t be displayed on the main page.',
     'name' => 'School',
     'academy' => 'Academy',
+    'create_personnel' => 'Create Personnel',
+    'create_athlete' => 'Create Athlete',
+    'quick_create_personnel' => 'Quick Create Personnel',
+    'quick_create_athlete' => 'Quick Create Athlete',
+    'go_to_edit' => 'Go to Edit',
+    'create_clan' => 'Create Course',
+    'quick_create_clan' => 'Quick Create Course',
+    'clan_name' => 'Course Name',
+    'go_to_edit_clan' => 'Go to Edit Course',
 ];

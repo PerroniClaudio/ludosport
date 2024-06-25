@@ -32,7 +32,10 @@
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('clan.instructors') }}
                     </h3>
-                    <x-clan.instructors :clan="$clan" :instructors="$instructors" />
+                    <div class="flex items-center gap-1">
+                        <x-clan.instructors :clan="$clan" :instructors="$instructors" />
+                        <x-clan.create-user :clan="$clan->id" type="personnel" :roles="$roles" />
+                    </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                 <x-table striped="false" :columns="[
@@ -67,7 +70,10 @@
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('clan.athletes') }}
                     </h3>
-                    <x-clan.athletes :clan="$clan" :athletes="$athletes" />
+                    <div class="flex items-center gap-1">
+                        <x-clan.athletes :clan="$clan" :athletes="$athletes" />
+                        <x-clan.create-user :clan="$clan->id" type="athlete" />
+                    </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                 <x-table striped="false" :columns="[

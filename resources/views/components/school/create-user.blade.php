@@ -1,5 +1,5 @@
 @props([
-    'academy' => 0,
+    'school' => 0,
     'type' => '',
     'roles' => [],
 ])
@@ -24,26 +24,26 @@
 
     <x-primary-button x-on:click.prevent="$dispatch('open-modal', 'new-user-{{ $type }}-modal')">
         @if ($type === 'personnel')
-            <span>{{ __('academies.create_personnel') }}</span>
+            <span>{{ __('school.create_personnel') }}</span>
         @else
-            <span>{{ __('academies.create_athlete') }}</span>
+            <span>{{ __('school.create_athlete') }}</span>
         @endif
     </x-primary-button>
 
     <x-modal name="new-user-{{ $type }}-modal" :show="$should_show_modal_for_errors" focusable>
 
-        <form action="{{ route('academies.users.create', $academy) }}" method="post" class="p-6 flex flex-col gap-4">
+        <form action="{{ route('schools.users.create', $school) }}" method="post" class="p-6 flex flex-col gap-4">
 
             @csrf
 
-            <input type="hidden" name="academy_id" value="{{ $academy }}">
+            <input type="hidden" name="school_id" value="{{ $school }}">
 
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
                     @if ($type === 'personnel')
-                        {{ __('academies.quick_create_personnel') }}
+                        {{ __('school.quick_create_personnel') }}
                     @else
-                        {{ __('academies.quick_create_athlete') }}
+                        {{ __('school.quick_create_athlete') }}
                     @endif
                 </h2>
                 <div>
@@ -124,15 +124,15 @@
             </div>
 
             <x-form.checkbox name="go_to_edit" id="go_to_edit_{{ $type }}"
-                label="{{ __('academies.go_to_edit') }}" />
+                label="{{ __('school.go_to_edit') }}" />
 
             <div class="flex justify-end">
                 <x-primary-button>
                     <span>
                         @if ($type === 'personnel')
-                            {{ __('academies.create_personnel') }}
+                            {{ __('school.create_personnel') }}
                         @else
-                            {{ __('academies.create_athlete') }}
+                            {{ __('school.create_athlete') }}
                         @endif
                     </span>
                 </x-primary-button>

@@ -15,4 +15,9 @@ return [
     'school' => 'School',
     'name' => 'Name',
     'select_school' => 'Select School',
+    'create_personnel' => 'Create Personnel',
+    'create_athlete' => 'Create Athlete',
+    'quick_creae_personnel' => 'Quick Create Personnel',
+    'quick_create_athlete' => 'Quick Create Athlete',
+    'go_to_edit' => 'Go to Edit',
 ];

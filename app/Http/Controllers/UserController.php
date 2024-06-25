@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Academy;
+use App\Models\Clan;
 use App\Models\Nation;
 use App\Models\Role;
+use App\Models\School;
 use App\Models\User;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -164,6 +166,122 @@ class UserController extends Controller {
             return redirect()->route('users.edit', $user->id)->with('success', 'User created successfully!');
         } else {
             return redirect()->route('academies.edit', $academy->id)->with('success', 'User created successfully!');
+        }
+    }
+
+    public function  storeForSchool(Request $request) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'surname' => 'required|string|max:255',
+        ]);
+
+        $code_valid = false;
+
+        while (!$code_valid) {
+            $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
+            $code_valid = User::where('unique_code', $unique_code)->count() == 0;
+        }
+
+        $school = School::find($request->school_id);
+        $academy = $school->academy;
+
+        $user = User::create([
+            'name' => $request->name,
+            'surname' => $request->surname,
+            'email' => $request->email,
+            'password' => bcrypt(Str::random(10)),
+            'subscription_year' => date('Y'),
+            'academy_id' => $academy->id,
+            'nation_id' => $academy->nation->id,
+            'school_id' => $school->id,
+            'unique_code' => $unique_code,
+        ]);
+
+        if ($request->type == "athlete") {
+
+            $role = Role::where('label', 'athlete')->first();
+            $user->roles()->attach($role->id);
+            $academy->athletes()->attach($user->id);
+            $school->athletes()->attach($user->id);
+        } else {
+
+            $roles = explode(',', $request->roles);
+
+            foreach ($roles as $role) {
+                $roleElement = Role::where('label', $role)->first();
+                if ($roleElement) {
+                    $user->roles()->attach($roleElement->id);
+                }
+            }
+            $academy->personnel()->attach($user->id);
+            $school->personnel()->attach($user->id);
+        }
+
+        if ($request->go_to_edit === 'on') {
+            return redirect()->route('users.edit', $user->id)->with('success', 'User created successfully!');
+        } else {
+            return redirect()->route('schools.edit', $school->id)->with('success', 'User created successfully!');
+        }
+    }
+
+
+    public function  storeForClan(Request $request) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'surname' => 'required|string|max:255',
+        ]);
+
+        $code_valid = false;
+
+        while (!$code_valid) {
+            $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
+            $code_valid = User::where('unique_code', $unique_code)->count() == 0;
+        }
+
+        $clan = Clan::find($request->clan_id);
+        $school = School::find($clan->school->id);
+        $academy = $school->academy;
+
+        $user = User::create([
+            'name' => $request->name,
+            'surname' => $request->surname,
+            'email' => $request->email,
+            'password' => bcrypt(Str::random(10)),
+            'subscription_year' => date('Y'),
+            'academy_id' => $academy->id,
+            'nation_id' => $academy->nation->id,
+            'school_id' => $school->id,
+            'unique_code' => $unique_code,
+        ]);
+
+        if ($request->type == "athlete") {
+
+            $role = Role::where('label', 'athlete')->first();
+            $user->roles()->attach($role->id);
+            $academy->athletes()->attach($user->id);
+            $school->athletes()->attach($user->id);
+            $clan->users()->attach($user->id);
+        } else {
+
+            $roles = explode(',', $request->roles);
+
+            foreach ($roles as $role) {
+                $roleElement = Role::where('label', $role)->first();
+                if ($roleElement) {
+                    $user->roles()->attach($roleElement->id);
+                }
+            }
+            $academy->personnel()->attach($user->id);
+            $school->personnel()->attach($user->id);
+            $clan->personnel()->attach($user->id);
+        }
+
+        if ($request->go_to_edit === 'on') {
+            return redirect()->route('users.edit', $user->id)->with('success', 'User created successfully!');
+        } else {
+            return redirect()->route('clans.edit', $request->clan_id)->with('success', 'User created successfully!');
         }
     }
 

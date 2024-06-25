@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Clan;
+use App\Models\Role;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -63,13 +64,45 @@ class ClanController extends Controller {
             'school_id' => 'required',
         ]);
 
+        $slug = Str::slug($request->name);
+
+        if (Clan::where('slug', $slug)->exists()) {
+            $slug = $slug . '-' . time();
+        }
+
         $clan = Clan::create([
             'name' => $request->name,
             'school_id' => $request->school_id,
-            'slug' => Str::slug($request->name)
+            'slug' => $slug
         ]);
 
         return redirect()->route('clans.edit', $clan)->with('success', 'Course created successfully.');
+    }
+
+    public function storeForSchool(Request $request) {
+        //
+
+        $request->validate([
+            'name' => 'required',
+        ]);
+
+        $slug = Str::slug($request->name);
+
+        if (Clan::where('slug', $slug)->exists()) {
+            $slug = $slug . '-' . time();
+        }
+
+        $clan = Clan::create([
+            'name' => $request->name,
+            'school_id' => $request->school_id,
+            'slug' => $slug
+        ]);
+
+        if ($request->go_to_edit_clan) {
+            return redirect()->route('clans.edit', $clan->id)->with('success', 'Course created successfully.');
+        } else {
+            return redirect()->route('schools.edit', $request->school_id)->with('success', 'Course created successfully.');
+        }
     }
 
     /**
@@ -110,13 +143,22 @@ class ClanController extends Controller {
         $athletes = User::where('role', 'user')->where('is_disabled', '0')->whereNotIn('id', $clan->users->pluck('id'))->get();
 
 
+        foreach ($associated_instructors as $key => $person) {
+            $associated_instructors[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {
+                return __('users.' . $role);
+            })->toArray());
+        }
+
+        $roles = Role::all();
+
         return view('clan.edit', [
             'clan' => $clan,
             'schools' => $formatted_schools,
             'associated_instructors' => $associated_instructors,
             'instructors' => $instructors,
             'associated_athletes' => $associated_athletes,
-            'athletes' => $athletes
+            'athletes' => $athletes,
+            'roles' => $roles,
         ]);
     }
 
