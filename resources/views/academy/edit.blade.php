@@ -92,7 +92,13 @@
                         'columnClasses' => '',
                         'rowClasses' => '',
                     ],
-                ]" :rows="$associated_personnel" />
+                ]" :rows="$associated_personnel">
+                    <x-slot name="tableActions">
+                        <a x-bind:href="'/users/' + row.id">
+                            <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                        </a>
+                    </x-slot>
+                </x-table>
             </div>
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
@@ -124,7 +130,13 @@
                         'columnClasses' => '',
                         'rowClasses' => '',
                     ],
-                ]" :rows="$associated_athletes" />
+                ]" :rows="$associated_athletes">
+                    <x-slot name="tableActions">
+                        <a x-bind:href="'/users/' + row.id">
+                            <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                        </a>
+                    </x-slot>
+                </x-table>
             </div>
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
@@ -150,7 +162,13 @@
                         'columnClasses' => '',
                         'rowClasses' => '',
                     ],
-                ]" :rows="$academy->schools" />
+                ]" :rows="$academy->schools">
+                    <x-slot name="tableActions">
+                        <a x-bind:href="'/schools/' + row.id">
+                            <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                        </a>
+                    </x-slot>
+                </x-table>
             </div>
 
             @if (!$academy->is_disabled)
