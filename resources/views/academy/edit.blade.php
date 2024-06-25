@@ -61,7 +61,10 @@
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.personnel') }}
                     </h3>
-                    <x-academy.personnel :academy="$academy" :personnel="$personnel" />
+                    <div class="flex items-center gap-1">
+                        <x-academy.personnel :academy="$academy" :personnel="$personnel" />
+                        <x-academy.create-user academy="{{ $academy->id }}" type="personnel" :roles="$roles" />
+                    </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                 <x-table striped="false" :columns="[
@@ -96,7 +99,10 @@
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.athletes') }}
                     </h3>
-                    <x-academy.athletes :academy="$academy" :athletes="$athletes" />
+                    <div class="flex items-center gap-1">
+                        <x-academy.athletes :academy="$academy" :athletes="$athletes" />
+                        <x-academy.create-user academy="{{ $academy->id }}" type="athlete" :roles="$roles" />
+                    </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                 <x-table striped="false" :columns="[
@@ -125,7 +131,10 @@
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.schools') }}
                     </h3>
-                    <x-academy.schools :academy="$academy" :schools="$schools" />
+                    <div class="flex items-center gap-1">
+                        <x-academy.schools :academy="$academy" :schools="$schools" />
+                        <x-academy.create-school :academy="$academy->id" />
+                    </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                 <x-table striped="false" :columns="[

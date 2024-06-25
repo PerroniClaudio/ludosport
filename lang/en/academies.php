@@ -18,4 +18,13 @@ return [
     'academy' => 'Academy',
     'nation' => 'Nation',
     'address' => 'Address',
+    'create_personnel' => 'Create Personnel',
+    'create_athlete' => 'Create Athlete',
+    'quick_create_personnel' => 'Quick Create Personnel',
+    'quick_create_athlete' => 'Quick Create Athlete',
+    'go_to_edit' => 'Go to Edit',
+    'create_school' => 'Create School',
+    'quick_create_school' => 'Quick Create School',
+    'go_to_edit_school' => 'Go to Edit School',
+    'school_name' => 'School Name',
 ];

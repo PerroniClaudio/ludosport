@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Academy;
 use App\Models\Clan;
 use App\Models\Nation;
 use App\Models\School;
@@ -61,6 +62,12 @@ class SchoolController extends Controller {
             'name' => 'required|string|max:255',
         ]);
 
+        $slug = Str::slug($request->name);
+
+        if (School::where('slug', $slug)->exists()) {
+            $slug = $slug . '-' . time();
+        }
+
         $school = School::create([
             'name' => $request->name,
             'nation_id' =>  $request->nationality,
@@ -69,6 +76,34 @@ class SchoolController extends Controller {
         ]);
 
         return redirect()->route('schools.edit', $school)->with('success', 'School created successfully!');
+    }
+
+    public function storeacademy(Request $request) {
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $academy = Academy::find($request->academy_id);
+
+        $slug = Str::slug($request->name);
+
+        if (School::where('slug', $slug)->exists()) {
+            $slug = $slug . '-' . time();
+        }
+
+        $school = School::create([
+            'name' => $request->name,
+            'nation_id' =>  $academy->nation_id,
+            'slug' => $slug,
+            'academy_id' => $academy->id
+        ]);
+
+        if ($request->go_to_edit_school) {
+            return redirect()->route('schools.edit', $school->id)->with('success', 'School created successfully!');
+        } else {
+            return redirect()->route('academies.edit', $academy->id)->with('success', 'School created successfully!');
+        }
     }
 
     /**

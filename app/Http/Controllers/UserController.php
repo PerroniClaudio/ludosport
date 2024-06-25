@@ -113,6 +113,60 @@ class UserController extends Controller {
         return redirect()->route('users.edit', $user)->with('success', 'User created successfully!');
     }
 
+    public function storeForAcademy(Request $request) {
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'surname' => 'required|string|max:255',
+        ]);
+
+        $code_valid = false;
+
+        while (!$code_valid) {
+            $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
+            $code_valid = User::where('unique_code', $unique_code)->count() == 0;
+        }
+
+        $academy = Academy::find($request->academy_id);
+
+        $user = User::create([
+            'name' => $request->name,
+            'surname' => $request->surname,
+            'email' => $request->email,
+            'password' => bcrypt(Str::random(10)),
+            'subscription_year' => date('Y'),
+            'academy_id' => $academy->id,
+            'nation_id' => $academy->nation->id,
+            'unique_code' => $unique_code,
+        ]);
+
+
+        if ($request->type == "athlete") {
+
+            $role = Role::where('label', 'athlete')->first();
+            $user->roles()->attach($role->id);
+            $academy->athletes()->attach($user->id);
+        } else {
+
+            $roles = explode(',', $request->roles);
+
+            foreach ($roles as $role) {
+                $roleElement = Role::where('label', $role)->first();
+                if ($roleElement) {
+                    $user->roles()->attach($roleElement->id);
+                }
+            }
+            $academy->personnel()->attach($user->id);
+        }
+
+        if ($request->go_to_edit === 'on') {
+            return redirect()->route('users.edit', $user->id)->with('success', 'User created successfully!');
+        } else {
+            return redirect()->route('academies.edit', $academy->id)->with('success', 'User created successfully!');
+        }
+    }
+
     public function edit(User $user) {
 
         $nations = Nation::all();
@@ -141,11 +195,12 @@ class UserController extends Controller {
         $roles = Role::all();
         $user->roles = $user->roles->pluck('label')->toArray();
 
-        $user->profile_picture = Storage::disk('gcs')->temporaryUrl(
-            $user->profile_picture,
-            now()->addMinutes(5)
-        );
-
+        if ($user->profile_picture !== null) {
+            $user->profile_picture = Storage::disk('gcs')->temporaryUrl(
+                $user->profile_picture,
+                now()->addMinutes(5)
+            );
+        }
 
         return view('users.edit', [
             'user' => $user,

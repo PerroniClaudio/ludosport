@@ -135,7 +135,17 @@ class AcademyController extends Controller {
             })->toArray());
         }
 
+        foreach ($associated_personnel as $key => $person) {
+            $associated_personnel[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {
+                return __('users.' . $role);
+            })->toArray());
+        }
+
+
+
         $athletes = User::whereNotIn('id', $academy->athletes->pluck('id'))->where('is_disabled', '0')->get();
+
+        $roles = Role::all();
 
         return view('academy.edit', [
             'academy' => $academy,
@@ -145,6 +155,7 @@ class AcademyController extends Controller {
             'athletes' => $athletes,
             'associated_personnel' => $associated_personnel,
             'associated_athletes' => $associated_athletes,
+            'roles' => $roles,
         ]);
     }
 

@@ -57,6 +57,7 @@ return [
     'search_result' => 'Search Results',
     'name' => 'Name',
     'surname' => 'Surname',
+    'email' => 'Email',
     'no_academies' => 'No Academies',
     'profile_picture' => 'Profile Picture',
     'upload_picture' => 'Upload Picture',

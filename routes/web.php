@@ -68,7 +68,9 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::post('/academies', [App\Http\Controllers\AcademyController::class, 'store'])->name('academies.store');
     Route::post('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'update'])->name('academies.update');
+    Route::post('/academies/{academy/schools/create', [App\Http\Controllers\SchoolController::class, 'storeacademy'])->name('academies.schools.create');
     Route::post('/academies/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'addSchool'])->name('academies.schools.store');
+    Route::post('/academies/{academy}/users/create', [App\Http\Controllers\UserController::class, 'storeForAcademy'])->name('academies.users.create');
     Route::post('/academies/{academy}/personnel', [App\Http\Controllers\AcademyController::class, 'addPersonnel'])->name('academies.personnel.store');
     Route::post('/academies/{academy}/athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('academies.athlete.store');
 });
