@@ -104,11 +104,42 @@
                         'columnClasses' => '',
                         'rowClasses' => '',
                     ],
+                    [
+                        'name' => 'Enabled',
+                        'field' => 'is_disabled',
+                        'columnClasses' => '',
+                        'rowClasses' => '',
+                    ],
+                    [
+                        'name' => 'Actions',
+                        'field' => 'actions',
+                        'columnClasses' => 'text-right',
+                        'rowClasses' => '',
+                    ],
                 ]" :rows="$associated_athletes">
-                    <x-slot name="tableActions">
-                        <a x-bind:href="'/users/' + row.id">
-                            <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                        </a>
+                    <x-slot name="tableRows">
+                        <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                            x-text="row.id"></td>
+                        <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                            x-text="row.name"></td>
+                        <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                            x-text="row.surname"></td>
+                        <td
+                            class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
+                            <div x-show="row.is_disabled">
+                                <x-lucide-x-circle class="w-5 h-5 text-red-500 dark:text-red-400" />
+                            </div>
+                            <div x-show="!row.is_disabled">
+                                <x-lucide-check-circle class="w-5 h-5 text-green-500 dark:text-green-400" />
+                            </div>
+                        </td>
+                        <td
+                            class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
+                            <a x-bind:href="'/users/' + row.id">
+                                <x-lucide-pencil
+                                    class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                            </a>
+                        </td>
                     </x-slot>
                 </x-table>
             </div>
