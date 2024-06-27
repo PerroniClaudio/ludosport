@@ -50,14 +50,14 @@
                         <x-nav-link :href="route('rankings.index')" :active="false">
                             {{ __('navigation.classifiche') }}
                         </x-nav-link>
-                        {{-- <x-nav-link-parent :href="'#'" :active="request()->routeIs('imports.*') || request()->routeIs('exports.*')">
+                        <x-nav-link-parent :href="'#'" :active="request()->routeIs('imports.*') || request()->routeIs('exports.*')">
                             <x-slot name="name">{{ __('navigation.operations') }}</x-slot>
                             <x-slot name="children">
                                 <a href="{{ route('imports.index') }}">{{ __('navigation.imports') }}</a>
                                 <span class="separator"></span>
                                 <a href="{{ route('exports.index') }}">{{ __('navigation.exports') }}</a>
                             </x-slot>
-                        </x-nav-link-parent> --}}
+                        </x-nav-link-parent>
                     @endif
 
                 </div>
@@ -129,6 +129,23 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @if (Auth::user()->getRole() !== 'admin')
+                @foreach (Auth::user()->routes() as $route)
+                    <x-responsive-nav-link :href="route($route->name)" :active="request()->routeIs($route->active)">
+                        {{ __('navigation.' . $route->label) }}
+                    </x-responsive-nav-link>
+                @endforeach
+            @else
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                    {{ __('navigation.users') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
+                    {{ __('navigation.eventi') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('rankings.index')" :active="false">
+                    {{ __('navigation.classifiche') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

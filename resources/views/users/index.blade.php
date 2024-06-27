@@ -18,7 +18,7 @@
             <div class="grid grid-cols-12 gap-4" x-data="{
                 selectedRole: 'athlete',
             }">
-                <div class="col-span-3">
+                <div class="col-span-12 md:col-span-3">
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6 text-background-900 dark:text-background-100">
                             <h3 class="text-background-800 dark:text-background-200 text-2xl">
@@ -40,7 +40,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-span-9">
+                <div class="col-span-12 md:col-span-9">
 
                     @foreach ($users as $key => $role)
                         <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg"

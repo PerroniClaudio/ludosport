@@ -36,6 +36,7 @@ class Event extends Model {
         'event_type',
         'is_free',
         'price',
+        'event_type'
     ];
 
     public function nation() {

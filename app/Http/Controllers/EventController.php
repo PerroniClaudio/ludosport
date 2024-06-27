@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\EventParticipantsExport;
 use App\Models\Academy;
 use App\Models\Event;
+use App\Models\EventType;
 use App\Models\Nation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -72,6 +73,8 @@ class EventController extends Controller {
     public function store(Request $request) {
         //
 
+        $user = auth()->user();
+
         $request->validate([
             'name' => 'required',
             'start_date' => 'required',
@@ -102,9 +105,14 @@ class EventController extends Controller {
             'is_approved' => 0,
             'is_published' => 0,
             'academy_id' => $request->academy_id,
+            'event_type' => EventType::first()->id,
         ]);
 
-        return redirect()->route('technician.events.index');
+        if ($user->getRole() === 'technician') {
+            return redirect()->route('technician.events.edit', $event->id);
+        } else {
+            return redirect()->route('events.edit', $event->id);
+        }
     }
 
     /**

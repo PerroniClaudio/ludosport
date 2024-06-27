@@ -14,7 +14,7 @@
 
             <div class="grid grid-cols-12 gap-4" x-data="calendar('{{ route('events.calendar') }}')">
 
-                <div class="col-span-3 flex flex-col gap-4">
+                <div class="col-span-12 md:col-span-3 flex flex-col gap-4">
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <details class="p-6 text-background-900 dark:text-background-100">
                             <summary class="text-background-800 dark:text-background-200 text-2xl">
@@ -101,7 +101,7 @@
                         </details>
                     </div>
                 </div>
-                <div class="col-span-9">
+                <div class="col-span-12 md:col-span-9">
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div x-ref="calendar" class="p-6 text-background-900 dark:text-background-100"></div>
                     </div>
