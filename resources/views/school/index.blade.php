@@ -26,6 +26,12 @@
                             'columnClasses' => '', // classes to style table th
                             'rowClasses' => '', // classes to style table td
                         ],
+                        [
+                            'name' => 'Academy',
+                            'field' => 'academy_name',
+                            'columnClasses' => '', // classes to style table th
+                            'rowClasses' => '', // classes to style table td
+                        ],
                     ]" :rows="$schools">
 
                         <x-slot name="tableActions">

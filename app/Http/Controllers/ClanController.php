@@ -20,6 +20,7 @@ class ClanController extends Controller {
 
         foreach ($clans as $key => $clan) {
             $clans[$key]->school_name = $clan->school->name;
+            $clans[$key]->academy_name = $clan->school->academy->name;
         }
 
         return view('clan.index', [

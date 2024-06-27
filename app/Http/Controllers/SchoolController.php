@@ -21,6 +21,7 @@ class SchoolController extends Controller {
 
         foreach ($schools as $key => $school) {
             $schools[$key]->nation_name = $school->nation->name;
+            $schools[$key]->academy_name = $school->academy->name;
         }
 
         return view('school.index', [
