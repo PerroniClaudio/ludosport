@@ -92,7 +92,7 @@ class DatabaseSeeder extends Seeder {
         ];
 
         foreach ($event_types as $event_type) {
-            \App\Models\EventType::factory()->create($event_type);
+            \App\Models\EventType::create($event_type);
         }
 
         $this->populateCountries();
