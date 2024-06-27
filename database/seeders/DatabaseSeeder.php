@@ -73,6 +73,28 @@ class DatabaseSeeder extends Seeder {
         $adminRole = \App\Models\Role::where('name', 'admin')->first();
         $user->roles()->attach($adminRole);
 
+        $event_types = [
+            [
+                'name' => 'Other Event',
+            ],
+            [
+                'name' => 'School Tournament',
+            ],
+            [
+                'name' => 'Academy Tournament',
+            ],
+            [
+                'name' => 'National Tournament',
+            ],
+            [
+                'name' => 'Training Course',
+            ],
+        ];
+
+        foreach ($event_types as $event_type) {
+            \App\Models\EventType::factory()->create($event_type);
+        }
+
         $this->populateCountries();
     }
 
