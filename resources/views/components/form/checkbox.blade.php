@@ -1,4 +1,5 @@
 @props(['id', 'name', 'label', 'isChecked' => false])
+
 <div x-data="{ isChecked: {{ $isChecked ? 'true' : 'false' }} }" class="flex items-center gap-2">
     <label for="{{ $id }}" class="toggle-switch">
         <input type="checkbox" id="{{ $id }}" name="{{ $name }}" x-model="isChecked"

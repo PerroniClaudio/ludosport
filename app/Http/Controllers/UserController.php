@@ -16,13 +16,8 @@ use Illuminate\Support\Str;
 class UserController extends Controller {
 
     public function index() {
-
-
         $roles = Role::all();
-
         $users_sorted_by_role = [];
-
-
         foreach ($roles as $role) {
 
             $users = [];
@@ -30,6 +25,17 @@ class UserController extends Controller {
             foreach ($role->users as $user) {
                 if ($user->is_disabled) {
                     continue;
+                }
+
+                if ($role->label === 'athlete') {
+                    $user->academy = $user->academyAthletes->first();
+                    $user->school = $user->schoolAthletes->first();
+                    if ($user->academy) {
+                        $user->nation = $user->academy->nation->name;
+                    } else {
+                        $nation = Nation::find($user->nation_id);
+                        $user->nation = $nation->name;
+                    }
                 }
 
                 $users[] = $user;
@@ -49,7 +55,7 @@ class UserController extends Controller {
 
         $roles = Role::all();
 
-        $academies = Academy::all();
+        $academies = Academy::where('is_disabled', false)->get();
 
         return view('users.create', [
             'roles' => $roles,
@@ -224,7 +230,6 @@ class UserController extends Controller {
             return redirect()->route('schools.edit', $school->id)->with('success', 'User created successfully!');
         }
     }
-
 
     public function  storeForClan(Request $request) {
         $request->validate([
@@ -449,5 +454,129 @@ class UserController extends Controller {
         } else {
             return redirect()->route('users.edit', $id)->with('error', 'Error uploading profile picture!');
         }
+    }
+
+    public function filter() {
+
+        $academies = Academy::where('is_disabled', false)->with('nation')->get();
+
+        return view('users.filter', [
+            'academies' => $academies,
+
+        ]);
+    }
+
+    public function filterResult(Request $request) {
+
+        $users = [];
+
+        // Stabilire il tipo di precisione 
+
+        if (strlen($request->selectedCoursesJson) > 0) {
+            $selectedCourses = json_decode($request->selectedCoursesJson);
+
+
+            foreach ($selectedCourses as $course) {
+                $course = Clan::find($course);
+
+                foreach ($course->users as $user) {
+                    $users[] = $user;
+                }
+
+                foreach ($course->personnel as $person) {
+                    $users[] = $person;
+                }
+            }
+        } else {
+
+            if (strlen($request->selectedSchoolsJson) > 0) {
+                $selectedSchools = json_decode($request->selectedSchoolsJson);
+
+                foreach ($selectedSchools as $school) {
+                    $school = School::find($school);
+
+                    foreach ($school->athletes as $user) {
+                        $users[] = $user;
+                    }
+
+                    foreach ($school->personnel as $person) {
+                        $users[] = $person;
+                    }
+                }
+            } else {
+                if (strlen($request->selectedAcademiesJson) > 0) {
+                    $selectedAcademies = json_decode($request->selectedAcademiesJson);
+
+                    foreach ($selectedAcademies as $academy) {
+                        $academy = Academy::find($academy);
+
+                        foreach ($academy->athletes as $user) {
+                            $users[] = $user;
+                        }
+
+                        foreach ($academy->personnel as $person) {
+                            $users[] = $person;
+                        }
+                    }
+                } else {
+
+                    // Applica solo gli altri filtri 
+                    $users = User::where('is_disabled', false)->get();
+                }
+            }
+        }
+
+        $shouldCheckForYear = $request->year != null;
+        $shouldCheckForCreationDateFrom = $request->from != null;
+        $shouldCheckForCreationDateTo = $request->to != null;
+
+
+        $filteredUsers = [];
+
+        foreach ($users as $user) {
+            $shouldAdd = true;
+
+            if ($shouldCheckForYear) {
+                if ($user->subscription_year != $request->year) {
+                    $shouldAdd = false;
+                }
+            }
+
+            if ($shouldCheckForCreationDateFrom) {
+                if ($user->created_at < $request->from) {
+                    $shouldAdd = false;
+                }
+            }
+
+            if ($shouldCheckForCreationDateTo) {
+                if ($user->created_at > $request->to) {
+                    $shouldAdd = false;
+                }
+            }
+
+            if ($shouldAdd) {
+                $filteredUsers[] = $user;
+            }
+        }
+
+        foreach ($filteredUsers as $user) {
+
+            $user->academy = $user->academyAthletes->first();
+            $user->school = $user->schoolAthletes->first();
+            if ($user->academy) {
+                $user->nation = $user->academy->nation->name;
+            } else {
+                $nation = Nation::find($user->nation_id);
+                $user->nation = $nation->name;
+            }
+
+            $user->role = implode(', ', $user->roles->pluck('name')->map(function ($role) {
+                return __('users.' . $role);
+            })->toArray());
+        }
+
+        return view('users.filter-result', [
+            'users' => $filteredUsers,
+        ]);
     }
 }

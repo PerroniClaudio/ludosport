@@ -245,4 +245,23 @@ class ClanController extends Controller {
 
         return response()->json($formatted_clans);
     }
+
+    public function getBySchool(Request $request) {
+
+
+        $schools = json_decode($request->schools);
+
+        $clans = Clan::whereIn('school_id', $schools)->where('is_disabled', '0')->with(['school'])->get();
+        $formatted_clans = [];
+
+        foreach ($clans as $key => $clan) {
+            $formatted_clans[] = [
+                'id' => $clan->id,
+                'school' => $clan->school->name,
+                'name' => $clan->name
+            ];
+        }
+
+        return response()->json($formatted_clans);
+    }
 }

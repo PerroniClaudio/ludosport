@@ -33,6 +33,8 @@ Route::middleware('auth')->group(function () {
 
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users.index');
+    Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('users.filter');
+    Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('users.filter.result');
     Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('users.search');
     Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('users.create');
     Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
@@ -81,6 +83,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/schools', [App\Http\Controllers\SchoolController::class, 'index'])->name('schools.index');
     Route::get('/schools/create', [App\Http\Controllers\SchoolController::class, 'create'])->name('schools.create');
     Route::get('/schools/all', [App\Http\Controllers\SchoolController::class, 'all'])->name('schools.all');
+    Route::get('/schools/academy', [App\Http\Controllers\SchoolController::class, 'getByAcademy'])->name('schools.academy');
     Route::get('/schools/search', [App\Http\Controllers\SchoolController::class, 'search'])->name('schools.search');
     Route::get('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'edit'])->name('schools.edit');
     Route::delete('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'destroy'])->name('schools.disable');
@@ -105,6 +108,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::get('/courses/all', [App\Http\Controllers\ClanController::class, 'all'])->name('clans.all');
     Route::get('/courses/search', [App\Http\Controllers\ClanController::class, 'search'])->name('clans.search');
+    Route::get('/courses/school', [App\Http\Controllers\ClanController::class, 'getBySchool'])->name('clans.school');
 
     Route::get('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'edit'])->name('clans.edit');
     Route::delete('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'destroy'])->name('clans.disable');

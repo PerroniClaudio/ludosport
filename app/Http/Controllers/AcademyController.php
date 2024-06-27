@@ -141,6 +141,13 @@ class AcademyController extends Controller {
             })->toArray());
         }
 
+        foreach ($associated_athletes as $athlete) {
+            if ($athlete->schoolAthletes->first()) {
+                $athlete->school = $athlete->schoolAthletes->first()->name;
+            } else {
+                $athlete->school = 'Not assigned';
+            }
+        }
 
 
         $athletes = User::whereNotIn('id', $academy->athletes->pluck('id'))->where('is_disabled', '0')->get();
