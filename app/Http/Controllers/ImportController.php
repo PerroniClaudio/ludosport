@@ -78,8 +78,8 @@ class ImportController extends Controller {
 
         $file = $request->file('file');
         $file_name = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
-        $path = "imports/4316/{$file_name}";
-        $storeFile = $file->storeAs("imports/4316/", $file_name, "gcs");
+        $path = "imports/{$import->id}/{$file_name}";
+        $storeFile = $file->storeAs("imports/{$import->id}/", $file_name, "gcs");
 
 
         if ($storeFile) {
