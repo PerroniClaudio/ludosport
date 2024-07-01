@@ -203,6 +203,7 @@ class EventController extends Controller {
             'name' => 'required',
             'start_date' => 'required',
             'end_date' => 'required',
+            'price' => 'min:0',
         ]);
 
         $event->name = $request->name;

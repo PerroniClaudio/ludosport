@@ -7,15 +7,7 @@ import { googlemap } from "./googlemap.js";
 import { calendar } from "./calendar.js";
 import { participants } from "./participants.js";
 import { mapsearcher } from "./mapsearcher.js";
-
-String.prototype.deentitize = function () {
-    var ret = this.replace(/&gt;/g, ">");
-    ret = ret.replace(/&lt;/g, "<");
-    ret = ret.replace(/&quot;/g, '"');
-    ret = ret.replace(/&apos;/g, "'");
-    ret = ret.replace(/&amp;/g, "&");
-    return ret;
-};
+import { userschoolgraph } from "./userschoolgraph.js";
 
 document.addEventListener("alpine:init", () => {
     Alpine.data("editor", editor);
@@ -24,6 +16,7 @@ document.addEventListener("alpine:init", () => {
     Alpine.data("chart", chart);
     Alpine.data("participants", participants);
     Alpine.data("mapsearcher", mapsearcher);
+    Alpine.data("userschoolgraph", userschoolgraph);
 });
 
 window.Alpine = Alpine;

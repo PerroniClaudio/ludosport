@@ -3,6 +3,5 @@
 </svg> --}}
 
 <div {{ $attributes }}>
-    <img src="https://storage.cloud.google.com/ludosport-production/ludosport/logo.png?authuser=1" alt="logo"
-        class="h-full w-full">
+    <img src="/logo" alt="logo" class="h-full w-full">
 </div>

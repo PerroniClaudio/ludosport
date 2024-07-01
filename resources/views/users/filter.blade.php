@@ -303,7 +303,7 @@
 
 
                         <div class="grid grid-cols-2 gap-2">
-                            <div class="bg-background-900 p-4 rounded">
+                            <div class="bg-white dark:bg-background-900 p-4 rounded">
                                 <div class="flex justify-between gap-2 items-center">
                                     <div class="flex-1">
                                         <h4 class="text-background-800 dark:text-background-200 text-lg">
@@ -392,7 +392,7 @@
 
                             </div>
 
-                            <div class="bg-background-900 p-4 rounded">
+                            <div class="bg-white dark:bg-background-900 p-4 rounded">
                                 <div class="flex justify-between gap-2 items-center">
                                     <div class="flex-1">
                                         <h4 class="text-background-800 dark:text-background-200 text-lg">
@@ -460,7 +460,7 @@
 
                         <div class="grid grid-cols-2 gap-2"
                             x-show="paginatedSchools.length > 0 || hasSelectedAllSchools">
-                            <div class="bg-background-900 p-4 rounded">
+                            <div class="bg-white dark:bg-background-900 p-4 rounded">
                                 <div class="flex justify-between gap-2 items-center">
                                     <div class="flex-1">
                                         <h4 class="text-background-800 dark:text-background-200 text-lg">
@@ -546,7 +546,7 @@
 
                             </div>
 
-                            <div class="bg-background-900 p-4 rounded">
+                            <div class="bg-white dark:bg-background-900 p-4 rounded">
                                 <div class="flex justify-between gap-2 items-center">
                                     <div class="flex-1">
                                         <h4 class="text-background-800 dark:text-background-200 text-lg">
@@ -612,7 +612,7 @@
 
                         <div class="grid grid-cols-2 gap-2"
                             x-show="paginatedCourses.length > 0 || hasSelectedAllCourses">
-                            <div class="bg-background-900 p-4 rounded">
+                            <div class="bg-white dark:bg-background-900 p-4 rounded">
                                 <div class="flex justify-between gap-2 items-center">
                                     <div class="flex-1">
                                         <h4 class="text-background-800 dark:text-background-200 text-lg">
@@ -698,7 +698,7 @@
 
                             </div>
 
-                            <div class="bg-background-900 p-4 rounded">
+                            <div class="bg-white dark:bg-background-900 p-4 rounded">
                                 <div class="flex justify-between gap-2 items-center">
                                     <div class="flex-1">
                                         <h4 class="text-background-800 dark:text-background-200 text-lg">

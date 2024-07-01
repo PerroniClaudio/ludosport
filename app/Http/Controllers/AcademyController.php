@@ -120,6 +120,7 @@ class AcademyController extends Controller {
             'Africa' => $countries['Africa'],
             'Asia' => $countries['Asia'],
             'North America' => $countries['North America'],
+            'South America' => $countries['South America'],
             'Oceania' => $countries['Oceania'],
         ];
 
@@ -366,5 +367,70 @@ class AcademyController extends Controller {
         $nearbyAcademies = $this->findNearbyAcademies($academies, $locationLat, $locationLon, $radius);
 
         return response()->json($nearbyAcademies);
+    }
+
+    public function athletesDataForAcademy(Academy $academy) {
+        $athletes = $academy->athletes;
+        $active_users = 0;
+        $active_users_no_course = 0;
+        $users_course_not_active = 0;
+        $new_users_this_year = 0;
+
+        foreach ($athletes as $key => $athlete) {
+
+            if ($athlete->has_paid_fee) {
+                $active_users++;
+            }
+
+            if (($athlete->has_paid_fee) && ($athlete->clans()->count() == 0)) {
+                $active_users_no_course++;
+            }
+
+            if ((!$athlete->has_paid_fee) && ($athlete->clans()->count() > 0)) {
+                $users_course_not_active++;
+            }
+
+            if ($athlete->created_at->year == now()->year) {
+                $new_users_this_year++;
+            }
+        }
+
+        return response()->json([
+            'active_users' => $active_users,
+            'active_users_no_course' => $active_users_no_course,
+            'users_course_not_active' => $users_course_not_active,
+            'new_users_this_year' => $new_users_this_year,
+        ]);
+    }
+
+    public function athletesSchoolDataForAcademy(Academy $academy) {
+
+        $schools = [];
+
+        foreach ($academy->schools as $key => $school) {
+
+            $schools[] = [
+                'id' => $school->id,
+                'name' => $school->name,
+                'athletes' => $school->athletes->count(),
+            ];
+        }
+
+        return response()->json($schools);
+    }
+
+    public function getAthletesNumberPerYear(Academy $academy) {
+        $athletes = $academy->athletes;
+        $athletes_last_year = 0;
+        $athletes_this_year = 0;
+
+        foreach ($athletes as $athlete) {
+            $athlete->created_at->year == now()->year ? $athletes_this_year++ : $athletes_last_year++;
+        }
+
+        return response()->json([
+            'last_year' => $athletes_last_year,
+            'this_year' => $athletes_this_year,
+        ]);
     }
 }

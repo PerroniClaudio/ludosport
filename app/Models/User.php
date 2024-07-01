@@ -126,13 +126,9 @@ class User extends Authenticatable implements MustVerifyEmail {
                     (object)[
                         'label' => 'users',
                         'active' => 'users.*',
-                        'name' => 'rettore.users.index',
+                        'name' => 'dashboard',
                     ],
-                    (object)[
-                        'label' => 'accademie',
-                        'active' => 'academies.*',
-                        'name' => 'rettore.accademie.index',
-                    ]
+
                 ]);
             case 'dean':
                 return collect([

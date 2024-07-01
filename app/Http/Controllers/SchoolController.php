@@ -46,6 +46,7 @@ class SchoolController extends Controller {
             'Africa' => $countries['Africa'],
             'Asia' => $countries['Asia'],
             'North America' => $countries['North America'],
+            'South America' => $countries['South America'],
             'Oceania' => $countries['Oceania'],
         ];
 
@@ -132,6 +133,7 @@ class SchoolController extends Controller {
             'Africa' => $countries['Africa'],
             'Asia' => $countries['Asia'],
             'North America' => $countries['North America'],
+            'South America' => $countries['South America'],
             'Oceania' => $countries['Oceania'],
         ];
 

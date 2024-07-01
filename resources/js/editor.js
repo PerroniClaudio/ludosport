@@ -5,6 +5,15 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 
+String.prototype.deentitize = function () {
+    var ret = this.replace(/&gt;/g, ">");
+    ret = ret.replace(/&lt;/g, "<");
+    ret = ret.replace(/&quot;/g, '"');
+    ret = ret.replace(/&apos;/g, "'");
+    ret = ret.replace(/&amp;/g, "&");
+    return ret;
+};
+
 export const editor = (content) => {
     let editor; // Alpine's reactive engine automatically wraps component properties in proxy objects. Attempting to use a proxied editor instance to apply a transaction will cause a "Range Error: Applying a mismatched transaction", so be sure to unwrap it using Alpine.raw(), or simply avoid storing your editor as a component property, as shown in this example.
 

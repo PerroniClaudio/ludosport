@@ -303,6 +303,7 @@ class UserController extends Controller {
             'Africa' => $countries['Africa'],
             'Asia' => $countries['Asia'],
             'North America' => $countries['North America'],
+            'South America' => $countries['South America'],
             'Oceania' => $countries['Oceania'],
         ];
 
@@ -390,8 +391,6 @@ class UserController extends Controller {
             'search' => 'required|string',
         ]);
 
-
-
         // $searchTerms = explode(' ', $request->search);
         // $users = User::where(function ($query) use ($searchTerms) {
         //     foreach ($searchTerms as $term) {
@@ -402,8 +401,6 @@ class UserController extends Controller {
         //     ->orWhere('email', 'like', '%' . $request->search . '%')
         //     ->with(['roles', 'academies', 'academyAthletes', 'nation'])
         //     ->get();
-
-
 
         $users = User::query()
             ->when($request->search, function (Builder $q, $value) {
@@ -416,53 +413,12 @@ class UserController extends Controller {
         ]);
     }
 
-    public function setUserRoleForSession(Request $request) {
-        $request->validate([
-            'role' => 'required|string|exists:roles,label',
-        ]);
-
-        $authUser = auth()->user();
-        $user = User::find($authUser->id);
-
-        if ($user->hasRole($request->role)) {
-            session(['role' => $request->role]);
-        } else {
-            return back()->with('error', 'You do not have the required role to access this page!');
-        }
-
-
-        return redirect()->route('dashboard');
-    }
-
-    public function picture($id, Request $request) {
-        if ($request->file('profilepicture') != null) {
-            $file = $request->file('profilepicture');
-            $file_name = time() . '_' . $file->getClientOriginalName();
-            $path = "users/" . $id . "/" . $file_name;
-
-            $storeFile = $file->storeAs("users/" . $id . "/", $file_name, "gcs");
-
-            if ($storeFile) {
-                $user = User::find($id);
-                $user->profile_picture = $path;
-                $user->save();
-
-                return redirect()->route('users.edit', $user->id)->with('success', 'Profile picture uploaded successfully!');
-            } else {
-                return redirect()->route('users.edit', $id)->with('error', 'Error uploading profile picture!');
-            }
-        } else {
-            return redirect()->route('users.edit', $id)->with('error', 'Error uploading profile picture!');
-        }
-    }
-
     public function filter() {
 
         $academies = Academy::where('is_disabled', false)->with('nation')->get();
 
         return view('users.filter', [
             'academies' => $academies,
-
         ]);
     }
 
@@ -578,5 +534,53 @@ class UserController extends Controller {
         return view('users.filter-result', [
             'users' => $filteredUsers,
         ]);
+    }
+
+    public function setUserRoleForSession(Request $request) {
+        $request->validate([
+            'role' => 'required|string|exists:roles,label',
+        ]);
+
+        $authUser = auth()->user();
+        $user = User::find($authUser->id);
+
+        if ($user->hasRole($request->role)) {
+            session(['role' => $request->role]);
+        } else {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
+
+        return redirect()->route('dashboard');
+    }
+
+    public function picture($id, Request $request) {
+        if ($request->file('profilepicture') != null) {
+            $file = $request->file('profilepicture');
+            $file_name = time() . '_' . $file->getClientOriginalName();
+            $path = "users/" . $id . "/" . $file_name;
+
+            $storeFile = $file->storeAs("users/" . $id . "/", $file_name, "gcs");
+
+            if ($storeFile) {
+                $user = User::find($id);
+                $user->profile_picture = $path;
+                $user->save();
+
+                return redirect()->route('users.edit', $user->id)->with('success', 'Profile picture uploaded successfully!');
+            } else {
+                return redirect()->route('users.edit', $id)->with('error', 'Error uploading profile picture!');
+            }
+        } else {
+            return redirect()->route('users.edit', $id)->with('error', 'Error uploading profile picture!');
+        }
+    }
+
+    public function dashboard() {
+        $user = auth()->user()->id;
+        $user = User::find($user);
+
+        $view = 'dashboard.' . $user->getRole() . '.index';
+
+        return view($view);
     }
 }

@@ -3,12 +3,10 @@
 use App\Http\Controllers\ProfileController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
-
-Route::get('/dashboard', function () {
-
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 
 Route::get('/role-select', function () {
@@ -21,6 +19,23 @@ Route::get('/role-select', function () {
         'roles' => $roles
     ]);
 })->middleware(['auth', 'verified'])->name('role-selector');
+
+Route::get('/logo', function () {
+
+    $url = Storage::disk('gcs')->temporaryUrl(
+        "logo.png",
+        now()->addMinutes(5)
+    );
+
+    $response = Http::get($url);
+    $image = $response->body();
+    $headers = [
+        'Content-Type' => 'image/png',
+        'Content-Length' => strlen($image),
+    ];
+    return response($image, 200, $headers);
+})->name('logo');
+
 
 Route::middleware('auth')->group(function () {
     Route::post('/profile/role', [App\Http\Controllers\UserController::class, 'setUserRoleForSession'])->name('profile.role.update');
@@ -65,6 +80,10 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/academies/create', [App\Http\Controllers\AcademyController::class, 'create'])->name('academies.create');
     Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('academies.all');
     Route::get('/academies/search', [App\Http\Controllers\AcademyController::class, 'search'])->name('academies.search');
+    Route::get('/academies/{academy}/athletes-data', [App\Http\Controllers\AcademyController::class, 'athletesDataForAcademy'])->name('academies.athletes-data');
+    Route::get('/academies/{academy}/athletes-school-data', [App\Http\Controllers\AcademyController::class, 'athletesSchoolDataForAcademy'])->name('academies.athletes-school-data');
+    Route::get('/academies/{academy}/athletes-year-data', [App\Http\Controllers\AcademyController::class, 'getAthletesNumberPerYear'])->name('academies.athletes-year-data');
+
     Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'edit'])->name('academies.edit');
     Route::delete('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'destroy'])->name('academies.disable');
 

@@ -141,8 +141,10 @@ class ClanController extends Controller {
             $query->where('label', 'instructor');
         })->whereNotIn('id', $clan->personnel->pluck('id'))->get();
 
-        $athletes = User::where('role', 'user')->where('is_disabled', '0')->whereNotIn('id', $clan->users->pluck('id'))->get();
 
+        $athletes = User::whereHas('roles', function ($query) {
+            $query->where('label', 'athlete');
+        })->whereNotIn('id', $clan->users->pluck('id'))->get();
 
         foreach ($associated_instructors as $key => $person) {
             $associated_instructors[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {

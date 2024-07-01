@@ -23,6 +23,7 @@ class NationController extends Controller {
             'Africa' => $continents['Africa'],
             'Asia' => $continents['Asia'],
             'North America' => $continents['North America'],
+            'South America' => $continents['South America'],
             'Oceania' => $continents['Oceania'],
         ];
 
