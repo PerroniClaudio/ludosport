@@ -140,54 +140,62 @@ class ImportController extends Controller {
 
             $log[] = "['File downloaded at " . now()->format('Y-m-d H:i:s') . "']";
 
-            switch ($import->type) {
-                case 'new_users':
-                    $log[] = "['Processing new users']";
-                    Excel::import(new UsersImport, $import->file, 'gcs');
-                    $log[] = "['Users imported at " . now()->format('Y-m-d H:i:s') . "']";
+            try {
+                switch ($import->type) {
+                    case 'new_users':
+                        $log[] = "['Processing new users']";
+                        Excel::import(new UsersImport, $import->file, 'gcs');
+                        $log[] = "['Users imported at " . now()->format('Y-m-d H:i:s') . "']";
 
-                    break;
-                case 'users_course':
-                    $log[] = "['Processing users course']";
-                    Excel::import(new UsersCourseImport, $import->file, 'gcs');
-                    $log[] = "['Users course imported at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'users_course':
+                        $log[] = "['Processing users course']";
+                        Excel::import(new UsersCourseImport, $import->file, 'gcs');
+                        $log[] = "['Users course imported at " . now()->format('Y-m-d H:i:s') . "']";
 
-                    break;
-                case 'users_academy':
-                    $log[] = "['Processing users academy']";
-                    Excel::import(new UsersAcademyImport, $import->file, 'gcs');
-                    $log[] = "['Users academy imported at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'users_academy':
+                        $log[] = "['Processing users academy']";
+                        Excel::import(new UsersAcademyImport, $import->file, 'gcs');
+                        $log[] = "['Users academy imported at " . now()->format('Y-m-d H:i:s') . "']";
 
-                    break;
-                case 'users_school':
-                    $log[] = "['Processing users school']";
-                    Excel::import(new UsersSchoolImport, $import->file, 'gcs');
-                    $log[] = "['Users school imported at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
+                        break;
+                    case 'users_school':
+                        $log[] = "['Processing users school']";
+                        Excel::import(new UsersSchoolImport, $import->file, 'gcs');
+                        $log[] = "['Users school imported at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
 
-                case 'event_participants':
-                    $log[] = "['Processing event participants']";
-                    Excel::import(new UsersEventImport, $import->file, 'gcs');
-                    $log[] = "['Event participants imported at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
-                case 'event_war':
-                    $log[] = "['Processing event war']";
-                    Excel::import(new EventWarImport, $import->file, 'gcs');
-                    $log[] = "['Event war imported at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
-                case 'event_style':
-                    $log[] = "['Processing event style']";
-                    Excel::import(new EventStyleImport, $import->file, 'gcs');
-                    $log[] = "['Event style imported at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
+                    case 'event_participants':
+                        $log[] = "['Processing event participants']";
+                        Excel::import(new UsersEventImport, $import->file, 'gcs');
+                        $log[] = "['Event participants imported at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'event_war':
+                        $log[] = "['Processing event war']";
+                        Excel::import(new EventWarImport, $import->file, 'gcs');
+                        $log[] = "['Event war imported at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'event_style':
+                        $log[] = "['Processing event style']";
+                        Excel::import(new EventStyleImport, $import->file, 'gcs');
+                        $log[] = "['Event style imported at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
+                }
+
+                $import->log = json_encode($log);
+                $import->status = 'completed';
+                $import->save();
+            } catch (\Exception $e) {
+                $log[] = "['Error exporting file']";
+                $log[] = "['" . $e->getMessage() . "']";
+                $import->log = json_encode($log);
+                $import->status = 'error';
+                $import->save();
             }
-
-            $import->log = json_encode($log);
-            $import->status = 'completed';
-            $import->save();
         }
     }
 }

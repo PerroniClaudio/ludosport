@@ -167,76 +167,84 @@ class ExportController extends Controller {
 
         foreach ($exports as $export) {
             $export->status = 'processing';
-            $log = json_encode($export->log);
+            $log = json_decode($export->log);
             $export->save();
 
             $log[] = "['Export started at " . now()->format('Y-m-d H:i:s') . "']";
 
-            switch ($export->type) {
-                case 'users':
-                    $log[] = "['Exporting users']";
-                    $file_path = 'exports/' . $export->id . '/users.xlsx';
-                    Excel::export(new UsersExport($export), $file_path, 'gcs');
-                    $export->file = $file_path;
-                    $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
+            try {
+                switch ($export->type) {
+                    case 'users':
+                        $log[] = "['Exporting users']";
+                        $file_path = 'exports/' . $export->id . '/users.xlsx';
+                        Excel::store(new UsersExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
 
-                case 'user_roles':
-                    $log[] = "['Exporting user roles']";
-                    $file_path = 'exports/' . $export->id . '/user_roles.xlsx';
-                    Excel::export(new UsersRoleExport($export), $file_path, 'gcs');
-                    $export->file = $file_path;
-                    $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
-                case 'users_course':
-                    $log = "['Exporting users course']";
-                    $file_path = 'exports/' . $export->id . '/users_course.xlsx';
-                    Excel::export(new UsersCourseExport($export), $file_path, 'gcs');
-                    $export->file = $file_path;
-                    $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
-                case 'users_academy':
-                    $log = "['Exporting users academy']";
-                    $file_path = 'exports/' . $export->id . '/users_academy.xlsx';
-                    Excel::export(new UsersAcademyExport($export), $file_path, 'gcs');
-                    $export->file = $file_path;
-                    $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
-                case 'users_school':
-                    $log = "['Exporting users school']";
-                    $file_path = 'exports/' . $export->id . '/users_school.xlsx';
-                    Excel::export(new UsersSchoolExport($export), $file_path, 'gcs');
-                    $export->file = $file_path;
-                    $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
-                case 'event_participants':
-                    $log = "['Exporting event participants']";
-                    $file_path = 'exports/' . $export->id . '/event_participants.xlsx';
-                    Excel::export(new EventParticipantsExport($export), $file_path, 'gcs');
-                    $export->file = $file_path;
-                    $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
-                case 'event_war':
-                    $log = "['Exporting event war points']";
-                    $file_path = 'exports/' . $export->id . '/event_war_points.xlsx';
-                    Excel::export(new EventsWarExport($export), $file_path, 'gcs');
-                    $export->file = $file_path;
-                    $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
-                case 'event_style':
-                    $log = "['Exporting event style points']";
-                    $file_path = 'exports/' . $export->id . '/event_style_points.xlsx';
-                    Excel::export(new EventsStyleExport($export), $file_path, 'gcs');
-                    $export->file = $file_path;
-                    $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
-                    break;
-                default:
-                    break;
+                    case 'user_roles':
+                        $log[] = "['Exporting user roles']";
+                        $file_path = 'exports/' . $export->id . '/user_roles.xlsx';
+                        Excel::store(new UsersRoleExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'users_course':
+                        $log[] = "['Exporting users course']";
+                        $file_path = 'exports/' . $export->id . '/users_course.xlsx';
+                        Excel::store(new UsersCourseExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'users_academy':
+                        $log[] = "['Exporting users academy']";
+                        $file_path = 'exports/' . $export->id . '/users_academy.xlsx';
+                        Excel::store(new UsersAcademyExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'users_school':
+                        $log[] = "['Exporting users school']";
+                        $file_path = 'exports/' . $export->id . '/users_school.xlsx';
+                        Excel::store(new UsersSchoolExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'event_participants':
+                        $log[] = "['Exporting event participants']";
+                        $file_path = 'exports/' . $export->id . '/event_participants.xlsx';
+                        Excel::store(new EventParticipantsExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'event_war':
+                        $log[] = "['Exporting event war points']";
+                        $file_path = 'exports/' . $export->id . '/event_war_points.xlsx';
+                        Excel::store(new EventsWarExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'event_style':
+                        $log[] = "['Exporting event style points']";
+                        $file_path = 'exports/' . $export->id . '/event_style_points.xlsx';
+                        Excel::store(new EventsStyleExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    default:
+                        break;
+                }
+
+                $export->log = json_encode($log);
+                $export->status = 'finished';
+                $export->save();
+            } catch (\Exception $e) {
+                $log[] = "['Error exporting file']";
+                $log[] = "['" . $e->getMessage() . "']";
+                $export->log = json_encode($log);
+                $export->status = 'error';
+                $export->save();
             }
-
-            $export->log = json_encode($log);
-            $export->status = 'finished';
-            $export->save();
         }
     }
 }

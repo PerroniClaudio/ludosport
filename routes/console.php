@@ -11,9 +11,9 @@ Artisan::command('inspire', function () {
 Schedule::call(function () {
     $importController = new \App\Http\Controllers\ImportController();
     $importController->resolvePendingImports();
-})->hourly();
+})->everyMinute();
 
 Schedule::call(function () {
     $exportController = new \App\Http\Controllers\ExportController();
     $exportController->resolvePendingExports();
-})->hourly();
+})->everyMinute();
