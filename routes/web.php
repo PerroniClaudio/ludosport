@@ -195,6 +195,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('exports.index');
     Route::get('/exports/create', [App\Http\Controllers\ExportController::class, 'create'])->name('exports.create');
+    Route::get('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('exports.download');
     Route::delete('/exports/{export}', [App\Http\Controllers\ExportController::class, 'destroy'])->name('exports.disable');
 
     Route::post('/exports', [App\Http\Controllers\ExportController::class, 'store'])->name('exports.store');

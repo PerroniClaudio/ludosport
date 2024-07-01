@@ -16,6 +16,9 @@ return [
     'submit' => 'Submit',
     'pending' => 'Pending',
     'completed' => 'Completed',
+    'finished' => 'Completed',
     'canceled' => 'Canceled',
     'processing' => 'Processing',
+    'failed' => 'Failed',
+    'error' => 'Error',
 ];

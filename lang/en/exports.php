@@ -15,6 +15,7 @@ return [
     'submit' => 'Submit',
     'pending' => 'Pending',
     'completed' => 'Completed',
+    'finished' => 'Completed',
     'canceled' => 'Canceled',
     'processing' => 'Processing',
     'users_filter_message' => 'Please select a starting date and an ending date to get the users that were created between those dates.',
@@ -34,4 +35,7 @@ return [
     'selected_schools' => 'Selected Schools',
     'available_events' => 'Available Events',
     'selected_events' => 'Selected Events',
+    'failed' => 'Failed',
+    'error' => 'Error',
+    ''
 ];

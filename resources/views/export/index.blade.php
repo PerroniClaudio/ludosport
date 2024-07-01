@@ -60,6 +60,15 @@
                                     minute: 'numeric' 
                                 })">
                             </td>
+                            <td
+                                class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
+                                <a x-bind:href="row.url">
+                                    <x-primary-button>
+                                        <x-lucide-download class="w-5 h-5" />
+                                    </x-primary-button>
+                                </a>
+
+                            </td>
                         </x-slot>
 
                     </x-table>

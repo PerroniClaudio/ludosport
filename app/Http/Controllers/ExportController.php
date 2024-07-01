@@ -13,6 +13,7 @@ use App\Exports\UsersSchoolExport;
 use App\Models\Export;
 use App\Models\Role;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExportController extends Controller {
@@ -25,6 +26,11 @@ class ExportController extends Controller {
         $exports = Export::with('user')->orderBy('created_at', 'desc')->get();
 
         foreach ($exports as $key => $export) {
+
+            if ($export->status == "finished") {
+                $exports[$key]->url = route('exports.download', $export);
+            }
+
             $exports[$key]->type = __('exports.' . $export->type);
             $exports[$key]->status = __('exports.' . $export->status);
         }
@@ -246,5 +252,19 @@ class ExportController extends Controller {
                 $export->save();
             }
         }
+    }
+
+    public function download(Export $export) {
+        $file = Storage::disk('gcs')->temporaryUrl(
+            $export->file,
+            now()->addMinutes(5)
+        );
+
+        $file2 = file_get_contents($file);
+        $filename = basename($export->file);
+
+        return response($file2)
+            ->header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }
