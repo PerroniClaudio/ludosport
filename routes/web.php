@@ -36,7 +36,6 @@ Route::get('/logo', function () {
     return response($image, 200, $headers);
 })->name('logo');
 
-
 Route::middleware('auth')->group(function () {
     Route::post('/profile/role', [App\Http\Controllers\UserController::class, 'setUserRoleForSession'])->name('profile.role.update');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -104,6 +103,11 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/schools/all', [App\Http\Controllers\SchoolController::class, 'all'])->name('schools.all');
     Route::get('/schools/academy', [App\Http\Controllers\SchoolController::class, 'getByAcademy'])->name('schools.academy');
     Route::get('/schools/search', [App\Http\Controllers\SchoolController::class, 'search'])->name('schools.search');
+    Route::get('/schools/{school}/athletes-data', [App\Http\Controllers\SchoolController::class, 'athletesDataForSchool'])->name('schools.athletes-data');
+    Route::get('/schools/{school}/athletes-clan-data', [App\Http\Controllers\SchoolController::class, 'athletesClanDataForSchool'])->name('schools.athletes-school-data');
+    Route::get('/schools/{school}/athletes-year-data', [App\Http\Controllers\SchoolController::class, 'getAthletesNumberPerYear'])->name('schools.athletes-year-data');
+
+
     Route::get('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'edit'])->name('schools.edit');
     Route::delete('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'destroy'])->name('schools.disable');
 

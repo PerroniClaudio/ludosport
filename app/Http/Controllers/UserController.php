@@ -575,12 +575,88 @@ class UserController extends Controller {
         }
     }
 
-    public function dashboard() {
+    public function dashboard(Request $request) {
         $user = auth()->user()->id;
         $user = User::find($user);
 
-        $view = 'dashboard.' . $user->getRole() . '.index';
+        if ($user->getRole() == "instructor") {
+            if (isset($request->course_id)) {
+                return $this->handleInstructor($request->course_id, $user);
+            } else {
+                return $this->handleInstructor(0, $user);
+            }
+        } else {
+            $view = 'dashboard.' . $user->getRole() . '.index';
+            return view($view);
+        }
+    }
 
-        return view($view);
+    private function handleInstructor($course_id = 0, $user) {
+        if ($course_id != 0) {
+            $course = Clan::find($course_id);
+            $users = $course->users;
+
+            $active_users_count = 0;
+            $inactive_users_count = 0;
+
+            foreach ($users as $key => $atl) {
+                $users[$key]->course_name = $course->name;
+
+                if (!$atl->has_paid_fee) {
+                    $inactive_users_count++;
+                } else {
+                    $active_users_count++;
+                }
+            }
+
+
+            return view('dashboard.instructor.index', [
+                'users' => $users,
+                'courses' => $user->clansPersonnel()->get(),
+                'course_id' => $course->id,
+                'active_users_count' => $active_users_count,
+                'inactive_users_count' => $inactive_users_count
+            ]);
+        } else {
+            $courses = $user->clansPersonnel()->get();
+            $athletes = [];
+            $athletes_ids = [];
+
+            $active_users_count = 0;
+            $inactive_users_count = 0;
+
+            foreach ($courses as $course) {
+                foreach ($course->users as $athlete) {
+
+                    if (!in_array($athlete->id, $athletes_ids)) {
+                        $athletes_ids[] = $athlete->id;
+
+                        if (!$athlete->has_paid_fee) {
+                            $inactive_users_count++;
+                        } else {
+                            $active_users_count++;
+                        }
+
+                        $athlete->course_name = $course->name;
+                        $athletes[] = $athlete;
+                    } else {
+
+                        $athlete = $athletes[array_search($athlete->id, array_column($athletes, 'id'))];
+                        $athlete->course_name .= ", " . $course->name;
+
+                        continue;
+                    }
+                }
+            }
+
+
+            return view('dashboard.instructor.index', [
+                'courses' => $courses,
+                'users' => $athletes,
+                'course_id' => 0,
+                'active_users_count' => $active_users_count,
+                'inactive_users_count' => $inactive_users_count
+            ]);
+        }
     }
 }

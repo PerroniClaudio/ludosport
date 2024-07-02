@@ -86,6 +86,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->belongsToMany(Clan::class, 'clans_users', 'user_id', 'clan_id');
     }
 
+    public function clansPersonnel() {
+        return $this->belongsToMany(Clan::class, 'clans_personnel', 'user_id', 'clan_id');
+    }
+
     public function roles() {
         return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
@@ -135,12 +139,12 @@ class User extends Authenticatable implements MustVerifyEmail {
                     (object)[
                         'label' => 'users',
                         'active' => 'users.*',
-                        'name' => 'preside.users.index',
+                        'name' => 'dashboard',
                     ],
                     (object)[
                         'label' => 'scuola',
                         'active' => 'schools.*',
-                        'name' => 'preside.scuola.index',
+                        'name' => 'dashboard',
                     ]
                 ]);
             case 'manager':
@@ -179,17 +183,17 @@ class User extends Authenticatable implements MustVerifyEmail {
                     (object)[
                         'label' => 'users',
                         'active' => 'users.*',
-                        'name' => 'istruttore.users.index',
+                        'name' => 'dashboard',
                     ],
                     (object)[
                         'label' => 'eventi',
                         'active' => 'events.*',
-                        'name' => 'istruttore.events.index',
+                        'name' => 'dashboard',
                     ],
                     (object)[
                         'label' => 'clan',
                         'active' => 'clans.*',
-                        'name' => 'istruttore.clan.index',
+                        'name' => 'dashboard',
                     ],
                 ]);
             default:

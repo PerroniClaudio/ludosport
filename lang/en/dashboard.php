@@ -17,4 +17,8 @@ return [
     'rector_schools_with_athletes_char' => 'Schools with most athletes',
     'rector_users_last_year' => 'Users last year',
     'rector_users_this_year' => 'Users this year',
+    'dean_athletes_courses_title' => 'Athletes by courses',
+    'dean_courses_with_athletes_chart' => 'Courses with most athletes',
+    'instructor_courses' => 'Select course',
+    'instructor_inactive_users' => 'Inactive users',
 ];

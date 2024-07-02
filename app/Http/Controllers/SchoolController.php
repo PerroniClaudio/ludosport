@@ -289,4 +289,68 @@ class SchoolController extends Controller {
 
         return response()->json($formatted_schools);
     }
+
+    public function athletesDataForSchool(School $school) {
+
+        $athletes = $school->athletes;
+        $active_users = 0;
+        $active_users_no_course = 0;
+        $users_course_not_active = 0;
+        $new_users_this_year = 0;
+
+        foreach ($athletes as $key => $athlete) {
+
+            if ($athlete->has_paid_fee) {
+                $active_users++;
+            }
+
+            if (($athlete->has_paid_fee) && ($athlete->clans()->count() == 0)) {
+                $active_users_no_course++;
+            }
+
+            if ((!$athlete->has_paid_fee) && ($athlete->clans()->count() > 0)) {
+                $users_course_not_active++;
+            }
+
+            if ($athlete->created_at->year == now()->year) {
+                $new_users_this_year++;
+            }
+        }
+
+        return response()->json([
+            'active_users' => $active_users,
+            'active_users_no_course' => $active_users_no_course,
+            'users_course_not_active' => $users_course_not_active,
+            'new_users_this_year' => $new_users_this_year,
+        ]);
+    }
+
+    public function athletesClanDataForSchool(School $school) {
+        $clans_data = [];
+
+        foreach ($school->clan as $clan) {
+            $clans_data[] = [
+                'id' => $clan->id,
+                'name' => $clan->name,
+                'athletes' => $clan->users->count(),
+            ];
+        }
+
+        return response()->json($clans_data);
+    }
+
+    public function getAthletesNumberPerYear(School $school) {
+        $athletes = $school->athletes;
+        $athletes_last_year = 0;
+        $athletes_this_year = 0;
+
+        foreach ($athletes as $athlete) {
+            $athlete->created_at->year == now()->year ? $athletes_this_year++ : $athletes_last_year++;
+        }
+
+        return response()->json([
+            'last_year' => $athletes_last_year,
+            'this_year' => $athletes_this_year,
+        ]);
+    }
 }

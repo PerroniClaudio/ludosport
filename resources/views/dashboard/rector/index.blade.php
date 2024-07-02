@@ -31,11 +31,10 @@
                     </div>
                 </div>
 
-                <!-- Grafico a torta per vedere la divisione di utenti tra le school -->
+                <!-- Grafico a torta per vedere la divisione di utenti tra le school + Confronto tra iscritti anno precedente e iscritti anno corrente  -->
 
                 <x-dashboard.user-school-graph academyId="{{ Auth()->user()->academies()->first()->id }}" />
 
-                <!-- Confronto tra iscritti anno precedente e iscritti anno corrente -->
                 <!-- Richieste di promozione a Preside delle school -->
                 <!-- Richiesta di promozione a cavaliere -->
 
