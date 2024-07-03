@@ -30,6 +30,24 @@
 
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-background-900 dark:text-background-100">
+                        <div class="grid grid-cols-4 gap-4 my-4">
+                            <div class="p-4 bg-background-100 dark:bg-background-700 rounded-lg">
+                                <h4 class="text-background-800 dark:text-background-200  xl:text-lg">
+                                    {{ __('dashboard.rector_active_users') }}</h4>
+                                <p class="text-primary-600 dark:text-primary-500 text-3xl">
+                                    {{ $active_users_count }}
+                                </p>
+                            </div>
+
+                            <div class="p-4 bg-background-100 dark:bg-background-700 rounded-lg">
+                                <h4 class="text-background-800 dark:text-background-200  xl:text-lg">
+                                    {{ __('dashboard.instructor_inactive_users') }}</h4>
+                                <p class="text-primary-600 dark:text-primary-500 text-3xl">
+                                    {{ $inactive_users_count }}
+                                </p>
+                            </div>
+                        </div>
+
                         <x-table striped="false" :columns="[
                             [
                                 'name' => 'Name',
@@ -94,23 +112,7 @@
 
                         </x-table>
 
-                        <div class="grid grid-cols-4 gap-4">
-                            <div class="p-4 bg-background-100 dark:bg-background-700 rounded-lg">
-                                <h4 class="text-background-800 dark:text-background-200  xl:text-lg">
-                                    {{ __('dashboard.rector_active_users') }}</h4>
-                                <p class="text-primary-600 dark:text-primary-500 text-3xl">
-                                    {{ $active_users_count }}
-                                </p>
-                            </div>
 
-                            <div class="p-4 bg-background-100 dark:bg-background-700 rounded-lg">
-                                <h4 class="text-background-800 dark:text-background-200  xl:text-lg">
-                                    {{ __('dashboard.instructor_inactive_users') }}</h4>
-                                <p class="text-primary-600 dark:text-primary-500 text-3xl">
-                                    {{ $inactive_users_count }}
-                                </p>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
