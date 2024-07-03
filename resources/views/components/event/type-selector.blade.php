@@ -6,7 +6,7 @@
 
 <div x-data="{
     newEventTypeName: '',
-    event_id: '{{ $event_id }}',
+    event_id: {{ $event_id }},
     eventTypes: [],
     selected: '{{ $selected }}',
     fetchEventTypes: async function() {
@@ -55,11 +55,11 @@
         <a x-on:click.prevent="$dispatch('open-modal', 'new-type-modal')">
             <x-lucide-plus-circle class="w-5 h-5 text-primary-500 dark:text-primary-600" />
         </a>
-        <select name="event_type" id="event_type" x-model="selected"
+        <select name="event_type" id="event_type" x-model="event_id"
             class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
 
             <template x-for="type in eventTypes" :key="type.id">
-                <option x-text="type.name"></option>
+                <option x-text="type.name" :selected="type.id == event_id"></option>
             </template>
 
         </select>
@@ -78,7 +78,7 @@
 
             <div>
                 <x-input-label value="Name" />
-                <input x-model="newEventTypeName" name="name" type="text" required placeholder="Event Type Name"
+                <input x-model="newEventTypeName" type="text" placeholder="Event Type Name"
                     class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
             </div>

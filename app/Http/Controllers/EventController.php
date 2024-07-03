@@ -204,6 +204,7 @@ class EventController extends Controller {
             'start_date' => 'required',
             'end_date' => 'required',
             'price' => 'min:0',
+
         ]);
 
         $event->name = $request->name;
@@ -212,7 +213,10 @@ class EventController extends Controller {
 
         if (Auth::user()->getRole() === 'admin') {
 
-            $event->event_type = $request->event_type;
+            $event_type = EventType::where('name', $request->event_type)->first();
+
+            $event->event_type = $event_type->id;
+
 
             if ($request->is_free == 'on') {
                 $event->is_free = true;
