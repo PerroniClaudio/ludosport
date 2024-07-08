@@ -232,4 +232,5 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/technician.php';
+require __DIR__ . '/athlete.php';
 require __DIR__ . '/site.php';

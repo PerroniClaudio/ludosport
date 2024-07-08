@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Announcement;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AnnouncementController extends Controller {
@@ -164,5 +165,20 @@ class AnnouncementController extends Controller {
         $announcement->save();
 
         return redirect()->route('announcements.index')->with('success', 'Announcement deleted successfully.');
+    }
+
+    public function athlete() {
+        //
+
+        $auth = auth()->user();
+        $user = User::find($auth->id);
+
+        $seen_announcements = $user->seenAnnouncements()->where('is_deleted', false)->get();
+        $announcements = Announcement::where('is_deleted', false)->whereIn('role_id', $user->roles->pluck('id'))->get();
+
+        return view('announcements.athlete', [
+            'seen_announcements' => $seen_announcements,
+            'announcements' => $announcements
+        ]);
     }
 }

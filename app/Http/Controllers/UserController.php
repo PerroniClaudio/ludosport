@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Academy;
+use App\Models\Announcement;
 use App\Models\Clan;
 use App\Models\Nation;
 use App\Models\Role;
@@ -585,6 +586,8 @@ class UserController extends Controller {
             } else {
                 return $this->handleInstructor(0, $user);
             }
+        } else if ($user->getRole() == "athlete") {
+            return $this->handleAthlere($user);
         } else {
             $view = 'dashboard.' . $user->getRole() . '.index';
             return view($view);
@@ -658,5 +661,33 @@ class UserController extends Controller {
                 'inactive_users_count' => $inactive_users_count
             ]);
         }
+    }
+
+    private function handleAthlere($user) {
+
+        $announcements = Announcement::where('is_deleted', false)->get();
+        $seen_by_user = $user->seenAnnouncements()->get();
+
+        $not_seen = [];
+
+        foreach ($announcements as $announcement) {
+            $found = false;
+
+            foreach ($seen_by_user as $seen) {
+                if ($seen->id == $announcement->id) {
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                $not_seen[] = $announcement;
+            }
+        }
+
+        $view = 'dashboard.athlete.index';
+        return view($view, [
+            'announcements' => $not_seen,
+        ]);
     }
 }
