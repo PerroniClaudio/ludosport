@@ -94,6 +94,16 @@ class AnnouncementController extends Controller {
     public function edit(Announcement $announcement) {
         //
 
+        $userhaveseen = $announcement->userHaveSeen()->with(['roles'])->get();
+
+        foreach ($userhaveseen as $key => $user) {
+            $userhaveseen[$key]['name'] = $user->name . ' ' . $user->surname;
+            $userhaveseen[$key]['role'] = implode(', ', $user->roles->pluck('name')->map(function ($role) {
+                return __('users.' . $role);
+            })->toArray());
+        }
+
+
         $types = $announcement->getTypes();
 
         $roles = Role::all();
@@ -116,7 +126,8 @@ class AnnouncementController extends Controller {
         return view('announcements.edit', [
             'announcement' => $announcement,
             'types' => $typesOptions,
-            'roles' => $rolesOptions
+            'roles' => $rolesOptions,
+            'haveseen' => $userhaveseen
         ]);
     }
 

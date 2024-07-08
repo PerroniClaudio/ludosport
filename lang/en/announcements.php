@@ -9,6 +9,8 @@ return [
     'direct_message' => 'Direct Message',
     'send' => 'Send',
     'save' => 'Save',
+    'informations' => 'Announcement Informations',
+    'users_have_seen' => 'Users who have seen this announcement',
     'edit_title' => 'Edit Announcement',
     'disable_announcement' => 'Disable Announcement',
     'disable_announcement_message' => 'Disabling the announcement will prevent users from seeing it.',

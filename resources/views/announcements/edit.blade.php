@@ -11,6 +11,10 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                    {{ __('announcements.informations') }}
+                </h3>
+                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                 <form method="POST" action="{{ route('announcements.update', $announcement->id) }}"
                     class="flex flex-col gap-4">
                     @csrf
@@ -38,6 +42,60 @@
                         </x-primary-button>
                     </div>
                 </form>
+            </div>
+
+            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                <h3 class="text-background-800 dark:text-background-200 text-lg">
+                    {{ __('announcements.users_have_seen') }}
+                </h3>
+                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                <x-table striped="false" :columns="[
+                    [
+                        'name' => 'Id',
+                        'field' => 'id',
+                        'columnClasses' => '', // classes to style table th
+                        'rowClasses' => '', // classes to style table td
+                    ],
+                    [
+                        'name' => 'Name',
+                        'field' => 'name',
+                        'columnClasses' => '', // classes to style table th
+                        'rowClasses' => '', // classes to style table td
+                    ],
+                    [
+                        'name' => 'Roles',
+                        'field' => 'role',
+                        'columnClasses' => '', // classes to style table th
+                        'rowClasses' => '', // classes to style table td
+                    ],
+                    [
+                        'name' => 'Seen at',
+                        'field' => 'created_at',
+                        'columnClasses' => '', // classes to style table th
+                        'rowClasses' => '', // classes to style table td
+                    ],
+                ]" :rows="$haveseen">
+                    <x-slot name="tableRows">
+                        <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                            x-text="row.id"></td>
+                        <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                            x-text="row.name"></td>
+                        <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                            x-text="row.role"></td>
+
+
+
+                        <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                            x-text="new Date(row.created_at).toLocaleDateString('it-IT', {
+                                                    hour: 'numeric', 
+                                                    minute: 'numeric' 
+                                                })">
+                        </td>
+
+                    </x-slot>
+
+                </x-table>
+
             </div>
 
             <x-announcements.disable-announcement :announcement="$announcement" />

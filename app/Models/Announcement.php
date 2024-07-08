@@ -32,6 +32,10 @@ class Announcement extends Model {
         return $this->belongsTo(Role::class);
     }
 
+    public function userHaveSeen() {
+        return $this->belongsToMany(User::class, 'announcement_users', 'announcement_id', 'user_id');
+    }
+
     public function getType() {
         return $this->types[$this->type];
     }
