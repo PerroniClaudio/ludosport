@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Announcement;
+use App\Models\AnnouncementUser;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -168,17 +169,40 @@ class AnnouncementController extends Controller {
     }
 
     public function athlete() {
-        //
 
         $auth = auth()->user();
         $user = User::find($auth->id);
 
-        $seen_announcements = $user->seenAnnouncements()->where('is_deleted', false)->get();
-        $announcements = Announcement::where('is_deleted', false)->whereIn('role_id', $user->roles->pluck('id'))->get();
+        $seen_announcements = $user->seenAnnouncements()->get();
+        $announcements = Announcement::where('is_deleted', false)->whereIn('role_id', $user->roles->pluck('id'))->orderBy('created_at', 'desc')->get();
+        $first_announcement = $announcements->first();
+
+        if (!in_array($first_announcement->id, $seen_announcements->pluck('id')->toArray())) {
+            AnnouncementUser::create([
+                'announcement_id' => $first_announcement->id,
+                'user_id' => $user->id
+            ]);
+
+            $seen_announcements = $user->seenAnnouncements()->get();
+        }
 
         return view('announcements.athlete', [
             'seen_announcements' => $seen_announcements,
-            'announcements' => $announcements
+            'announcements' => $announcements,
+            'active_announcement' => $first_announcement
+        ]);
+    }
+
+    public function setSeen(Announcement $announcement) {
+        $auth = auth()->user();
+
+        AnnouncementUser::create([
+            'announcement_id' => $announcement->id,
+            'user_id' => $auth->id
+        ]);
+
+        return response()->json([
+            'success' => true
         ]);
     }
 }

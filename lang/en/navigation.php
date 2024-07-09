@@ -30,4 +30,5 @@ return [
     'login' => 'Login',
     'register' => 'Register',
     'operations' => 'Operations',
+    'announcements' => 'Announcements',
 ];

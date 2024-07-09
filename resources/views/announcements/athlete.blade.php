@@ -13,12 +13,33 @@
                 <div class="grid grid-cols-12 gap-4" x-data="{
                     announcements: {{ $announcements }},
                     seenAnnouncements: {{ $seen_announcements }},
-                    selectedAnnouncement: null,
+                    selectedAnnouncement: {{ $active_announcement }},
+                    csrf: '{{ csrf_token() }}',
                     shouldShowAsNew: function(announcement) {
-                        return this.seenAnnouncements.map(element => (element.id == announcement.id)).length == 0;
+                        console.log(this.seenAnnouncements)
+                
+                        //Return true if announcement is not in seenAnnouncements
+                
+                        let isSeen = this.seenAnnouncements.find(element => element.id == announcement.id);
+                
+                        return !isSeen;
                     },
                     setSelectedAnnouncement: function(announcement) {
-                        this.selectedAnnouncement = this.announcements.find(element => element.id == announcement.id);
+                        fetch(`announcements/${announcement.id}/seen`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': this.csrf
+                            },
+                            body: JSON.stringify({
+                                _method: 'POST',
+                            })
+                        }).then(response => {
+                            if (response.ok) {
+                                this.seenAnnouncements.push(announcement);
+                                this.selectedAnnouncement = this.announcements.find(element => element.id == announcement.id);
+                            }
+                        });
                     },
                     shouldShowSelectedItem: function(announcement) {
                         if (this.selectedAnnouncement != null) {
@@ -59,8 +80,17 @@
                                     x-on:click="setSelectedAnnouncement(announcement)"
                                     x-on:click="selectedAnnouncement = announcement.id"
                                     class="cursor-pointer p-2 border-b dark:border-background-700 flex items-center justify-between">
-                                    <p x-text="announcement.object"></p>
+                                    <div class="flex flex-col gap-1">
+                                        <p x-text="announcement.object" class=""></p>
+                                        <p x-text="new Date(announcement.created_at).toLocaleDateString('it-IT', {
+                                            hour: 'numeric', 
+                                            minute: 'numeric' 
+                                        })"
+                                            class=" text-xs">
+                                        </p>
+                                    </div>
                                     <x-lucide-chevron-right class="h-6 w-6" />
+
                                 </div>
                             </div>
 
