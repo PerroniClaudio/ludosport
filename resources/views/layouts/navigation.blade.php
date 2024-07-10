@@ -44,6 +44,9 @@
                                 <a href="{{ route('clans.index') }}">{{ __('navigation.clan') }}</a>
                             </x-slot>
                         </x-nav-link-parent>
+                        <x-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">
+                            {{ __('navigation.announcements') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
                             {{ __('navigation.eventi') }}
                         </x-nav-link>
@@ -138,6 +141,9 @@
             @else
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                     {{ __('navigation.users') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">
+                    {{ __('navigation.announcements') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
                     {{ __('navigation.eventi') }}

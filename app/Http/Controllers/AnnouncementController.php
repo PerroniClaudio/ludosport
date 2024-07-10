@@ -15,7 +15,7 @@ class AnnouncementController extends Controller {
     public function index() {
         //
 
-        $announcements = Announcement::where('is_deleted', false)->get();
+        $announcements = Announcement::where('is_deleted', false)->where('type', '!=', '4')->get();
 
         foreach ($announcements as $announcement) {
             $announcement->target = __('users.' . $announcement->role->name . '_role');
@@ -174,22 +174,63 @@ class AnnouncementController extends Controller {
         $user = User::find($auth->id);
 
         $seen_announcements = $user->seenAnnouncements()->get();
-        $announcements = Announcement::where('is_deleted', false)->whereIn('role_id', $user->roles->pluck('id'))->orderBy('created_at', 'desc')->get();
+        $announcements = Announcement::where('is_deleted', false)->whereIn('role_id', $user->roles->pluck('id'))->where('type', '!=', '4')->orderBy('created_at', 'desc')->get();
+
+
+
         $first_announcement = $announcements->first();
 
-        if (!in_array($first_announcement->id, $seen_announcements->pluck('id')->toArray())) {
-            AnnouncementUser::create([
-                'announcement_id' => $first_announcement->id,
-                'user_id' => $user->id
-            ]);
 
-            $seen_announcements = $user->seenAnnouncements()->get();
+        if ($first_announcement) {
+            if (!in_array($first_announcement->id, $seen_announcements->pluck('id')->toArray())) {
+                AnnouncementUser::create([
+                    'announcement_id' => $first_announcement->id,
+                    'user_id' => $user->id
+                ]);
+
+                $seen_announcements = $user->seenAnnouncements()->get();
+            }
         }
+
 
         return view('announcements.athlete', [
             'seen_announcements' => $seen_announcements,
             'announcements' => $announcements,
             'active_announcement' => $first_announcement
+        ]);
+    }
+
+    public function technician() {
+
+        $auth = auth()->user();
+        $user = User::find($auth->id);
+
+        $seen_announcements = $user->seenAnnouncements()->get();
+        $announcements = Announcement::where('is_deleted', false)->whereIn('role_id', $user->roles->pluck('id'))->where('type', '!=', '4')->orderBy('created_at', 'desc')->get();
+        $direct_messages = Announcement::where([['is_deleted', false], ['type', '4'], ['user_id', $user->id]])->orderBy('created_at', 'desc')->get();
+        $announcements = $announcements->merge($direct_messages);
+
+        $first_announcement = $announcements->first();
+
+        if ($first_announcement) {
+            if (!in_array($first_announcement->id, $seen_announcements->pluck('id')->toArray())) {
+                AnnouncementUser::create([
+                    'announcement_id' => $first_announcement->id,
+                    'user_id' => $user->id
+                ]);
+
+                $seen_announcements = $user->seenAnnouncements()->get();
+            }
+        } else {
+            $first_announcement = [];
+        }
+
+
+
+        return view('announcements.technician', [
+            'seen_announcements' => $seen_announcements,
+            'announcements' => $announcements,
+            'active_announcement' => $first_announcement,
         ]);
     }
 

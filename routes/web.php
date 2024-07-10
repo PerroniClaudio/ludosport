@@ -172,6 +172,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('events.store');
     Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('events.update');
+    Route::post('/events/{event}/reject', [App\Http\Controllers\EventController::class, 'reject'])->name('events.reject');
     Route::post('/events/{event}/approve', [App\Http\Controllers\EventController::class, 'approve'])->name('events.approve');
     Route::post('/events/{event}/publish', [App\Http\Controllers\EventController::class, 'publish'])->name('events.publish');
     Route::post('/events/{event}/participants', [App\Http\Controllers\EventController::class, 'addParticipant'])->name('events.participants.store');

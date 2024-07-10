@@ -106,6 +106,8 @@ class UserController extends Controller {
 
             if ($user->hasRole('athlete')) {
                 $academy->athletes()->attach($user->id);
+            } else {
+                $academy->personnel()->attach($user->id);
             }
         }
 

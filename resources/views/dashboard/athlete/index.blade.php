@@ -28,7 +28,7 @@
                     @endif
 
                     <div class="flex justify-end">
-                        <a href="#">
+                        <a href="{{ route('athlete.announcements.index') }}">
                             <x-primary-button>
                                 <x-lucide-arrow-right class="h-6 w-6 text-white" />
                             </x-primary-button>
