@@ -29,6 +29,8 @@
                 </form>
             </div>
 
+            <x-school.search-users :school="$school" :roles="$roles" />
+
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.personnel') }}

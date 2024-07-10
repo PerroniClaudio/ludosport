@@ -222,6 +222,12 @@ class User extends Authenticatable implements MustVerifyEmail {
         })->toArray();
     }
 
+    public function allowedRoleIds(): array {
+        return $this->roles()->get()->map(function ($role) {
+            return $role->id;
+        })->toArray();
+    }
+
     public function hasRole(string $role): bool {
         $selectedRole = Role::where('name', $role)->first();
         $user = $selectedRole->users()->where('user_id', $this->id)->get();
