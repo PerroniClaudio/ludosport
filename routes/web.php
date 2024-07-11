@@ -70,6 +70,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/nations/{nation}/academies/create', [App\Http\Controllers\AcademyController::class, 'storenation'])->name('nations.academies.create');
     Route::post('/nations/{nation}/academies', [App\Http\Controllers\NationController::class, 'associateAcademy'])->name('nations.academies.store');
     Route::put('/nations/{nation}/flag', [App\Http\Controllers\NationController::class, 'updateFlag'])->name('nations.flag.update');
+
+    Route::get('/nations/{nation}/users-search', [App\Http\Controllers\NationController::class, 'searchUsers'])->name('nations.users-search');
 });
 
 /** Accademie */
@@ -93,6 +95,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/academies/{academy}/users/create', [App\Http\Controllers\UserController::class, 'storeForAcademy'])->name('academies.users.create');
     Route::post('/academies/{academy}/personnel', [App\Http\Controllers\AcademyController::class, 'addPersonnel'])->name('academies.personnel.store');
     Route::post('/academies/{academy}/athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('academies.athlete.store');
+
+    Route::get('/academies/{academy}/users-search', [App\Http\Controllers\AcademyController::class, 'searchUsers'])->name('academies.users-search');
 });
 
 /** Scuole */
@@ -121,6 +125,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('schools.clans.store');
     Route::post('/schools/{school}/personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('schools.personnel.store');
     Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('schools.athlete.store');
+
+    Route::get('/schools/{school}/users-search', [App\Http\Controllers\SchoolController::class, 'searchUsers'])->name('schools.users-search');
 });
 
 /** Clan */
@@ -172,6 +178,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('events.store');
     Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('events.update');
+    Route::post('/events/{event}/reject', [App\Http\Controllers\EventController::class, 'reject'])->name('events.reject');
     Route::post('/events/{event}/approve', [App\Http\Controllers\EventController::class, 'approve'])->name('events.approve');
     Route::post('/events/{event}/publish', [App\Http\Controllers\EventController::class, 'publish'])->name('events.publish');
     Route::post('/events/{event}/participants', [App\Http\Controllers\EventController::class, 'addParticipant'])->name('events.participants.store');
@@ -215,12 +222,23 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/rankings/paginate', [App\Http\Controllers\ChartController::class, 'paginate'])->name('rankings.paginate');
 });
 
+/** Annunci */
 
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+    Route::get('/announcements', [App\Http\Controllers\AnnouncementController::class, 'index'])->name('announcements.index');
+    Route::get('/announcements/create', [App\Http\Controllers\AnnouncementController::class, 'create'])->name('announcements.create');
+    Route::get('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'edit'])->name('announcements.edit');
+    Route::delete('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'destroy'])->name('announcements.disable');
+
+    Route::post('/announcements', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('announcements.store');
+    Route::post('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'update'])->name('announcements.update');
+});
 
 
 /** Script */
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/technician.php';
+require __DIR__ . '/athlete.php';
 require __DIR__ . '/site.php';
 require __DIR__ . '/dean.php';

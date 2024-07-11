@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Exports\EventParticipantsExport;
+use App\Mail\EventRejectionMail;
 use App\Models\Academy;
+use App\Models\Announcement;
 use App\Models\Event;
 use App\Models\EventType;
 use App\Models\Nation;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -20,7 +24,8 @@ class EventController extends Controller {
     public function index() {
         //
 
-        $user = auth()->user();
+        $auth = auth()->user();
+        $user = User::find($auth->id);
 
         if ($user->getRole() === 'technician') {
             $view = 'event.technician.index';
@@ -53,14 +58,14 @@ class EventController extends Controller {
     public function create() {
         //
 
-        $user = auth()->user();
+        $auth = auth()->user();
+        $user = User::find($auth->id);
 
         if ($user->getRole() === 'admin') {
             $academies = Academy::all();
         } else {
             $academies = $user->academies()->get();
         }
-
 
         return view('event.create', [
             'academies' => $academies
@@ -73,7 +78,8 @@ class EventController extends Controller {
     public function store(Request $request) {
         //
 
-        $user = auth()->user();
+        $auth = auth()->user();
+        $user = User::find($auth->id);
 
         $request->validate([
             'name' => 'required',
@@ -128,7 +134,8 @@ class EventController extends Controller {
     public function edit(Event $event) {
         //
 
-        $user = auth()->user();
+        $auth = auth()->user();
+        $user = User::find($auth->id);
 
 
 
@@ -352,6 +359,21 @@ class EventController extends Controller {
         $event->save();
 
         return redirect()->route('events.edit', $event->id)->with('success', 'Event approved successfully!');
+    }
+
+    public function reject(Event $event) {
+
+        $announcement = Announcement::create([
+            'object' => 'Event Rejected',
+            'content' => 'The event ' . $event->name . ' has been rejected. Reason: ' . request()->reason,
+            'user_id' => $event->user_id,
+            'type' => 4,
+        ]);
+
+        Mail::to($event->user->email)->send(new EventRejectionMail(request()->reason));
+        $event->delete();
+
+        return redirect()->route('events.index')->with('success', 'Event rejected successfully!');
     }
 
     public function publish(Event $event) {

@@ -21,4 +21,7 @@ return [
     'dean_courses_with_athletes_chart' => 'Courses with most athletes',
     'instructor_courses' => 'Select course',
     'instructor_inactive_users' => 'Inactive users',
+    'athlete_announcements' => 'Announcements',
+    'athlete_no_announcements' => 'No announcements',
+    'athlete_announcements_text' => 'You have :count new announcements to read',
 ];

@@ -11,7 +11,6 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="flex flex-col gap-4 mb-4">
 
-
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8"
                     x-data="{}">
                     <div class="flex justify-between">
@@ -75,6 +74,8 @@
                         </x-slot>
                     </x-table>
                 </div>
+
+                <x-nations.search-users :nation="$nation" :roles="$roles" />
             </div>
         </div>
     </div>

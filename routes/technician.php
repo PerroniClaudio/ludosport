@@ -18,6 +18,9 @@ Route::prefix('technician')->middleware('auth')->middleware('role:tecnico')->mid
     Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('technician.events.participants.add');
     Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('technician.events.participants.export');
 
+    Route::get('announcements', [App\Http\Controllers\AnnouncementController::class, 'technician'])->name('technician.announcements.index');
+    Route::post('announcements/{announcement}/seen', [App\Http\Controllers\AnnouncementController::class, 'setSeen'])->name('technician.announcements.seen');
+
     // Route::post('events', [App\Http\Controllers\EventController::class, 'store'])->name();
     // Route::put('events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name();
     // Route::delete('events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])->name();

@@ -17,7 +17,7 @@
                             {{ __('users.filter_results') }}
                         </h3>
                         <div>
-                            <a href="{{ route('users.filter') }}">
+                            <a href="{{ isset($backUrl) ? $backUrl : route('users.filter') }}">
                                 <x-primary-button>
                                     {{ __('users.back_to_filter') }}
                                 </x-primary-button>

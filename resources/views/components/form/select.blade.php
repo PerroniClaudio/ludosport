@@ -19,10 +19,10 @@
         {{ $xModel ? 'x-model=' . $xModel : '' }}>
 
         @if ($shouldHaveEmptyOption)
-            <option value="">{{ __('Select an option') }}</option>
+            <option value="" selected>{{ __('Select an option') }}</option>
         @endif
 
-        @if ($selected)
+        @if ($selected != null)
             <option value="{{ $selected['value'] }}" selected>{{ $selected['label'] }}</option>
         @endif
 

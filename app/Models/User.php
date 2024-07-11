@@ -94,6 +94,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
 
+    public function seenAnnouncements() {
+        return $this->belongsToMany(Announcement::class, 'announcement_users', 'user_id', 'announcement_id');
+    }
+
     public function imports() {
         return $this->hasMany(Import::class);
     }
@@ -124,7 +128,13 @@ class User extends Authenticatable implements MustVerifyEmail {
                     ]
                 ]);
             case 'athlete':
-                return collect([]);
+                return collect([
+                    (object)[
+                        'label' => 'announcements',
+                        'active' => 'announcements.*',
+                        'name' => 'athlete.announcements.index',
+                    ]
+                ]);
             case 'rector':
                 return collect([
                     (object)[
@@ -157,6 +167,11 @@ class User extends Authenticatable implements MustVerifyEmail {
                 ]);
             case 'technician':
                 return collect([
+                    (object)[
+                        'label' => 'announcements',
+                        'active' => 'announcements.*',
+                        'name' => 'technician.announcements.index',
+                    ],
                     (object)[
                         'label' => 'users',
                         'active' => 'users.*',
@@ -199,6 +214,12 @@ class User extends Authenticatable implements MustVerifyEmail {
     public function allowedRoles(): array {
         return $this->roles()->get()->map(function ($role) {
             return $role->name;
+        })->toArray();
+    }
+
+    public function allowedRoleIds(): array {
+        return $this->roles()->get()->map(function ($role) {
+            return $role->id;
         })->toArray();
     }
 
