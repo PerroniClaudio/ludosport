@@ -224,9 +224,12 @@ class UserController extends Controller {
             $school->personnel()->attach($user->id);
         }
 
+        $userRole = auth()->user()->getRole();
         if ($request->go_to_edit === 'on') {
-            return redirect()->route('users.edit', $user->id)->with('success', 'User created successfully!');
+            $redirectRoute = $userRole === 'admin' ? 'users.edit' : $userRole . '.users.edit';
+            return redirect()->route($redirectRoute, $user->id)->with('success', 'User created successfully!');
         } else {
+            $redirectRoute = $userRole === 'admin' ? 'schools.edit' : $userRole . '.users.edit';
             return redirect()->route('schools.edit', $school->id)->with('success', 'User created successfully!');
         }
     }
@@ -578,16 +581,19 @@ class UserController extends Controller {
     public function dashboard(Request $request) {
         $user = auth()->user()->id;
         $user = User::find($user);
+        $role = $user->getRole();
 
-        if ($user->getRole() == "instructor") {
-            if (isset($request->course_id)) {
-                return $this->handleInstructor($request->course_id, $user);
-            } else {
-                return $this->handleInstructor(0, $user);
-            }
-        } else {
-            $view = 'dashboard.' . $user->getRole() . '.index';
-            return view($view);
+        // Modificato per poter poi aggiungere altri ruoli
+        switch ($role){
+            case 'instructor':
+                if (isset($request->course_id)) {
+                    return $this->handleInstructor($request->course_id, $user);
+                } else {
+                    return $this->handleInstructor(0, $user);
+                }
+            default:
+                $view = 'dashboard.' . $role . '.index';
+                return view($view);
         }
     }
 

@@ -16,8 +16,7 @@ class UserRoleMiddleware {
     public function handle(Request $request, Closure $next, string $role): Response {
 
         $selectedRole = Role::where('name', $role)->first();
-        $user = $selectedRole->users()->where('user_id', $request->user()->id)->get();
-
+        $user = $selectedRole->users()->where('user_id', $request->user()->id)->first();
         if (!$user) {
             return redirect()->route('dashboard');
         }

@@ -17,6 +17,14 @@ class SchoolController extends Controller {
      */
     public function index() {
         //
+
+        // The dean (and maybe others, ex. manager) should only see his school
+        if(auth()->user()->getRole() === 'dean') {
+            $school = auth()->user()->schools->where('is_disabled', '0')->first();
+            
+            return $this->edit($school);
+        }
+
         $schools = School::with('nation')->where('is_disabled', '0')->orderBy('created_at', 'desc')->get();
 
         foreach ($schools as $key => $school) {
@@ -121,6 +129,7 @@ class SchoolController extends Controller {
      */
     public function edit(School $school) {
         //
+        $role = auth()->user()->getRole();
 
         $nations = Nation::all();
 
@@ -159,7 +168,7 @@ class SchoolController extends Controller {
 
         $roles = Role::all();
 
-        return view('school.edit', [
+        return view($role === 'admin' ? 'school.edit' : 'school.' . $role . '.edit', [
             'school' => $school,
             'nations' => $countries,
             'clans' => $clans,
