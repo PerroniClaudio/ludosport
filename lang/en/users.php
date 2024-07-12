@@ -72,4 +72,7 @@ return [
     'filter_by_fee' => 'Filter by fee',
     'filter_results' => 'Filter Results',
     'back_to_filter' => 'Back to filters',
+    'custom_role_create' => 'Create Custom Role',
+    'custom_role_search' => 'Search Custom Roles',
+    'custom_role_select' => 'Select Custom Role',
 ];

@@ -332,6 +332,7 @@ class UserController extends Controller {
             );
         }
 
+
         return view('users.edit', [
             'user' => $user,
             'academies' => $user->nation->academies ?? [],
