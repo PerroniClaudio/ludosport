@@ -171,6 +171,10 @@
 
                         <input type="hidden" name="roles" x-model="selected">
                     </div>
+
+                    @if ($user->hasRole('manager'))
+                        <x-user.custom-role :user="$user->id" :roleid="isset($user->customRoles()->first()->id) ? $user->customRoles()->first()->id : 0" />
+                    @endif
                 </div>
 
 

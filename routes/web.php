@@ -234,6 +234,15 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'update'])->name('announcements.update');
 });
 
+/** Ruoli */
+
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+    Route::get('/custom-roles', [App\Http\Controllers\RoleController::class, 'index'])->name('roles.index');
+    Route::get('/custom-roles/search', [App\Http\Controllers\RoleController::class, 'search'])->name('roles.search');
+    Route::post('/custom-roles/assign', [App\Http\Controllers\RoleController::class, 'assign'])->name('roles.assign');
+    Route::post('/custom-roles', [App\Http\Controllers\RoleController::class, 'store'])->name('roles.store');
+});
+
 
 /** Script */
 
