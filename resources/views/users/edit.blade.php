@@ -109,8 +109,6 @@
                     </div>
                 </div>
 
-
-
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">
                         {{ __('users.authorization') }}</h3>
@@ -177,7 +175,6 @@
                     @endif
                 </div>
 
-
                 <div class="fixed bottom-8 right-32">
                     <x-primary-button type="submit">
                         <x-lucide-save class="w-6 h-6 text-white" />
@@ -185,6 +182,21 @@
                 </div>
 
             </form>
+
+            @if ($user->hasRole('instructor') || $user->hasRole('technician'))
+                <div class="grid grid-cols-2 gap-4 my-4">
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                            {{ __('users.weapons_and_forms') }}</h3>
+                        <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                    </div>
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                            {{ __('users.languages') }}</h3>
+                        <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                    </div>
+                </div>
+            @endif
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4"
                 x-data="{}">
