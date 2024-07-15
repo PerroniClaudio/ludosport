@@ -75,4 +75,6 @@ return [
     'custom_role_create' => 'Create Custom Role',
     'custom_role_search' => 'Search Custom Roles',
     'custom_role_select' => 'Select Custom Role',
+    'weapons_forms' => 'Weapon Forms',
+    'languages' => 'Languages',
 ];
