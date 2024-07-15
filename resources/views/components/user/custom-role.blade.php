@@ -3,6 +3,12 @@
     'roleid' => 0,
 ])
 
+@php
+    $authUser = auth()->user();
+    $authUserRole = $authUser->getRole();
+    // $canCreateCustomRole = in_array($authUserRole, ['admin', 'rector', 'dean']);
+@endphp
+
 <div x-data="{
     user: {{ $user }},
     selectedRole: {{ $roleid }},
@@ -13,6 +19,7 @@
     canShowSearchResult: false,
     loading: false,
     selectedSearchRole: 0,
+    authUserRole: '{{ $authUserRole }}',
     uppercaseFirstLetters: function(string) {
 
         return string.replace(/\b\w/g, function(l) {
@@ -22,7 +29,8 @@
     },
     init() {
         this.loading = true;
-        fetch('/custom-roles')
+        const fetchRoute = this.authUserRole === 'admin' ? '/custom-roles' : '/' + this.authUserRole + '/custom-roles'; 
+        fetch(fetchRoute)
             .then(response => response.json())
             .then(data => {
                 this.roles = data.map(role => ({
@@ -41,8 +49,8 @@
         const body = new FormData();
         body.append('name', this.newCustomRoleName);
         body.append('user_id', this.user)
-
-        fetch('/custom-roles', {
+        const fetchRoute = this.authUserRole === 'admin' ? '/custom-roles' : '/' + this.authUserRole + '/custom-roles'; 
+        fetch(fetchRoute, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -66,8 +74,8 @@
         const params = new URLSearchParams({
             name: this.searchCustomRoleName
         });
-
-        fetch(`/custom-roles/search?${params.toString()}`)
+        const fetchRoute = this.authUserRole === 'admin' ? '/custom-roles/search' : '/' + this.authUserRole + '/custom-roles/search'; 
+        fetch(fetchRoute + `?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
                 console.log(data)
@@ -91,8 +99,8 @@
         const body = new FormData();
         body.append('role_id', this.selectedRole);
         body.append('user_id', this.user)
-
-        fetch('/custom-roles/assign', {
+        const fetchRoute = this.authUserRole === 'admin' ? '/custom-roles/assign' : '/' + this.authUserRole + '/custom-roles/assign'; 
+        fetch(fetchRoute, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'

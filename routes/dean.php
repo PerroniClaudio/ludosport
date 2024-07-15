@@ -15,11 +15,20 @@ Route::prefix('dean')->middleware('auth')->middleware('role:dean')->group(functi
       // Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('users.create');
       Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('dean.users.edit');
       // Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('users.store');
-      // Route::post('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
+      Route::post('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('dean.users.update');
       // Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.disable');
       // Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('nation.academies.index');
       // Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
       // Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('users.picture.update');
+    });
+
+    /** Ruoli */
+
+    Route::group([], function () {
+      Route::get('/custom-roles', [App\Http\Controllers\RoleController::class, 'index'])->name('dean.roles.index');
+      Route::get('/custom-roles/search', [App\Http\Controllers\RoleController::class, 'search'])->name('dean.roles.search');
+      Route::post('/custom-roles/assign', [App\Http\Controllers\RoleController::class, 'assign'])->name('dean.roles.assign');
+      Route::post('/custom-roles', [App\Http\Controllers\RoleController::class, 'store'])->name('dean.roles.store');
     });
     
     /** Scuole */

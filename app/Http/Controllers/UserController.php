@@ -332,8 +332,10 @@ class UserController extends Controller {
             );
         }
 
+        $authRole = auth()->user()->getRole();
+        $redirectRoute = $authRole === 'admin' ? 'users.edit' :  'users.' . $authRole . '.edit';
 
-        return view('users.edit', [
+        return view($redirectRoute, [
             'user' => $user,
             'academies' => $user->nation->academies ?? [],
             'schools' => $schools,
