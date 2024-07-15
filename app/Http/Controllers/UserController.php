@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Academy;
 use App\Models\Announcement;
 use App\Models\Clan;
+use App\Models\Language;
 use App\Models\Nation;
 use App\Models\Role;
 use App\Models\School;
@@ -335,12 +336,15 @@ class UserController extends Controller {
         $authRole = auth()->user()->getRole();
         $redirectRoute = $authRole === 'admin' ? 'users.edit' :  'users.' . $authRole . '.edit';
 
+        $allLanguages = Language::all();
+
         return view($redirectRoute, [
             'user' => $user,
             'academies' => $user->nation->academies ?? [],
             'schools' => $schools,
             'nations' => $countries,
             'roles' => $roles,
+            'languages' => $allLanguages,
         ]);
     }
 
@@ -590,7 +594,7 @@ class UserController extends Controller {
         $role = $user->getRole();
 
         // Modificato per poter poi aggiungere altri ruoli
-        switch ($role){
+        switch ($role) {
             case 'instructor':
                 if (isset($request->course_id)) {
                     return $this->handleInstructor($request->course_id, $user);
@@ -699,6 +703,21 @@ class UserController extends Controller {
         $view = 'dashboard.athlete.index';
         return view($view, [
             'announcements' => $not_seen,
+        ]);
+    }
+
+    public function languages(User $user, Request $request) {
+
+        $user->languages()->detach();
+
+        $languages = explode(',', $request->languages);
+
+        foreach ($languages as $language) {
+            $user->languages()->attach($language);
+        }
+
+        return response()->json([
+            'success' => true,
         ]);
     }
 }
