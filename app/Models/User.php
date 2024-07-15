@@ -126,6 +126,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->belongsToMany(Language::class, 'users_languages', 'user_id', 'language_id');
     }
 
+    public function rank() {
+        return $this->belongsTo(Rank::class);
+    }
+
     public function routes() {
 
         $role = $this->getRole();

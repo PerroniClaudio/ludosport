@@ -80,4 +80,8 @@ return [
     'languages_add' => 'Add Language',
     'available_languages' => 'Available Languages',
     'selected_languages' => 'Selected Languages',
+    'novice' => 'Novice',
+    'initiate' => 'Initiate',
+    'academic' => 'Academic',
+    'chevalier' => 'Chevalier',
 ];

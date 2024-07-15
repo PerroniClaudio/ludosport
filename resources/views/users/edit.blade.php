@@ -16,6 +16,34 @@
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <div class="w-1/2 flex flex-col gap-2">
                         <div>
+                            <div
+                                class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex items-center gap-2">
+                                @switch($user->rank->id)
+                                    @case(1)
+                                        <x-lucide-user class="w-6 h-6 text-background-800 dark:text-background-200" />
+                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
+                                    @break
+
+                                    @case(2)
+                                        <x-lucide-user-check class="w-6 h-6 text-background-800 dark:text-background-200" />
+                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
+                                    @break
+
+                                    @case(3)
+                                        <x-lucide-graduation-cap class="w-6 h-6 text-background-800 dark:text-background-200" />
+                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
+                                    @break
+
+                                    @case(4)
+                                        <x-lucide-shield-check class="w-6 h-6 text-background-800 dark:text-background-200" />
+                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
+                                    @break
+
+                                    @default
+                                @endswitch
+                            </div>
+                        </div>
+                        <div>
                             @if ($user->hasRole('athlete'))
                                 @if ($user->has_paid_fee)
                                     <div
@@ -68,6 +96,7 @@
                                 </div>
                             @endif
                         </div>
+
                     </div>
                 </div>
             </div>
