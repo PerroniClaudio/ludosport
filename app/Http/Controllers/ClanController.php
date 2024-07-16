@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Academy;
 use App\Models\Clan;
 use App\Models\Role;
 use App\Models\School;
@@ -33,8 +34,27 @@ class ClanController extends Controller {
      */
     public function create() {
         //
+        $authRole = auth()->user()->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])){
+            return redirect()->route($authRole . '.dashboard')->with('error', 'You are not authorized to access this page.');
+        }
+    
+        switch($authRole){
+            case 'admin':
+                $schools = School::all();
+                break;
+            case 'rector':
+                $schools = auth()->user()->academies->first()->schools;
+                break;
+            case 'dean':
+            case 'manager':
+                $schools = auth()->user()->schools->first();
+                break;
+            default:
+                $schools = [];
+                break;
+        }
 
-        $schools = School::all();
         $formatted_schools = [
             [
                 'value' => '',
@@ -49,7 +69,8 @@ class ClanController extends Controller {
             ];
         }
 
-        return view('clan.create', [
+        $viewPath = $authRole === 'admin' ? 'clan.create' : 'clan.' . $authRole . '.create';
+        return view($viewPath, [
             'schools' => $formatted_schools
         ]);
     }
@@ -59,6 +80,31 @@ class ClanController extends Controller {
      */
     public function store(Request $request) {
         //
+        $authRole = auth()->user()->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])){
+            return redirect()->route($authRole . '.dashboard')->with('error', 'You are not authorized to access this page.');
+        }
+
+        switch($authRole){
+            case 'admin':
+                break;
+            case 'rector':
+                $school = auth()->user()->academies->first()->schools->where('id', $request->school_id)->first();
+                if(!$school){
+                    return redirect()->route('rector.dashboard')->with('error', 'You are not authorized to access this page.');
+                }
+                break;
+            case 'dean':
+            case 'manager':
+                $school = auth()->user()->schools->first();
+                if($school->id !== $request->school_id){
+                    return redirect()->route('rector.dashboard')->with('error', 'You are not authorized to access this page.');
+                }
+                break;
+            default:
+                return redirect()->route('rector.dashboard')->with('error', 'You are not authorized to access this page.');
+                break;
+        }
 
         $request->validate([
             'name' => 'required',
@@ -77,7 +123,8 @@ class ClanController extends Controller {
             'slug' => $slug
         ]);
 
-        return redirect()->route('clans.edit', $clan)->with('success', 'Course created successfully.');
+        $redirectPath = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
+        return redirect()->route($redirectPath, $clan)->with('success', 'Course created successfully.');
     }
 
     public function storeForSchool(Request $request) {
@@ -99,10 +146,14 @@ class ClanController extends Controller {
             'slug' => $slug
         ]);
 
+        $authRole = auth()->user()->getRole();
+
         if ($request->go_to_edit_clan) {
-            return redirect()->route('clans.edit', $clan->id)->with('success', 'Course created successfully.');
+            $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
+            return redirect()->route($redirectRoute, $clan->id)->with('success', 'Course created successfully.');
         } else {
-            return redirect()->route('schools.edit', $request->school_id)->with('success', 'Course created successfully.');
+            $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
+            return redirect()->route($redirectRoute, $request->school_id)->with('success', 'Course created successfully.');
         }
     }
 
@@ -118,8 +169,35 @@ class ClanController extends Controller {
      */
     public function edit(Clan $clan) {
         //
+        $authUser = auth()->user();
+        $authRole = $authUser->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])){
+            return redirect()->route($authRole . '.dashboard')->with('error', 'You are not authorized to access this page.');
+        }
+        switch($authRole){
+            case 'admin':
+                $schools = School::all();
+                break;
+            case 'rector':
+                $school = $authUser->academies->first()->schools->where('id', $clan->school_id)->first();
+                if(!$school){
+                    return redirect()->route($authRole . '.dashboard')->with('error', 'You are not authorized to access this page.');
+                }
+                $schools = $authUser->academies->first()->schools;
+                break;
+            case 'dean':
+            case 'manager':
+                if($clan->school_id !== $authUser->schools->first()->id){
+                    return redirect()->route($authRole . '.dashboard')->with('error', 'You are not authorized to access this page.');
+                }
+                $schools = $authUser->schools->where('id', $authUser->schools->first()->id);
+                break;
+            default:
+                return redirect()->route($authRole . '.dashboard')->with('error', 'You are not authorized to access this page.');
+                $schools = [];
+                break;
+        }
 
-        $schools = School::all();
         $formatted_schools = [
             [
                 'value' => '',
@@ -137,11 +215,10 @@ class ClanController extends Controller {
         $associated_instructors = $clan->personnel;
         $associated_athletes = $clan->users()->where('is_disabled', '0')->get();
 
+        // Possono vedere tutti gli utenti e poi, se mancano delle associazioni con scuola e accademia, si aggiungono.
         $instructors = User::whereHas('roles', function ($query) {
             $query->where('label', 'instructor');
         })->whereNotIn('id', $clan->personnel->pluck('id'))->get();
-
-
         $athletes = User::whereHas('roles', function ($query) {
             $query->where('label', 'athlete');
         })->whereNotIn('id', $clan->users->pluck('id'))->get();
@@ -154,7 +231,8 @@ class ClanController extends Controller {
 
         $roles = Role::all();
 
-        return view('clan.edit', [
+        $viewPath = $authRole === 'admin' ? 'clan.edit' : 'clan.' . $authRole . '.edit';
+        return view($viewPath, [
             'clan' => $clan,
             'schools' => $formatted_schools,
             'associated_instructors' => $associated_instructors,
@@ -198,18 +276,53 @@ class ClanController extends Controller {
     }
 
     public function addInstructor(Clan $clan, Request $request) {
-        //
+        $authRole = auth()->user()->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])){
+            return redirect()->route($authRole . '.dashboard')->with('error', 'Not authorized.');
+        }
+        
+        // Se mancano le associazioni a scuola e accademia del corso, si aggiungono
+        $user = User::find($request->instructor_id);
+        $school = School::find($clan->school_id);
+        $academy = Academy::find($school->academy_id);
+        $isInThisSchool = $school->personnel->where('id', $user->id)->count();
+        $isInThisAcademy = $academy->personnel->where('id', $user->id)->count();
+        if(!$isInThisAcademy){
+            $academy->personnel()->attach($user);
+        }
+        if(!$isInThisSchool){
+            $school->personnel()->attach($user);
+        }
+
         $clan->personnel()->attach($request->instructor_id);
 
-        return redirect()->route('clans.edit', $clan)->with('success', 'Instructor added successfully.');
+        $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
+        return redirect()->route($redirectRoute, $clan)->with('success', 'Instructor added successfully.');
     }
 
     public function addAthlete(Clan $clan, Request $request) {
-        //
+        $authRole = auth()->user()->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])){
+            return redirect()->route($authRole . '.dashboard')->with('error', 'Not authorized.');
+        }
+
+        // Se mancano le associazioni a scuola e accademia del corso, si aggiungono
+        $user = User::find($request->athlete_id);
+        $school = School::find($clan->school_id);
+        $academy = Academy::find($school->academy_id);
+        $isInThisSchool = $school->athletes->where('id', $user->id)->count();
+        $isInThisAcademy = $academy->athletes->where('id', $user->id)->count();
+        if(!$isInThisAcademy){
+            $academy->athletes()->attach($user);
+        }
+        if(!$isInThisSchool){
+            $school->athletes()->attach($user);
+        }
 
         $clan->users()->attach($request->athlete_id);
 
-        return redirect()->route('clans.edit', $clan)->with('success', 'Athlete added successfully.');
+        $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
+        return redirect()->route($redirectRoute, $clan)->with('success', 'Athlete added successfully.');
     }
 
     public function all(Request $request) {

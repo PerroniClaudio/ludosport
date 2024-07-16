@@ -9,8 +9,11 @@
     </x-primary-button>
 
     <x-modal name="new-clan-modal" :show="$errors->get('name') || $errors->get('go_to_edit')" focusable>
-
-        <form method="post" action="{{ route('schools.clan.create', $school) }}" class="p-6 flex flex-col gap-4"
+        @php
+            $authRole = auth()->user()->getRole();
+            $formRoute = $authRole === 'admin' ? 'schools.clan.create' : $authRole . '.schools.clan.create';
+        @endphp
+        <form method="post" action="{{ route($formRoute, $school) }}" class="p-6 flex flex-col gap-4"
             x-ref="form">
             @csrf
 

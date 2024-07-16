@@ -274,7 +274,7 @@ class UserController extends Controller {
             $redirectRoute = $userRole === 'admin' ? 'users.edit' : $userRole . '.users.edit';
             return redirect()->route($redirectRoute, $user->id)->with('success', 'User created successfully!');
         } else {
-            $redirectRoute = $userRole === 'admin' ? 'schools.edit' : $userRole . '.users.edit';
+            $redirectRoute = $userRole === 'admin' ? 'schools.edit' : $userRole . '.schools.edit';
             return redirect()->route($redirectRoute, $school->id)->with('success', 'User created successfully!');
         }
     }

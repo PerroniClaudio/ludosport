@@ -38,4 +38,8 @@ class Clan extends Model {
     public function nation() {
         return $this->belongsTo(Nation::class);
     }
+
+    public function academy() {
+        return $this->belongsTo(Academy::class);
+    }
 }

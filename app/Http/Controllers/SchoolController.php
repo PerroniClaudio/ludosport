@@ -23,7 +23,7 @@ class SchoolController extends Controller {
         $authRole = auth()->user()->getRole();
         if(in_array($authRole, ['dean', 'manager'])) {
             $school = auth()->user()->schools->where('is_disabled', '0')->first();
-            if($school->id){
+            if($school){
                 return $this->edit($school);
             }
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
@@ -193,7 +193,8 @@ class SchoolController extends Controller {
 
         $roles = Role::all();
 
-        return view($authRole === 'admin' ? 'school.edit' : 'school.' . $authRole . '.edit', [
+        $viewPath = $authRole === 'admin' ? 'school.edit' : 'school.' . $authRole . '.edit';
+        return view($viewPath, [
             'school' => $school,
             'nations' => $countries,
             'clans' => $clans,
@@ -247,13 +248,18 @@ class SchoolController extends Controller {
 
     public function addClan(School $school, Request $request) {
         //
+        if(!$this->checkPermission($school)){
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
 
         $clan = Clan::find($request->clan_id);
         $clan->school_id = $school->id;
 
         $clan->save();
 
-        return redirect()->route('schools.edit', $school)->with('success', 'Course added successfully!');
+        $authRole = auth()->user()->getRole();
+        $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
+        return redirect()->route($redirectRoute, $school)->with('success', 'Course added successfully!');
     }
 
     public function addPersonnel(School $school, Request $request) {
@@ -262,7 +268,13 @@ class SchoolController extends Controller {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
+        // Se mancano le associazioni a scuola e accademia del corso, si aggiungono
         $personnel = User::find($request->personnel_id);
+        $academy = Academy::find($school->academy_id);
+        $isInThisAcademy = $academy->personnel->where('id', $personnel->id)->count();
+        if(!$isInThisAcademy){
+            $academy->personnel()->attach($personnel);
+        }
 
         $school->personnel()->attach($personnel);
 
@@ -278,11 +290,17 @@ class SchoolController extends Controller {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
+        // Se mancano le associazioni a scuola e accademia del corso, si aggiungono
         $athlete = User::find($request->athlete_id);
+        $academy = Academy::find($school->academy_id);
+        $isInThisAcademy = $academy->athletes->where('id', $athlete->id)->count();
+        if(!$isInThisAcademy){
+            $academy->athletes()->attach($athlete);
+        }
         
         $school->athletes()->attach($athlete);
         
-        // $authRole = auth()->user()->getRole();
+        $authRole = auth()->user()->getRole();
         $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
 
         return redirect()->route($redirectRoute, $school)->with('success', 'Athlete added successfully!');

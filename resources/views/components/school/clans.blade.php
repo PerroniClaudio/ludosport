@@ -6,7 +6,11 @@
     </x-primary-button>
 
     <x-modal name="clan-modal" :show="$errors->schoolId->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('schools.clans.store', $school->id) }}" class="p-6" x-ref="form">
+        @php
+            $authRole = auth()->user()->getRole();
+            $formRoute = $authRole === 'admin' ? 'schools.clans.store' : $authRole . '.schools.clans.store';
+        @endphp
+        <form method="post" action="{{ route($formRoute, $school->id) }}" class="p-6" x-ref="form">
             @csrf
 
             <input type="hidden" name="clan_id" x-model="selectedClanId">

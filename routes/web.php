@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 
-use MeiliSearch\Client;
-
 ini_set ('display_errors', 1);
 ini_set ('display_startup_errors', 1);
 error_reporting (E_ALL);
@@ -260,36 +258,3 @@ require __DIR__ . '/athlete.php';
 require __DIR__ . '/site.php';
 require __DIR__ . '/dean.php';
 
-// Route::get('/test', function () {
-//     // Assicurati di avere installato il client PHP di MeiliSearch
-//     // composer require meilisearch/meilisearch-php
-
-//     require_once '../vendor/autoload.php';
-
-//     try {
-//         $client = new Client(env('MEILISEARCH_HOST'), env('MEILISEARCH_KEY'));
-//         // $indexes = $client->getIndexes();
-    
-//         // foreach ($indexes as $index) {
-//         //     echo "Index: " . $index->getUid() . "\n";
-//         //     $documents = $index->search('')->getHits();
-    
-//         //     foreach ($documents as $document) {
-//         //         print_r($document);
-//         //     }
-//         // }
-
-//         $users = User::all()->toArray();
-//         $result = $client->index('users')->addDocuments($users, 'id');
-//         echo "Numero di utenti importati: " . count($users) . "\n";
-//         foreach ($users as $user) {
-//             echo "User: " . $user['name'] . "\n";
-//         }
-//         var_dump($result);
-
-//         // return $client->getTask(16);
-
-//     } catch (Exception $e) {
-//         echo 'Eccezione catturata: ',  $e->getMessage(), "\n";
-//     }
-// })->name('test');

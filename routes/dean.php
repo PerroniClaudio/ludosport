@@ -54,9 +54,9 @@ Route::prefix('dean')->middleware('auth')->middleware('role:dean')->group(functi
 
 
       Route::post('/schools/{school}/users/create', [App\Http\Controllers\UserController::class, 'storeForSchool'])->name('dean.schools.users.create');
-      // Route::post('/schools/{school}/clan/create', [App\Http\Controllers\ClanController::class, 'storeForSchool'])->name('dean.schools.clan.create');
+      Route::post('/schools/{school}/clan/create', [App\Http\Controllers\ClanController::class, 'storeForSchool'])->name('dean.schools.clan.create');
 
-      // Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('dean.schools.clans.store');
+      Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('dean.schools.clans.store');
       Route::post('/schools/{school}/personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('dean.schools.personnel.store');
       Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('dean.schools.athlete.store');
     });
@@ -65,21 +65,21 @@ Route::prefix('dean')->middleware('auth')->middleware('role:dean')->group(functi
     /** Clan */
     
     Route::group([], function () {
-      // Route::get('/courses', [App\Http\Controllers\ClanController::class, 'index'])->name('clans.index');
-      // Route::get('/courses/create', [App\Http\Controllers\ClanController::class, 'create'])->name('clans.create');
+      Route::get('/courses', [App\Http\Controllers\ClanController::class, 'index'])->name('dean.clans.index');
+      // Route::get('/courses/create', [App\Http\Controllers\ClanController::class, 'create'])->name('dean.clans.create');
   
-      // Route::get('/courses/all', [App\Http\Controllers\ClanController::class, 'all'])->name('clans.all');
-      // Route::get('/courses/search', [App\Http\Controllers\ClanController::class, 'search'])->name('clans.search');
-      // Route::get('/courses/school', [App\Http\Controllers\ClanController::class, 'getBySchool'])->name('clans.school');
+      // Route::get('/courses/all', [App\Http\Controllers\ClanController::class, 'all'])->name('dean.clans.all');
+      // Route::get('/courses/search', [App\Http\Controllers\ClanController::class, 'search'])->name('dean.clans.search');
+      // Route::get('/courses/school', [App\Http\Controllers\ClanController::class, 'getBySchool'])->name('dean.clans.school');
   
-      // Route::get('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'edit'])->name('clans.edit');
-      // Route::delete('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'destroy'])->name('clans.disable');
+      Route::get('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'edit'])->name('dean.clans.edit');
+      // Route::delete('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'destroy'])->name('dean.clans.disable');
   
-      // Route::post('/courses', [App\Http\Controllers\ClanController::class, 'store'])->name('clans.store');
-      // Route::post('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'update'])->name('clans.update');
-      // Route::post('/courses/{clan}/user/create', [App\Http\Controllers\UserController::class, 'storeForClan'])->name('clans.users.create');
-      // Route::post('/courses/{clan}/instructors', [App\Http\Controllers\ClanController::class, 'addInstructor'])->name('clans.instructors.store');
-      // Route::post('/courses/{clan}/athlete', [App\Http\Controllers\ClanController::class, 'addAthlete'])->name('clans.athletes.store');
+      Route::post('/courses', [App\Http\Controllers\ClanController::class, 'store'])->name('dean.clans.store');
+      Route::post('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'update'])->name('dean.clans.update');
+      // Route::post('/courses/{clan}/user/create', [App\Http\Controllers\UserController::class, 'storeForClan'])->name('dean.clans.users.create');
+      // Route::post('/courses/{clan}/instructors', [App\Http\Controllers\ClanController::class, 'addInstructor'])->name('dean.clans.instructors.store');
+      // Route::post('/courses/{clan}/athlete', [App\Http\Controllers\ClanController::class, 'addAthlete'])->name('dean.clans.athletes.store');
     });
 
   
