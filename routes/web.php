@@ -58,6 +58,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('users.search');
     Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('users.create');
     Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
+
+    Route::post('/users/{user}/languages', [App\Http\Controllers\UserController::class, 'languages'])->name('users.languages.store');
     Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('users.store');
     Route::post('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.disable');

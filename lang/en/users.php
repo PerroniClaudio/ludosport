@@ -77,4 +77,11 @@ return [
     'custom_role_select' => 'Select Custom Role',
     'weapons_forms' => 'Weapon Forms',
     'languages' => 'Languages',
+    'languages_add' => 'Add Language',
+    'available_languages' => 'Available Languages',
+    'selected_languages' => 'Selected Languages',
+    'novice' => 'Novice',
+    'initiate' => 'Initiate',
+    'academic' => 'Academic',
+    'chevalier' => 'Chevalier',
 ];
