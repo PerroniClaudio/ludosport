@@ -103,8 +103,12 @@
                         'rowClasses' => '',
                     ],
                 ]" :rows="$associated_personnel">
+                    @php
+                        $authRole = auth()->user()->getRole();
+                        $editUserPath = $authRole === 'admin' ? '/users/' : '/' . $authRole . '/users/';
+                    @endphp
                     <x-slot name="tableActions">
-                        <a x-bind:href="'/users/' + row.id">
+                        <a x-bind:href="'{{ $editUserPath }}' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>

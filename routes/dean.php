@@ -36,29 +36,29 @@ Route::prefix('dean')->middleware('auth')->middleware('role:dean')->group(functi
     Route::get('school', [App\Http\Controllers\SchoolController::class, 'index'])->name('dean.school.index'); //reindirizza all'edit della scuola principale
     
     Route::group([], function () {
-      // Route::get('/schools', [App\Http\Controllers\SchoolController::class, 'index'])->name('schools.index');
-      // Route::get('/schools/create', [App\Http\Controllers\SchoolController::class, 'create'])->name('schools.create');
-      // Route::get('/schools/all', [App\Http\Controllers\SchoolController::class, 'all'])->name('schools.all');
-      // Route::get('/schools/academy', [App\Http\Controllers\SchoolController::class, 'getByAcademy'])->name('schools.academy');
-      // Route::get('/schools/search', [App\Http\Controllers\SchoolController::class, 'search'])->name('schools.search');
-      // Route::get('/schools/{school}/athletes-data', [App\Http\Controllers\SchoolController::class, 'athletesDataForSchool'])->name('schools.athletes-data');
-      // Route::get('/schools/{school}/athletes-clan-data', [App\Http\Controllers\SchoolController::class, 'athletesClanDataForSchool'])->name('schools.athletes-school-data');
-      // Route::get('/schools/{school}/athletes-year-data', [App\Http\Controllers\SchoolController::class, 'getAthletesNumberPerYear'])->name('schools.athletes-year-data');
+      // Route::get('/schools', [App\Http\Controllers\SchoolController::class, 'index'])->name('dean.schools.index');
+      // Route::get('/schools/create', [App\Http\Controllers\SchoolController::class, 'create'])->name('dean.schools.create');
+      // Route::get('/schools/all', [App\Http\Controllers\SchoolController::class, 'all'])->name('dean.schools.all');
+      // Route::get('/schools/academy', [App\Http\Controllers\SchoolController::class, 'getByAcademy'])->name('dean.schools.academy');
+      // Route::get('/schools/search', [App\Http\Controllers\SchoolController::class, 'search'])->name('dean.schools.search');
+      // Route::get('/schools/{school}/athletes-data', [App\Http\Controllers\SchoolController::class, 'athletesDataForSchool'])->name('dean.schools.athletes-data');
+      // Route::get('/schools/{school}/athletes-clan-data', [App\Http\Controllers\SchoolController::class, 'athletesClanDataForSchool'])->name('dean.schools.athletes-school-data');
+      // Route::get('/schools/{school}/athletes-year-data', [App\Http\Controllers\SchoolController::class, 'getAthletesNumberPerYear'])->name('dean.schools.athletes-year-data');
       
 
-      // Route::get('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'edit'])->name('schools.edit');
-      // Route::delete('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'destroy'])->name('schools.disable');
+      Route::get('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'edit'])->name('dean.schools.edit');
+      // Route::delete('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'destroy'])->name('dean.schools.disable');
 
-      // Route::post('/schools', [App\Http\Controllers\SchoolController::class, 'store'])->name('schools.store');
-      // Route::post('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'update'])->name('schools.update');
+      // Route::post('/schools', [App\Http\Controllers\SchoolController::class, 'store'])->name('dean.schools.store');
+      // Route::post('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'update'])->name('dean.schools.update');
 
 
       Route::post('/schools/{school}/users/create', [App\Http\Controllers\UserController::class, 'storeForSchool'])->name('dean.schools.users.create');
-      // Route::post('/schools/{school}/clan/create', [App\Http\Controllers\ClanController::class, 'storeForSchool'])->name('schools.clan.create');
+      // Route::post('/schools/{school}/clan/create', [App\Http\Controllers\ClanController::class, 'storeForSchool'])->name('dean.schools.clan.create');
 
-      // Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('schools.clans.store');
-      // Route::post('/schools/{school}/personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('schools.personnel.store');
-      // Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('schools.athlete.store');
+      // Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('dean.schools.clans.store');
+      Route::post('/schools/{school}/personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('dean.schools.personnel.store');
+      Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('dean.schools.athlete.store');
     });
     
 
@@ -84,21 +84,97 @@ Route::prefix('dean')->middleware('auth')->middleware('role:dean')->group(functi
 
   
   
-    // Route::get('events', [App\Http\Controllers\EventController::class, 'index'])->name('technician.events.index');
-    // Route::get('events/create', [App\Http\Controllers\EventController::class, 'create'])->name('technician.events.create');
-    // Route::post('events/create', [App\Http\Controllers\EventController::class, 'store'])->name('technician.events.store');
-    // Route::get('events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('technician.events.edit');
-    // Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('technician.events.save.description');
-    // Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('technician.events.save.location');
-    // Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('technician.events.update.thumbnail');
-    // Route::post('events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('technician.events.update');
+    /** Eventi */
 
-    // Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('technician.events.participants');
-    // Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('technician.events.available');
 
-    // Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('technician.events.participants.add');
-    // Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('technician.events.participants.export');
-    // Route::post('events', [App\Http\Controllers\EventController::class, 'store'])->name();
-    // Route::put('events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name();
-    // Route::delete('events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])->name();
+    // Route::get('/events/location', [App\Http\Controllers\EventController::class, 'getLocationData'])->name('events.location');
+    // Route::get('/events/coordinates', [App\Http\Controllers\EventController::class, 'coordinates'])->name('events.coordinates');
+
+    Route::group(['middleware' => ['auth', 'role:admin']], function () {
+        // Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');
+        // Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('events.calendar');
+        // Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('events.create');
+
+        //Tipi 
+
+        // Route::get('/event-types', [App\Http\Controllers\EventTypeController::class, 'index'])->name('events.list_types');
+        // Route::post('/event-types/create', [App\Http\Controllers\EventTypeController::class, 'store'])->name('events.new_type');
+        // Route::post('/event-types/{eventType}/associate', [App\Http\Controllers\EventTypeController::class, 'associate_event'])->name('events.associate_event');
+        // Route::post('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'update'])->name('events.update_type');
+        // Route::delete('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'destroy'])->name('events.type_disable');
+        // Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('events.types');
+        // Route::get('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'edit'])->name('events.edit_type');
+
+        // Route::get('/events/{event}/review', [App\Http\Controllers\EventController::class, 'review'])->name('events.review');
+        // Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('events.all');
+        // Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('events.search');
+        // Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('events.edit');
+        // Route::delete('/events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])->name('events.disable');
+
+        // Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('events.store');
+        // Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('events.update');
+        // Route::post('/events/{event}/reject', [App\Http\Controllers\EventController::class, 'reject'])->name('events.reject');
+        // Route::post('/events/{event}/approve', [App\Http\Controllers\EventController::class, 'approve'])->name('events.approve');
+        // Route::post('/events/{event}/publish', [App\Http\Controllers\EventController::class, 'publish'])->name('events.publish');
+        // Route::post('/events/{event}/participants', [App\Http\Controllers\EventController::class, 'addParticipant'])->name('events.participants.store');
+        // Route::post('/events/{event}/results', [App\Http\Controllers\EventController::class, 'addResult'])->name('events.results.store');
+    });
+
+    /** Imports */
+
+    Route::group(['middleware' => ['auth', 'role:admin']], function () {
+
+        // Route::get('/imports', [App\Http\Controllers\ImportController::class, 'index'])->name('imports.index');
+        // Route::get('/imports/create', [App\Http\Controllers\ImportController::class, 'create'])->name('imports.create');
+        // Route::delete('/imports/{import}', [App\Http\Controllers\ImportController::class, 'destroy'])->name('imports.disable');
+
+
+        // Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('imports.store');
+        // Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('imports.update');
+        // Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('imports.download');
+
+        // Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('imports.template');
+    });
+
+    /** Exports */
+
+    Route::group(['middleware' => ['auth', 'role:admin']], function () {
+        // Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('exports.index');
+        // Route::get('/exports/create', [App\Http\Controllers\ExportController::class, 'create'])->name('exports.create');
+        // Route::get('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('exports.download');
+        // Route::delete('/exports/{export}', [App\Http\Controllers\ExportController::class, 'destroy'])->name('exports.disable');
+
+        // Route::post('/exports', [App\Http\Controllers\ExportController::class, 'store'])->name('exports.store');
+        // Route::post('/exports/{export}', [App\Http\Controllers\ExportController::class, 'update'])->name('exports.update');
+        // Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('exports.download');
+    });
+
+
+    /** Rankings and Charts */
+
+    Route::group(['middleware' => ['auth', 'role:admin']], function () {
+        // Route::get('/rankings', [App\Http\Controllers\ChartController::class, 'index'])->name('rankings.index');
+        // Route::get('/rankings/paginate', [App\Http\Controllers\ChartController::class, 'paginate'])->name('rankings.paginate');
+    });
+
+    /** Annunci */
+
+    Route::group(['middleware' => ['auth', 'role:admin']], function () {
+        // Route::get('/announcements', [App\Http\Controllers\AnnouncementController::class, 'index'])->name('announcements.index');
+        // Route::get('/announcements/create', [App\Http\Controllers\AnnouncementController::class, 'create'])->name('announcements.create');
+        // Route::get('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'edit'])->name('announcements.edit');
+        // Route::delete('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'destroy'])->name('announcements.disable');
+
+        // Route::post('/announcements', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('announcements.store');
+        // Route::post('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'update'])->name('announcements.update');
+    });
+
+    /** Ruoli */
+
+    Route::group(['middleware' => ['auth', 'role:admin']], function () {
+        // Route::get('/custom-roles', [App\Http\Controllers\RoleController::class, 'index'])->name('roles.index');
+        // Route::get('/custom-roles/search', [App\Http\Controllers\RoleController::class, 'search'])->name('roles.search');
+        // Route::post('/custom-roles/assign', [App\Http\Controllers\RoleController::class, 'assign'])->name('roles.assign');
+        // Route::post('/custom-roles', [App\Http\Controllers\RoleController::class, 'store'])->name('roles.store');
+    });
 });

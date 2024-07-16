@@ -6,7 +6,11 @@
     </x-primary-button>
 
     <x-modal name="athlete-modal" :show="$errors->userId->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('schools.athlete.store', $school->id) }}" class="p-6" x-ref="form">
+        @php
+            $authRole = auth()->user()->getRole();
+            $formRoute = $authRole === 'admin' ? 'schools.athlete.store' : $authRole . '.schools.athlete.store';
+        @endphp
+        <form method="post" action="{{ route($formRoute, $school->id) }}" class="p-6" x-ref="form">
             @csrf
 
             <input type="hidden" name="athlete_id" x-model="selectedUserId">

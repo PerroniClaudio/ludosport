@@ -33,18 +33,10 @@
     <x-modal name="new-user-{{ $type }}-modal" :show="$should_show_modal_for_errors" focusable>
 
         @php
-            $userRole = auth()->user()->getRole();
-            $route= '';
-            switch($userRole){
-                case 'dean':
-                    $route = 'dean.schools.users.create';
-                    break;
-                default:
-                    $route = 'schools.users.create';
-                break;
-            }
+            $authRole = auth()->user()->getRole();
+            $formRoute = $authRole === 'admin' ? 'schools.users.create' : $authRole . '.schools.users.create';
         @endphp
-        <form action="{{ route($route, $school) }}" method="post" class="p-6 flex flex-col gap-4">
+        <form action="{{ route($formRoute, $school) }}" method="post" class="p-6 flex flex-col gap-4">
 
             @csrf
 
