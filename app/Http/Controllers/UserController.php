@@ -16,7 +16,10 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller {
 
-    public function index() {
+    public function index() { 
+        // Qui si dovrebbero filtrare gli utenti visualizzabili in base al ruolo dell'utente loggato.
+        // Es. dean vede solo gli utenti della sua scuola, admin vede tutti gli utenti, ecc.
+        $authUserRole = auth()->user()->getRole();
         $roles = Role::all();
         $users_sorted_by_role = [];
         foreach ($roles as $role) {
@@ -26,6 +29,41 @@ class UserController extends Controller {
             foreach ($role->users as $user) {
                 if ($user->is_disabled) {
                     continue;
+                }
+
+                // Se l'utente è un admin, non filtra nulla
+                
+                // Se l'utente è rector, filtra solo gli utenti della sua accademia
+                // è stato stabilito che rector, dean e manager vengono assegnati con questo ruolo ad una sola scuola e che questa scuola è la prima alla quale sono stati associati, quindi recuperabile col metodo first().
+                if($authUserRole === 'rector') {
+                    if($user->academies->where('id', auth()->user()->academies->first()->id)->isEmpty()
+                    && $user->academyAthletes->where('id', auth()->user()->academies->first()->id)->isEmpty()
+                    ) {
+                        continue;
+                    }
+                }
+
+                // Se l'utente è un dean o manager, filtra solo gli utenti della sua scuola
+                if(in_array($authUserRole, ['dean', 'manager'])) {
+                    $authSchool = auth()->user()->schools->where('is_disabled', '0')->first();
+                    if(
+                        $user->schools->where('id', $authSchool->id)->isEmpty()
+                        && $user->schoolAthletes->where('id', $authSchool->id)->isEmpty()
+                    ) {
+                        continue;
+                    }
+                }
+
+                // Se l'utente è un instructor o technician, filtra solo gli utenti dei corsi a cui è associato? tutti?
+                if(in_array($authUserRole, ['instructor', 'technician'])) {
+                    $authClans = auth()->user()->clansPersonnel->where('is_disabled', '0')->pluck('id')->toArray();
+
+                    if(
+                        $user->clansPersonnel->whereIn('id', $authClans)->isEmpty()
+                        && $user->clans->whereIn('id', $authClans)->isEmpty()
+                    ) {
+                        continue;
+                    }
                 }
 
                 if ($role->label === 'athlete') {
@@ -45,20 +83,23 @@ class UserController extends Controller {
             $users_sorted_by_role[$role->label] = $users;
         }
 
-        return view('users.index', [
+        $viewPath = $authUserRole === 'admin' ? 'users.index' : 'users.' . $authUserRole . '.index';
+
+        return view($viewPath, [
             'users' => $users_sorted_by_role,
             'roles' => $roles,
         ]);
     }
 
     public function create() {
-
-
         $roles = Role::all();
 
         $academies = Academy::where('is_disabled', false)->get();
+        
+        $authRole = auth()->user()->getRole();
+        $viewPath = $authRole === 'admin' ? 'users.create' :  'users.' . $authRole . '.create';
 
-        return view('users.create', [
+        return view($viewPath, [
             'roles' => $roles,
             'academies' => $academies,
         ]);
@@ -384,7 +425,10 @@ class UserController extends Controller {
             }
         }
 
-        return redirect()->route('users.index', $user)->with('success', 'User updated successfully!');
+        $authUserRole = auth()->user()->getRole();
+        $redirectRoute = $authUserRole === 'admin' ? 'users.index' :  $authUserRole . '.users.index';
+
+        return redirect()->route($redirectRoute, $user)->with('success', 'User updated successfully!');
     }
 
     public function destroy(User $user) {
@@ -411,6 +455,8 @@ class UserController extends Controller {
         //     ->with(['roles', 'academies', 'academyAthletes', 'nation'])
         //     ->get();
 
+
+        // Installare meilisearch e continuare aggiungendo le condizionni per rector, dean, manager ecc.
         $users = User::query()
             ->when($request->search, function (Builder $q, $value) {
                 return $q->whereIn('id', User::search($value)->keys());
@@ -563,7 +609,10 @@ class UserController extends Controller {
     }
 
     public function picture($id, Request $request) {
+        $authRole = $request->user()->getRole();
+        $redirectRoute = $authRole === 'admin' ? 'users.edit' :  $authRole . '.users.edit';
         if ($request->file('profilepicture') != null) {
+
             $file = $request->file('profilepicture');
             $file_name = time() . '_' . $file->getClientOriginalName();
             $path = "users/" . $id . "/" . $file_name;
@@ -575,12 +624,12 @@ class UserController extends Controller {
                 $user->profile_picture = $path;
                 $user->save();
 
-                return redirect()->route('users.edit', $user->id)->with('success', 'Profile picture uploaded successfully!');
+                return redirect()->route($redirectRoute, $user->id)->with('success', 'Profile picture uploaded successfully!');
             } else {
-                return redirect()->route('users.edit', $id)->with('error', 'Error uploading profile picture!');
+                return redirect()->route($redirectRoute, $id)->with('error', 'Error uploading profile picture!');
             }
         } else {
-            return redirect()->route('users.edit', $id)->with('error', 'Error uploading profile picture!');
+            return redirect()->route($redirectRoute, $id)->with('error', 'Error uploading profile picture!');
         }
     }
 

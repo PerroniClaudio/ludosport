@@ -200,7 +200,7 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('users.profile_picture') }}
                     </h3>
                     <div>
-                        <form method="POST" action="{{ route('users.picture.update', $user->id) }}"
+                        <form method="POST" action="{{ route('dean.users.picture.update', $user->id) }}"
                             enctype="multipart/form-data" x-ref="pfpform">
                             @csrf
                             @method('PUT')

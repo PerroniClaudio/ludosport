@@ -8,18 +8,18 @@ Route::prefix('dean')->middleware('auth')->middleware('role:dean')->group(functi
     /** Users */
 
     Route::group([], function () {
-      // Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users.index');
+      Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('dean.users.index');
       // Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('users.filter');
       // Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('users.filter.result');
-      // Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('users.search');
-      // Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('users.create');
+      Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('dean.users.search');
+      Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('dean.users.create');
       Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('dean.users.edit');
       // Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('users.store');
       Route::post('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('dean.users.update');
       // Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.disable');
       // Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('nation.academies.index');
       // Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
-      // Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('users.picture.update');
+      Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('dean.users.picture.update');
     });
 
     /** Ruoli */
