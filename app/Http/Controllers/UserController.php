@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Academy;
 use App\Models\Announcement;
 use App\Models\Clan;
+use App\Models\Invoice;
 use App\Models\Language;
 use App\Models\Nation;
 use App\Models\Role;
@@ -764,6 +765,51 @@ class UserController extends Controller {
         foreach ($languages as $language) {
             $user->languages()->attach($language);
         }
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    public function invoicedata(User $user) {
+
+        $last_invoice = $user->invoices()->latest()->first();
+
+        if ($last_invoice) {
+            return response()->json($last_invoice);
+        } else {
+            return response()->json([
+                'name' => $user->name,
+                'surname' => $user->surname,
+                'address' => [
+                    'address' => '',
+                    'zip' => '',
+                    'city' => '',
+                    'country' => $user->nation->name,
+                ],
+                'vat' => '',
+            ]);
+        }
+    }
+
+    public function saveInvoice(Request $request) {
+
+        $address = json_encode([
+            'address' => $request->address,
+            'zip' => $request->zip,
+            'city' => $request->city,
+            'country' => $request->country,
+        ]);
+
+        $invoice = Invoice::create([
+            'name' => $request->name,
+            'surname' => $request->surname,
+            'vat' => $request->vat,
+            'address' => $address,
+            'user_id' => Auth()->user()->id
+        ]);
+
+        $invoice->save();
 
         return response()->json([
             'success' => true,
