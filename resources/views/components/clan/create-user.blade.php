@@ -31,8 +31,11 @@
     </x-primary-button>
 
     <x-modal name="new-user-{{ $type }}-modal" :show="$should_show_modal_for_errors" focusable>
-
-        <form action="{{ route('clans.users.create', $clan) }}" method="post" class="p-6 flex flex-col gap-4">
+        @php
+            $authRole = auth()->user()->getRole();
+            $editUserRoute = $authRole === 'admin' ? 'clans.users.create' : $authRole . '.clans.users.create';
+        @endphp
+        <form action="{{ route($editUserRoute, $clan) }}" method="post" class="p-6 flex flex-col gap-4">
 
             @csrf
 

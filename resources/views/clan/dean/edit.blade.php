@@ -10,11 +10,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                @php
-                    $authRole = auth()->user()->getRole();
-                    $formRoute = $authRole === 'admin' ? 'clans.update' : $authRole . '.clans.update';
-                @endphp
-                <form method="POST" action="{{ route($formRoute, $clan->id) }}">
+                <form method="POST" action="{{ route('dean.clans.update', $clan->id) }}">
                     @csrf
                     <div class="flex flex-col gap-2 w-1/2">
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
@@ -69,11 +65,7 @@
                     ],
                 ]" :rows="$associated_instructors">
                     <x-slot name="tableActions">
-                        @php
-                            $authRole = auth()->user()->getRole();
-                            $editUserPath = $authRole === 'admin' ? '/users/' : $authRole . '/users/';
-                        @endphp
-                        <a x-bind:href="'{{$editUserPath}}' + row.id">
+                        <a x-bind:href="'/dean/users/' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>
@@ -140,11 +132,7 @@
                         </td>
                         <td
                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                            @php
-                                $authRole = auth()->user()->getRole();
-                                $editUserPath = $authRole === 'admin' ? '/users/' : $authRole . '/users/';
-                            @endphp
-                            <a x-bind:href="'{{$editUserPath}}' + row.id">
+                            <a x-bind:href="'/dean/users/' + row.id">
                                 <x-lucide-pencil
                                     class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                             </a>

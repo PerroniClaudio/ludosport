@@ -34,8 +34,9 @@ class UserController extends Controller {
 
                 // Se l'utente è un admin, non filtra nulla
                 
-                // Se l'utente è rector, filtra solo gli utenti della sua accademia
-                // è stato stabilito che rector, dean e manager vengono assegnati con questo ruolo ad una sola scuola e che questa scuola è la prima alla quale sono stati associati, quindi recuperabile col metodo first().
+                // Se l'utente è rector, filtra solo gli utenti della sua accademia (sia personale che atleti)
+                // è stato stabilito che rector, dean e manager vengono assegnati con questo ruolo ad una sola scuola 
+                // e che questa scuola è la prima alla quale sono stati associati, quindi recuperabile col metodo first().
                 if($authUserRole === 'rector') {
                     if($user->academies->where('id', auth()->user()->academies->first()->id)->isEmpty()
                     && $user->academyAthletes->where('id', auth()->user()->academies->first()->id)->isEmpty()
@@ -93,11 +94,30 @@ class UserController extends Controller {
     }
 
     public function create() {
-        $roles = Role::all();
-
-        $academies = Academy::where('is_disabled', false)->get();
-        
         $authRole = auth()->user()->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
+
+        switch($authRole) {
+            case 'admin':
+                $roles = Role::all();
+                $academies = Academy::where('is_disabled', false)->get();                
+                break;
+            case 'rector':
+                $roles = Role::all()->whereNotIn('name', ['admin']);
+                $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->academies->first()->id)->get();                
+                break;
+            case 'dean':
+            case 'manager':
+                $roles = Role::all()->whereNotIn('name', ['admin', 'rector']);
+                $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->schools->first()->academy->id)->get();
+                break;
+            default:
+                return back()->with('error', 'You do not have the required role to access this page!');
+
+        }
+        
         $viewPath = $authRole === 'admin' ? 'users.create' :  'users.' . $authRole . '.create';
 
         return view($viewPath, [
@@ -112,6 +132,12 @@ class UserController extends Controller {
             'email' => 'required|email|unique:users,email',
 
         ]);
+
+        $authRole = auth()->user()->getRole();
+
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
 
         $code_valid = false;
 
@@ -162,8 +188,8 @@ class UserController extends Controller {
             }
         }
 
-
-        return redirect()->route('users.edit', $user)->with('success', 'User created successfully!');
+        $redirectRoute = $authRole === 'admin' ? 'users.edit' :  $authRole . '.users.edit';
+        return redirect()->route($redirectRoute, $user)->with('success', 'User created successfully!');
     }
 
     public function storeForAcademy(Request $request) {
@@ -227,6 +253,11 @@ class UserController extends Controller {
             'surname' => 'required|string|max:255',
         ]);
 
+        $authRole = auth()->user()->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
+
         $code_valid = false;
 
         while (!$code_valid) {
@@ -269,17 +300,22 @@ class UserController extends Controller {
             $school->personnel()->attach($user->id);
         }
 
-        $userRole = auth()->user()->getRole();
+        $authRole = auth()->user()->getRole();
         if ($request->go_to_edit === 'on') {
-            $redirectRoute = $userRole === 'admin' ? 'users.edit' : $userRole . '.users.edit';
+            $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
             return redirect()->route($redirectRoute, $user->id)->with('success', 'User created successfully!');
         } else {
-            $redirectRoute = $userRole === 'admin' ? 'schools.edit' : $userRole . '.schools.edit';
+            $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
             return redirect()->route($redirectRoute, $school->id)->with('success', 'User created successfully!');
         }
     }
 
     public function  storeForClan(Request $request) {
+        $authRole = auth()->user()->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -332,13 +368,20 @@ class UserController extends Controller {
         }
 
         if ($request->go_to_edit === 'on') {
-            return redirect()->route('users.edit', $user->id)->with('success', 'User created successfully!');
+            $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
+            return redirect()->route($redirectRoute, $user->id)->with('success', 'User created successfully!');
         } else {
-            return redirect()->route('clans.edit', $request->clan_id)->with('success', 'User created successfully!');
+            $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
+            return redirect()->route($redirectRoute, $request->clan_id)->with('success', 'User created successfully!');
         }
     }
 
     public function edit(User $user) {
+
+        $authRole = auth()->user()->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
 
         $nations = Nation::all();
 
@@ -374,12 +417,12 @@ class UserController extends Controller {
             );
         }
 
-        $authRole = auth()->user()->getRole();
-        $redirectRoute = $authRole === 'admin' ? 'users.edit' :  'users.' . $authRole . '.edit';
-
         $allLanguages = Language::all();
 
-        return view($redirectRoute, [
+        $authRole = auth()->user()->getRole();
+        $viewPath = $authRole === 'admin' ? 'users.edit' :  'users.' . $authRole . '.edit';
+
+        return view($viewPath, [
             'user' => $user,
             'academies' => $user->nation->academies ?? [],
             'schools' => $schools,
@@ -398,23 +441,18 @@ class UserController extends Controller {
             'nationality' => 'required|string|exists:nations,id',
         ]);
 
-        if ($user->role != 'admin') {
-            $user->update([
-                'name' => $request->name,
-                'surname' => $request->surname,
-                'email' => $request->email,
-                'subscription_year' => $request->year,
-                'nation_id' => $request->nationality,
-            ]);
-        } else {
-            $user->update([
-                'name' => $request->name,
-                'surname' => $request->surname,
-                'email' => $request->email,
-                'subscription_year' => $request->year,
-                'nation_id' => $request->nationality,
-            ]);
+        $authRole = auth()->user()->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return back()->with('error', 'You do not have the required role to access this page!');
         }
+
+        $user->update([
+            'name' => $request->name,
+            'surname' => $request->surname,
+            'email' => $request->email,
+            'subscription_year' => $request->year,
+            'nation_id' => $request->nationality,
+        ]);
 
         $user->roles()->detach();
 
@@ -436,6 +474,10 @@ class UserController extends Controller {
     }
 
     public function destroy(User $user) {
+        $authRole = auth()->user()->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
         $user->is_disabled = true;
         $user->save();
 
@@ -646,9 +688,9 @@ class UserController extends Controller {
         switch ($role) {
             case 'instructor':
                 if (isset($request->course_id)) {
-                    return $this->handleInstructor($request->course_id, $user);
+                    return $this->handleInstructor($user, $request->course_id);
                 } else {
-                    return $this->handleInstructor(0, $user);
+                    return $this->handleInstructor($user, 0);
                 }
             case 'athlete':
                 return $this->handleAthlere($user);
@@ -658,7 +700,7 @@ class UserController extends Controller {
         }
     }
 
-    private function handleInstructor($course_id = 0, $user) {
+    private function handleInstructor($user, $course_id = 0) {
         if ($course_id != 0) {
             $course = Clan::find($course_id);
             $users = $course->users;

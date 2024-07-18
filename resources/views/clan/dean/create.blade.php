@@ -9,11 +9,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                @php
-                    $authRole = auth()->user()->getRole();
-                    $formRoute = $authRole === 'admin' ? 'clans.store' : $authRole . '.clans.store';
-                @endphp
-                <form method="POST" action="{{ route($formRoute) }}">
+                <form method="POST" action="{{ route('dean.clans.store') }}">
                     @csrf
                     <div class="flex flex-col gap-2 w-1/2">
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
@@ -22,7 +18,7 @@
                         <x-form.select name="school_id" label="School" required="{{ true }}" :options="$schools"
                             value="{{ old('school_id') }}" /> --}}
 
-                        <x-clan.school />
+                        <x-clan.dean.school />
 
                     </div>
 

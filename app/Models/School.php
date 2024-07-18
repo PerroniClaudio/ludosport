@@ -18,6 +18,7 @@ class School extends Model {
 
     public function toSearchableArray() {
         return [
+            'id' => $this->id,
             'name' => $this->name,
             'academy' => $this->academy->name,
             'slug' => $this->slug

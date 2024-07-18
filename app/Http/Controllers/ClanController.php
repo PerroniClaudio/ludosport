@@ -16,15 +16,31 @@ class ClanController extends Controller {
      */
     public function index() {
         //
+        $authRole = auth()->user()->getRole();
 
-        $clans = Clan::orderBy('created_at', 'desc')->where('is_disabled', '0')->with(['school'])->get();
+        switch($authRole){
+            case 'admin':
+                $clans = Clan::orderBy('created_at', 'desc')->where('is_disabled', '0')->with(['school'])->get();
+                break;
+            case 'rector':
+                $clans = Clan::whereIn('school_id', auth()->user()->academies->first()->schools->pluck('id'))->get();
+                break;
+            case 'dean':
+            case 'manager':
+                $clans = auth()->user()->schools->first()->clan;
+                break;
+            default:
+                $clans = [];
+                break;
+        }
 
         foreach ($clans as $key => $clan) {
             $clans[$key]->school_name = $clan->school->name;
             $clans[$key]->academy_name = $clan->school->academy->name;
         }
 
-        return view('clan.index', [
+        $viewPath = $authRole === 'admin' ? 'clan.index' : 'clan.' . $authRole . '.index';
+        return view($viewPath, [
             'clans' => $clans
         ]);
     }
@@ -48,7 +64,7 @@ class ClanController extends Controller {
                 break;
             case 'dean':
             case 'manager':
-                $schools = auth()->user()->schools->first();
+                $schools = collect([auth()->user()->schools->first()]);
                 break;
             default:
                 $schools = [];
@@ -80,6 +96,11 @@ class ClanController extends Controller {
      */
     public function store(Request $request) {
         //
+        $request->validate([
+            'name' => 'required',
+            'school_id' => 'required',
+        ]);
+
         $authRole = auth()->user()->getRole();
         if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])){
             return redirect()->route($authRole . '.dashboard')->with('error', 'You are not authorized to access this page.');
@@ -91,25 +112,21 @@ class ClanController extends Controller {
             case 'rector':
                 $school = auth()->user()->academies->first()->schools->where('id', $request->school_id)->first();
                 if(!$school){
-                    return redirect()->route('rector.dashboard')->with('error', 'You are not authorized to access this page.');
+                    return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
                 }
                 break;
             case 'dean':
             case 'manager':
                 $school = auth()->user()->schools->first();
-                if($school->id !== $request->school_id){
-                    return redirect()->route('rector.dashboard')->with('error', 'You are not authorized to access this page.');
+                if($school->id != $request->school_id){
+                    return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
                 }
                 break;
             default:
-                return redirect()->route('rector.dashboard')->with('error', 'You are not authorized to access this page.');
+                return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
                 break;
         }
 
-        $request->validate([
-            'name' => 'required',
-            'school_id' => 'required',
-        ]);
 
         $slug = Str::slug($request->name);
 
@@ -248,11 +265,37 @@ class ClanController extends Controller {
      */
     public function update(Request $request, Clan $clan) {
         //
-
+        $authUser = auth()->user();
+        $authRole = $authUser->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])){
+            return redirect()->route($authRole . '.dashboard')->with('error', 'Not authorized to access this page.');
+        }
         $request->validate([
             'name' => 'required',
             'school_id' => 'required',
         ]);
+
+        switch($authRole){
+            case 'admin':
+                break;
+            case 'rector':
+                $oldSchool = $authUser->academies->first()->schools->where('id', $clan->school_id)->first();
+                $newSchool = $authUser->academies->first()->schools->where('id', $request->school_id)->first();
+                if(!$oldSchool || !$newSchool){
+                    return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
+                }
+                break;
+            case 'dean':
+            case 'manager':
+                $school = auth()->user()->schools->first();
+                if($school->id != $clan->school_id || $school->id != $request->school_id){
+                    return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
+                }
+                break;
+            default:
+                return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
+                break;
+        }
 
         $clan->update([
             'name' => $request->name,
@@ -260,7 +303,8 @@ class ClanController extends Controller {
             'slug' => Str::slug($request->name)
         ]);
 
-        return redirect()->route('clans.edit', $clan)->with('success', 'Course updated successfully.');
+        $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
+        return redirect()->route($redirectRoute, $clan)->with('success', 'Course updated successfully.');
     }
 
     /**
@@ -268,11 +312,16 @@ class ClanController extends Controller {
      */
     public function destroy(Clan $clan) {
         //
-
+        $authUser = auth()->user();
+        $authRole = $authUser->getRole();
+        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])){
+            return redirect()->route($authRole . '.dashboard')->with('error', 'Not authorized to access this page.');
+        }
         $clan->is_disabled = true;
         $clan->save();
 
-        return redirect()->route('clans.index')->with('success', 'Course disabled successfully.');
+        $redirectRoute = $authRole === 'admin' ? 'clans.index' : $authRole . '.clans.index';
+        return redirect()->route($redirectRoute)->with('success', 'Course disabled successfully.');
     }
 
     public function addInstructor(Clan $clan, Request $request) {

@@ -23,6 +23,7 @@ class Academy extends Model {
 
     public function toSearchableArray() {
         return [
+            'id' => $this->id,
             'name' => $this->name,
             'school' => $this->nation->name,
             'slug' => $this->slug

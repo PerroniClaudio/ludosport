@@ -32,6 +32,7 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function toSearchableArray() {
         return [
+            'id' => $this->id,
             'name' => $this->name,
             'surname' => $this->surname,
             'email' => $this->email,
@@ -164,8 +165,23 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return collect([
                     (object)[
                         'label' => 'scuola',
-                        'active' => 'school.*',
+                        'active' => 'schools.*',
                         'name' => 'dean.school.index',
+                    ],
+                    (object)[
+                        'label' => 'clan',
+                        'active' => 'clans.*',
+                        'name' => 'dean.clans.index',
+                    ],
+                    (object)[
+                        'label' => 'users',
+                        'active' => 'users.*',
+                        'name' => 'dean.users.index',
+                    ],
+                    (object)[
+                        'label' => 'eventi',
+                        'active' => 'events.*',
+                        'name' => 'dean.events.index',
                     ],
                 ]);
             case 'manager':

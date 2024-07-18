@@ -19,8 +19,11 @@
     </div>
 
     <x-modal name="confirm-user-disable" :show="$errors->disable->isNotEmpty()" focusable>
-
-        <form method="post" action="{{ route('clans.disable', $clan) }}" class="p-6">
+        @php
+            $authRole = auth()->user()->getRole();
+            $editUserRoute = $authRole === 'admin' ? 'clans.disable' : $authRole . '.clans.disable';
+        @endphp
+        <form method="post" action="{{ route($editUserRoute, $clan) }}" class="p-6">
             @csrf
             @method('delete')
 

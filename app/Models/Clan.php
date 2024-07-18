@@ -17,6 +17,7 @@ class Clan extends Model {
 
     public function toSearchableArray() {
         return [
+            'id' => $this->id,
             'name' => $this->name,
             'school' => $this->school->name,
             'slug' => $this->slug
