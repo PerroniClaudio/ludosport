@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Config\MeiliSearchConfig;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,6 +20,5 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
-        MeiliSearchConfig::setup();
     }
 }
