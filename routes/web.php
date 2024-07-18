@@ -6,10 +6,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 
-ini_set ('display_errors', 1);
-ini_set ('display_startup_errors', 1);
-error_reporting (E_ALL);
-
 Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 
@@ -257,4 +253,4 @@ require __DIR__ . '/technician.php';
 require __DIR__ . '/athlete.php';
 require __DIR__ . '/site.php';
 require __DIR__ . '/dean.php';
-
+require __DIR__ . '/rector.php';

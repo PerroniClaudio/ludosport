@@ -131,6 +131,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->belongsTo(Rank::class);
     }
 
+    public function invoices() {
+        return $this->hasMany(Invoice::class);
+    }
+
     public function routes() {
 
         $role = $this->getRole();
