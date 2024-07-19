@@ -9,8 +9,8 @@ Route::prefix('dean')->middleware('auth')->middleware('role:dean')->group(functi
 
     Route::group([], function () {
       Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('dean.users.index');
-      // Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('users.filter');
-      // Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('users.filter.result');
+      Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('dean.users.filter');
+      Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('dean.users.filter.result');
       Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('dean.users.search');
       Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('dean.users.create');
       Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('dean.users.edit');
@@ -30,6 +30,10 @@ Route::prefix('dean')->middleware('auth')->middleware('role:dean')->group(functi
       Route::post('/custom-roles/assign', [App\Http\Controllers\RoleController::class, 'assign'])->name('dean.roles.assign');
       Route::post('/custom-roles', [App\Http\Controllers\RoleController::class, 'store'])->name('dean.roles.store');
     });
+
+    /** Accademie */
+
+    // Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'show'])->name('dean.academies.show');
     
     /** Scuole */
     
@@ -39,7 +43,7 @@ Route::prefix('dean')->middleware('auth')->middleware('role:dean')->group(functi
       // Route::get('/schools', [App\Http\Controllers\SchoolController::class, 'index'])->name('dean.schools.index');
       // Route::get('/schools/create', [App\Http\Controllers\SchoolController::class, 'create'])->name('dean.schools.create');
       Route::get('/schools/all', [App\Http\Controllers\SchoolController::class, 'all'])->name('dean.schools.all');
-      // Route::get('/schools/academy', [App\Http\Controllers\SchoolController::class, 'getByAcademy'])->name('dean.schools.academy');
+      Route::get('/schools/academy', [App\Http\Controllers\SchoolController::class, 'getByAcademy'])->name('dean.schools.academy');
       // Route::get('/schools/search', [App\Http\Controllers\SchoolController::class, 'search'])->name('dean.schools.search');
       
       // Route::get('/schools/{school}/athletes-data', [App\Http\Controllers\SchoolController::class, 'athletesDataForSchool'])->name('dean.schools.athletes-data');
@@ -67,7 +71,7 @@ Route::prefix('dean')->middleware('auth')->middleware('role:dean')->group(functi
     
     Route::group([], function () {
       Route::get('/courses', [App\Http\Controllers\ClanController::class, 'index'])->name('dean.clans.index');
-      // Route::get('/courses/school', [App\Http\Controllers\ClanController::class, 'getBySchool'])->name('dean.clans.school');
+      Route::get('/courses/school', [App\Http\Controllers\ClanController::class, 'getBySchool'])->name('dean.clans.school');
       // Route::get('/courses/all', [App\Http\Controllers\ClanController::class, 'all'])->name('dean.clans.all');
 
       Route::get('/courses/create', [App\Http\Controllers\ClanController::class, 'create'])->name('dean.clans.create');

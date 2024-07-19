@@ -18,8 +18,12 @@
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-background-900 dark:text-background-100">
+                    @php
+                        $authRole = auth()->user()->getRole();
+                        $editRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
+                    @endphp
                     @foreach ($users as $user)
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 mb-4 border rounded p-4">
                             <div class="flex-1 flex flex-col gap-2">
                                 <div class="text-xl">{{ $user->name }} {{ $user->surname }}</div>
                                 <div class="text-sm text-background-500 dark:text-background-400">
@@ -64,8 +68,8 @@
 
                             </div>
 
-                            <a href="{{ route('users.edit', $user->id) }}">
-                                <x-secondary-button>
+                            <a href="{{ route($editRoute, $user->id) }}">
+                                <x-secondary-button class="bg-background-300">
                                     <x-lucide-edit class="h-5 w-5 text-white" />
                                 </x-secondary-button>
                             </a>

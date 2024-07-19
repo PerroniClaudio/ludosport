@@ -11,6 +11,7 @@ use App\Models\Nation;
 use App\Models\Role;
 use App\Models\School;
 use App\Models\User;
+use GPBMetadata\Google\Api\Log;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -482,7 +483,8 @@ class UserController extends Controller {
         $user->is_disabled = true;
         $user->save();
 
-        return redirect()->route('users.index')->with('success', 'User disabled successfully!');
+        $redirectRoute = $authRole === 'admin' ? 'users.index' :  $authRole . '.users.index';
+        return redirect()->route($redirectRoute)->with('success', 'User disabled successfully!');
     }
 
     public function search(Request $request) {
@@ -517,9 +519,25 @@ class UserController extends Controller {
 
     public function filter() {
 
-        $academies = Academy::where('is_disabled', false)->with('nation')->get();
+        $authRole = auth()->user()->getRole();
+        
+        switch($authRole) {
+            case 'admin':
+                $academies = Academy::where('is_disabled', false)->with('nation')->get();
+                break;
+            case 'rector':
+                $academies = auth()->user()->academies;
+                break;
+            case 'dean':
+            case 'manager':
+                $academies = collect([auth()->user()->schools->first()->academy]);
+                break;
+            default:
+                return back()->with('error', 'You do not have the required role to access this page!');
+        }
 
-        return view('users.filter', [
+        $viewPath = $authRole === 'admin' ? 'users.filter' :  'users.' . $authRole . '.filter';
+        return view($viewPath, [
             'academies' => $academies,
         ]);
     }
@@ -633,7 +651,9 @@ class UserController extends Controller {
             })->toArray());
         }
 
-        return view('users.filter-result', [
+        $authRole = auth()->user()->getRole();
+        $viewPath = $authRole === 'admin' ? 'users.filter-result' :  'users.' . $authRole . '.filter-result';
+        return view($viewPath, [
             'users' => $filteredUsers,
         ]);
     }

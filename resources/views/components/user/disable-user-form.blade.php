@@ -24,7 +24,6 @@
             $authRole = auth()->user()->getRole();
             $formRoute = $authRole === 'admin' ? 'users.disable' : $authRole . '.users.disable';
         @endphp
-        @endphp
         <form method="post" action="{{ route($formRoute, $user) }}" class="p-6">
             @csrf
             @method('delete')

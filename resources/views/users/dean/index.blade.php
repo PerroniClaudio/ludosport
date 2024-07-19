@@ -53,7 +53,11 @@
                                             {{ __('users.' . $key . '_role') }}
                                         </h3>
                                         <div>
-                                            <a href="{{ route('users.filter') }}">
+                                            @php
+                                                $authRole = auth()->user()->getRole();
+                                                $filterRoute = $authRole === 'admin' ? 'users.filter' : $authRole . '.users.filter';
+                                            @endphp
+                                            <a href="{{ route($filterRoute) }}">
                                                 <x-primary-button>
                                                     {{ __('users.filter_by') }}
                                                 </x-primary-button>

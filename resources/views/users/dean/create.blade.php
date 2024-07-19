@@ -107,7 +107,7 @@
                     </div>
 
                     <div class="flex items-center justify-end gap-2 mt-8">
-                        <x-secondary-button type="button">
+                        <x-secondary-button type="reset">
                             {{ __('users.cancel') }}
                         </x-secondary-button>
                         <x-primary-button type="submit">
