@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Fee extends Model {
     use HasFactory;
 
-    protected $fillable = ['type', 'start_date', 'end_date'];
+    protected $fillable = ['type', 'start_date', 'end_date', 'academy_id', 'auto_renew', 'unique_id', 'user_id', 'used'];
 
     protected function academy() {
         return $this->belongsTo(Academy::class);

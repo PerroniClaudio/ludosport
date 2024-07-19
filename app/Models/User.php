@@ -6,11 +6,13 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
+use App\Models\Invoice as Invoice;
 
 class User extends Authenticatable implements MustVerifyEmail {
-    use HasFactory, Notifiable, HasApiTokens, Searchable;
+    use HasFactory, Notifiable, HasApiTokens, Searchable, Billable;
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +30,9 @@ class User extends Authenticatable implements MustVerifyEmail {
         'nation_id',
         'unique_code',
         'profile_picture',
+        'birthday',
+        'active_fee_id',
+        'has_paid_fee',
     ];
 
     public function toSearchableArray() {
@@ -132,7 +137,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function invoices() {
-        return $this->hasMany(Invoice::class);
+        return $this->hasMany(\App\Models\Invoice::class);
     }
 
     public function routes() {

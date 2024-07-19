@@ -9,6 +9,7 @@
         "blade-ui-kit/blade-icons": "^1.6",
         "http-interop/http-factory-guzzle": "^1.2",
         "laravel/breeze": "^2.0",
+        "laravel/cashier": "^15.4",
         "laravel/framework": "^11.0",
         "laravel/horizon": "^5.24",
         "laravel/sanctum": "^4.0",
