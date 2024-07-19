@@ -11,8 +11,8 @@
     <div class="py-12" x-data="{
         seniorFees: 0,
         juniorFees: 0,
-        seniorFeesPrice: 100,
-        juniorFeesPrice: 50,
+        seniorFeesPrice: 50,
+        juniorFeesPrice: 25,
         totalPrice: 0,
         name: 'Name',
         surname: 'Surname',
@@ -128,6 +128,35 @@
                     console.log(data)
                 })
         },
+        startStripeCheckout() {
+            this.saveInvoiceData()
+    
+            const url = `/rector/fees/stripe-checkout`
+            let items = [];
+    
+            if (this.seniorFees > 0) {
+                items.push({
+                    'name': 'senior_fee',
+                    'quantity': this.seniorFees,
+                })
+            }
+    
+            if (this.juniorFees > 0) {
+                items.push({
+                    'name': 'junior_fee',
+                    'quantity': this.juniorFees,
+                })
+            }
+    
+            const itemsJson = JSON.stringify(items)
+    
+            const params = new URLSearchParams({
+                'items': itemsJson
+            })
+    
+            window.location.href = `${url}?${params}`
+    
+        },
         init() {
             this.fetchInvoiceData()
         }
@@ -241,8 +270,9 @@
                             </div>
                         </div>
                         <div x-show="totalPrice > 0" class="mt-4">
-                            <div
-                                class="rounded-full bg-white hover:bg-gray-200 text-black font-bold p-1 text-center cursor-pointer">
+                            <div class="rounded-full bg-white hover:bg-gray-200 text-black font-bold p-1 text-center cursor-pointer"
+                                @click="startStripeCheckout">
+
                                 <span>Stripe</span>
                             </div>
                         </div>

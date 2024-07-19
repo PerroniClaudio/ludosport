@@ -291,6 +291,16 @@ Route::get('/populate-disabled', function () {
     return response()->json($newCountries);
 });
 
+Route::get('/fake-birthdays', function () {
+
+    $users = \App\Models\User::all();
+
+    foreach ($users as $user) {
+        $user->birthday = \Carbon\Carbon::now()->subYears(rand(14, 40))->subMonths(rand(0, 11))->subDays(rand(0, 30));
+        $user->save();
+    }
+});
+
 Route::get('/fake-verification', function () {
     $user = App\Models\User::find(2);
     $user->markEmailAsVerified();
