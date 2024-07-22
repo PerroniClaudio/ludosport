@@ -245,6 +245,16 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/custom-roles', [App\Http\Controllers\RoleController::class, 'store'])->name('roles.store');
 });
 
+/** Ordini */
+
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+    Route::post('/orders-invoice/{order}', [App\Http\Controllers\OrderController::class, 'invoice'])->name('orders.update.invoice');
+
+    Route::get('/orders', [App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [App\Http\Controllers\OrderController::class, 'edit'])->name('orders.edit');
+    Route::get('/orders/{order}/transaction-result', [App\Http\Controllers\OrderController::class, 'result'])->name('orders.transaction-result');
+});
+
 
 /** Script */
 

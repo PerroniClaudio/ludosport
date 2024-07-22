@@ -31,4 +31,5 @@ return [
     'register' => 'Register',
     'operations' => 'Operations',
     'announcements' => 'Announcements',
+    'ordini' => 'Orders',
 ];

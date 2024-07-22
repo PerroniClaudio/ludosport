@@ -50,6 +50,9 @@
                         <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
                             {{ __('navigation.eventi') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                            {{ __('navigation.ordini') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('rankings.index')" :active="false">
                             {{ __('navigation.classifiche') }}
                         </x-nav-link>
