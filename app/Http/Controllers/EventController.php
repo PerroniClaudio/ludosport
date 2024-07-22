@@ -10,6 +10,7 @@ use App\Models\Event;
 use App\Models\EventType;
 use App\Models\Nation;
 use App\Models\User;
+use App\Models\WeaponForm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -137,15 +138,15 @@ class EventController extends Controller {
         $auth = auth()->user();
         $user = User::find($auth->id);
 
-
-
         if ($user->getRole() === 'technician') {
             $view = 'event.technician.edit';
+            $weaponForms = $user->weaponForms()->get();
 
             if ($event->user_id !== $user->id) {
                 return redirect()->route('technician.events.index');
             }
         } else {
+            $weaponForms = WeaponForm::all();
             $view = 'event.edit';
         }
 
@@ -165,7 +166,8 @@ class EventController extends Controller {
 
         return view($view, [
             'event' => $event,
-            'results' => $results
+            'results' => $results,
+            'weaponForms' => $weaponForms,
         ]);
     }
 
@@ -178,6 +180,10 @@ class EventController extends Controller {
     }
 
     public function saveLocation(Request $request, Event $event) {
+
+        $auth = auth()->user();
+        $user = User::find($auth->id);
+
         $event->location = $request->location;
         $event->city = $request->city;
         $event->address = $request->address;
@@ -193,7 +199,7 @@ class EventController extends Controller {
 
         $user = auth()->user();
 
-        if ($user->role === 'tecnico') {
+        if ($user->getRole() === 'technician') {
             return redirect()->route('technician.events.edit', $event->id)->with('success', 'Location saved successfully');
         }
 
@@ -205,6 +211,9 @@ class EventController extends Controller {
      */
     public function update(Request $request, Event $event) {
         //
+
+        $auth = auth()->user();
+        $user = User::find($auth->id);
 
         $request->validate([
             'name' => 'required',
@@ -234,9 +243,17 @@ class EventController extends Controller {
             }
         }
 
+        if (isset($request->weapon_form_id)) {
+            $event->weapon_form_id = $request->weapon_form_id;
+        }
+
         $event->save();
 
-        return redirect()->route('technician.events.edit', $event->id)->with('success', 'Event saved successfully');
+        if ($user->getRole() === 'technician') {
+            return redirect()->route('technician.events.edit', $event->id)->with('success', 'Event saved successfully');
+        }
+
+        return redirect()->route('events.edit', $event->id)->with('success', 'Event saved successfully');
     }
 
     /**

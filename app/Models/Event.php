@@ -36,7 +36,8 @@ class Event extends Model {
         'event_type',
         'is_free',
         'price',
-        'event_type'
+        'event_type',
+        'weapon_form_id',
     ];
 
     public function nation() {
@@ -61,6 +62,10 @@ class Event extends Model {
 
     public function type() {
         return $this->belongsTo(EventType::class, 'event_type');
+    }
+
+    public function weaponForm() {
+        return $this->belongsTo(WeaponForm::class);
     }
 
     public function eventTypes() {

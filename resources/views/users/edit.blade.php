@@ -212,12 +212,16 @@
 
             </form>
 
-            @if ($user->hasRole('instructor') || $user->hasRole('technician'))
-                <div class="grid grid-cols-2 gap-4 my-4">
+
+            <div class="grid grid-cols-2 gap-4 my-4">
+                @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
                     <x-user.weapon-forms :forms="$user->weaponForms" />
+                @endif
+                @if ($user->hasRole('instructor') || $user->hasRole('technician'))
                     <x-user.languages :languages="$user->languages" :user="$user->id" :availableLanguages="collect($languages)" />
-                </div>
-            @endif
+                @endif
+            </div>
+
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4"
                 x-data="{}">
