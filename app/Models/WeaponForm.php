@@ -14,6 +14,10 @@ class WeaponForm extends Model {
     ];
 
     public function users() {
-        return $this->belongsToMany(User::class, 'weapon_forms_users', 'weapon_form_id', 'user_id');
+        return $this->belongsToMany(User::class, 'weapon_forms_users', 'weapon_form_id', 'user_id')->withTimestamps();
+    }
+
+    public function events() {
+        return $this->hasMany(Event::class);
     }
 }

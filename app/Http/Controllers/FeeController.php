@@ -298,6 +298,7 @@ class FeeController extends Controller {
         } else {
 
             $order->update(['status' => 2, 'result' => json_encode($session)]);
+            $user = User::find($order->user_id);
 
             foreach ($order->items as $item) {
 

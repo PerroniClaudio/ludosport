@@ -10,6 +10,7 @@ use App\Models\Event;
 use App\Models\EventType;
 use App\Models\Nation;
 use App\Models\User;
+use App\Models\WeaponForm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -153,14 +154,20 @@ class EventController extends Controller {
         $results = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
 
         foreach ($results as $key => $result) {
-
             $results[$key]['user_fullname'] = $result->user['name'] . ' ' . $result->user['surname'];
+        }
+
+        if ($authRole === 'technician') {
+            $weaponForms = $authUser->weaponForms()->get();
+        } else {
+            $weaponForms = WeaponForm::all();
         }
 
         $viewPath = $authRole === 'admin' ? 'event.edit' : 'event.' . $authRole . '.edit';
         return view($viewPath, [
             'event' => $event,
-            'results' => $results
+            'results' => $results,
+            'weaponForms' => $weaponForms,
         ]);
     }
 
@@ -201,11 +208,6 @@ class EventController extends Controller {
 
         
         $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
-        
-        // $user = auth()->user();
-        // if ($user->role === 'tecnico') {
-        //     return redirect()->route('technician.events.edit', $event->id)->with('success', 'Location saved successfully');
-        // }
 
         return redirect()->route($redirectRoute, $event->id)->with('success', 'Location saved successfully');
     }
@@ -217,6 +219,9 @@ class EventController extends Controller {
         //
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
+
+        $auth = auth()->user();
+        $user = User::find($auth->id);
 
         $request->validate([
             'name' => 'required',
@@ -248,6 +253,10 @@ class EventController extends Controller {
                 $event->is_free = false;
                 $event->price = $request->price;
             }
+        }
+
+        if (isset($request->weapon_form_id)) {
+            $event->weapon_form_id = $request->weapon_form_id;
         }
 
         $event->save();

@@ -68,6 +68,8 @@
                     <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
                         selected="{{ $event->type->id }}" />
 
+                    <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms" />
+
                     {{-- <x-form.select name="event_type" label="Event Type" required="{{ true }}"
                         :options="$event->eventTypes()" value="{{ $event->event_type }}" /> --}}
 

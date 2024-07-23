@@ -266,6 +266,9 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function hasRole(string $role): bool {
         $selectedRole = Role::where('name', $role)->first();
+        if (!$selectedRole) {
+            return false;
+        }
         $user = $selectedRole->users()->where('user_id', $this->id)->get();
         return $user->count() > 0;
     }

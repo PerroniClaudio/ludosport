@@ -52,5 +52,6 @@ return [
     'disable_event_type' => 'Disable Event Type',
     'disable_event_type_confirmation' => 'Are you sure you want to disable this event type?',
     'disable_event_type_message' => 'This action will disable the event type, you cannot select this type for other events.',
-    'event_map_tooltip' => 'Insert all data, then click the magnifying glass. If the position is right you can save.'
+    'event_map_tooltip' => 'Insert all data, then click the magnifying glass. If the position is right you can save.',
+    'weapon_form' => 'Weapon Form',
 ];
