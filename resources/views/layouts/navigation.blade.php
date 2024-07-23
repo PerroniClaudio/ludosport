@@ -42,6 +42,8 @@
                                 <a href="{{ route('schools.index') }}">{{ __('navigation.scuole') }}</a>
                                 <span class="separator"></span>
                                 <a href="{{ route('clans.index') }}">{{ __('navigation.clan') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('weapon-forms.index') }}">{{ __('navigation.weapon_forms') }}</a>
                             </x-slot>
                         </x-nav-link-parent>
                         <x-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">
