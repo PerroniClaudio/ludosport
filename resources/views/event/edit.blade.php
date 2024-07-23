@@ -66,7 +66,7 @@
                         value="{!! $event->name !!}" placeholder="{{ fake()->company() }}" />
 
                     <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
-                        selected="{{ $event->type->name }}" />
+                        selected="{{ $event->type->id }}" />
 
                     {{-- <x-form.select name="event_type" label="Event Type" required="{{ true }}"
                         :options="$event->eventTypes()" value="{{ $event->event_type }}" /> --}}

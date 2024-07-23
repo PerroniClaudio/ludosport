@@ -29,7 +29,7 @@
         x-show="show"
         class="fixed bg-red-500 text-white py-2 px-4 rounded-xl bottom-8 left-32 text-sm"
     >
-        <p>{{ session('status') }}</p>
+        <p>{{ session('error') }}</p>
     </div>
 
 @endif

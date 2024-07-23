@@ -24,15 +24,20 @@ class EventController extends Controller {
     public function index() {
         //
 
-        $auth = auth()->user();
-        $user = User::find($auth->id);
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
-        if ($user->getRole() === 'technician') {
-            $view = 'event.technician.index';
-            $events = Event::where('user_id', $user->id)->get();
-        } else {
-            $view = 'event.index';
-            $events = Event::all();
+        switch ($authRole) {
+            case 'dean':
+            case 'manager':
+                $events = Event::where('school_id', $authUser->schools->first())->get();
+                break;
+            case 'technician':
+                $events = Event::where('user_id', $authUser->id)->get();
+                break;
+            default:
+                $events = Event::all();
+                break;
         }
 
         $approved = [];
@@ -45,8 +50,8 @@ class EventController extends Controller {
                 $pending[$key] = $event;
             }
         }
-
-        return view($view, [
+        $viewPath = $authRole === 'admin' ? 'event.index' : 'event.' . $authRole . '.index';
+        return view($viewPath, [
             'approved_events' => $approved,
             'pending_events' =>  $pending,
         ]);
@@ -58,16 +63,17 @@ class EventController extends Controller {
     public function create() {
         //
 
-        $auth = auth()->user();
-        $user = User::find($auth->id);
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
-        if ($user->getRole() === 'admin') {
+        if ($authRole === 'admin') {
             $academies = Academy::all();
         } else {
-            $academies = $user->academies()->get();
+            $academies = $authUser->academies()->get();
         }
 
-        return view('event.create', [
+        $viewPath = $authRole === 'admin' ? 'event.create' : 'event.' . $authRole . '.create';
+        return view($viewPath, [
             'academies' => $academies
         ]);
     }
@@ -77,9 +83,6 @@ class EventController extends Controller {
      */
     public function store(Request $request) {
         //
-
-        $auth = auth()->user();
-        $user = User::find($auth->id);
 
         $request->validate([
             'name' => 'required',
@@ -114,11 +117,10 @@ class EventController extends Controller {
             'event_type' => EventType::first()->id,
         ]);
 
-        if ($user->getRole() === 'technician') {
-            return redirect()->route('technician.events.edit', $event->id);
-        } else {
-            return redirect()->route('events.edit', $event->id);
-        }
+        $authRole = User::find(auth()->user()->id)->getRole();
+        $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
+        
+        return redirect()->route($redirectRoute, $event->id);
     }
 
     /**
@@ -134,19 +136,11 @@ class EventController extends Controller {
     public function edit(Event $event) {
         //
 
-        $auth = auth()->user();
-        $user = User::find($auth->id);
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
-
-
-        if ($user->getRole() === 'technician') {
-            $view = 'event.technician.edit';
-
-            if ($event->user_id !== $user->id) {
-                return redirect()->route('technician.events.index');
-            }
-        } else {
-            $view = 'event.edit';
+        if ($authRole !== 'admin' && $event->user_id !== $authUser->id) {
+            return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
         if ($event->thumbnail) {
@@ -163,21 +157,35 @@ class EventController extends Controller {
             $results[$key]['user_fullname'] = $result->user['name'] . ' ' . $result->user['surname'];
         }
 
-        return view($view, [
+        $viewPath = $authRole === 'admin' ? 'event.edit' : 'event.' . $authRole . '.edit';
+        return view($viewPath, [
             'event' => $event,
             'results' => $results
         ]);
     }
 
     public function saveDescription(Request $request, Event $event) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
+        if ($authRole !== 'admin' && $event->user_id !== $authUser->id) {
+            return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
+        }
 
         $event->description = $request->description;
         $event->save();
 
-        return redirect()->route('technician.events.edit', $event->id);
+        $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
+        return redirect()->route($redirectRoute, $event->id);
     }
 
     public function saveLocation(Request $request, Event $event) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
+        if ($authRole !== 'admin' && $event->user_id !== $authUser->id) {
+            return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
+        }
         $event->location = $request->location;
         $event->city = $request->city;
         $event->address = $request->address;
@@ -191,13 +199,15 @@ class EventController extends Controller {
 
         $event->save();
 
-        $user = auth()->user();
+        
+        $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
+        
+        // $user = auth()->user();
+        // if ($user->role === 'tecnico') {
+        //     return redirect()->route('technician.events.edit', $event->id)->with('success', 'Location saved successfully');
+        // }
 
-        if ($user->role === 'tecnico') {
-            return redirect()->route('technician.events.edit', $event->id)->with('success', 'Location saved successfully');
-        }
-
-        return redirect()->route('events.edit', $event->id)->with('success', 'Location saved successfully');
+        return redirect()->route($redirectRoute, $event->id)->with('success', 'Location saved successfully');
     }
 
     /**
@@ -205,22 +215,28 @@ class EventController extends Controller {
      */
     public function update(Request $request, Event $event) {
         //
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
         $request->validate([
             'name' => 'required',
+            'event_type' => 'numeric',
             'start_date' => 'required',
             'end_date' => 'required',
             'price' => 'min:0',
-
         ]);
+        
+        if ($authRole !== 'admin' && $event->user_id !== $authUser->id) {
+            return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
+        }
 
         $event->name = $request->name;
         $event->start_date = $request->start_date;
         $event->end_date = $request->end_date;
 
-        if (Auth::user()->getRole() === 'admin') {
+        if ($authRole === 'admin') {
 
-            $event_type = EventType::where('name', $request->event_type)->first();
+            $event_type = EventType::where('id', $request->event_type)->first();
 
             $event->event_type = $event_type->id;
 
@@ -236,7 +252,8 @@ class EventController extends Controller {
 
         $event->save();
 
-        return redirect()->route('technician.events.edit', $event->id)->with('success', 'Event saved successfully');
+        $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
+        return redirect()->route($redirectRoute, $event->id)->with('success', 'Event saved successfully');
     }
 
     /**
@@ -284,6 +301,8 @@ class EventController extends Controller {
 
     public function updateThumbnail($id, Request $request) {
         //
+        $authRole = User::find(auth()->user()->id)->getRole();
+        $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
         if ($request->file('thumbnail') != null) {
             $file = $request->file('thumbnail');
             $file_name = time() . '_' . $file->getClientOriginalName();
@@ -296,18 +315,20 @@ class EventController extends Controller {
                 $event->thumbnail = $path;
                 $event->save();
 
-                return redirect()->route('technician.events.edit', $event->id)->with('success', 'Thumbnail uploaded successfully!');
+                return redirect()->route($redirectRoute, $event->id)->with('success', 'Thumbnail uploaded successfully!');
             } else {
-                return redirect()->route('technician.events.edit', $id)->with('error', 'Error uploading thumbnail!');
+                return redirect()->route($redirectRoute, $id)->with('error', 'Error uploading thumbnail!');
             }
         } else {
-            return redirect()->route('technician.events.edit', $id)->with('error', 'Error uploading thumbnail!');
+            return redirect()->route($redirectRoute, $id)->with('error', 'Error uploading thumbnail!');
         }
     }
 
     public function calendar(Request $request) {
 
         header('Content-Type: application/json');
+
+        $authRole = User::find(auth()->user()->id)->getRole();
 
         $events = Event::where('start_date', '>=', $request->start)
             ->where('end_date', '<=', $request->end)
@@ -326,17 +347,18 @@ class EventController extends Controller {
                 $classname = 'bg-background-500 dark:bg-background-700';
             }
 
+            $eventUrl = $authRole === 'admin' ? "/events/{$event->id}" : "/{$authRole}/events/{$event->id}";
             $events_data[] = [
                 'id' => $event->id,
                 'title' => $event->name,
                 'start' => $event->start_date,
                 'end' => $event->end_date,
-                'url' => "/events/{$event->id}",
+                'url' => $eventUrl,
                 'className' => $classname,
                 'is_approved' => $event->is_approved,
                 'is_published' => $event->is_published,
                 'user' => $event->user->name . " " . $event->user->surname,
-                'academy' => $event->academy->name,
+                'academy' => $event->academy ? $event->academy->name : '',
             ];
         }
 

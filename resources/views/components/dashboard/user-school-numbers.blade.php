@@ -1,4 +1,8 @@
 @props(['schoolId' => 1])
+@php
+    $authRole = auth()->user()->getRole();
+    $addToRoute = $authRole === 'admin' ? '' : '/' . $authRole;
+@endphp
 
 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-data="{
     schoolId: {{ $schoolId }},
@@ -7,7 +11,7 @@
     users_course_not_active: 0,
     new_users_this_year: 0,
     fetchData() {
-        fetch(`/schools/${this.schoolId}/athletes-data`)
+        fetch(`{{$addToRoute}}/schools/${this.schoolId}/athletes-data`)
             .then(response => response.json())
             .then(data => {
                 this.active_users = data.active_users;

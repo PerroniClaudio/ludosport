@@ -1,6 +1,8 @@
 @props(['academyId' => 1])
-
-<div x-data="userschoolgraph({{ $academyId }})">
+@php
+    $authRole = auth()->user()->getRole();
+@endphp
+<div x-data="userschoolgraph({{ $academyId }}, '{{ $authRole }}')">
 
     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 text-background-900 dark:text-background-100">

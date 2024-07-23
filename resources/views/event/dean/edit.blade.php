@@ -8,7 +8,12 @@
     </x-slot>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
-            <form method="POST" action={{ route('technician.events.update', $event->id) }}
+
+            {{-- @php
+                $authRole = auth()->user()->getRole();
+                $canSetPrice = in_array($authRole, ['admin']);
+            @endphp --}}
+            <form method="POST" action={{ route('dean.events.update', $event->id) }}
                 class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 @csrf
                 <div class="flex items-center justify-between">
@@ -26,6 +31,9 @@
                         value="{!! $event->name !!}" placeholder="{{ fake()->company() }}" 
                         disabled="{{!!$event->is_approved}}" />
 
+                    {{-- <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
+                        selected="{{ $event->type->id }}" /> --}}
+
                     <x-form.input name="start_date" label="Start Date" type="datetime-local"
                         required="{{ true }}" value="{{ $event->start_date }}"
                         placeholder="{{ fake()->date() }}" 
@@ -34,6 +42,13 @@
                     <x-form.input name="end_date" label="End Date" type="datetime-local" required="{{ true }}"
                         value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}" 
                         disabled="{{!!$event->is_approved}}" />
+
+                    {{-- <x-form.checkbox id="is_free" name="is_free" label="Free Event" disabled="{{ !$canSetPrice }}"
+                        isChecked="{{ $event->is_free }}" />
+
+                    <x-form.input name="price" label="Price (include taxes)" type="number" disabled="{{ !$canSetPrice }}"
+                        value="{{ number_format($event->price, 2) }}"
+                        required="{{ $event->is_free ? false : true }}" /> --}}
 
                 </div>
             </form>
@@ -45,6 +60,9 @@
             <x-event.thumbnail :event="$event" />
 
             @if ($event->is_approved)
+                @php
+                    $authRole = auth()->user()->getRole();
+                @endphp
                 <x-event.participants :event="$event" />
             @endif
 

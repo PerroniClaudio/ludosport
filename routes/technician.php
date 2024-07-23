@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('technician')->middleware('auth')->middleware('role:tecnico')->group(function () {
+// Route::prefix('technician')->middleware('auth')->middleware('role:tecnico')->group(function () {
+Route::prefix('technician')->middleware('auth')->middleware('role:technician')->group(function () {
     Route::get('events', [App\Http\Controllers\EventController::class, 'index'])->name('technician.events.index');
     Route::get('events/create', [App\Http\Controllers\EventController::class, 'create'])->name('technician.events.create');
     Route::post('events/create', [App\Http\Controllers\EventController::class, 'store'])->name('technician.events.store');

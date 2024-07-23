@@ -14,7 +14,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
 
-                <form method="POST" action="{{ route('events.store') }}">
+                <form method="POST" action="{{ route('dean.events.store') }}">
 
                     @csrf
                     <div class="flex flex-col gap-2 w-1/2">

@@ -1,6 +1,6 @@
 import Chart from "chart.js/auto";
 
-export const userschoolgraph = (academyId) => {
+export const userschoolgraph = (academyId, role) => {
     return {
         academyId: academyId,
         schoolData: [],
@@ -14,7 +14,7 @@ export const userschoolgraph = (academyId) => {
         ],
         async getSchoolData() {
             const response = await fetch(
-                `/academies/${this.academyId}/athletes-school-data`
+                `${role == 'admin' ? '' : '/' + role}/academies/${this.academyId}/athletes-school-data`
             );
             const data = await response.json();
 
@@ -22,7 +22,7 @@ export const userschoolgraph = (academyId) => {
         },
         async getYearData() {
             const response = await fetch(
-                `/academies/${this.academyId}/athletes-year-data`
+                `${role == 'admin' ? '' : '/' + role}/academies/${this.academyId}/athletes-year-data`
             );
             const data = await response.json();
 

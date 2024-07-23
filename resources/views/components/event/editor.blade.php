@@ -14,11 +14,17 @@
 
     <div class="flex items-center justify-between">
         <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ $label }}</h3>
-        <form method="POST" action={{ route('technician.events.save.description', $event->id) }}>
+        @php
+            $authRole = auth()->user()->getRole();
+            $formRoute = $authRole === 'admin' ? 'events.save.description' : $authRole . '.events.save.description';
+        @endphp
+        <form method="POST" action={{ route($formRoute, $event->id) }}>
             @csrf
-            <x-primary-button type="sumbit">
-                <x-lucide-save class="w-5 h-5 text-white" />
-            </x-primary-button>
+            @if ($authRole === 'admin' || !$event->is_approved)
+                <x-primary-button type="sumbit">
+                    <x-lucide-save class="w-5 h-5 text-white" />
+                </x-primary-button>
+            @endif
             <input type="hidden" name="description" value="{{ $value }}" id="editor-content">
         </form>
     </div>

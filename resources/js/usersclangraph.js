@@ -1,6 +1,6 @@
 import Chart from "chart.js/auto";
 
-export const usersclangraph = (schoolId) => {
+export const usersclangraph = (schoolId, role) => {
     return {
         schoolId: schoolId,
         clanData: [],
@@ -14,7 +14,7 @@ export const usersclangraph = (schoolId) => {
         ],
         async getclanData() {
             const response = await fetch(
-                `/schools/${this.schoolId}/athletes-clan-data`
+                `${role == 'admin' ? '' : '/' + role}/schools/${this.schoolId}/athletes-clan-data`
             );
             const data = await response.json();
 
@@ -22,7 +22,7 @@ export const usersclangraph = (schoolId) => {
         },
         async getYearData() {
             const response = await fetch(
-                `/schools/${this.schoolId}/athletes-year-data`
+                `${role == 'admin' ? '' : '/' + role}/schools/${this.schoolId}/athletes-year-data`
             );
             const data = await response.json();
 

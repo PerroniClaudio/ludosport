@@ -185,6 +185,10 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/events/{event}/publish', [App\Http\Controllers\EventController::class, 'publish'])->name('events.publish');
     Route::post('/events/{event}/participants', [App\Http\Controllers\EventController::class, 'addParticipant'])->name('events.participants.store');
     Route::post('/events/{event}/results', [App\Http\Controllers\EventController::class, 'addResult'])->name('events.results.store');
+
+    Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('events.save.description');
+    Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('events.save.location');
+    Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('events.update.thumbnail');
 });
 
 /** Imports */
@@ -255,3 +259,9 @@ require __DIR__ . '/site.php';
 require __DIR__ . '/dean.php';
 require __DIR__ . '/rector.php';
 require __DIR__ . '/script.php';
+
+Route::group([], function () {
+    Route::get('/test', function () {
+        return 'test';
+    })->name('test');
+});
