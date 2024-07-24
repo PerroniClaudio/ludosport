@@ -1,12 +1,13 @@
 @props(['event' => ''])
 @php
     $authRole = auth()->user()->getRole();
+    $exportRoute = $authRole === 'admin' ? 'events.participants.export' : $authRole . '.events.participants.export';
 @endphp
 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-data="participants({{ $event->id }}, '{{ $authRole }}')">
     <div class="flex justify-between">
         <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.participants') }}</h3>
         <div>
-            <a href="{{ route('technician.events.participants.export', $event->id) }}">
+            <a href="{{ route($exportRoute, $event->id) }}">
                 <x-primary-button type="button">
                     {{ __('events.export_participants') }}
                 </x-primary-button>

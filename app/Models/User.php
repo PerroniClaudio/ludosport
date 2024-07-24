@@ -196,15 +196,25 @@ class User extends Authenticatable implements MustVerifyEmail {
             case 'manager':
                 return collect([
                     (object)[
+                        'label' => 'scuola',
+                        'active' => 'schools.*',
+                        'name' => 'manager.school.index',
+                    ],
+                    (object)[
+                        'label' => 'clan',
+                        'active' => 'clans.*',
+                        'name' => 'manager.clans.index',
+                    ],
+                    (object)[
                         'label' => 'users',
                         'active' => 'users.*',
                         'name' => 'manager.users.index',
                     ],
                     (object)[
-                        'label' => 'scuola',
-                        'active' => 'schools.*',
-                        'name' => 'manager.scuola.index',
-                    ]
+                        'label' => 'eventi',
+                        'active' => 'events.*',
+                        'name' => 'manager.events.index',
+                    ],
                 ]);
             case 'technician':
                 return collect([

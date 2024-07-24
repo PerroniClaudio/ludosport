@@ -13,7 +13,7 @@
                 $authRole = auth()->user()->getRole();
                 $canSetPrice = in_array($authRole, ['admin']);
             @endphp --}}
-            <form method="POST" action={{ route('dean.events.update', $event->id) }}
+            <form method="POST" action={{ route('manager.events.update', $event->id) }}
                 class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 @csrf
                 <div class="flex items-center justify-between">

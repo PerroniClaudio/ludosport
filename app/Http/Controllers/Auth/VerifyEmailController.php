@@ -14,6 +14,8 @@ class VerifyEmailController extends Controller
      */
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
+        // Se non è loggato deve rimandarlo al login e fare in modo che quando si logga effettui la verifica (reindirizzi a questa pagina)
+
         if ($request->user()->hasVerifiedEmail()) {
             return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
         }

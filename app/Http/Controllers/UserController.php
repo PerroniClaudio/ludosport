@@ -111,8 +111,11 @@ class UserController extends Controller {
                 $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->academies->first()->id)->get();                
                 break;
             case 'dean':
-            case 'manager':
                 $roles = Role::all()->whereNotIn('name', ['admin', 'rector']);
+                $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->schools->first()->academy->id)->get();
+                break;
+            case 'manager':
+                $roles = Role::all()->whereNotIn('name', ['admin', 'rector', 'dean']);
                 $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->schools->first()->academy->id)->get();
                 break;
             default:
