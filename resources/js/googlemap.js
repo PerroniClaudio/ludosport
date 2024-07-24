@@ -26,6 +26,8 @@ export const googlemap = (location) => {
         init() {
             fetchLocation(this.location).then((data) => {
                 data.address_components.forEach((element) => {
+                    console.log(element);
+
                     if (element.types.includes("route")) {
                         this.address = element.long_name + ", " + this.address;
                     }
@@ -34,8 +36,30 @@ export const googlemap = (location) => {
                         this.address += element.long_name;
                     }
 
+                    if (this.address === "") {
+                        if (element.types.includes("sublocality_level_2")) {
+                            this.address = element.long_name;
+                        }
+                    }
+
                     if (element.types.includes("locality")) {
                         this.city = element.long_name;
+                    }
+
+                    if (this.city === "") {
+                        if (element.types.includes("postal_town")) {
+                            this.city = element.long_name;
+                        }
+                    }
+
+                    if (this.city === "") {
+                        if (
+                            element.types.includes(
+                                "administrative_area_level_2"
+                            )
+                        ) {
+                            this.city = element.long_name;
+                        }
                     }
 
                     if (element.types.includes("country")) {

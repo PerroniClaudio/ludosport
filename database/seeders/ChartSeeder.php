@@ -67,6 +67,10 @@ class ChartSeeder extends Seeder {
                         break;
                 }
 
+                if ($bonus_war_points === null) {
+                    $bonus_war_points = 0;
+                }
+
                 EventResult::create([
                     'event_id' => $event->id,
                     'user_id' => $user->id,

@@ -243,7 +243,11 @@ class EventController extends Controller {
 
             $event_type = EventType::where('id', $request->event_type)->first();
 
+
+
             $event->event_type = $event_type->id;
+
+
 
 
             if ($request->is_free == 'on') {

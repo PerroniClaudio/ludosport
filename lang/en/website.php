@@ -18,4 +18,9 @@ return [
     "tird_section_first_title" => "Respect",
     "tird_section_second_title" => "Fair Play",
     "tird_section_third_title" => "Community",
+    'academies_map' => 'Academies Map',
+    'academies_map_text' => 'Find the nearest LudoSport Academy, and start your journey today!',
+    'rankings' => 'Rankings',
+    'shop' => 'Shop',
+    'user_search' => 'User Search',
 ];

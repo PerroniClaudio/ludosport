@@ -22,18 +22,35 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                    <a href="{{ route('homepage') }}">
                         {{-- <x-application-logo
                             class="block h-9 w-auto fill-current text-background-800 dark:text-background-200" /> --}}
                         <x-application-logo class="block h-9 w-auto" />
                     </a>
                 </div>
 
+
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('dashboard.title') }}
+                    @if (Auth::check())
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                            {{ __('dashboard.title') }}
+                        </x-nav-link>
+                    @endif
+
+                    <x-nav-link :href="route('academies-map')" :active="request()->routeIs('academies-map')">
+                        {{ __('website.academies_map') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('rankings-website')" :active="request()->routeIs('rankings-website')">
+                        {{ __('website.rankings') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('shop')" :active="request()->routeIs('shop')">
+                        {{ __('website.shop') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('user-search')" :active="request()->routeIs('user-search')">
+                        {{ __('website.user_search') }}
+                    </x-nav-link>
+
                 </div>
             </div>
 
@@ -57,22 +74,30 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
 
-
-
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                        <!-- Only show if user is authenticated -->
+                        @if (Auth::check())
+                            <x-dropdown-link :href="route('dashboard')">
+                                {{ __('Dashboard') }}
                             </x-dropdown-link>
-                        </form>
+                            <x-dropdown-link :href="route('dashboard')">
+                                {{ __('Profile') }}
+                            </x-dropdown-link>
+                            <!-- Authentication -->
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+
+                                <x-dropdown-link :href="route('logout')"
+                                    onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
+                        @endif
+
+
+
+
                     </x-slot>
                 </x-dropdown>
             </div>
