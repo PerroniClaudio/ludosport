@@ -11,6 +11,7 @@ use App\Models\EventType;
 use App\Models\Nation;
 use App\Models\User;
 use App\Models\WeaponForm;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -120,7 +121,7 @@ class EventController extends Controller {
 
         $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
-        
+
         return redirect()->route($redirectRoute, $event->id);
     }
 
@@ -206,7 +207,7 @@ class EventController extends Controller {
 
         $event->save();
 
-        
+
         $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
 
         return redirect()->route($redirectRoute, $event->id)->with('success', 'Location saved successfully');
@@ -230,7 +231,7 @@ class EventController extends Controller {
             'end_date' => 'required',
             'price' => 'min:0',
         ]);
-        
+
         if ($authRole !== 'admin' && $event->user_id !== $authUser->id) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
@@ -492,5 +493,20 @@ class EventController extends Controller {
         }
 
         return response()->json($formatted_events);
+    }
+
+    // Sito web 
+
+    public function list(Request $request) {
+
+        $date = Carbon::parse($request->date);
+
+        $events = Event::where([
+            ['is_approved', '=', 1],
+            ['is_published', '=', 1],
+            ['end_date', '<=', $date->format('Y-m-d')],
+        ])->get();
+
+        return response()->json($events);
     }
 }

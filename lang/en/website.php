@@ -23,4 +23,6 @@ return [
     'rankings' => 'Rankings',
     'shop' => 'Shop',
     'user_search' => 'User Search',
+
+    'rankings_text' => 'Check out the latest rankings and see where you stand!',
 ];

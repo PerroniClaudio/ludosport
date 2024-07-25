@@ -33,7 +33,7 @@
     </script>
 
     <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
-        <section class="hidden lg:block col-span-12 py-12">
+        <section class="col-span-12 py-12">
             <h1
                 class="text-6xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300">
                 {{ __('website.academies_map') }}

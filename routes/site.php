@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 
 
-
 Route::get('/', function () {
     // return view('welcome');
     return view('homepage');
@@ -13,9 +12,7 @@ Route::get('/academies-map', function () {
     return view('website.academies-map');
 })->name('academies-map');
 
-Route::get('/rankings-website', function () {
-    return view('website.rankings');
-})->name('rankings-website');
+
 
 Route::get('/shop', function () {
     return view('website.shop');
@@ -32,6 +29,17 @@ Route::get('/athlete-profile/{id}', function () {
 Route::get('/academy-profile/{id}', function () {
     return view('website.academy-profile');
 })->name('academy-profile');
+
+/** Rankings */
+
+Route::prefix('/website-rankings')->group(function () {
+
+    Route::get('/', function () {
+        return view('website.rankings');
+    })->name('rankings-website');
+
+    Route::get('/events/list', [App\Http\Controllers\EventController::class, 'list'])->name('rankings-events-list');
+});
 
 Route::group(['middleware' => ['auth']], function () {
     // Route::get('/events-list', function () {
