@@ -46,4 +46,5 @@ return [
     'shop_fees_error' => 'Fees payment failed',
     'shop_fees_success_text' => 'Your fees have been successfully paid. Your membership is now active.',
     'shop_fees_error_text' => 'There was an error processing your payment. Please try again.',
+    'paypal' => 'Pay with PayPal',
 ];
