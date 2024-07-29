@@ -138,7 +138,43 @@
                     window.location.href = `${url}?${params}`
             
                 },
+                startPaypalCheckout() {
+                    this.saveInvoiceData()
             
+                    const url = `/shop/fees/paypal/checkout`
+                    let items = [];
+            
+                    if (this.seniorFees > 0) {
+                        items.push({
+                            'name': 'senior_fee',
+                            'quantity': this.seniorFees,
+                        })
+                    }
+            
+                    if (this.juniorFees > 0) {
+                        items.push({
+                            'name': 'junior_fee',
+                            'quantity': this.juniorFees,
+                        })
+                    }
+            
+                    const itemsJson = JSON.stringify(items)
+            
+                    let fd = new FormData()
+                    fd.append('items', itemsJson)
+            
+                    fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: fd
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            window.location.href = data.url
+                        })
+                },
                 init() {
                     this.fetchInvoiceData()
                 }
@@ -213,7 +249,7 @@
                                     x-text="'€ ' + totalPrice.toFixed(2)"></p>
 
                                 <div x-show="shouldShowPayment" class="mt-4">
-                                    <div
+                                    <div @click="startPaypalCheckout"
                                         class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer">
                                         <span>PayPal</span>
                                     </div>

@@ -17,6 +17,11 @@ class ShopController extends Controller {
     public function activate() {
 
         $user = User::find(Auth()->user()->id);
+
+        if ($user->has_paid_fee === 1) {
+            return redirect()->route('shop')->with('error', __('website.already_paid'));
+        }
+
         $invoice = $user->invoices->first();
 
         if (!$invoice) {

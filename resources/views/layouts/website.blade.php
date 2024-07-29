@@ -93,6 +93,13 @@
                                     {{ __('Log Out') }}
                                 </x-dropdown-link>
                             </form>
+                        @else
+                            <x-dropdown-link :href="route('login')">
+                                {{ __('Log in') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('register')">
+                                {{ __('Register') }}
+                            </x-dropdown-link>
                         @endif
 
 
@@ -120,6 +127,8 @@
     <main class="min-h-screen bg-background-100 dark:bg-background-900">
         {{ $slot }}
     </main>
+
+    <x-flash />
 </body>
 
 

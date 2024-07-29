@@ -51,6 +51,12 @@ Route::prefix('/shop')->group(function () {
 
     Route::get('/fees/success', [App\Http\Controllers\FeeController::class, 'successUser'])->name('shop.fees.success');
     Route::get('/fees/cancel', [App\Http\Controllers\FeeController::class, 'cancelUser'])->name('shop.fees.cancel');
+
+    # PayPal
+
+    Route::post('/fees/paypal/checkout', [App\Http\Controllers\FeeController::class, 'userCheckoutPaypal'])->name('shop.fees.paypal-checkout');
+    Route::get('/fees/paypal/success', [App\Http\Controllers\FeeController::class, 'successUserPaypal'])->name('shop.fees.paypal-success');
+    Route::get('/fees/paypal/cancel', [App\Http\Controllers\FeeController::class, 'cancelUserPaypal'])->name('shop.fees.paypal-cancel');
 });
 
 Route::group(['middleware' => ['auth']], function () {

@@ -12,6 +12,7 @@ use Illuminate\Support\Env;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Cashier;
 use Illuminate\Support\Facades\DB;
+use Srmklive\PayPal\Services\Paypal as PaypalClient;
 
 class FeeController extends Controller {
     /**
@@ -213,9 +214,7 @@ class FeeController extends Controller {
         ]);
     }
 
-    /**
-     * Checkout with Stripe.
-     */
+    //? Checkout with Stripe.
 
     public function checkoutStripe(Request $request) {
 
@@ -380,7 +379,12 @@ class FeeController extends Controller {
         if ($order->status !== 0) {
         } else {
 
-            $order->update(['status' => 2, 'result' => json_encode($session)]);
+            $order->update([
+                'status' => 2,
+                'total' => number_format($session->amount_total / 100, 2),
+                'payment_method' => 'stripe',
+                'result' => json_encode($session)
+            ]);
             $user = User::find($order->user_id);
 
             //! Cosa succede se l'utente non è in una accademia?
@@ -458,5 +462,160 @@ class FeeController extends Controller {
     private function retrievePriceByPriceId($priceId) {
         $price = Cashier::stripe()->prices->retrieve($priceId);
         return $price->unit_amount;
+    }
+
+
+    //? Checkout with Paypal.
+
+    public function userCheckoutPaypal(Request $request) {
+
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+
+        $order_id = $request->session()->get('order_id');
+        $order = Order::findOrFail($order_id);
+
+        $items = json_decode($request->items);
+        $amount = 0;
+        foreach ($items as $item) {
+            $amount += $item->name == 'senior_fee' ? 50 : 25;
+
+            $order->items()->create([
+                'product_type' => 'fee',
+                'product_name' => $item->name,
+                'product_code' => $item->name == 'senior_fee' ? 'senior_fee' : 'junior_fee',
+                'quantity' => $item->quantity,
+                'price' => number_format($amount, 2),
+                'vat' => 0,
+                'total' => number_format($amount, 2),
+            ]);
+        }
+
+        $response = $provider->createOrder([
+            'intent' => 'CAPTURE',
+            'purchase_units' => [
+                [
+                    'amount' => [
+                        'currency_code' => 'EUR',
+                        'value' => number_format($amount, 2),
+                    ],
+                ],
+            ],
+            'application_context' => [
+                'cancel_url' => route('shop.fees.paypal-cancel') . "?order_id={$order_id}",
+                'return_url' => route('shop.fees.paypal-success') . "?order_id={$order_id}",
+                'order_id' => $order_id
+            ],
+        ]);
+
+        if (isset($response['id']) && $response['id'] !== null) {
+            session(['paypal_order_id' => $response['id']]);
+
+            foreach ($response['links'] as $link) {
+                if ($link['rel'] == 'approve') {
+
+
+                    $order->update([
+                        'status' => 1,
+                        'payment_method' => 'paypal',
+                        'total' => number_format($amount, 2),
+                        'result' => json_encode($response),
+                    ]);
+
+                    session()->put('product_name', $request->product_name);
+
+                    return response()->json([
+                        'success' => true,
+                        'url' => $link['href'],
+                    ]);
+                }
+            }
+        } else {
+
+            $order->update([
+                'status' => 4,
+                'payment_method' => 'paypal',
+                'total' => number_format($amount, 2),
+                'result' => 'Error creating order',
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Error creating order',
+                'url' => route('shop.fees.fees-cancel'),
+            ]);
+        }
+    }
+
+    public function successUserPaypal(Request $request) {
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+        $result = $provider->capturePaymentOrder($request->token);
+        $orderId = $request->order_id;
+
+
+        if ($orderId === null) {
+            return;
+        }
+
+        $order = Order::findOrFail($orderId);
+
+        if ($order->status !== 1) {
+        } else {
+
+            $order->update([
+                'status' => 2,
+                'result' => json_encode($result),
+            ]);
+            $user = User::find($order->user_id);
+
+            //! Cosa succede se l'utente non è in una accademia?
+
+            $academy = $order->user->academies()->first() ? $order->user->academies()->first()->id : 1;
+
+            foreach ($order->items as $item) {
+
+                Fee::create([
+                    'user_id' => $order->user_id,
+                    'academy_id' => $academy ? $academy : 1,
+                    'type' => $item->product_name == 'senior_fee' ? 1 : 2,
+                    'start_date' => now(),
+                    'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
+                    'auto_renew' => 1,
+                    'used' => 1,
+                    'unique_id' => Str::orderedUuid(),
+                ]);
+            }
+
+            $user->update([
+                'has_paid_fee' => 1,
+            ]);
+        }
+
+        return view('website.shop.fees-success', [
+            'order' => $order,
+        ]);
+    }
+
+    public function cancelUserPaypal(Request $request) {
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+        $result = $provider->capturePaymentOrder($request->token);
+        $orderId = $request->order_id;
+
+        if ($orderId === null) {
+            return;
+        }
+
+        $order = Order::findOrFail($orderId);
+
+        $order->update(['status' => 4, 'result' => json_encode($result)]);
+
+        return view('website.shop.fees-cancel', [
+            'order' => $order,
+        ]);
     }
 }
