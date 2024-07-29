@@ -509,4 +509,64 @@ class EventController extends Controller {
 
         return response()->json($events);
     }
+
+    public function general(Request $request) {
+
+        $date = Carbon::parse($request->date);
+        $events = Event::where('end_date', '<', $date->format('Y-m-d'))->get();
+
+        $results = [];
+
+        foreach ($events as $event) {
+            $event_result = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
+
+            foreach ($event_result as $key => $value) {
+
+                if (!isset($results[$value->user_id])) {
+                    $results[$value->user_id] = [
+                        'user_id' => $value->user_id,
+                        'user_name' => $value->user->name . ' ' . $value->user->surname,
+                        'total_war_points' => 0,
+                        'total_style_points' => 0,
+                    ];
+                }
+
+                $results[$value->user_id]['total_war_points'] += $value->total_war_points;
+                $results[$value->user_id]['total_style_points'] += $value->total_style_points;
+            }
+        }
+
+        usort($results, function ($a, $b) {
+            return $b['total_war_points'] - $a['total_war_points'];
+        });
+
+        return response()->json($results);
+    }
+
+    public function eventResult(Event $event) {
+
+        $results = [];
+
+        $event_results = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
+
+        foreach ($event_results as $key => $value) {
+            if (!isset($results[$value->user_id])) {
+                $results[$value->user_id] = [
+                    'user_id' => $value->user_id,
+                    'user_name' => $value->user->name . ' ' . $value->user->surname,
+                    'total_war_points' => 0,
+                    'total_style_points' => 0,
+                ];
+            }
+
+            $results[$value->user_id]['total_war_points'] += $value->total_war_points;
+            $results[$value->user_id]['total_style_points'] += $value->total_style_points;
+        }
+
+        usort($results, function ($a, $b) {
+            return $b['total_war_points'] - $a['total_war_points'];
+        });
+
+        return response()->json($results);
+    }
 }

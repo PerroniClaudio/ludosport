@@ -38,7 +38,19 @@ Route::prefix('/website-rankings')->group(function () {
         return view('website.rankings');
     })->name('rankings-website');
 
+    Route::get('/general', [App\Http\Controllers\EventController::class, 'general'])->name('rankings-events-results');
     Route::get('/events/list', [App\Http\Controllers\EventController::class, 'list'])->name('rankings-events-list');
+    Route::get('/events/{event}/rankings', [App\Http\Controllers\EventController::class, 'eventResult'])->name('rankings-events-show');
+});
+
+Route::prefix('/shop')->group(function () {
+    Route::get('/', [App\Http\Controllers\ShopController::class, 'shop'])->name('shop');
+    Route::get('/activate-membership', [App\Http\Controllers\ShopController::class, 'activate'])->middleware('auth')->name('shop-activate-membership');
+    Route::get('/invoices/user-data/{user}', [App\Http\Controllers\UserController::class, 'invoiceData'])->name('users.invoices.get');
+    Route::get('/fees/stripe-checkout', [App\Http\Controllers\FeeController::class, 'userCheckoutStripe'])->name('users.invoices.get');
+
+    Route::get('/fees/success', [App\Http\Controllers\FeeController::class, 'successUser'])->name('shop.fees.success');
+    Route::get('/fees/cancel', [App\Http\Controllers\FeeController::class, 'cancelUser'])->name('shop.fees.cancel');
 });
 
 Route::group(['middleware' => ['auth']], function () {

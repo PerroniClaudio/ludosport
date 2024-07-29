@@ -78,7 +78,7 @@
                         <!-- Only show if user is authenticated -->
                         @if (Auth::check())
                             <x-dropdown-link :href="route('dashboard')">
-                                {{ __('Dashboard') }}
+                                {{ __('dashboard.title') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard')">
                                 {{ __('Profile') }}

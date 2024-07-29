@@ -13,7 +13,7 @@
                 <div class="flex flex-col gap-2 col-span-2">
                     <!-- Events -->
                     <div class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2"
-                        data-id="0" @click="showRanking(0)">
+                        data-id="0" @click="getGeneralRankings()">
 
                         <span>{{ __('General rank') }}</span>
                         <div class="flex flex-col justify-center align-center cursor-pointer hover:text-primary-500">
@@ -23,7 +23,7 @@
 
                     <template x-for="event in events" :key="event.id">
                         <div class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2"
-                            data-id="0" @click="showRanking(event.id)">
+                            data-id="0" @click="getDataForEvent(event.id); eventName = event.name">
                             <span x-text="event.name"></span>
                             <div
                                 class="flex flex-col justify-center align-center cursor-pointer hover:text-primary-500">
@@ -33,7 +33,28 @@
                     </template>
                 </div>
                 <div class="col-span-4">
+                    <div class="px-8">
+                        <h1 class="font-bold tracking-tighter text-4xl pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300"
+                            x-text="eventName"></h1>
+                    </div>
+
                     <!-- Table -->
+                    <div class="flex flex-col gap-4 px-8 max-h-[80vh] overflow-y-scroll">
+                        <template x-for="athlete in xdd" :key="athlete.id">
+                            <div class="bg-background-800 rounded dark:text-background-300 p-4">
+                                <div class="flex justify-between gap-1 items-center">
+                                    <div class="flex-1">
+                                        <h1 class="font-bold dark:text-background-100" x-text="athlete.name"></h1>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-primary-500" x-text="athlete.war_points"></p>
+                                        <p class="text-secondary-500" x-text="athlete.style_points"></p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
         </section>
