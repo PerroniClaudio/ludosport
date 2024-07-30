@@ -16,6 +16,7 @@
     newEventTypeName: '',
     event_id: {{ $event_id }},
     type_id: {{ $selected }},
+    selected: '',
     eventTypes: [],
     fetchEventTypes: async function() {
 
@@ -30,6 +31,8 @@
             const data = await response.json()
             console.log(data)
             this.eventTypes = data.eventTypes
+            console.log(this.type_id)
+            this.selected = this.eventTypes.find(type => type.id === this.type_id).name
         }
     },
     createNewEventType: async function() {
@@ -67,7 +70,7 @@
             class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
 
             <template x-for="type in eventTypes" :key="type.id">
-                <option x-text="type.name" :selected="type.name == selected"></option>
+                <option x-text="type.name"></option>
             </template>
 
         </select>

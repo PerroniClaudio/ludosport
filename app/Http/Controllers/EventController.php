@@ -218,19 +218,20 @@ class EventController extends Controller {
      */
     public function update(Request $request, Event $event) {
         //
-        $authUser = User::find(auth()->user()->id);
-        $authRole = $authUser->getRole();
 
         $auth = auth()->user();
         $user = User::find($auth->id);
 
+        $authRole = $user->getRole();
+
         $request->validate([
             'name' => 'required',
-            'event_type' => 'numeric',
+            'event_type' => 'string',
             'start_date' => 'required',
             'end_date' => 'required',
             'price' => 'min:0',
         ]);
+
 
         if ($authRole !== 'admin' && $event->user_id !== $authUser->id) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
@@ -240,14 +241,12 @@ class EventController extends Controller {
         $event->start_date = $request->start_date;
         $event->end_date = $request->end_date;
 
+
+
         if ($authRole === 'admin') {
 
-            $event_type = EventType::where('id', $request->event_type)->first();
-
-
-
+            $event_type = EventType::where('name', $request->event_type)->first();
             $event->event_type = $event_type->id;
-
 
 
 
