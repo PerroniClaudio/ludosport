@@ -48,4 +48,6 @@ return [
     'shop_fees_error_text' => 'There was an error processing your payment. Please try again.',
     'paypal' => 'Pay with PayPal',
     'already_paid' => 'You have already paid the membership fee.',
+    'search_user_title' => 'User Search',
+    'search_user_text' => 'Search for a user by their name or battle name.',
 ];

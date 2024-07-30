@@ -33,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         'birthday',
         'active_fee_id',
         'has_paid_fee',
+        'battle_name',
     ];
 
     public function toSearchableArray() {
@@ -41,6 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail {
             'name' => $this->name,
             'surname' => $this->surname,
             'email' => $this->email,
+            'battle_name' => $this->battle_name,
         ];
     }
 
