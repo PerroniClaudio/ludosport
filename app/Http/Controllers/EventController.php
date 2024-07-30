@@ -497,6 +497,20 @@ class EventController extends Controller {
 
     // Sito web 
 
+    public function eventsList() {
+        $date = Carbon::parse(now());
+
+        $events = Event::where([
+            ['is_approved', '=', 1],
+            ['is_published', '=', 1],
+            ['end_date', '>=', $date->format('Y-m-d')],
+        ])->get();
+
+        return view('website.events-list', [
+            'events' => $events
+        ]);
+    }
+
     public function list(Request $request) {
 
         $date = Carbon::parse($request->date);

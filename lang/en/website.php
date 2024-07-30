@@ -50,4 +50,7 @@ return [
     'already_paid' => 'You have already paid the membership fee.',
     'search_user_title' => 'User Search',
     'search_user_text' => 'Search for a user by their name or battle name.',
+    'events_list' => 'Events',
+    'events_list_title' => 'Events List',
+    'events_list_text' => 'List of all upcoming events.',
 ];

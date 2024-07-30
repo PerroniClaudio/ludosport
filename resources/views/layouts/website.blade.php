@@ -51,6 +51,12 @@
                         {{ __('website.user_search') }}
                     </x-nav-link>
 
+                    @if (Auth::check())
+                        <x-nav-link :href="route('events-list')" :active="request()->routeIs('events-list')">
+                            {{ __('website.events_list') }}
+                        </x-nav-link>
+                    @endif
+
                 </div>
             </div>
 

@@ -15,8 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         //
-        $middleware->alias(['role' => UserRoleMiddleware::class]);
-        $middleware->alias(['throttle' => SearchThrottleMiddleware::class]);
+        $middleware->alias([
+            'role' => UserRoleMiddleware::class,
+            'throttle' => SearchThrottleMiddleware::class
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

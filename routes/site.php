@@ -46,17 +46,21 @@ Route::prefix('/website-rankings')->group(function () {
 Route::prefix('/shop')->group(function () {
     Route::get('/', [App\Http\Controllers\ShopController::class, 'shop'])->name('shop');
     Route::get('/activate-membership', [App\Http\Controllers\ShopController::class, 'activate'])->middleware('auth')->name('shop-activate-membership');
-    Route::get('/invoices/user-data/{user}', [App\Http\Controllers\UserController::class, 'invoiceData'])->name('users.invoices.get');
-    Route::get('/fees/stripe-checkout', [App\Http\Controllers\FeeController::class, 'userCheckoutStripe'])->name('users.invoices.get');
+    Route::get('/invoices/user-data/{user}', [App\Http\Controllers\UserController::class, 'invoiceData'])->middleware('auth')->name('users.invoices.get');
+    Route::get('/fees/stripe-checkout', [App\Http\Controllers\FeeController::class, 'userCheckoutStripe'])->middleware('auth')->name('users.invoices.get');
 
-    Route::get('/fees/success', [App\Http\Controllers\FeeController::class, 'successUser'])->name('shop.fees.success');
-    Route::get('/fees/cancel', [App\Http\Controllers\FeeController::class, 'cancelUser'])->name('shop.fees.cancel');
+    Route::get('/fees/success', [App\Http\Controllers\FeeController::class, 'successUser'])->middleware('auth')->name('shop.fees.success');
+    Route::get('/fees/cancel', [App\Http\Controllers\FeeController::class, 'cancelUser'])->middleware('auth')->name('shop.fees.cancel');
 
     # PayPal
 
-    Route::post('/fees/paypal/checkout', [App\Http\Controllers\FeeController::class, 'userCheckoutPaypal'])->name('shop.fees.paypal-checkout');
-    Route::get('/fees/paypal/success', [App\Http\Controllers\FeeController::class, 'successUserPaypal'])->name('shop.fees.paypal-success');
-    Route::get('/fees/paypal/cancel', [App\Http\Controllers\FeeController::class, 'cancelUserPaypal'])->name('shop.fees.paypal-cancel');
+    Route::post('/fees/paypal/checkout', [App\Http\Controllers\FeeController::class, 'userCheckoutPaypal'])->middleware('auth')->name('shop.fees.paypal-checkout');
+    Route::get('/fees/paypal/success', [App\Http\Controllers\FeeController::class, 'successUserPaypal'])->middleware('auth')->name('shop.fees.paypal-success');
+    Route::get('/fees/paypal/cancel', [App\Http\Controllers\FeeController::class, 'cancelUserPaypal'])->middleware('auth')->name('shop.fees.paypal-cancel');
+});
+
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('/events-list', [App\Http\Controllers\EventController::class, 'eventsList'])->name('events-list');
 });
 
 Route::group(['middleware' => ['auth']], function () {
