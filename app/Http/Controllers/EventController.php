@@ -11,6 +11,7 @@ use App\Models\EventType;
 use App\Models\Nation;
 use App\Models\User;
 use App\Models\WeaponForm;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -120,7 +121,7 @@ class EventController extends Controller {
 
         $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
-        
+
         return redirect()->route($redirectRoute, $event->id);
     }
 
@@ -219,7 +220,7 @@ class EventController extends Controller {
 
         $event->save();
 
-        
+
         $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
 
         return redirect()->route($redirectRoute, $event->id)->with('success', 'Location saved successfully');
@@ -233,12 +234,9 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        $auth = auth()->user();
-        $user = User::find($auth->id);
-
         $request->validate([
             'name' => 'required',
-            'event_type' => 'numeric',
+            'event_type' => 'string',
             'start_date' => 'required',
             'end_date' => 'required',
             'price' => 'min:0',
@@ -261,11 +259,13 @@ class EventController extends Controller {
         $event->start_date = $request->start_date;
         $event->end_date = $request->end_date;
 
+
+
         if ($authRole === 'admin') {
 
-            $event_type = EventType::where('id', $request->event_type)->first();
-
+            $event_type = EventType::where('name', $request->event_type)->first();
             $event->event_type = $event_type->id;
+
 
 
             if ($request->is_free == 'on') {
@@ -510,5 +510,94 @@ class EventController extends Controller {
         }
 
         return response()->json($formatted_events);
+    }
+
+    // Sito web 
+
+    public function eventsList() {
+        $date = Carbon::parse(now());
+
+        $events = Event::where([
+            ['is_approved', '=', 1],
+            ['is_published', '=', 1],
+            ['end_date', '>=', $date->format('Y-m-d')],
+        ])->get();
+
+        return view('website.events-list', [
+            'events' => $events
+        ]);
+    }
+
+    public function list(Request $request) {
+
+        $date = Carbon::parse($request->date);
+
+        $events = Event::where([
+            ['is_approved', '=', 1],
+            ['is_published', '=', 1],
+            ['end_date', '<=', $date->format('Y-m-d')],
+        ])->get();
+
+        return response()->json($events);
+    }
+
+    public function general(Request $request) {
+
+        $date = Carbon::parse($request->date);
+        $events = Event::where('end_date', '<', $date->format('Y-m-d'))->get();
+
+        $results = [];
+
+        foreach ($events as $event) {
+            $event_result = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
+
+            foreach ($event_result as $key => $value) {
+
+                if (!isset($results[$value->user_id])) {
+                    $results[$value->user_id] = [
+                        'user_id' => $value->user_id,
+                        'user_name' => $value->user->name . ' ' . $value->user->surname,
+                        'total_war_points' => 0,
+                        'total_style_points' => 0,
+                    ];
+                }
+
+                $results[$value->user_id]['total_war_points'] += $value->total_war_points;
+                $results[$value->user_id]['total_style_points'] += $value->total_style_points;
+            }
+        }
+
+        usort($results, function ($a, $b) {
+            return $b['total_war_points'] - $a['total_war_points'];
+        });
+
+        return response()->json($results);
+    }
+
+    public function eventResult(Event $event) {
+
+        $results = [];
+
+        $event_results = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
+
+        foreach ($event_results as $key => $value) {
+            if (!isset($results[$value->user_id])) {
+                $results[$value->user_id] = [
+                    'user_id' => $value->user_id,
+                    'user_name' => $value->user->name . ' ' . $value->user->surname,
+                    'total_war_points' => 0,
+                    'total_style_points' => 0,
+                ];
+            }
+
+            $results[$value->user_id]['total_war_points'] += $value->total_war_points;
+            $results[$value->user_id]['total_style_points'] += $value->total_style_points;
+        }
+
+        usort($results, function ($a, $b) {
+            return $b['total_war_points'] - $a['total_war_points'];
+        });
+
+        return response()->json($results);
     }
 }

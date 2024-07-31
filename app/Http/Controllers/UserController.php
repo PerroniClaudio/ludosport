@@ -14,12 +14,14 @@ use App\Models\User;
 use GPBMetadata\Google\Api\Log;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UserController extends Controller {
 
-    public function index() { 
+    public function index() {
         // Qui si dovrebbero filtrare gli utenti visualizzabili in base al ruolo dell'utente loggato.
         // Es. dean vede solo gli utenti della sua scuola, admin vede tutti gli utenti, ecc.
         $authUserRole = User::find(auth()->user()->id)->getRole();
@@ -35,22 +37,23 @@ class UserController extends Controller {
                 }
 
                 // Se l'utente è un admin, non filtra nulla
-                
+
                 // Se l'utente è rector, filtra solo gli utenti della sua accademia (sia personale che atleti)
                 // è stato stabilito che rector, dean e manager vengono assegnati con questo ruolo ad una sola scuola 
                 // e che questa scuola è la prima alla quale sono stati associati, quindi recuperabile col metodo first().
-                if($authUserRole === 'rector') {
-                    if($user->academies->where('id', auth()->user()->academies->first()->id)->isEmpty()
-                    && $user->academyAthletes->where('id', auth()->user()->academies->first()->id)->isEmpty()
+                if ($authUserRole === 'rector') {
+                    if (
+                        $user->academies->where('id', auth()->user()->academies->first()->id)->isEmpty()
+                        && $user->academyAthletes->where('id', auth()->user()->academies->first()->id)->isEmpty()
                     ) {
                         continue;
                     }
                 }
 
                 // Se l'utente è un dean o manager, filtra solo gli utenti della sua scuola
-                if(in_array($authUserRole, ['dean', 'manager'])) {
+                if (in_array($authUserRole, ['dean', 'manager'])) {
                     $authSchool = auth()->user()->schools->where('is_disabled', '0')->first();
-                    if(
+                    if (
                         $user->schools->where('id', $authSchool->id)->isEmpty()
                         && $user->schoolAthletes->where('id', $authSchool->id)->isEmpty()
                     ) {
@@ -59,10 +62,10 @@ class UserController extends Controller {
                 }
 
                 // Se l'utente è un instructor o technician, filtra solo gli utenti dei corsi a cui è associato? tutti?
-                if(in_array($authUserRole, ['instructor', 'technician'])) {
+                if (in_array($authUserRole, ['instructor', 'technician'])) {
                     $authClans = auth()->user()->clansPersonnel->where('is_disabled', '0')->pluck('id')->toArray();
 
-                    if(
+                    if (
                         $user->clansPersonnel->whereIn('id', $authClans)->isEmpty()
                         && $user->clans->whereIn('id', $authClans)->isEmpty()
                     ) {
@@ -101,14 +104,14 @@ class UserController extends Controller {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
-        switch($authRole) {
+        switch ($authRole) {
             case 'admin':
                 $roles = Role::all();
-                $academies = Academy::where('is_disabled', false)->get();                
+                $academies = Academy::where('is_disabled', false)->get();
                 break;
             case 'rector':
                 $roles = Role::all()->whereNotIn('name', ['admin']);
-                $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->academies->first()->id)->get();                
+                $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->academies->first()->id)->get();
                 break;
             case 'dean':
                 $roles = Role::all()->whereNotIn('name', ['admin', 'rector']);
@@ -120,9 +123,8 @@ class UserController extends Controller {
                 break;
             default:
                 return back()->with('error', 'You do not have the required role to access this page!');
-
         }
-        
+
         $viewPath = $authRole === 'admin' ? 'users.create' :  'users.' . $authRole . '.create';
 
         return view($viewPath, [
@@ -440,6 +442,44 @@ class UserController extends Controller {
         ]);
     }
 
+    public function show(User $user) {
+
+        $roles = Role::all();
+        $user->roles = $user->roles->pluck('label')->toArray();
+
+        return view('website.user-show', [
+            'user' => $user,
+            'roles' => $roles,
+        ]);
+    }
+
+    public function propic(User $user) {
+
+        $cacheKey = 'propic-' . $user->id;
+
+        $image = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($user) {
+            if ($user->profile_picture !== null) {
+                $url = Storage::disk('gcs')->temporaryUrl(
+                    $user->profile_picture,
+                    now()->addMinutes(5)
+                );
+            } else {
+                $url = 'https://ui-avatars.com/api/?name=' . $user->name . '+' . $user->surname . '&size=256';
+            }
+
+            $response = Http::get($url);
+
+            return $response->body();
+        });
+
+        $headers = [
+            'Content-Type' => 'image/png',
+            'Content-Length' => strlen($image),
+        ];
+
+        return response($image, 200, $headers);
+    }
+
     public function update(Request $request, User $user) {
 
         $request->validate([
@@ -521,6 +561,20 @@ class UserController extends Controller {
         return view('users.search-result', [
             'users' => $users,
         ]);
+    }
+
+    public function searchJson(Request $request) {
+
+        $request->validate([
+            'search' => 'required|string',
+        ]);
+
+        $users = User::query()
+            ->when($request->search, function (Builder $q, $value) {
+                return $q->whereIn('id', User::search($value)->keys());
+            })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+
+        return response()->json($users);
     }
 
     public function filter() {
