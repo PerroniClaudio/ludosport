@@ -1,3 +1,9 @@
+{{-- 
+    Rector cannot assign roles higher than his own.
+--}}
+@php
+    $no_access_roles = ['admin'];
+@endphp
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -15,34 +21,6 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('users.status') }}</h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <div class="w-1/2 flex flex-col gap-2">
-                        <div>
-                            <div
-                                class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex items-center gap-2">
-                                @switch($user->rank->id)
-                                    @case(1)
-                                        <x-lucide-user class="w-6 h-6 text-background-800 dark:text-background-200" />
-                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
-                                    @break
-
-                                    @case(2)
-                                        <x-lucide-user-check class="w-6 h-6 text-background-800 dark:text-background-200" />
-                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
-                                    @break
-
-                                    @case(3)
-                                        <x-lucide-graduation-cap class="w-6 h-6 text-background-800 dark:text-background-200" />
-                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
-                                    @break
-
-                                    @case(4)
-                                        <x-lucide-shield-check class="w-6 h-6 text-background-800 dark:text-background-200" />
-                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
-                                    @break
-
-                                    @default
-                                @endswitch
-                            </div>
-                        </div>
                         <div>
                             @if ($user->hasRole('athlete'))
                                 @if ($user->has_paid_fee)
@@ -96,13 +74,13 @@
                                 </div>
                             @endif
                         </div>
-
                     </div>
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('users.update', $user->id) }}" class="grid grid-cols-2 gap-4">
+            <form method="POST" action="{{ route('rector.users.update', $user->id) }}" class="grid grid-cols-2 gap-4">
                 @csrf
+
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">
                         {{ __('users.personal_details_message') }}</h3>
@@ -123,7 +101,7 @@
                             <select name="nationality" id="nationality"
                                 class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
                                 @foreach ($nations as $key => $nation)
-                                    <optgroup label="{{ $key }}">
+                                    <optgroup label="{{ $key }}"">
                                         @foreach ($nation as $n)
                                             <option value="{{ $n['id'] }}"
                                                 {{ $n['id'] == $user->nation_id ? 'selected' : '' }}>
@@ -137,6 +115,8 @@
                     </div>
                 </div>
 
+
+
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">
                         {{ __('users.authorization') }}</h3>
@@ -146,10 +126,12 @@
                         x-data="{
                             selected: {{ collect($user->roles) }},
                             selectRole(role) {
-                                if (this.selected.includes(role)) {
-                                    this.selected = this.selected.filter(item => item !== role);
-                                } else {
-                                    this.selected.push(role);
+                                if (!{{ collect($no_access_roles) }}.includes(role)) {
+                                    if (this.selected.includes(role)) {
+                                        this.selected = this.selected.filter(item => item !== role);
+                                    } else {
+                                        this.selected.push(role);
+                                    }
                                 }
                             }
                         }">
@@ -199,9 +181,10 @@
                     </div>
 
                     @if ($user->hasRole('manager'))
-                        <x-user.custom-role :user="$user->id" :roleid="isset($user->customRoles()->first()->id) ? $user->customRoles()->first()->id : 0" />
+                        <x-user.custom-role :user="$user->id" :roleid="isset($user->customRoles->first()->id) ? $user->customRoles->first()->id : 0" />
                     @endif
                 </div>
+
 
                 <div class="fixed bottom-8 right-32">
                     <x-primary-button type="submit">
@@ -211,24 +194,13 @@
 
             </form>
 
-
-            <div class="grid grid-cols-2 gap-4 my-4">
-                @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
-                    <x-user.weapon-forms :forms="$user->weaponForms" />
-                @endif
-                @if ($user->hasRole('instructor') || $user->hasRole('technician'))
-                    <x-user.languages :languages="$user->languages" :user="$user->id" :availableLanguages="collect($languages)" />
-                @endif
-            </div>
-
-
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4"
                 x-data="{}">
                 <div class="flex justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('users.profile_picture') }}
                     </h3>
                     <div>
-                        <form method="POST" action="{{ route('users.picture.update', $user->id) }}"
+                        <form method="POST" action="{{ route('rector.users.picture.update', $user->id) }}"
                             enctype="multipart/form-data" x-ref="pfpform">
                             @csrf
                             @method('PUT')

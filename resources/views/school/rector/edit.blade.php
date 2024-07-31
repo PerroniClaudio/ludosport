@@ -2,71 +2,44 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-background-800 dark:text-background-200 leading-tight">
-                {{ __('academies.edit') }} #{{ $academy->id }}
+                {{ __('school.edit') }}
             </h2>
-
         </div>
     </x-slot>
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
-            <form method="POST" action="{{ route('academies.update', $academy->id) }}"
-                class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                @csrf
-                <div class="flex items-center justify-between">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.info') }}</h3>
-                    <x-primary-button type="submit">
-                        <x-lucide-save class="w-6 h-6 text-white" />
-                    </x-primary-button>
-                </div>
+            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('school.info') }}</h3>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-
-
-                <div class="flex flex-col gap-2 w-1/2 mb-8">
-                    <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                        value="{{ $academy->name }}" placeholder="{{ fake()->company() }}" />
-                    <div>
-                        <x-input-label for="nationality" value="Nationality" />
-                        <select x-model="selectedNationality" x-on:change="updateNationId()" name="nationality"
-                            id="nationality"
-                            class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
-                            @foreach ($nations as $key => $nation)
-                                <optgroup label="{{ $key }}"">
-                                    @foreach ($nation as $n)
-                                        <option value="{{ $n['id'] }}"
-                                            {{ $n['id'] == $academy->nation_id ? 'selected' : '' }}>
-                                            {{ $n['name'] }}</option>
-                                    @endforeach
-                                </optgroup>
-                            @endforeach
-                        </select>
+                <form method="POST" action="{{ route('rector.schools.update', $school->id) }}">
+                    @csrf
+                    <div class="flex flex-col gap-2 w-1/2">
+                        <x-form.input name="name" label="Name" type="text" required="{{ true }}"
+                            value="{{ $school->name }}" placeholder="{{ fake()->company() }}" />
+                        <x-school.rector.academy nationality="{{ $school->nation_id }}"
+                            selectedAcademyId="{{ $school->academy_id }}" selectedAcademy="{{ $school->academy->name }}"
+                            :nations="$nations" :academies="$academies" />
                     </div>
-                </div>
+                    
+                    <div class="fixed bottom-8 right-32 z-10">
+                        <x-primary-button type="submit">
+                            <x-lucide-save class="w-6 h-6 text-white" />
+                        </x-primary-button>
+                    </div>
+                </form>
+            </div>
 
-                <h1 class="text-background-800 dark:text-background-200 text-lg">{{ __('academies.address') }}</h1>
-                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                <div class="flex flex-col gap-2 w-1/2">
-                    <x-form.input name="address" label="Address" type="text" required="{{ true }}"
-                        value="{{ $academy->address }}" placeholder="{{ fake()->address() }}" />
-                    <x-form.input name="city" label="City" type="text" required="{{ true }}"
-                        value="{{ $academy->city }}" placeholder="{{ fake()->city() }}" />
-                    <x-form.input name="zip" label="Zip" type="text" required="{{ true }}"
-                        value="{{ $academy->zip }}" placeholder="{{ fake()->postcode() }}" />
-                </div>
-
-
-            </form>
-
-            <x-academy.search-users :academy="$academy" :roles="$roles" />
+            <x-school.search-users :school="$school" :roles="$roles" />
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.personnel') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        <x-academy.personnel :academy="$academy" :personnel="$personnel" />
-                        <x-academy.create-user academy="{{ $academy->id }}" type="personnel" :roles="$roles" />
+                        <x-school.personnel :school="$school" :personnel="$personnel" />
+                        <x-school.create-user :school="$school->id" type="personnel" :roles="$roles" />
                     </div>
+
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                 <x-table striped="false" :columns="[
@@ -96,20 +69,21 @@
                     ],
                 ]" :rows="$associated_personnel">
                     <x-slot name="tableActions">
-                        <a x-bind:href="'/users/' + row.id">
+                        <a x-bind:href="'/rector/users/' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>
                 </x-table>
             </div>
 
+
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.athletes') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        <x-academy.athletes :academy="$academy" :athletes="$athletes" />
-                        <x-academy.create-user academy="{{ $academy->id }}" type="athlete" :roles="$roles" />
+                        <x-school.athletes :school="$school" :athletes="$athletes" />
+                        <x-school.create-user :school="$school->id" type="athlete" />
                     </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
@@ -139,12 +113,6 @@
                         'rowClasses' => '',
                     ],
                     [
-                        'name' => 'School',
-                        'field' => 'school',
-                        'columnClasses' => '',
-                        'rowClasses' => '',
-                    ],
-                    [
                         'name' => 'Actions',
                         'field' => 'actions',
                         'columnClasses' => 'text-right',
@@ -167,29 +135,24 @@
                                 <x-lucide-check-circle class="w-5 h-5 text-green-500 dark:text-green-400" />
                             </div>
                         </td>
-                        <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
-                            x-text="row.school"></td>
                         <td
                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                            <a x-bind:href="'/users/' + row.id">
+                            <a x-bind:href="'/rector/users/' + row.id">
                                 <x-lucide-pencil
                                     class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                             </a>
                         </td>
-
                     </x-slot>
-
-
                 </x-table>
             </div>
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.schools') }}
+                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('school.clans') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        {{-- <x-academy.schools :academy="$academy" :schools="$schools" /> --}}
-                        <x-academy.create-school :academy="$academy->id" />
+                        {{-- <x-school.clans :school="$school" :athletes="$clans" /> --}}
+                        <x-school.create-clan :school="$school->id" />
                     </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
@@ -206,19 +169,19 @@
                         'columnClasses' => '',
                         'rowClasses' => '',
                     ],
-                ]" :rows="$academy->schools">
+                ]" :rows="$school->clan">
                     <x-slot name="tableActions">
-                        <a x-bind:href="'/schools/' + row.id">
+                        <a x-bind:href="'/rector/courses/' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>
                 </x-table>
             </div>
 
-            @if (!$academy->is_disabled)
-                <x-academy.disable-form :academy="$academy->id" />
+
+            @if (!$school->is_disabled)
+                <x-school.disable-form :school="$school->id" />
             @endif
         </div>
     </div>
-
 </x-app-layout>

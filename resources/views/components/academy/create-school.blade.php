@@ -2,6 +2,11 @@
     'academy' => 0,
 ])
 
+@php
+    $authRole = auth()->user()->getRole();
+    $addToRoute = $authRole === 'admin' ? '' : $authRole . '.';
+@endphp
+
 <div x-data="{}">
 
     <x-primary-button x-on:click.prevent="$dispatch('open-modal', 'new-school-modal')">
@@ -10,7 +15,7 @@
 
     <x-modal name="new-school-modal" :show="$errors->get('name') || $errors->get('go_to_edit')" focusable>
 
-        <form method="post" action="{{ route('academies.schools.create', $academy) }}" class="p-6 flex flex-col gap-4"
+        <form method="post" action="{{ route($addToRoute . 'academies.schools.create', $academy) }}" class="p-6 flex flex-col gap-4"
             x-ref="form">
             @csrf
 

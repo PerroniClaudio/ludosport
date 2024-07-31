@@ -29,11 +29,11 @@ class Clan extends Model {
     }
 
     public function users() {
-        return $this->belongsToMany(User::class, 'clans_users', 'clan_id', 'user_id');
+        return $this->belongsToMany(User::class, 'clans_users', 'clan_id', 'user_id')->where('is_disabled', '0');
     }
 
     public function personnel() {
-        return $this->belongsToMany(User::class, 'clans_personnel', 'clan_id', 'user_id');
+        return $this->belongsToMany(User::class, 'clans_personnel', 'clan_id', 'user_id')->where('is_disabled', '0');
     }
 
     public function nation() {

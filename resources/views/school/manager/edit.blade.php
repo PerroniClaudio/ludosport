@@ -186,7 +186,7 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('school.clans') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        <x-school.clans :school="$school" :athletes="$clans" />
+                        {{-- <x-school.clans :school="$school" :athletes="$clans" /> --}}
                         <x-school.create-clan :school="$school->id" />
                     </div>
                 </div>

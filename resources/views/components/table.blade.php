@@ -161,10 +161,10 @@
             <div class="flex items-center justify-end w-full">
 
                 <div class="flex items-center">
-                    <button x-on:click="page = 1" class="mr-2" x-bind:disabled="page === 1">
+                    <button type="button" x-on:click="page = 1" class="mr-2" x-bind:disabled="page === 1">
                         <x-lucide-chevron-first class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                     </button>
-                    <button x-on:click="page = page - 1" class="mr-2" x-bind:disabled="page === 1"
+                    <button type="button" x-on:click="page = page - 1" class="mr-2" x-bind:disabled="page === 1"
                         :class="{ 'opacity-50 cursor-not-allowed': page === 1 }">
                         <x-lucide-chevron-left class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                     </button>
@@ -172,12 +172,12 @@
                     <p class="text-sm text-background-500 dark:text-background-300">Page <span x-text="page"></span> of
                         <span x-text="totalPages()"></span>
                     </p>
-                    <button x-on:click="page = page + 1" class="ml-2"
+                    <button type="button" x-on:click="page = page + 1" class="ml-2"
                         :class="{ 'opacity-50 cursor-not-allowed': page === totalPages() }"
                         x-bind:disabled="page === totalPages()">
                         <x-lucide-chevron-right class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                     </button>
-                    <button x-on:click="page = totalPages()" class="ml-2" x-bind:disabled="page === totalPages()">
+                    <button type="button" x-on:click="page = totalPages()" class="ml-2" x-bind:disabled="page === totalPages()">
                         <x-lucide-chevron-last class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                     </button>
                 </div>

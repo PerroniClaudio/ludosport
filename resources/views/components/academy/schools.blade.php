@@ -1,5 +1,10 @@
 @props(['schools' =>[], 'academy' => null])
 
+@php
+    $authRole = auth()->user()->getRole();
+    $addToRoute = $authRole === 'admin' ? '' : $authRole . '.';
+@endphp
+
 <div
     x-data="{ selectedSchoolId: null }"
 >
@@ -8,7 +13,7 @@
     </x-primary-button>
 
     <x-modal name="school-modal" :show="$errors->schoolId->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('academies.schools.store', $academy->id) }}" class="p-6" x-ref="form">
+        <form method="post" action="{{ route($addToRoute . 'academies.schools.store', $academy->id) }}" class="p-6" x-ref="form">
             @csrf
 
             <input type="hidden" name="school_id" x-model="selectedSchoolId">

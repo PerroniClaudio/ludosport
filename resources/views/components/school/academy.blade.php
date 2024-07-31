@@ -52,7 +52,7 @@
 
                 <option value="" selected disabled>{{ __('Select a country') }}</option>
                 @foreach ($nations as $key => $nation)
-                    <optgroup label="{{ $key }}"">
+                    <optgroup label="{{ $key }}">
                         @foreach ($nation as $n)
                             <option value="{{ $n['id'] }}" {{ $n['id'] == $nationality ? 'selected' : '' }}>
                                 {{ $n['name'] }}</option>

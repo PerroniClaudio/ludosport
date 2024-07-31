@@ -96,6 +96,10 @@
 
             <x-event.thumbnail :event="$event" />
 
+            @if ($event->is_approved)
+                <x-event.participants :event="$event" />
+            @endif
+
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-background-900 dark:text-background-100">
                     <x-table striped="false" :columns="[

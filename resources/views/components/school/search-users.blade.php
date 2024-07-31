@@ -2,7 +2,10 @@
     'school' => [],
     'roles' => [],
 ])
-
+@php
+    $authRole = auth()->user()->getRole();
+    $addToRoute = $authRole === 'admin' ? '' : $authRole . '.';
+@endphp
 <form class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-data="{
     selectedRoles: [],
     selectedRolesJson: '',
@@ -18,7 +21,7 @@
     }
 
 }"
-    method="GET" action="{{ route('schools.users-search', $school->id) }}">
+    method="GET" action="{{ route($addToRoute . 'schools.users-search', $school->id) }}">
     <div class="flex justify-between">
         <h3 class="text-background-800 dark:text-background-200 text-2xl">
             {{ __('users.filter_title') }}

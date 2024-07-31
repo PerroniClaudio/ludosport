@@ -30,11 +30,11 @@ class School extends Model {
     }
 
     public function athletes() {
-        return $this->belongsToMany(User::class, 'schools_athletes', 'school_id', 'user_id');
+        return $this->belongsToMany(User::class, 'schools_athletes', 'school_id', 'user_id')->where('is_disabled', '0');
     }
 
     public function personnel() {
-        return $this->belongsToMany(User::class, 'schools_personnel', 'school_id', 'user_id');
+        return $this->belongsToMany(User::class, 'schools_personnel', 'school_id', 'user_id')->where('is_disabled', '0');
     }
 
     public function academy() {
@@ -42,6 +42,6 @@ class School extends Model {
     }
 
     public function clan() {
-        return $this->hasMany(Clan::class);
+        return $this->hasMany(Clan::class)->where('is_disabled', '0');
     }
 }

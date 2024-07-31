@@ -1,5 +1,10 @@
 @props(['school' => 0])
 
+@php
+    $authRole = auth()->user()->getRole();
+    $addToRoute = $authRole === 'admin' ? '' : $authRole . '.';
+@endphp
+
 <div class="flex flex-col gap-4">
     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
         <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('school.disable_school') }}</h3>
@@ -20,7 +25,7 @@
 
     <x-modal name="confirm-user-disable" :show="$errors->disable->isNotEmpty()" focusable>
 
-        <form method="post" action="{{ route('schools.disable', $school) }}" class="p-6">
+        <form method="post" action="{{ route($addToRoute . 'schools.disable', $school) }}" class="p-6">
             @csrf
             @method('delete')
 

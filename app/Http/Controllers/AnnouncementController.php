@@ -200,7 +200,8 @@ class AnnouncementController extends Controller {
         ]);
     }
 
-    public function technician() {
+    // public function technician() {
+    public function ownRoles() {
 
         $auth = auth()->user();
         $user = User::find($auth->id);
@@ -227,7 +228,7 @@ class AnnouncementController extends Controller {
 
 
 
-        return view('announcements.technician', [
+        return view('announcements.allroles', [
             'seen_announcements' => $seen_announcements,
             'announcements' => $announcements,
             'active_announcement' => $first_announcement,
@@ -235,12 +236,15 @@ class AnnouncementController extends Controller {
     }
 
     public function setSeen(Announcement $announcement) {
-        $auth = auth()->user();
+        $authUser = User::find(auth()->user()->id);
+        $seen_announcements = $authUser ->seenAnnouncements()->get();
 
-        AnnouncementUser::create([
-            'announcement_id' => $announcement->id,
-            'user_id' => $auth->id
-        ]);
+        if (!in_array($announcement->id, $seen_announcements->pluck('id')->toArray())) {
+            AnnouncementUser::create([
+                'announcement_id' => $announcement->id,
+                'user_id' => $authUser->id
+            ]);
+        }
 
         return response()->json([
             'success' => true

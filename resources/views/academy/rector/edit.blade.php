@@ -10,7 +10,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
-            <form method="POST" action="{{ route('academies.update', $academy->id) }}"
+            {{-- <form method="POST" action="{{ route('academies.update', $academy->id) }}"
                 class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 @csrf
                 <div class="flex items-center justify-between">
@@ -55,7 +55,41 @@
                 </div>
 
 
-            </form>
+            </form> --}}
+                
+            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                <div class="flex flex-col gap-2 w-1/2">
+                    <x-form.input name="name" label="Name" type="text" required="{{ true }}" disabled="{{ true }}"
+                        value="{{ $academy->name }}" placeholder="{{ fake()->company() }}" />
+                    @php
+                        $nationId = $academy->nation_id;
+                        $nationName = '';
+                        // $nations contiene i continenti e quelli contengono le nazioni
+                        foreach ($nations as $key => $nation) {
+                            if ($nationName != '') {
+                                break;
+                            }
+                            foreach ($nation as $n) {
+                                if ($nationName != '') {
+                                    break;
+                                }
+                                if($n['id'] == $nationId) {
+                                    $nationName = $n['name'];
+                                }
+                            }
+                        }
+                    @endphp
+                    <x-form.input name="name" label="Nationality" type="text" required="{{ true }}" disabled="{{ true }}"
+                        value="{{ $nationName }}" placeholder="{{ fake()->company() }}" />
+
+                        <x-form.input name="address" label="Address" type="text" required="{{ true }}" disabled="{{ true }}"
+                        value="{{ $academy->address }}" placeholder="{{ fake()->address() }}" />
+                    <x-form.input name="city" label="City" type="text" required="{{ true }}" disabled="{{ true }}"
+                        value="{{ $academy->city }}" placeholder="{{ fake()->city() }}" />
+                    <x-form.input name="zip" label="Zip" type="text" required="{{ true }}" disabled="{{ true }}"
+                        value="{{ $academy->zip }}" placeholder="{{ fake()->postcode() }}" />
+                </div>
+            </div>
 
             <x-academy.search-users :academy="$academy" :roles="$roles" />
 
@@ -96,7 +130,7 @@
                     ],
                 ]" :rows="$associated_personnel">
                     <x-slot name="tableActions">
-                        <a x-bind:href="'/users/' + row.id">
+                        <a x-bind:href="'/rector/users/' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>
@@ -171,7 +205,7 @@
                             x-text="row.school"></td>
                         <td
                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                            <a x-bind:href="'/users/' + row.id">
+                            <a x-bind:href="'/rector/users/' + row.id">
                                 <x-lucide-pencil
                                     class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                             </a>
@@ -208,16 +242,16 @@
                     ],
                 ]" :rows="$academy->schools">
                     <x-slot name="tableActions">
-                        <a x-bind:href="'/schools/' + row.id">
+                        <a x-bind:href="'/rector/schools/' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>
                 </x-table>
             </div>
 
-            @if (!$academy->is_disabled)
+            {{-- @if (!$academy->is_disabled)
                 <x-academy.disable-form :academy="$academy->id" />
-            @endif
+            @endif --}}
         </div>
     </div>
 

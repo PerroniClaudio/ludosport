@@ -126,9 +126,6 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
       Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('manager.events.participants.add');
       Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('manager.events.participants.export');
 
-      // Route::get('announcements', [App\Http\Controllers\AnnouncementController::class, 'technician'])->name('manager.announcements.index');
-      // Route::post('announcements/{announcement}/seen', [App\Http\Controllers\AnnouncementController::class, 'setSeen'])->name('manager.announcements.seen');
-
       //Tipi (solo l'admin può modificare i tipi di evento, per evitare la creazione indiscriminata di tipi)
 
       // Route::get('/event-types', [App\Http\Controllers\EventTypeController::class, 'index'])->name('manager.events.list_types');
@@ -180,13 +177,8 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
     /** Annunci */
 
     Route::group([], function () {
-        Route::get('/announcements', [App\Http\Controllers\AnnouncementController::class, 'index'])->name('manager.announcements.index');
-        // Route::get('/announcements/create', [App\Http\Controllers\AnnouncementController::class, 'create'])->name('manager.announcements.create');
-        // Route::get('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'edit'])->name('manager.announcements.edit');
-        // Route::delete('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'destroy'])->name('manager.announcements.disable');
-
-        // Route::post('/announcements', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('manager.announcements.store');
-        // Route::post('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'update'])->name('manager.announcements.update');
+      Route::get('announcements', [App\Http\Controllers\AnnouncementController::class, 'ownRoles'])->name('manager.announcements.index');
+      Route::post('announcements/{announcement}/seen', [App\Http\Controllers\AnnouncementController::class, 'setSeen'])->name('manager.announcements.seen');
     });
 
 });

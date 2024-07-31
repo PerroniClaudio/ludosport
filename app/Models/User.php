@@ -67,6 +67,17 @@ class User extends Authenticatable implements MustVerifyEmail {
         ];
     }
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (is_null($user->rank_id)) {
+                $user->rank_id = Rank::first()->id; // Imposta il valore predefinito per rank_id
+            }
+        });
+    }
+
 
     public function nation() {
         return $this->belongsTo(Nation::class);
@@ -159,19 +170,49 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'label' => 'announcements',
                         'active' => 'announcements.*',
                         'name' => 'athlete.announcements.index',
-                    ]
+                    ],
                 ]);
             case 'rector':
                 return collect([
                     (object)[
+                        'label' => 'announcements',
+                        'active' => 'announcements.*',
+                        'name' => 'rector.announcements.index',
+                    ],
+                    (object)[
+                        'label' => 'accademia',
+                        'active' => 'academies.*',
+                        'name' => 'rector.academies.index',
+                    ],
+                    (object)[
+                        'label' => 'scuole',
+                        'active' => 'schools.*',
+                        'name' => 'rector.schools.index',
+                    ],
+                    (object)[
+                        'label' => 'clan',
+                        'active' => 'clans.*',
+                        'name' => 'rector.clans.index',
+                    ],
+                    (object)[
                         'label' => 'users',
                         'active' => 'users.*',
-                        'name' => 'dashboard',
+                        'name' => 'rector.users.index',
+                    ],
+                    (object)[
+                        'label' => 'eventi',
+                        'active' => 'events.*',
+                        'name' => 'rector.events.index',
                     ],
 
                 ]);
             case 'dean':
                 return collect([
+                    (object)[
+                        'label' => 'announcements',
+                        'active' => 'announcements.*',
+                        'name' => 'dean.announcements.index',
+                    ],
                     (object)[
                         'label' => 'scuola',
                         'active' => 'schools.*',
@@ -195,6 +236,11 @@ class User extends Authenticatable implements MustVerifyEmail {
                 ]);
             case 'manager':
                 return collect([
+                    (object)[
+                        'label' => 'announcements',
+                        'active' => 'announcements.*',
+                        'name' => 'manager.announcements.index',
+                    ],
                     (object)[
                         'label' => 'scuola',
                         'active' => 'schools.*',
@@ -241,6 +287,11 @@ class User extends Authenticatable implements MustVerifyEmail {
                 ]);
             case 'instructor':
                 return collect([
+                    (object)[
+                        'label' => 'announcements',
+                        'active' => 'announcements.*',
+                        'name' => 'instructor.announcements.index',
+                    ],
                     (object)[
                         'label' => 'users',
                         'active' => 'users.*',

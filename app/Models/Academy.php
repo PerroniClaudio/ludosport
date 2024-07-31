@@ -37,18 +37,18 @@ class Academy extends Model {
     }
 
     public function users() {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class)->where('is_disabled', '0');
     }
 
     public function schools() {
-        return $this->hasMany(School::class);
+        return $this->hasMany(School::class)->where('is_disabled', '0');
     }
 
     public function athletes() {
-        return $this->belongsToMany(User::class, 'academies_athletes', 'academy_id', 'user_id');
+        return $this->belongsToMany(User::class, 'academies_athletes', 'academy_id', 'user_id')->where('is_disabled', '0');
     }
 
     public function personnel() {
-        return $this->belongsToMany(User::class, 'academies_personnel', 'academy_id', 'user_id');
+        return $this->belongsToMany(User::class, 'academies_personnel', 'academy_id', 'user_id')->where('is_disabled', '0');
     }
 }

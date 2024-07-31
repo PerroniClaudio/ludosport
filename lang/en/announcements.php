@@ -3,6 +3,7 @@
 return [
     'title' => 'Announcements',
     'new' => 'New Announcement',
+    'announcement'  => 'Announcement',
     'info' => 'Info',
     'priority_info' => 'Priority Info',
     'danger' => 'Danger',

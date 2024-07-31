@@ -22,7 +22,7 @@ class UserController extends Controller {
     public function index() { 
         // Qui si dovrebbero filtrare gli utenti visualizzabili in base al ruolo dell'utente loggato.
         // Es. dean vede solo gli utenti della sua scuola, admin vede tutti gli utenti, ecc.
-        $authUserRole = auth()->user()->getRole();
+        $authUserRole = User::find(auth()->user()->id)->getRole();
         $roles = Role::all();
         $users_sorted_by_role = [];
         foreach ($roles as $role) {
@@ -96,7 +96,7 @@ class UserController extends Controller {
     }
 
     public function create() {
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
@@ -138,7 +138,7 @@ class UserController extends Controller {
 
         ]);
 
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
 
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
@@ -244,10 +244,13 @@ class UserController extends Controller {
             $academy->personnel()->attach($user->id);
         }
 
+        $authRole = User::find(auth()->user()->id)->getRole();
         if ($request->go_to_edit === 'on') {
-            return redirect()->route('users.edit', $user->id)->with('success', 'User created successfully!');
+            $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
+            return redirect()->route($redirectRoute, $user->id)->with('success', 'User created successfully!');
         } else {
-            return redirect()->route('academies.edit', $academy->id)->with('success', 'User created successfully!');
+            $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
+            return redirect()->route($redirectRoute, $academy->id)->with('success', 'User created successfully!');
         }
     }
 
@@ -258,7 +261,7 @@ class UserController extends Controller {
             'surname' => 'required|string|max:255',
         ]);
 
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
@@ -305,7 +308,7 @@ class UserController extends Controller {
             $school->personnel()->attach($user->id);
         }
 
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if ($request->go_to_edit === 'on') {
             $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
             return redirect()->route($redirectRoute, $user->id)->with('success', 'User created successfully!');
@@ -316,7 +319,7 @@ class UserController extends Controller {
     }
 
     public function  storeForClan(Request $request) {
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
@@ -383,7 +386,7 @@ class UserController extends Controller {
 
     public function edit(User $user) {
 
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
@@ -424,7 +427,7 @@ class UserController extends Controller {
 
         $allLanguages = Language::all();
 
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         $viewPath = $authRole === 'admin' ? 'users.edit' :  'users.' . $authRole . '.edit';
 
         return view($viewPath, [
@@ -446,7 +449,7 @@ class UserController extends Controller {
             'nationality' => 'required|string|exists:nations,id',
         ]);
 
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
@@ -472,14 +475,14 @@ class UserController extends Controller {
             }
         }
 
-        $authUserRole = auth()->user()->getRole();
+        $authUserRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authUserRole === 'admin' ? 'users.index' :  $authUserRole . '.users.index';
 
         return redirect()->route($redirectRoute, $user)->with('success', 'User updated successfully!');
     }
 
     public function destroy(User $user) {
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
@@ -522,7 +525,7 @@ class UserController extends Controller {
 
     public function filter() {
 
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         
         switch($authRole) {
             case 'admin':
@@ -654,7 +657,7 @@ class UserController extends Controller {
             })->toArray());
         }
 
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         $viewPath = $authRole === 'admin' ? 'users.filter-result' :  'users.' . $authRole . '.filter-result';
         return view($viewPath, [
             'users' => $filteredUsers,
@@ -666,10 +669,9 @@ class UserController extends Controller {
             'role' => 'required|string|exists:roles,label',
         ]);
 
-        $authUser = auth()->user();
-        $user = User::find($authUser->id);
+        $authUser = User::find(auth()->user()->id);
 
-        if ($user->hasRole($request->role)) {
+        if ($authUser->hasRole($request->role)) {
             session(['role' => $request->role]);
         } else {
             return back()->with('error', 'You do not have the required role to access this page!');

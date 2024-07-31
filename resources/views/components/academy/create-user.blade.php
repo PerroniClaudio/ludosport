@@ -6,6 +6,9 @@
 
 @php
 
+    $authRole = auth()->user()->getRole();
+    $addToRoute = $authRole === 'admin' ? '' : $authRole . '.';
+
     $should_show_modal_for_errors =
         $errors->get('name') || $errors->get('surname') || $errors->get('email') || $errors->get('go_to_edit');
 
@@ -32,7 +35,7 @@
 
     <x-modal name="new-user-{{ $type }}-modal" :show="$should_show_modal_for_errors" focusable>
 
-        <form action="{{ route('academies.users.create', $academy) }}" method="post" class="p-6 flex flex-col gap-4">
+        <form action="{{ route($addToRoute . 'academies.users.create', $academy) }}" method="post" class="p-6 flex flex-col gap-4">
 
             @csrf
 

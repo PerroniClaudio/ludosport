@@ -20,7 +20,7 @@ class SchoolController extends Controller {
         //
 
         // The dean (and maybe others, ex. manager) should only see his school
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if(in_array($authRole, ['dean', 'manager'])) {
             $school = auth()->user()->schools->where('is_disabled', '0')->first();
             if($school){
@@ -29,14 +29,20 @@ class SchoolController extends Controller {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
-        $schools = School::with('nation')->where('is_disabled', '0')->orderBy('created_at', 'desc')->get();
+        if($authRole === 'rector'){
+            $academy = auth()->user()->academies->first();
+            $schools = School::with('nation')->where([['academy_id', $academy->id], ['is_disabled', '0']])->orderBy('created_at', 'desc')->get();
+        } else {
+            $schools = School::with('nation')->where('is_disabled', '0')->orderBy('created_at', 'desc')->get();
+        }
 
         foreach ($schools as $key => $school) {
             $schools[$key]->nation_name = $school->nation->name;
             $schools[$key]->academy_name = $school->academy->name;
         }
 
-        return view('school.index', [
+        $viewPath = $authRole === 'admin' ? 'school.index' : 'school.' . $authRole . '.index';
+        return view($viewPath, [
             'schools' => $schools
         ]);
     }
@@ -46,7 +52,7 @@ class SchoolController extends Controller {
      */
     public function create() {
         //
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if(!in_array($authRole, ['admin', 'rector'])){
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
@@ -78,7 +84,7 @@ class SchoolController extends Controller {
      */
     public function store(Request $request) {
         //
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if(!in_array($authRole, ['admin', 'rector'])){
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
@@ -105,7 +111,7 @@ class SchoolController extends Controller {
     }
 
     public function storeacademy(Request $request) {
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if(!in_array($authRole, ['admin', 'rector'])){
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
@@ -154,7 +160,7 @@ class SchoolController extends Controller {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
 
         $nations = Nation::all();
 
@@ -189,7 +195,7 @@ class SchoolController extends Controller {
             })->toArray());
         }
 
-        $athletes = User::whereNotIn('id', $school->athletes->pluck('id'))->where('is_disabled', '0')->get();
+        $athletes = User::where('is_disabled', '0')->whereNotIn('id', $school->athletes->pluck('id'))->get();
 
         $roles = Role::all();
 
@@ -228,7 +234,9 @@ class SchoolController extends Controller {
             'academy_id' => $request->academy_id,
         ]);
 
-        return redirect()->route('schools.edit', $school)->with('success', 'School updated successfully!');
+        $authRole = User::find(auth()->user()->id)->getRole();
+        $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
+        return redirect()->route($redirectRoute, $school)->with('success', 'School updated successfully!');
     }
 
     /**
@@ -257,7 +265,7 @@ class SchoolController extends Controller {
 
         $clan->save();
 
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
         return redirect()->route($redirectRoute, $school)->with('success', 'Course added successfully!');
     }
@@ -278,7 +286,7 @@ class SchoolController extends Controller {
 
         $school->personnel()->attach($personnel);
 
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
         
         return redirect()->route($redirectRoute, $school)->with('success', 'Personnel added successfully!');
@@ -300,7 +308,7 @@ class SchoolController extends Controller {
         
         $school->athletes()->attach($athlete);
         
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
 
         return redirect()->route($redirectRoute, $school)->with('success', 'Athlete added successfully!');
@@ -342,9 +350,19 @@ class SchoolController extends Controller {
     public function search(Request $request) {
         // $academies = Academy::where('name', 'like', '%' . $request->name . '%')->where('is_disabled', '0')->get();
 
-        $schools = School::query()->when($request->search, function ($q, $search) {
-            return $q->whereIn('id', School::search($search)->keys());
-        })->where('is_disabled', '0')->with(['academy'])->get();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
+        if($authRole === 'rector') {
+            $academy = $authUser->academies->first();
+            $schools = School::query()->when($request->search, function ($q, $search) {
+                return $q->whereIn('id', School::search($search)->keys());
+            })->where([['is_disabled', '0'], ['academy_id', $academy->id]])->with(['academy'])->get();
+        } else {
+            $schools = School::query()->when($request->search, function ($q, $search) {
+                return $q->whereIn('id', School::search($search)->keys());
+            })->where('is_disabled', '0')->with(['academy'])->get();
+        }
 
         $formatted_schools = [];
 
@@ -449,7 +467,7 @@ class SchoolController extends Controller {
 
             // Filtro per ruolo 
 
-            if (count($roles) > 0) {
+            if ($roles && count($roles) > 0) {
 
                 $users = $users->filter(function ($user) use ($roles) {
 
@@ -521,17 +539,20 @@ class SchoolController extends Controller {
             })->toArray());
         }
 
-        return view('users.filter-result', [
+        $authRole = User::find(auth()->user()->id)->getRole();
+        $viewPath = $authRole == 'admin' ? 'users.filter-result' : 'users.' . $authRole . '.filter-result';
+        $backUrlRoute = $authRole == 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
+        return view($viewPath, [
             'users' => $filteredUsers,
-            'backUrl' => route('schools.edit', $school->id),
+            'backUrl' => route($backUrlRoute, $school->id),
         ]);
     }
 
     public function checkPermission(School $school, $isStrict = false){
         // admin -> sempre; rector -> solo se la scuola è nella sua accademia; dean e manager -> solo se la scuola è associata a lui; 
         // l'opzione isStrict permette di escludere anche i dean e manager, per funzionalità accessibili solo a rettori e admin
-        $authUser = auth()->user();
-        $authRole = auth()->user()->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
         $authorized = true;
 
@@ -550,6 +571,7 @@ class SchoolController extends Controller {
                 }
                 break;
             default: 
+                $authorized = false;
                 break;
         }
 

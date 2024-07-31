@@ -16,18 +16,19 @@ class ClanController extends Controller {
      */
     public function index() {
         //
-        $authRole = auth()->user()->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
         switch($authRole){
             case 'admin':
                 $clans = Clan::orderBy('created_at', 'desc')->where('is_disabled', '0')->with(['school'])->get();
                 break;
             case 'rector':
-                $clans = Clan::whereIn('school_id', auth()->user()->academies->first()->schools->pluck('id'))->get();
+                $clans = Clan::where('is_disabled', '0')->whereIn('school_id', $authUser->academies->first()->schools->pluck('id'))->with(['school'])->get();
                 break;
             case 'dean':
             case 'manager':
-                $clans = auth()->user()->schools->first()->clan;
+                $clans = $authUser->schools->first()->clan;
                 break;
             default:
                 $clans = [];
@@ -186,7 +187,7 @@ class ClanController extends Controller {
      */
     public function edit(Clan $clan) {
         //
-        $authUser = auth()->user();
+        $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
         if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])){
             return redirect()->route($authRole . '.dashboard')->with('error', 'You are not authorized to access this page.');
@@ -233,10 +234,10 @@ class ClanController extends Controller {
         $associated_athletes = $clan->users()->where('is_disabled', '0')->get();
 
         // Possono vedere tutti gli utenti e poi, se mancano delle associazioni con scuola e accademia, si aggiungono.
-        $instructors = User::whereHas('roles', function ($query) {
+        $instructors = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
             $query->where('label', 'instructor');
         })->whereNotIn('id', $clan->personnel->pluck('id'))->get();
-        $athletes = User::whereHas('roles', function ($query) {
+        $athletes = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
             $query->where('label', 'athlete');
         })->whereNotIn('id', $clan->users->pluck('id'))->get();
 
@@ -312,11 +313,16 @@ class ClanController extends Controller {
      */
     public function destroy(Clan $clan) {
         //
-        $authUser = auth()->user();
+        $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
         if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])){
             return redirect()->route($authRole . '.dashboard')->with('error', 'Not authorized to access this page.');
         }
+
+        if($clan->users->count() > 0){
+            return back()->with('error', 'Cannot delete course with athletes.');
+        }
+
         $clan->is_disabled = true;
         $clan->save();
 
@@ -325,7 +331,7 @@ class ClanController extends Controller {
     }
 
     public function addInstructor(Clan $clan, Request $request) {
-        $authRole = auth()->user()->getRole();
+        $authRole = User::find(auth()->user()->id)->getRole();
         if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])){
             return redirect()->route($authRole . '.dashboard')->with('error', 'Not authorized.');
         }

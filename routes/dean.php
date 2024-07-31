@@ -180,13 +180,8 @@ Route::prefix('dean')->middleware('auth')->middleware('role:admin,dean')->group(
     /** Annunci */
 
     Route::group([], function () {
-        Route::get('/announcements', [App\Http\Controllers\AnnouncementController::class, 'index'])->name('dean.announcements.index');
-        // Route::get('/announcements/create', [App\Http\Controllers\AnnouncementController::class, 'create'])->name('dean.announcements.create');
-        // Route::get('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'edit'])->name('dean.announcements.edit');
-        // Route::delete('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'destroy'])->name('dean.announcements.disable');
-
-        // Route::post('/announcements', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('dean.announcements.store');
-        // Route::post('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'update'])->name('dean.announcements.update');
+        Route::get('announcements', [App\Http\Controllers\AnnouncementController::class, 'ownRoles'])->name('dean.announcements.index');
+        Route::post('announcements/{announcement}/seen', [App\Http\Controllers\AnnouncementController::class, 'setSeen'])->name('dean.announcements.seen');
     });
 
 });

@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 // Route::prefix('technician')->middleware('auth')->middleware('role:tecnico')->group(function () {
-Route::prefix('technician')->middleware('auth')->middleware('role:technician')->group(function () {
+Route::prefix('technician')->middleware('auth')->middleware('role:admin,technician')->group(function () {
     Route::get('events', [App\Http\Controllers\EventController::class, 'index'])->name('technician.events.index');
     Route::get('events/create', [App\Http\Controllers\EventController::class, 'create'])->name('technician.events.create');
     Route::post('events/create', [App\Http\Controllers\EventController::class, 'store'])->name('technician.events.store');
@@ -19,7 +19,7 @@ Route::prefix('technician')->middleware('auth')->middleware('role:technician')->
     Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('technician.events.participants.add');
     Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('technician.events.participants.export');
 
-    Route::get('announcements', [App\Http\Controllers\AnnouncementController::class, 'technician'])->name('technician.announcements.index');
+    Route::get('announcements', [App\Http\Controllers\AnnouncementController::class, 'ownRoles'])->name('technician.announcements.index');
     Route::post('announcements/{announcement}/seen', [App\Http\Controllers\AnnouncementController::class, 'setSeen'])->name('technician.announcements.seen');
 
     // Route::post('events', [App\Http\Controllers\EventController::class, 'store'])->name();

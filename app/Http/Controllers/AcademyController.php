@@ -17,6 +17,14 @@ class AcademyController extends Controller {
      */
     public function index() {
         //
+        $authRole = User::find(auth()->user()->id)->getRole();
+        if(in_array($authRole, ['rector'])) {
+            $academy = auth()->user()->academies->where('is_disabled', '0')->first();
+            if($academy){
+                return $this->edit($academy);
+            }
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
 
         $academies = Academy::with('nation')->where('is_disabled', '0')->orderBy('created_at', 'desc')->get();
 
@@ -156,7 +164,10 @@ class AcademyController extends Controller {
 
         $roles = Role::all();
 
-        return view('academy.edit', [
+        $authRole = User::find(auth()->user()->id)->getRole();
+        $viewPath = $authRole === 'admin' ? 'academy.edit' : 'academy.' . $authRole . '.edit';
+
+        return view($viewPath, [
             'academy' => $academy,
             'nations' => $countries,
             'schools' => $schools,
@@ -177,6 +188,10 @@ class AcademyController extends Controller {
         if ($request->address) {
             $address = $request->address . " " . $request->city . " "  . $request->zip;
             $location = $this->getLocation($address);
+
+            if(!$location){
+                return back()->with('error', 'Invalid address. Please check the address and try again.');
+            }
 
             $request->validate([
                 'name' => 'required|string|max:255',
@@ -217,6 +232,17 @@ class AcademyController extends Controller {
     public function destroy(Academy $academy) {
         //
 
+        if(User::find(auth()->user()->id)->getRole() !== 'admin'){
+            return redirect()->route('academies.index')->with('error', 'You are not authorized to perform this action.');
+        }
+
+        if ($academy->schools->count() > 0) {
+            return back()->with('error', 'Cannot delete academy with associated schools.');
+        }
+        if($academy->athletes->count() > 0){
+            return back()->with('error', 'Cannot delete academy with associated athletes.');
+        }
+
         $academy->is_disabled = true;
         $academy->save();
 
@@ -228,27 +254,36 @@ class AcademyController extends Controller {
     }
 
     public function addSchool(Request $request, Academy $academy) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
         $school = School::find($request->school_id);
         $school->academy_id = $academy->id;
         $school->save();
 
-        return redirect()->route('academies.edit', $academy)->with('success', 'School added successfully!');
+        $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
+        return redirect()->route($redirectRoute, $academy)->with('success', 'School added successfully!');
     }
 
     public function addPersonnel(Request $request, Academy $academy) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
         $personnel = User::find($request->personnel_id);
 
         $academy->personnel()->attach($personnel);
 
-        return redirect()->route('academies.edit', $academy)->with('success', 'Personnel added successfully!');
+        $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
+        return redirect()->route($redirectRoute, $academy)->with('success', 'Personnel added successfully!');
     }
 
     public function addAthlete(Request $request, Academy $academy) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
         $athlete = User::find($request->athlete_id);
 
         $academy->athletes()->attach($athlete);
 
-        return redirect()->route('academies.edit', $academy)->with('success', 'Athlete added successfully!');
+        $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
+        return redirect()->route($redirectRoute, $academy)->with('success', 'Athlete added successfully!');
     }
 
     public function all(Request $request) {
@@ -294,6 +329,9 @@ class AcademyController extends Controller {
         $response = file_get_contents($url);
         $json = json_decode($response, true);
 
+        if($json['status'] == 'ZERO_RESULTS'){
+            return null;
+        }
 
         return [
             'lat' => $json['results'][0]['geometry']['location']['lat'],
@@ -532,9 +570,36 @@ class AcademyController extends Controller {
             })->toArray());
         }
 
-        return view('users.filter-result', [
+        $authRole = User::find(auth()->user()->id)->getRole();
+        $viewPath = $authRole === 'admin' ? 'users.filter-result' : 'users.' . $authRole . '.filter-result';
+
+        return view($viewPath, [
             'users' => $filteredUsers,
             'backUrl' => route('academies.edit', $academy->id),
         ]);
     }
+
+    public function checkPermission(Academy $academy, $isStrict = false){
+        // admin -> sempre; rector -> solo se l'accademia è associata a lui; 
+        // l'opzione isStrict permette di escludere anche i rector, per funzionalità accessibili solo agli admin
+        $authUser = auth()->user();
+        $authRole = User::find(auth()->user()->id)->getRole();
+
+        $authorized = true;
+
+        switch($authRole){
+            case 'admin': // sempre autorizzato
+                break;
+            case 'rector': // non autorizzato se non è la sua accademia
+                if($authUser->academies->first()->id != $academy->id){
+                    $authorized = false;
+                }
+                break;
+            default: 
+                $authorized = false;
+                break;
+        }
+
+        return $authorized;
+    } 
 }

@@ -140,7 +140,12 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if ($authRole !== 'admin' && $event->user_id !== $authUser->id) {
+        // Questa parte si può spostare in una funzione tipo checkPermission
+        // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
+        if(!($authRole === 'admin' || 
+            ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
+            $event->user_id === $authUser->id)
+        ){
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
@@ -175,7 +180,11 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if ($authRole !== 'admin' && $event->user_id !== $authUser->id) {
+        // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
+        if(!($authRole === 'admin' || 
+            ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
+            $event->user_id === $authUser->id)
+        ){
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
@@ -190,7 +199,11 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if ($authRole !== 'admin' && $event->user_id !== $authUser->id) {
+        // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
+        if(!($authRole === 'admin' || 
+            ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
+            $event->user_id === $authUser->id)
+        ){
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
         $event->location = $request->location;
@@ -231,7 +244,16 @@ class EventController extends Controller {
             'price' => 'min:0',
         ]);
         
-        if ($authRole !== 'admin' && $event->user_id !== $authUser->id) {
+        // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
+        if(!($authRole === 'admin' || 
+            ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
+            $event->user_id === $authUser->id)
+        ){
+            return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
+        }
+
+        // Da quando è approvato può modificarlo solo l'admin
+        if($event->is_approved && $authRole !== 'admin'){
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
