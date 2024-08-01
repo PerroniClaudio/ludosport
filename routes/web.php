@@ -189,6 +189,12 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('events.save.description');
     Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('events.save.location');
     Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('events.update.thumbnail');
+
+    Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('events.participants');
+    Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('events.available');
+
+    Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('events.participants.add');
+    Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('events.participants.export');
 });
 
 /** Imports */

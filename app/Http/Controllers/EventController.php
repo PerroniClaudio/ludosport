@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Cashier\Cashier;
 use Maatwebsite\Excel\Facades\Excel;
+use Srmklive\PayPal\Services\Paypal as PaypalClient;
 
 class EventController extends Controller {
     /**
@@ -140,10 +141,9 @@ class EventController extends Controller {
 
         // Questa parte si può spostare in una funzione tipo checkPermission
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
-        if(!($authRole === 'admin' || 
+        if (!($authRole === 'admin' ||
             ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
-            $event->user_id === $authUser->id)
-        ){
+            $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
@@ -179,10 +179,9 @@ class EventController extends Controller {
         $authRole = $authUser->getRole();
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
-        if(!($authRole === 'admin' || 
+        if (!($authRole === 'admin' ||
             ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
-            $event->user_id === $authUser->id)
-        ){
+            $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
@@ -198,10 +197,9 @@ class EventController extends Controller {
         $authRole = $authUser->getRole();
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
-        if(!($authRole === 'admin' || 
+        if (!($authRole === 'admin' ||
             ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
-            $event->user_id === $authUser->id)
-        ){
+            $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
         $event->location = $request->location;
@@ -238,17 +236,16 @@ class EventController extends Controller {
             'end_date' => 'required',
             'price' => 'min:0',
         ]);
-        
+
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
-        if(!($authRole === 'admin' || 
+        if (!($authRole === 'admin' ||
             ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
-            $event->user_id === $authUser->id)
-        ){
+            $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
         // Da quando è approvato può modificarlo solo l'admin
-        if($event->is_approved && $authRole !== 'admin'){
+        if ($event->is_approved && $authRole !== 'admin') {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
@@ -711,6 +708,68 @@ class EventController extends Controller {
         ]);
     }
 
+    public function userCheckoutPaypal(Event $event, Request $request) {
+
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+
+        $order_id = $request->session()->get('order_id');
+        $order = Order::findOrFail($order_id);
+
+        $response = $provider->createOrder([
+            'intent' => 'CAPTURE',
+            'purchase_units' => [
+                [
+                    'amount' => [
+                        'currency_code' => 'EUR',
+                        'value' => $event->price,
+                    ],
+                ],
+            ],
+            'application_context' => [
+                'cancel_url' => route('shop.event.paypal-cancel') . '?order_id=' . $order->id,
+                'return_url' => route('shop.event.paypal-success') . '?order_id=' . $order->id,
+                'order_id' => $order->id,
+            ],
+        ]);
+
+        if (isset($response['id']) && $response['id'] !== null) {
+            session(['paypal_order_id' => $response['id']]);
+
+            foreach ($response['links'] as $link) {
+                if ($link['rel'] === 'approve') {
+                    $order->update([
+                        'status' => 1,
+                        'payment_method' => 'paypal',
+                        'total' => number_format($event->price, 2),
+                        'result' => json_encode($response),
+                    ]);
+
+                    session()->put('product_name', $event->name);
+
+                    return response()->json([
+                        'success' => true,
+                        'url' => $link['href'],
+                    ]);
+                }
+            }
+        } else {
+            $order->update([
+                'status' => 4,
+                'payment_method' => 'paypal',
+                'total' => number_format($event->price, 2),
+                'result' => 'Error creating order',
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Error creating order',
+                'url' => route('shop.fees.fees-cancel'),
+            ]);
+        }
+    }
+
     public function successUser(Request $request) {
 
         $sessionId = $request->get('session_id');
@@ -766,6 +825,60 @@ class EventController extends Controller {
         if ($order->status !== 0) {
         } else {
             $order->update(['status' => 4, 'result' => json_encode($session)]);
+        }
+
+        return view('website.shop.event-cancel');
+    }
+
+    public function successUserPaypal(Request $request) {
+        $orderId = $request->order_id;
+
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+
+        $result = $provider->capturePaymentOrder($request->token);
+        $order = Order::findOrFail($orderId);
+
+        if ($order->status !== 1) {
+            $event = Event::find($order->items->first()->product_code);
+        } else {
+            $order->update([
+                'status' => 2,
+                'result' => json_encode($result),
+            ]);
+
+            $event = Event::find($order->items->first()->product_code);
+
+            $event->results()->create([
+                'user_id' => $order->user_id,
+                'war_points' => 0,
+                'style_points' => 0,
+                'total_points' => 0,
+            ]);
+        }
+
+        return view('website.shop.event-success', [
+            'event' => $event,
+        ]);
+    }
+
+    public function cancelUserPaypal(Request $request) {
+        $orderId = $request->order_id;
+
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+
+        $result = $provider->capturePaymentOrder($request->token);
+        $order = Order::findOrFail($orderId);
+
+        if ($order->status !== 1) {
+        } else {
+            $order->update([
+                'status' => 4,
+                'result' => json_encode($result),
+            ]);
         }
 
         return view('website.shop.event-cancel');

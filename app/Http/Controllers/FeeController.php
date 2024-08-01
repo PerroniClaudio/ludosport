@@ -620,7 +620,13 @@ class FeeController extends Controller {
 
         $order = Order::findOrFail($orderId);
 
-        $order->update(['status' => 4, 'result' => json_encode($result)]);
+        if ($order->status !== 1) {
+        } else {
+            $order->update([
+                'status' => 4,
+                'result' => json_encode($result),
+            ]);
+        }
 
         return view('website.shop.fees-cancel', [
             'order' => $order,
