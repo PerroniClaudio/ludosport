@@ -3,11 +3,7 @@
         <section class="col-span-12 py-12">
             <div x-data="{
                 birthday: '',
-                seniorFees: 0,
-                juniorFees: 0,
-                seniorFeesPrice: 50,
-                juniorFeesPrice: 25,
-                totalPrice: 0,
+                totalPrice: {{ $event->price }},
                 name: 'Name',
                 surname: 'Surname',
                 address: 'Address',
@@ -15,49 +11,8 @@
                 city: 'City',
                 vat: 'VAT',
                 country: '',
-                shouldShowPayment: false,
-                differenzaInAnni(dataInizio, dataFine) {
-                    var anni = dataFine.getFullYear() - dataInizio.getFullYear();
-                    var meseFine = dataFine.getMonth();
-                    var giornoFine = dataFine.getDate();
-                    var meseInizio = dataInizio.getMonth();
-                    var giornoInizio = dataInizio.getDate();
-            
-                    if (meseFine < meseInizio || (meseFine === meseInizio && giornoFine < giornoInizio)) {
-                        anni--;
-                    }
-                    return anni;
-                },
-                calculateFeePrice() {
-                    let date = new Date(this.birthday)
-                    let age = Math.abs(this.differenzaInAnni(new Date(), date))
-            
-                    if (age < 99) {
-            
-                        if (age >= 16) {
-                            this.seniorFees = 1
-                            this.juniorFees = 0
-            
-                            this.totalPrice = this.seniorFeesPrice
-            
-                        } else {
-                            this.seniorFees = 0
-                            this.juniorFees = 1
-            
-                            this.totalPrice = this.juniorFeesPrice
-            
-                        }
-            
-                        this.shouldShowPayment = true
-            
-                    } else {
-                        this.seniorFees = 0
-                        this.juniorFees = 0
-                        this.totalPrice = 0
-                        this.shouldShowPayment = false
-                    }
-            
-                },
+                shouldShowPayment: true,
+                event_id: '{{ $event->id }}',
                 fetchInvoiceData() {
                     const url = `/shop/invoices/user-data/{{ Auth()->user()->id }}`
             
@@ -112,22 +67,13 @@
                 startStripeCheckout() {
                     this.saveInvoiceData()
             
-                    const url = `/shop/fees/stripe/checkout`
+                    const url = `/shop/event/${this.event_id}/stripe/checkout`
                     let items = [];
             
-                    if (this.seniorFees > 0) {
-                        items.push({
-                            'name': 'senior_fee',
-                            'quantity': this.seniorFees,
-                        })
-                    }
-            
-                    if (this.juniorFees > 0) {
-                        items.push({
-                            'name': 'junior_fee',
-                            'quantity': this.juniorFees,
-                        })
-                    }
+                    items.push({
+                        'name': 'event_participation',
+                        'quantity': 1,
+                    })
             
                     const itemsJson = JSON.stringify(items)
             
@@ -141,22 +87,14 @@
                 startPaypalCheckout() {
                     this.saveInvoiceData()
             
-                    const url = `/shop/fees/paypal/checkout`
+                    const url = `/shop/event/${this.event_id}/paypal/checkout`
                     let items = [];
             
-                    if (this.seniorFees > 0) {
-                        items.push({
-                            'name': 'senior_fee',
-                            'quantity': this.seniorFees,
-                        })
-                    }
+                    items.push({
+                        'name': 'event_participation',
+                        'quantity': 1,
+                    })
             
-                    if (this.juniorFees > 0) {
-                        items.push({
-                            'name': 'junior_fee',
-                            'quantity': this.juniorFees,
-                        })
-                    }
             
                     const itemsJson = JSON.stringify(items)
             
@@ -183,23 +121,14 @@
                     <div class="grid grid-cols-4 gap-4">
                         <div class="col-span-3 flex flex-col gap-4">
                             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-
+                                <h1
+                                    class="font-semibold text-3xl text-background-800 dark:text-background-200 leading-tight">
+                                    {{ $event->name }}</h1>
+                                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                                 <div>
-                                    <label for="seniorFees" class="text-background-800 dark:text-background-200">
-                                        {{ __('website.birthday') }}
-                                    </label>
-                                    <input type="date" name="birthday" id="seniorFees" x-model="birthday"
-                                        x-on:input="calculateFeePrice"
-                                        class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
+                                    <p class="text-background-800 dark:text-background-200">1x
+                                        {{ __('website.event_participation_checkout_text') }}</p>
                                 </div>
-
-                                <p class="text-background-800 dark:text-background-200 mt-4">
-                                    {{ __('website.membership_age') }}
-                                </p>
-
-                                <p class="text-background-800 dark:text-background-200 mt-4">
-                                    {{ __('website.membership_expiration_text') }}
-                                </p>
                             </div>
                             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                                 <div class="flex justify-between items-center">
@@ -242,7 +171,7 @@
                         <div>
                             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                                 <h3 class="text-background-800 dark:text-background-200 text-2xl">
-                                    {{ __('fees.fees_total') }}
+                                    {{ __('website.total_price') }}
                                 </h3>
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                                 <p class="text-background-800 dark:text-background-200 text-lg"

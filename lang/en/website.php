@@ -53,4 +53,13 @@ return [
     'events_list' => 'Events',
     'events_list_title' => 'Events List',
     'events_list_text' => 'List of all upcoming events.',
+    'events_list_button' => 'View event',
+    'events_list_participate' => 'Join the event',
+    'must_pay_fee' => 'You must pay the membership fee to participate in this event.',
+    'event_participation_checkout_text' => 'Event participation fee',
+    'total_price' => 'Total price',
+    'shop_event_success' => 'Event successfully paid',
+    'shop_event_error' => 'Event payment failed',
+    'shop_event_success_text' => 'You have successfully paid for :event. You are now registered.',
+    'shop_event_error_text' => 'There was an error processing your payment. Please try again.',
 ];

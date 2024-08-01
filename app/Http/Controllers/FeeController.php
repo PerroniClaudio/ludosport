@@ -432,7 +432,12 @@ class FeeController extends Controller {
 
         $order = Order::findOrFail($orderId);
 
-        $order->update(['status' => 4, 'result' => json_encode($session)]);
+        if ($order->status !== 0) {
+        } else {
+            $order->update(['status' => 4, 'result' => json_encode($session)]);
+        }
+
+
 
         return view('fees.rector.cancel', [
             'order' => $order,
@@ -452,7 +457,10 @@ class FeeController extends Controller {
 
         $order = Order::findOrFail($orderId);
 
-        $order->update(['status' => 4, 'result' => json_encode($session)]);
+        if ($order->status !== 0) {
+        } else {
+            $order->update(['status' => 4, 'result' => json_encode($session)]);
+        }
 
         return view('website.shop.fees-cancel', [
             'order' => $order,
