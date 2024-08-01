@@ -765,7 +765,7 @@ class EventController extends Controller {
             return response()->json([
                 'success' => false,
                 'error' => 'Error creating order',
-                'url' => route('shop.fees.fees-cancel'),
+                'url' => route('shop.event.paypal-cancel') . '?order_id=' . $order->id,
             ]);
         }
     }
