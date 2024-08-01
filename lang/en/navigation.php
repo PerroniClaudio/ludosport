@@ -35,4 +35,5 @@ return [
     'ordini' => 'Orders',
     'weapon_forms' => 'Weapon Forms',
     'website' => 'Website',
+    'fees' => 'Fees',
 ];

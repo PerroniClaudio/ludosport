@@ -69,8 +69,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         ];
     }
 
-    protected static function boot()
-    {
+    protected static function boot() {
         parent::boot();
 
         static::creating(function ($user) {
@@ -205,6 +204,11 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'label' => 'eventi',
                         'active' => 'events.*',
                         'name' => 'rector.events.index',
+                    ],
+                    (object)[
+                        'label' => 'fees',
+                        'active' => 'fees.*',
+                        'name' => 'rector.fees.index',
                     ],
 
                 ]);

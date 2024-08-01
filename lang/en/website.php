@@ -62,4 +62,7 @@ return [
     'shop_event_error' => 'Event payment failed',
     'shop_event_success_text' => 'You have successfully paid for :event. You are now registered.',
     'shop_event_error_text' => 'There was an error processing your payment. Please try again.',
+    'footer_text_1' => 'LudoSport official light saber by LAMADILUCE',
+    'footer_text_2' => 'Learn the basics @home: LudoSport Evolve ',
+    'footer_text_coypright' => '© Abridge. All rights reserved. | LudoSport™ and the Sporting Light Saber Combat are not associated with The Walt Disney Company, Lucasfilm LTD, LFL LTD or other owners of intellectual property connected with the Star Wars® trademark.'
 ];

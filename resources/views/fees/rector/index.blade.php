@@ -20,7 +20,7 @@
                                 class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex flex-col gap-2">
                                 <p>{{ __('fees.buy_new_fees') }}</p>
                                 <div class="flex justify-end ">
-                                    <a href="{{ route('dean.fees.purchase') }}">
+                                    <a href="{{ route('rector.fees.purchase') }}">
                                         <x-primary-button>
                                             <x-lucide-arrow-right class="h-6 w-6 text-white" />
                                         </x-primary-button>

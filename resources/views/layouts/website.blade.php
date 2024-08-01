@@ -135,6 +135,7 @@
     </main>
 
     <x-flash />
+    <x-footer />
 </body>
 
 
