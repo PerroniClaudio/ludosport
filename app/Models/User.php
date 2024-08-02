@@ -149,7 +149,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function weaponForms() {
-        return $this->belongsToMany(WeaponForm::class, 'weapon_forms_users', 'user_id', 'weapon_form_id');
+        return $this->belongsToMany(WeaponForm::class, 'weapon_forms_users', 'user_id', 'weapon_form_id')
+            ->withPivot('created_at as awarded_at');
     }
 
     public function languages() {
@@ -290,18 +291,18 @@ class User extends Authenticatable implements MustVerifyEmail {
                     (object)[
                         'label' => 'users',
                         'active' => 'users.*',
-                        'name' => 'dashboard',
+                        'name' => 'technician.users.index',
                     ],
                     (object)[
                         'label' => 'eventi',
                         'active' => 'events.*',
                         'name' => 'technician.events.index',
                     ],
-                    (object)[
-                        'label' => 'istruttori',
-                        'active' => 'istruttori.*',
-                        'name' => 'dashboard',
-                    ],
+                    // (object)[
+                    //     'label' => 'istruttori',
+                    //     'active' => 'istruttori.*',
+                    //     'name' => 'technician.',
+                    // ],
                 ]);
             case 'instructor':
                 return collect([

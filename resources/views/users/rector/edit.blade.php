@@ -237,13 +237,19 @@
                     <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
 
                     <div class="flex flex-col gap-2">
-
-                        @foreach ($user->academies as $academy)
+                        {{-- Solo per gli admin c'è il reindirizzamento per ora. quando si saranno le view nel sito potremo rimandare a quelle, magari con target _blank --}}
+                        {{-- @foreach ($user->academies as $academy)
                             <a href="{{ route('academies.edit', $academy->id) }}"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>{{ $academy->name }}</span>
                             </a>
+                        @endforeach --}}
+                        @foreach ($user->academies as $academy)
+                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
+                                <span>{{ $academy->name }}</span>
+                            </div>
                         @endforeach
 
                     </div>
@@ -251,12 +257,18 @@
                     <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
 
                     <div class="flex flex-col gap-2">
-                        @foreach ($user->academyAthletes as $academy)
+                        {{-- @foreach ($user->academyAthletes as $academy)
                             <a href="{{ route('academies.edit', $academy->id) }}"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>{{ $academy->name }}</span>
                             </a>
+                        @endforeach --}}
+                        @foreach ($user->academyAthletes as $academy)
+                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
+                                <span>{{ $academy->name }}</span>
+                            </div>
                         @endforeach
                     </div>
                 </div>
@@ -271,12 +283,18 @@
 
                     <div class="flex flex-col gap-2">
 
-                        @foreach ($user->schools as $school)
+                        {{-- @foreach ($user->schools as $school)
                             <a href="{{ route('schools.edit', $school->id) }}"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>{{ $school->name }}</span>
                             </a>
+                        @endforeach --}}
+                        @foreach ($user->schools as $school)
+                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
+                                <span>{{ $school->name }}</span>
+                            </div>
                         @endforeach
 
                     </div>
@@ -284,12 +302,18 @@
                     <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
 
                     <div class="flex flex-col gap-2">
-                        @foreach ($user->schoolAthletes as $schools)
+                        {{-- @foreach ($user->schoolAthletes as $schools)
                             <a href="{{ route('schools.edit', $schools->id) }}"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>{{ $schools->name }}</span>
                             </a>
+                        @endforeach --}}
+                        @foreach ($user->schoolAthletes as $schools)
+                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
+                                <span>{{ $schools->name }}</span>
+                            </div>
                         @endforeach
                     </div>
                 </div>

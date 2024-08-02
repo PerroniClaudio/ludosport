@@ -41,6 +41,16 @@
                         </div>
                     </div>
                 </div>
+                @php
+                    foreach ($pending_events as $key => $value) {
+                        $pending_events[$key]['start_date'] = date('d/m/Y H:i', strtotime($value['start_date']));
+                        $pending_events[$key]['end_date'] = date('d/m/Y H:i', strtotime($value['end_date']));
+                    }
+                    foreach ($approved_events as $key => $value) {
+                        $approved_events[$key]['start_date'] = date('d/m/Y H:i', strtotime($value['start_date']));
+                        $approved_events[$key]['end_date'] = date('d/m/Y H:i', strtotime($value['end_date']));
+                    }
+                @endphp
                 <div class="col-span-9">
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg"
                         x-show="selectedType == 'pending'" x-cloak>
@@ -109,7 +119,16 @@
                                     'columnClasses' => '', // classes to style table th
                                     'rowClasses' => '', // classes to style table td
                                 ],
-                            ]" :rows="$approved_events" />
+                            ]" :rows="$approved_events" >
+
+                                {{-- <x-slot name="tableActions">
+                                    <a x-bind:href="'/technician/events/' + row.id">
+                                        <x-lucide-pencil
+                                            class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                                    </a>
+                                </x-slot> --}}
+                                
+                            </x-table>
                         </div>
                     </div>
 

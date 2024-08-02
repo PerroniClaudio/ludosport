@@ -15,7 +15,7 @@
         ],
         [
             'name' => 'Awarded on',
-            'field' => 'created_at',
+            'field' => 'awarded_at',
             'columnClasses' => '', // classes to style table th
             'rowClasses' => '', // classes to style table td
         ],

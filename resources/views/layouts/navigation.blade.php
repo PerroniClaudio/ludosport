@@ -26,12 +26,22 @@
                             </x-nav-link>
                         @endforeach
                     @else
+                        @php
+                            $navLang = 'users';
+                            if(request()->routeIs('users.*')) {$navLang = 'users';}
+                            if(request()->routeIs('nations.*')) {$navLang = 'nazioni';}
+                            if(request()->routeIs('academies.*')) {$navLang = 'accademie';}
+                            if(request()->routeIs('schools.*')) {$navLang = 'scuole';}
+                            if(request()->routeIs('clans.*')) {$navLang = 'clan';}
+                            if(request()->routeIs('weapon-forms.*')) {$navLang = 'weapon_forms';}
+                        @endphp
                         <x-nav-link-parent :href="'#'" :active="request()->routeIs('users.*') ||
                             request()->routeIs('nations.*') ||
                             request()->routeIs('academies.*') ||
                             request()->routeIs('schools.*') ||
-                            request()->routeIs('clans.*')">
-                            <x-slot name="name">{{ __('navigation.users') }}</x-slot>
+                            request()->routeIs('clans.*') ||
+                            request()->routeIs('weapon-forms.*')">
+                            <x-slot name="name">{{ __('navigation.' . $navLang) }}</x-slot>
                             <x-slot name="children">
                                 <a href="{{ route('users.index') }}">{{ __('navigation.users') }}</a>
                                 <span class="separator"></span>
@@ -151,13 +161,31 @@
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                     {{ __('navigation.users') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('nations.index')" :active="request()->routeIs('nations.*')">
+                    {{ __('navigation.nazioni') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('academies.index')" :active="request()->routeIs('academies.*')">
+                    {{ __('navigation.accademie') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('schools.index')" :active="request()->routeIs('schools.*')">
+                    {{ __('navigation.scuole') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('clans.index')" :active="request()->routeIs('clans.*')">
+                    {{ __('navigation.clan') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('weapon-forms.index')" :active="request()->routeIs('weapon-forms.*')">
+                    {{ __('navigation.weapon_forms') }}
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">
                     {{ __('navigation.announcements') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
                     {{ __('navigation.eventi') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('rankings.index')" :active="false">
+                <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                    {{ __('navigation.ordini') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('rankings.index')" :active="request()->routeIs('rankings.*')">
                     {{ __('navigation.classifiche') }}
                 </x-responsive-nav-link>
             @endif

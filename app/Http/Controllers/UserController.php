@@ -61,8 +61,8 @@ class UserController extends Controller {
                     }
                 }
 
-                // Se l'utente è un instructor o technician, filtra solo gli utenti dei corsi a cui è associato? tutti?
-                if (in_array($authUserRole, ['instructor', 'technician'])) {
+                // Se l'utente è un instructor, filtra solo gli utenti dei corsi a cui è associato? tutti?
+                if ($authUserRole == 'instructor') {
                     $authClans = auth()->user()->clansPersonnel->where('is_disabled', '0')->pluck('id')->toArray();
 
                     if (
@@ -72,6 +72,11 @@ class UserController extends Controller {
                         continue;
                     }
                 }
+                
+                // Se l'utente è un technician, può vedere tutti gli utenti, non essendoci limitazioni per associarli agli eventi.
+                // if ($authUserRole == 'technician') {
+                    
+                // }
 
                 if ($role->label === 'athlete') {
                     $user->academy = $user->academyAthletes->first();
@@ -550,13 +555,64 @@ class UserController extends Controller {
 
 
         // Installare meilisearch e continuare aggiungendo le condizionni per rector, dean, manager ecc.
-        $users = User::query()
-            ->when($request->search, function (Builder $q, $value) {
-                return $q->whereIn('id', User::search($value)->keys());
-            })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
 
+        $authRole = User::find(auth()->user()->id)->getRole();
 
-        return view('users.search-result', [
+        switch($authRole){
+            case 'admin':
+                $users = User::query()
+                    ->when($request->search, function (Builder $q, $value) {
+                        return $q->whereIn('id', User::search($value)->keys());
+                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                break;
+            case 'rector':
+                $users = User::query()
+                    ->when($request->search, function (Builder $q, $value) {
+                        return $q->whereIn('users.id', User::search($value)->keys());
+                    })->where(function ($query) {
+                        $query->whereHas('academies', function ($q) {
+                            return $q->where('academies.id', auth()->user()->academies->first()->id);
+                        })->orWhereHas('academyAthletes', function ($q) {
+                            return $q->where('academies.id', auth()->user()->academies->first()->id);
+                        });
+                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                break;
+            case 'dean':
+            case 'manager':
+                $users = User::query()
+                    ->when($request->search, function (Builder $q, $value) {
+                        return $q->whereIn('users.id', User::search($value)->keys());
+                    })->where(function ($query) {
+                        $query->whereHas('schools', function ($q) {
+                            return $q->where('schools.id', auth()->user()->schools->first()->id);
+                        })
+                        ->orWhereHas('schoolAthletes', function ($q) {
+                            return $q->where('schools.id', auth()->user()->schools->first()->id);
+                        });
+                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                break;
+            case 'technician':
+                $users = User::query()
+                    ->when($request->search, function (Builder $q, $value) {
+                        return $q->whereIn('id', User::search($value)->keys());
+                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                break;
+            case 'instructor': // Da controllare
+                $users = User::query()
+                    ->when($request->search, function (Builder $q, $value) {
+                        return $q->whereIn('users.id', User::search($value)->keys());
+                    })->where(function ($query) {
+                        $query->whereHas('clans', function ($q) {
+                            return $q->whereIn('clans.id', auth()->user()->clansPersonnel->pluck('id'));
+                        })->orWhereHas('clansPersonnel', function ($q) {
+                            return $q->whereIn('clans.id', auth()->user()->clansPersonnel->pluck('id'));
+                        });
+                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                break;
+        }
+
+        $viewPath = $authRole === 'admin' ? 'users.search-result' :  'users.' . $authRole . '.search-result';
+        return view($viewPath, [
             'users' => $users,
         ]);
     }
@@ -589,6 +645,9 @@ class UserController extends Controller {
             case 'dean':
             case 'manager':
                 $academies = collect([auth()->user()->schools->first()->academy]);
+                break;
+            case 'technician':
+                $academies = Academy::where('is_disabled', false)->with('nation')->get();
                 break;
             default:
                 return back()->with('error', 'You do not have the required role to access this page!');

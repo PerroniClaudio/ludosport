@@ -50,9 +50,9 @@ class EventController extends Controller {
 
         foreach ($events as $key => $event) {
             if ($event->is_approved) {
-                $approved[$key] = $event;
+                $approved[] = $event;
             } else {
-                $pending[$key] = $event;
+                $pending[] = $event;
             }
         }
         $viewPath = $authRole === 'admin' ? 'event.index' : 'event.' . $authRole . '.index';
@@ -140,10 +140,13 @@ class EventController extends Controller {
         $authRole = $authUser->getRole();
 
         // Questa parte si può spostare in una funzione tipo checkPermission
-        // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
+        // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato (tecnico). 
         if (!($authRole === 'admin' ||
             ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
             $event->user_id === $authUser->id)) {
+            return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
+        }
+        if ($event->is_approved && $authRole !== 'admin') {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
