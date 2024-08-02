@@ -189,7 +189,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('events.save.description');
     Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('events.save.location');
     Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('events.update.thumbnail');
-    
+
     Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('events.participants');
     Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('events.available');
 
@@ -287,7 +287,7 @@ require __DIR__ . '/rector.php';
 require __DIR__ . '/script.php';
 
 Route::group([], function () {
-    Route::get('/test', function (Illuminate\Http\Request $request) {
-        return 'test';
-    })->name('test');
+    Route::get('/healthcheck', function () {
+        return 'healthcheck';
+    })->name('healthcheck');
 });

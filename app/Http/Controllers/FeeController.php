@@ -432,7 +432,12 @@ class FeeController extends Controller {
 
         $order = Order::findOrFail($orderId);
 
-        $order->update(['status' => 4, 'result' => json_encode($session)]);
+        if ($order->status !== 0) {
+        } else {
+            $order->update(['status' => 4, 'result' => json_encode($session)]);
+        }
+
+
 
         return view('fees.rector.cancel', [
             'order' => $order,
@@ -452,7 +457,10 @@ class FeeController extends Controller {
 
         $order = Order::findOrFail($orderId);
 
-        $order->update(['status' => 4, 'result' => json_encode($session)]);
+        if ($order->status !== 0) {
+        } else {
+            $order->update(['status' => 4, 'result' => json_encode($session)]);
+        }
 
         return view('website.shop.fees-cancel', [
             'order' => $order,
@@ -466,6 +474,103 @@ class FeeController extends Controller {
 
 
     //? Checkout with Paypal.
+
+    public function checkoutPaypal(Request $request) {
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+
+        // Crea ordine
+
+        $user = User::find(Auth()->user()->id);
+        $invoice = $user->invoices->first();
+
+        $order = Order::create([
+            'user_id' => $user->id,
+            'status' => 0,
+            'total' => 0,
+            'payment_method' => 'paypal',
+            'order_number' => Str::orderedUuid(),
+            'result' => '{}',
+            'invoice_id' => $invoice->id,
+        ]);
+
+        // Aggiungi item all'ordine
+
+        $items = json_decode($request->items);
+        $amount = 0;
+
+        foreach ($items as $item) {
+
+            $price = $item->name == 'senior_fee' ? 50 : 25;
+            $amount += $price;
+
+            $order->items()->create([
+                'product_type' => 'fee',
+                'product_name' => $item->name,
+                'product_code' => $item->name == 'senior_fee' ? 'senior_fee' : 'junior_fee',
+                'quantity' => $item->quantity,
+                'price' => number_format($price * $item->quantity, 2),
+                'vat' => 0,
+                'total' => number_format($price * $item->quantity, 2),
+            ]);
+        }
+
+        $response = $provider->createOrder([
+            'intent' => 'CAPTURE',
+            'purchase_units' => [
+                [
+                    'amount' => [
+                        'currency_code' => 'EUR',
+                        'value' => number_format($amount, 2),
+                    ],
+                ],
+            ],
+            'application_context' => [
+                'cancel_url' => route('fees.paypal-cancel') . "?order_id={$order->id}",
+                'return_url' => route('fees.paypal-success') . "?order_id={$order->id}",
+                'order_id' => $order->id
+            ],
+        ]);
+
+        if (isset($response['id']) && $response['id'] !== null) {
+            session(['paypal_order_id' => $response['id']]);
+
+            foreach ($response['links'] as $link) {
+                if ($link['rel'] == 'approve') {
+
+
+                    $order->update([
+                        'status' => 1,
+                        'payment_method' => 'paypal',
+                        'total' => number_format($amount, 2),
+                        'result' => json_encode($response),
+                    ]);
+
+                    session()->put('product_name', $request->product_name);
+
+                    return response()->json([
+                        'success' => true,
+                        'url' => $link['href'],
+                    ]);
+                }
+            }
+        } else {
+
+            $order->update([
+                'status' => 4,
+                'payment_method' => 'paypal',
+                'total' => number_format($amount, 2),
+                'result' => 'Error creating order',
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Error creating order',
+                'url' => route('fees.paypal-cancel') . "?order_id={$order->id}",
+            ]);
+        }
+    }
 
     public function userCheckoutPaypal(Request $request) {
 
@@ -612,9 +717,84 @@ class FeeController extends Controller {
 
         $order = Order::findOrFail($orderId);
 
-        $order->update(['status' => 4, 'result' => json_encode($result)]);
+        if ($order->status !== 1) {
+        } else {
+            $order->update([
+                'status' => 4,
+                'result' => json_encode($result),
+            ]);
+        }
 
         return view('website.shop.fees-cancel', [
+            'order' => $order,
+        ]);
+    }
+
+    public function successPaypal(Request $request) {
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+        $result = $provider->capturePaymentOrder($request->token);
+        $orderId = $request->order_id;
+
+        if ($orderId === null) {
+            return;
+        }
+
+        $order = Order::findOrFail($orderId);
+
+        if ($order->status !== 1) {
+        } else {
+
+            $order->update([
+                'status' => 2,
+                'result' => json_encode($result),
+            ]);
+            $user = User::find($order->user_id);
+
+            foreach ($order->items as $item) {
+
+                for ($i = 0; $i < $item->quantity; $i++) {
+                    Fee::create([
+                        'user_id' => $order->user_id,
+                        'academy_id' => $order->user->academies()->first()->id,
+                        'type' => $item->product_name == 'senior_fee' ? 1 : 2,
+                        'start_date' => now(),
+                        'end_date' => now()->addYear(),
+                        'auto_renew' => 0,
+                        'unique_id' => Str::orderedUuid(),
+                    ]);
+                }
+            }
+        }
+
+        return view('fees.rector.success', [
+            'order' => $order,
+        ]);
+    }
+
+    public function cancelPaypal(Request $request) {
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+        $result = $provider->capturePaymentOrder($request->token);
+        $orderId = $request->order_id;
+
+        if ($orderId === null) {
+            return;
+        }
+
+        $order = Order::findOrFail($orderId);
+
+        if ($order->status !== 1) {
+        } else {
+            $order->update([
+                'status' => 4,
+                'result' => json_encode($result),
+            ]);
+        }
+
+        return view('fees.rector.cancel', [
             'order' => $order,
         ]);
     }

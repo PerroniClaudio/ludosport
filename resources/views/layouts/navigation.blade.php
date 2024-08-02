@@ -68,6 +68,10 @@
                         </x-nav-link-parent>
                     @endif
 
+                    <x-nav-link :href="route('homepage')">
+                        {{ __('navigation.website') }}
+                    </x-nav-link>
+
                 </div>
             </div>
 

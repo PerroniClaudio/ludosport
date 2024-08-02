@@ -6,7 +6,6 @@ export const rankingschart = () => {
         selectedEvent: 0,
         selectedEventData: {},
         athletesData: [],
-        xdd: [],
         eventName: "General Rankings",
         getEventsList: async function () {
             const url = `/website-rankings/events/list?date=${today.toISOString()}`;
@@ -19,7 +18,7 @@ export const rankingschart = () => {
         },
         getDataForEvent: async function (id) {
             this.selectedEvent = id;
-            this.xdd = [];
+            this.athletesData = [];
             const url = `/website-rankings/events/${this.selectedEvent}/rankings`;
             const response = await fetch(url);
 
@@ -27,7 +26,7 @@ export const rankingschart = () => {
                 const data = await response.json();
 
                 Object.entries(data).forEach(([key, value]) => {
-                    this.xdd.push({
+                    this.athletesData.push({
                         id: key,
                         name: value.user_name,
                         war_points: value.total_war_points,
@@ -38,7 +37,8 @@ export const rankingschart = () => {
         },
         getGeneralRankings: async function () {
             this.selectedEvent = 0;
-            this.xdd = [];
+            this.athletesData = [];
+            this.eventName = "General Rankings";
             const url = `/website-rankings/general?date=${today.toISOString()}`;
             const response = await fetch(url);
 
@@ -46,7 +46,7 @@ export const rankingschart = () => {
                 const data = await response.json();
 
                 Object.entries(data).forEach(([key, value]) => {
-                    this.xdd.push({
+                    this.athletesData.push({
                         id: key,
                         name: value.user_name,
                         war_points: value.total_war_points,

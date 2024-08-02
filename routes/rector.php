@@ -3,67 +3,76 @@
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(function () {
-    Route::get('/fees', 'App\Http\Controllers\FeeController@index')->name('fees.index');
-    Route::get('/fees/purchase', 'App\Http\Controllers\FeeController@create')->name('dean.fees.purchase');
-    Route::get('/invoices/user-data/{user}', [App\Http\Controllers\UserController::class, 'invoiceData'])->name('users.invoices.get');
-    Route::post('/invoices/store', [App\Http\Controllers\UserController::class, 'saveInvoice'])->name('users.invoices.store');
+  Route::get('/fees', 'App\Http\Controllers\FeeController@index')->name('rector.fees.index');
+  Route::get('/fees/purchase', 'App\Http\Controllers\FeeController@create')->name('rector.fees.purchase');
+  Route::get('/invoices/user-data/{user}', [App\Http\Controllers\UserController::class, 'invoiceData'])->name('users.invoices.get');
+  Route::post('/invoices/store', [App\Http\Controllers\UserController::class, 'saveInvoice'])->name('users.invoices.store');
 
 
-    #Stripe 
+  #Stripe 
 
-    Route::get('/fees/stripe-checkout', [App\Http\Controllers\FeeController::class, 'checkoutStripe'])->name('fees.checkout');
-    Route::get('/fees/success', [App\Http\Controllers\FeeController::class, 'success'])->name('fees.success');
-    Route::get('/fees/cancel', [App\Http\Controllers\FeeController::class, 'cancel'])->name('fees.cancel');
-    Route::get('/fees/extimate', [App\Http\Controllers\FeeController::class, 'extimateFeeConsumption'])->name('fees.extimate');
-    Route::post('/fees/associate', [App\Http\Controllers\FeeController::class, 'associateFeesToUsers'])->name('fees.associate');
+  Route::get('/fees/stripe/checkout', [App\Http\Controllers\FeeController::class, 'checkoutStripe'])->name('fees.checkout');
+  Route::get('/fees/success', [App\Http\Controllers\FeeController::class, 'success'])->name('fees.success');
+  Route::get('/fees/cancel', [App\Http\Controllers\FeeController::class, 'cancel'])->name('fees.cancel');
 
-    /** Users */
+  # Paypal 
 
-    Route::group([], function () {
-        Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('rector.users.index');
-        Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('rector.users.filter');
-        Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('rector.users.filter.result');
-        Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('rector.users.search');
-        Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('rector.users.create');
-        Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('rector.users.edit');
-        Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('rector.users.store');
-        Route::post('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('rector.users.update');
-        Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('rector.users.disable');
-        Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('rector.users.picture.update');
-        Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('rector.nation.academies.index');
-        // Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('rector.academies.schools.index');
-      });
-  
-      /** Ruoli */
-  
-      Route::group([], function () {
-        Route::get('/custom-roles', [App\Http\Controllers\RoleController::class, 'index'])->name('rector.roles.index');
-        Route::get('/custom-roles/search', [App\Http\Controllers\RoleController::class, 'search'])->name('rector.roles.search');
-        Route::post('/custom-roles/assign', [App\Http\Controllers\RoleController::class, 'assign'])->name('rector.roles.assign');
-        Route::post('/custom-roles', [App\Http\Controllers\RoleController::class, 'store'])->name('rector.roles.store');
-      });
-  
-      /** Accademie */
+  Route::post('/fees/paypal/checkout', [App\Http\Controllers\FeeController::class, 'checkoutPaypal'])->name('fees.checkout-paypal');
+  Route::get('/fees/paypal/success', [App\Http\Controllers\FeeController::class, 'successPaypal'])->name('fees.paypal-success');
+  Route::get('/fees/paypal/cancel', [App\Http\Controllers\FeeController::class, 'cancelPaypal'])->name('fees.paypal-cancel');
 
-        Route::group(['middleware' => ['auth', 'role:admin,rector']], function () {
-            Route::get('/academies', [App\Http\Controllers\AcademyController::class, 'index'])->name('rector.academies.index');
-            // Route::get('/academies/create', [App\Http\Controllers\AcademyController::class, 'create'])->name('rector.academies.create');
-            // Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('rector.academies.all');
-            // Route::get('/academies/search', [App\Http\Controllers\AcademyController::class, 'search'])->name('rector.academies.search');
-            Route::get('/academies/{academy}/athletes-data', [App\Http\Controllers\AcademyController::class, 'athletesDataForAcademy'])->name('rector.academies.athletes-data');
-            Route::get('/academies/{academy}/athletes-school-data', [App\Http\Controllers\AcademyController::class, 'athletesSchoolDataForAcademy'])->name('rector.academies.athletes-school-data');
-            Route::get('/academies/{academy}/athletes-year-data', [App\Http\Controllers\AcademyController::class, 'getAthletesNumberPerYear'])->name('rector.academies.athletes-year-data');
+  Route::get('/fees/stripe-checkout', [App\Http\Controllers\FeeController::class, 'checkoutStripe'])->name('fees.checkout');
 
-            Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'edit'])->name('rector.academies.edit');
-            // Route::delete('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'destroy'])->name('rector.academies.disable');
+  Route::get('/fees/extimate', [App\Http\Controllers\FeeController::class, 'extimateFeeConsumption'])->name('fees.extimate');
+  Route::post('/fees/associate', [App\Http\Controllers\FeeController::class, 'associateFeesToUsers'])->name('fees.associate');
 
-            // Route::post('/academies', [App\Http\Controllers\AcademyController::class, 'store'])->name('rector.academies.store');
-            // Route::post('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'update'])->name('rector.academies.update');
-            Route::post('/academies/{academy}/schools/create', [App\Http\Controllers\SchoolController::class, 'storeacademy'])->name('rector.academies.schools.create');
-            Route::post('/academies/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'addSchool'])->name('rector.academies.schools.store');
-            Route::post('/academies/{academy}/users/create', [App\Http\Controllers\UserController::class, 'storeForAcademy'])->name('rector.academies.users.create');
-            Route::post('/academies/{academy}/personnel', [App\Http\Controllers\AcademyController::class, 'addPersonnel'])->name('rector.academies.personnel.store');
-            Route::post('/academies/{academy}/athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('rector.academies.athlete.store');
+  /** Users */
+
+  Route::group([], function () {
+    Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('rector.users.index');
+    Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('rector.users.filter');
+    Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('rector.users.filter.result');
+    Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('rector.users.search');
+    Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('rector.users.create');
+    Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('rector.users.edit');
+    Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('rector.users.store');
+    Route::post('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('rector.users.update');
+    Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('rector.users.disable');
+    Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('rector.users.picture.update');
+    Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('rector.nation.academies.index');
+    // Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('rector.academies.schools.index');
+  });
+
+  /** Ruoli */
+
+  Route::group([], function () {
+    Route::get('/custom-roles', [App\Http\Controllers\RoleController::class, 'index'])->name('rector.roles.index');
+    Route::get('/custom-roles/search', [App\Http\Controllers\RoleController::class, 'search'])->name('rector.roles.search');
+    Route::post('/custom-roles/assign', [App\Http\Controllers\RoleController::class, 'assign'])->name('rector.roles.assign');
+    Route::post('/custom-roles', [App\Http\Controllers\RoleController::class, 'store'])->name('rector.roles.store');
+  });
+
+  /** Accademie */
+
+  Route::group(['middleware' => ['auth', 'role:admin,rector']], function () {
+    Route::get('/academies', [App\Http\Controllers\AcademyController::class, 'index'])->name('rector.academies.index');
+    // Route::get('/academies/create', [App\Http\Controllers\AcademyController::class, 'create'])->name('rector.academies.create');
+    // Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('rector.academies.all');
+    // Route::get('/academies/search', [App\Http\Controllers\AcademyController::class, 'search'])->name('rector.academies.search');
+    Route::get('/academies/{academy}/athletes-data', [App\Http\Controllers\AcademyController::class, 'athletesDataForAcademy'])->name('rector.academies.athletes-data');
+    Route::get('/academies/{academy}/athletes-school-data', [App\Http\Controllers\AcademyController::class, 'athletesSchoolDataForAcademy'])->name('rector.academies.athletes-school-data');
+    Route::get('/academies/{academy}/athletes-year-data', [App\Http\Controllers\AcademyController::class, 'getAthletesNumberPerYear'])->name('rector.academies.athletes-year-data');
+
+    Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'edit'])->name('rector.academies.edit');
+    // Route::delete('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'destroy'])->name('rector.academies.disable');
+
+    // Route::post('/academies', [App\Http\Controllers\AcademyController::class, 'store'])->name('rector.academies.store');
+    // Route::post('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'update'])->name('rector.academies.update');
+    Route::post('/academies/{academy}/schools/create', [App\Http\Controllers\SchoolController::class, 'storeacademy'])->name('rector.academies.schools.create');
+    Route::post('/academies/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'addSchool'])->name('rector.academies.schools.store');
+    Route::post('/academies/{academy}/users/create', [App\Http\Controllers\UserController::class, 'storeForAcademy'])->name('rector.academies.users.create');
+    Route::post('/academies/{academy}/personnel', [App\Http\Controllers\AcademyController::class, 'addPersonnel'])->name('rector.academies.personnel.store');
+    Route::post('/academies/{academy}/athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('rector.academies.athlete.store');
 
             Route::get('/academies/{academy}/users-search', [App\Http\Controllers\AcademyController::class, 'searchUsers'])->name('rector.academies.users-search');
         });

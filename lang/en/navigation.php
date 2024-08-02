@@ -34,4 +34,6 @@ return [
     'announcements' => 'Announcements',
     'ordini' => 'Orders',
     'weapon_forms' => 'Weapon Forms',
+    'website' => 'Website',
+    'fees' => 'Fees',
 ];

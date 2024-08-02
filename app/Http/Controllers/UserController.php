@@ -79,8 +79,13 @@ class UserController extends Controller {
                     if ($user->academy) {
                         $user->nation = $user->academy->nation->name;
                     } else {
-                        $nation = Nation::find($user->nation_id);
-                        $user->nation = $nation->name;
+
+                        if ($user->nation_id === null) {
+                            $user->nation = "Not set";
+                        } else {
+                            $nation = Nation::find($user->nation_id);
+                            $user->nation = $nation->name;
+                        }
                     }
                 }
 
@@ -100,7 +105,7 @@ class UserController extends Controller {
 
     public function create() {
         $authRole = User::find(auth()->user()->id)->getRole();
-        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
@@ -257,7 +262,7 @@ class UserController extends Controller {
         ]);
 
         $authRole = User::find(auth()->user()->id)->getRole();
-        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
@@ -315,7 +320,7 @@ class UserController extends Controller {
 
     public function  storeForClan(Request $request) {
         $authRole = User::find(auth()->user()->id)->getRole();
-        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
@@ -382,7 +387,7 @@ class UserController extends Controller {
     public function edit(User $user) {
 
         $authRole = User::find(auth()->user()->id)->getRole();
-        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
@@ -483,7 +488,7 @@ class UserController extends Controller {
         ]);
 
         $authRole = User::find(auth()->user()->id)->getRole();
-        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
@@ -516,7 +521,7 @@ class UserController extends Controller {
 
     public function destroy(User $user) {
         $authRole = User::find(auth()->user()->id)->getRole();
-        if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
         $user->is_disabled = true;
@@ -573,8 +578,8 @@ class UserController extends Controller {
     public function filter() {
 
         $authRole = User::find(auth()->user()->id)->getRole();
-        
-        switch($authRole) {
+
+        switch ($authRole) {
             case 'admin':
                 $academies = Academy::where('is_disabled', false)->with('nation')->get();
                 break;
