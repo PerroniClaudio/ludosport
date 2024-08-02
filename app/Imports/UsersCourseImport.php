@@ -24,7 +24,7 @@ class UsersCourseImport implements ToCollection {
             $user = User::where('email', $row[0])->first();
             $course = Clan::where('id', $row[1])->first();
 
-            if ($user && $course) {
+            if ($user && $course && !$user->clans->contains($course->id)) {
                 $user->clans()->attach($course->id);
                 $user->save();
             }

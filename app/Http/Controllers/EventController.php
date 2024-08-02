@@ -437,7 +437,7 @@ class EventController extends Controller {
     }
 
     public function available(Event $event) {
-        $users = $event->academy->athletes()->get();
+        $users = User::where('is_disabled', '0')->get();
         return response()->json($users);
     }
 

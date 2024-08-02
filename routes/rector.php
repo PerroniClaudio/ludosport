@@ -121,56 +121,27 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
         Route::post('/courses/{clan}/instructors', [App\Http\Controllers\ClanController::class, 'addInstructor'])->name('rector.clans.instructors.store');
         Route::post('/courses/{clan}/athlete', [App\Http\Controllers\ClanController::class, 'addAthlete'])->name('rector.clans.athletes.store');
       });
-  
     
     
       /** Eventi */
   
-  
-      // Route::get('/events/location', [App\Http\Controllers\EventController::class, 'getLocationData'])->name('rector.events.location');
-      // Route::get('/events/coordinates', [App\Http\Controllers\EventController::class, 'coordinates'])->name('rector.events.coordinates');
-  
-      Route::group([], function () {
-        Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('rector.events.index');
-        Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('rector.events.calendar');
-        Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('rector.events.create');
-  
-        // Route::get('/events/{event}/review', [App\Http\Controllers\EventController::class, 'review'])->name('rector.events.review');
-        // Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('rector.events.all');
-        // Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('rector.events.search');
-        Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('rector.events.edit');
-        // Route::delete('/events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])->name('rector.events.disable');
-  
-        Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('rector.events.store');
-        Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('rector.events.update');
-        // Route::post('/events/{event}/reject', [App\Http\Controllers\EventController::class, 'reject'])->name('rector.events.reject');
-        // Route::post('/events/{event}/approve', [App\Http\Controllers\EventController::class, 'approve'])->name('rector.events.approve');
-        // Route::post('/events/{event}/publish', [App\Http\Controllers\EventController::class, 'publish'])->name('rector.events.publish');
-        
-        // Route::post('/events/{event}/participants', [App\Http\Controllers\EventController::class, 'addParticipant'])->name('rector.events.participants.store');
-        // Route::post('/events/{event}/results', [App\Http\Controllers\EventController::class, 'addResult'])->name('rector.events.results.store');
-  
-        // Presi da technician. alcuni mancano in admin
-        Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('rector.events.save.description');
-        Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('rector.events.save.location');
-        Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('rector.events.update.thumbnail');
-  
-        Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('rector.events.participants');
-        Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('rector.events.available');
-  
-        Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('rector.events.participants.add');
-        Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('rector.events.participants.export');
-    
-        //Tipi (solo l'admin può modificare i tipi di evento, per evitare la creazione indiscriminata di tipi)
-  
-        // Route::get('/event-types', [App\Http\Controllers\EventTypeController::class, 'index'])->name('rector.events.list_types');
-        // Route::post('/event-types/create', [App\Http\Controllers\EventTypeController::class, 'store'])->name('rector.events.new_type');
-        // Route::post('/event-types/{eventType}/associate', [App\Http\Controllers\EventTypeController::class, 'associate_event'])->name('rector.events.associate_event');
-        // Route::post('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'update'])->name('rector.events.update_type');
-        // Route::delete('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'destroy'])->name('rector.events.type_disable');
-        Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('rector.events.types');
-        // Route::get('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'edit'])->name('rector.events.edit_type');
-      });
+      // Questo gruppo di route (Eventi) qui commentate sono funzionanti ma il preside non è al momento abilitato al loro utilizzo
+      // Route::group([], function () {
+      //   Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('rector.events.index');
+      //   Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('rector.events.calendar');
+      //   Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('rector.events.create');
+      //   Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('rector.events.edit');
+      //   Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('rector.events.store');
+      //   Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('rector.events.update');
+      //   Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('rector.events.save.description');
+      //   Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('rector.events.save.location');
+      //   Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('rector.events.update.thumbnail');
+      //   Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('rector.events.participants');
+      //   Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('rector.events.available');
+      //   Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('rector.events.participants.add');
+      //   Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('rector.events.participants.export');
+      //   Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('rector.events.types');
+      // });
   
       /** Imports */
   

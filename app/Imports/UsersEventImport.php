@@ -27,7 +27,7 @@ class UsersEventImport implements ToCollection {
 
             $user = User::where('email', $row[1])->first();
 
-            if ($user) {
+            if ($user && !EventResult::where('event_id', $row[0])->where('user_id', $user->id)->exists()) {
                 $eventResult = EventResult::create([
                     'event_id' => $row[0],
                     'user_id' => $user->id,

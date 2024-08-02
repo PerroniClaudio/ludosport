@@ -98,79 +98,97 @@ class Event extends Model {
         switch ($type_of_bonus) {
             case "FIRST_IN_WAR":
                 switch ($this->event_type) {
-                    case 1:
+                    case 2:
                         return 15;
                         break;
-                    case 2:
+                    case 3:
                         return 45;
                         break;
-                    case 3:
+                    case 4:
                         return 75;
+                        break;
+                    default:
+                        return 0;
                         break;
                 }
                 break;
             case "SECOND_IN_WAR":
                 switch ($this->event_type) {
-                    case 1:
+                    case 2:
                         return 10;
                         break;
-                    case 2:
+                    case 3:
                         return 30;
                         break;
-                    case 3:
+                    case 4:
                         return 50;
+                        break;
+                    default:
+                        return 0;
                         break;
                 }
                 break;
             case "THIRD_IN_WAR":
                 switch ($this->event_type) {
-                    case 1:
+                    case 2:
                         return 5;
                         break;
-                    case 2:
+                    case 3:
                         return 15;
                         break;
-                    case 3:
+                    case 4:
                         return 25;
+                        break;
+                    default:
+                        return 0;
                         break;
                 }
                 break;
             case "FIRST_IN_STYLE":
                 switch ($this->event_type) {
-                    case 1:
+                    case 2:
                         return 15;
                         break;
-                    case 2:
+                    case 3:
                         return 45;
                         break;
-                    case 3:
+                    case 4:
                         return 75;
+                        break;
+                    default:
+                        return 0;
                         break;
                 }
                 break;
             case "SECOND_IN_STYLE":
                 switch ($this->event_type) {
-                    case 1:
+                    case 2:
                         return 10;
                         break;
-                    case 2:
+                    case 3:
                         return 30;
                         break;
-                    case 3:
+                    case 4:
                         return 50;
+                        break;
+                    default:
+                        return 0;
                         break;
                 }
                 break;
             case "THIRD_IN_STYLE":
                 switch ($this->event_type) {
-                    case 1:
+                    case 2:
                         return 5;
                         break;
-                    case 2:
+                    case 3:
                         return 15;
                         break;
-                    case 3:
+                    case 4:
                         return 25;
+                        break;
+                    default:
+                        return 0;
                         break;
                 }
                 break;

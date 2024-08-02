@@ -10,6 +10,7 @@ use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 use App\Models\Invoice as Invoice;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmail {
     use HasFactory, Notifiable, HasApiTokens, Searchable, Billable;
@@ -76,6 +77,17 @@ class User extends Authenticatable implements MustVerifyEmail {
         static::creating(function ($user) {
             if (is_null($user->rank_id)) {
                 $user->rank_id = Rank::first()->id; // Imposta il valore predefinito per rank_id
+            }
+
+            if (is_null($user->unique_code) ||
+                $user->unique_code == "" ||
+                User::where('unique_code', $user->unique_code)->count() > 0) {
+                $code_valid = false;
+                while (!$code_valid) {
+                    $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
+                    $code_valid = User::where('unique_code', $unique_code)->count() == 0;
+                }
+                $user->unique_code = $unique_code;
             }
         });
     }
@@ -201,11 +213,11 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'active' => 'users.*',
                         'name' => 'rector.users.index',
                     ],
-                    (object)[
-                        'label' => 'eventi',
-                        'active' => 'events.*',
-                        'name' => 'rector.events.index',
-                    ],
+                    // (object)[
+                    //     'label' => 'eventi',
+                    //     'active' => 'events.*',
+                    //     'name' => 'rector.events.index',
+                    // ],
 
                 ]);
             case 'dean':
@@ -230,11 +242,11 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'active' => 'users.*',
                         'name' => 'dean.users.index',
                     ],
-                    (object)[
-                        'label' => 'eventi',
-                        'active' => 'events.*',
-                        'name' => 'dean.events.index',
-                    ],
+                    // (object)[
+                    //     'label' => 'eventi',
+                    //     'active' => 'events.*',
+                    //     'name' => 'dean.events.index',
+                    // ],
                 ]);
             case 'manager':
                 return collect([
@@ -258,11 +270,11 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'active' => 'users.*',
                         'name' => 'manager.users.index',
                     ],
-                    (object)[
-                        'label' => 'eventi',
-                        'active' => 'events.*',
-                        'name' => 'manager.events.index',
-                    ],
+                    // (object)[
+                    //     'label' => 'eventi',
+                    //     'active' => 'events.*',
+                    //     'name' => 'manager.events.index',
+                    // ],
                 ]);
             case 'technician':
                 return collect([

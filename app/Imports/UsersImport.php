@@ -27,18 +27,20 @@ class UsersImport implements ToCollection {
                 $row[4] = 1;
             }
             $academy = Academy::where('id', $row[4])->first();
-            $user = User::create([
-                'name'     => $row[0],
-                'surname'    => $row[1],
-                'email'    => $row[2],
-                'nation_id' => $nationality ? $nationality->id : 2,
-                'password' => Hash::make(Str::random(8)),
-                'academy_id' => $academy ? $academy->id : 1,
-                'subscription_year' => now()->year,
-            ]);
+            if (!User::where('email', $row[2])->exists()) {
+                $user = User::create([
+                    'name'     => $row[0],
+                    'surname'    => $row[1],
+                    'email'    => $row[2],
+                    'nation_id' => $nationality ? $nationality->id : 2,
+                    'password' => Hash::make(Str::random(8)),
+                    'academy_id' => $academy ? $academy->id : 1,
+                    'subscription_year' => now()->year,
+                ]);
 
-            $user->roles()->attach(7);
-            $user->academyAthletes()->attach($academy->id);
+                $user->roles()->attach(7);
+                $user->academyAthletes()->attach($academy->id);
+            }
         }
     }
 }

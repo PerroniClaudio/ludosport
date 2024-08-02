@@ -25,7 +25,7 @@ class UsersSchoolImport implements ToCollection {
             $user = User::where('email', $row[0])->first();
             $school = School::where('id', $row[1])->first();
 
-            if ($user && $school) {
+            if ($user && $school && !$user->schoolAthletes->contains($school->id)) {
                 $user->schoolAthletes()->attach($school->id);
                 $user->save();
             }

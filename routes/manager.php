@@ -91,51 +91,23 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
   
     /** Eventi */
 
-
-    // Route::get('/events/location', [App\Http\Controllers\EventController::class, 'getLocationData'])->name('manager.events.location');
-    // Route::get('/events/coordinates', [App\Http\Controllers\EventController::class, 'coordinates'])->name('manager.events.coordinates');
-
-    Route::group([], function () {
-      Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('manager.events.index');
-      Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('manager.events.calendar');
-      Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('manager.events.create');
-
-      // Route::get('/events/{event}/review', [App\Http\Controllers\EventController::class, 'review'])->name('manager.events.review');
-      // Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('manager.events.all');
-      // Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('manager.events.search');
-      Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('manager.events.edit');
-      // Route::delete('/events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])->name('manager.events.disable');
-
-      Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('manager.events.store');
-      Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('manager.events.update');
-      // Route::post('/events/{event}/reject', [App\Http\Controllers\EventController::class, 'reject'])->name('manager.events.reject');
-      // Route::post('/events/{event}/approve', [App\Http\Controllers\EventController::class, 'approve'])->name('manager.events.approve');
-      // Route::post('/events/{event}/publish', [App\Http\Controllers\EventController::class, 'publish'])->name('manager.events.publish');
-      
-      // Route::post('/events/{event}/participants', [App\Http\Controllers\EventController::class, 'addParticipant'])->name('manager.events.participants.store');
-      // Route::post('/events/{event}/results', [App\Http\Controllers\EventController::class, 'addResult'])->name('manager.events.results.store');
-
-      // Presi da technician. alcuni mancano in admin
-      Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('manager.events.save.description');
-      Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('manager.events.save.location');
-      Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('manager.events.update.thumbnail');
-
-      Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('manager.events.participants');
-      Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('manager.events.available');
-
-      Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('manager.events.participants.add');
-      Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('manager.events.participants.export');
-
-      //Tipi (solo l'admin può modificare i tipi di evento, per evitare la creazione indiscriminata di tipi)
-
-      // Route::get('/event-types', [App\Http\Controllers\EventTypeController::class, 'index'])->name('manager.events.list_types');
-      // Route::post('/event-types/create', [App\Http\Controllers\EventTypeController::class, 'store'])->name('manager.events.new_type');
-      // Route::post('/event-types/{eventType}/associate', [App\Http\Controllers\EventTypeController::class, 'associate_event'])->name('manager.events.associate_event');
-      // Route::post('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'update'])->name('manager.events.update_type');
-      // Route::delete('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'destroy'])->name('manager.events.type_disable');
-      Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('manager.events.types');
-      // Route::get('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'edit'])->name('manager.events.edit_type');
-    });
+    // Questo gruppo di route (Eventi) qui commentate sono funzionanti ma il manager non è al momento abilitato al loro utilizzo
+    // Route::group([], function () {
+    //   Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('manager.events.index');
+    //   Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('manager.events.calendar');
+    //   Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('manager.events.create');
+    //   Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('manager.events.edit');
+    //   Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('manager.events.store');
+    //   Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('manager.events.update');
+    //   Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('manager.events.save.description');
+    //   Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('manager.events.save.location');
+    //   Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('manager.events.update.thumbnail');
+    //   Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('manager.events.participants');
+    //   Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('manager.events.available');
+    //   Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('manager.events.participants.add');
+    //   Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('manager.events.participants.export');
+    //   Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('manager.events.types');
+    // });
 
     /** Imports */
 

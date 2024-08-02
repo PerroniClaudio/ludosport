@@ -146,13 +146,6 @@ class UserController extends Controller {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
-        $code_valid = false;
-
-        while (!$code_valid) {
-            $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
-            $code_valid = User::where('unique_code', $unique_code)->count() == 0;
-        }
-
         $nation = Nation::where('name', $request->nationality)->first();
         $user = User::create([
             'name' => $request->name,
@@ -162,7 +155,7 @@ class UserController extends Controller {
             'subscription_year' => $request->year,
             'academy_id' => $request->academy_id ?? 0,
             'nation_id' => $nation->id,
-            'unique_code' => $unique_code,
+            // 'unique_code' => $unique_code,
         ]);
 
         $roles = explode(',', $request->roles);
