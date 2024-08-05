@@ -18,9 +18,9 @@ class AcademyController extends Controller {
     public function index() {
         //
         $authRole = User::find(auth()->user()->id)->getRole();
-        if(in_array($authRole, ['rector'])) {
+        if (in_array($authRole, ['rector'])) {
             $academy = auth()->user()->academies->where('is_disabled', '0')->first();
-            if($academy){
+            if ($academy) {
                 return $this->edit($academy);
             }
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
@@ -189,7 +189,7 @@ class AcademyController extends Controller {
             $address = $request->address . " " . $request->city . " "  . $request->zip;
             $location = $this->getLocation($address);
 
-            if(!$location){
+            if (!$location) {
                 return back()->with('error', 'Invalid address. Please check the address and try again.');
             }
 
@@ -232,14 +232,14 @@ class AcademyController extends Controller {
     public function destroy(Academy $academy) {
         //
 
-        if(User::find(auth()->user()->id)->getRole() !== 'admin'){
+        if (User::find(auth()->user()->id)->getRole() !== 'admin') {
             return redirect()->route('academies.index')->with('error', 'You are not authorized to perform this action.');
         }
 
         if ($academy->schools->count() > 0) {
             return back()->with('error', 'Cannot delete academy with associated schools.');
         }
-        if($academy->athletes->count() > 0){
+        if ($academy->athletes->count() > 0) {
             return back()->with('error', 'Cannot delete academy with associated athletes.');
         }
 
@@ -329,16 +329,17 @@ class AcademyController extends Controller {
         $response = file_get_contents($url);
         $json = json_decode($response, true);
 
-        if($json['status'] == 'ZERO_RESULTS'){
+        if ($json['status'] == 'ZERO_RESULTS') {
             return null;
         }
+
 
         return [
             'lat' => $json['results'][0]['geometry']['location']['lat'],
             'lng' => $json['results'][0]['geometry']['location']['lng'],
             'city' => $json['results'][0]['address_components'][2]['long_name'],
-            'state' => $json['results'][0]['address_components'][5]['long_name'],
-            'country' => $json['results'][0]['address_components'][6]['long_name'],
+            'state' => $json['results'][0]['address_components'][5]['long_name'] ?? "",
+            'country' => $json['results'][0]['address_components'][6]['long_name']  ?? "",
         ];
     }
 
@@ -396,7 +397,7 @@ class AcademyController extends Controller {
     public function searchAcademies(Request $request) {
 
         $location = $request->location;
-        $radius = $request->radius ? $request->radius : 10;
+        $radius = $request->radius ? $request->radius : 50;
 
         $coordinates = $this->getCoordinates($location);
         $locationLat = $coordinates[0];
@@ -579,7 +580,7 @@ class AcademyController extends Controller {
         ]);
     }
 
-    public function checkPermission(Academy $academy, $isStrict = false){
+    public function checkPermission(Academy $academy, $isStrict = false) {
         // admin -> sempre; rector -> solo se l'accademia è associata a lui; 
         // l'opzione isStrict permette di escludere anche i rector, per funzionalità accessibili solo agli admin
         $authUser = auth()->user();
@@ -587,19 +588,19 @@ class AcademyController extends Controller {
 
         $authorized = true;
 
-        switch($authRole){
+        switch ($authRole) {
             case 'admin': // sempre autorizzato
                 break;
             case 'rector': // non autorizzato se non è la sua accademia
-                if($authUser->academies->first()->id != $academy->id){
+                if ($authUser->academies->first()->id != $academy->id) {
                     $authorized = false;
                 }
                 break;
-            default: 
+            default:
                 $authorized = false;
                 break;
         }
 
         return $authorized;
-    } 
+    }
 }
