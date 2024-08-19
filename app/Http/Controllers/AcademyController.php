@@ -116,7 +116,7 @@ class AcademyController extends Controller {
      * Show the form for editing the specified resource.
      */
     public function edit(Academy $academy) {
-        //
+        $authUser = User::find(auth()->user()->id);
 
         $nations = Nation::all();
 
@@ -163,6 +163,7 @@ class AcademyController extends Controller {
         $athletes = User::whereNotIn('id', $academy->athletes->pluck('id'))->where('is_disabled', '0')->get();
 
         $roles = Role::all();
+        $editable_roles = $authUser->getEditableRoles();
 
         $authRole = User::find(auth()->user()->id)->getRole();
         $viewPath = $authRole === 'admin' ? 'academy.edit' : 'academy.' . $authRole . '.edit';
@@ -176,6 +177,7 @@ class AcademyController extends Controller {
             'associated_personnel' => $associated_personnel,
             'associated_athletes' => $associated_athletes,
             'roles' => $roles,
+            'editable_roles' => $editable_roles
         ]);
     }
 

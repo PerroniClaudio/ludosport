@@ -5,7 +5,7 @@
                 {{ __('users.title') }}
             </h2>
             {{-- <div>
-                <x-create-new-button :href="route('technician.users.create')" />
+                <x-create-new-button :href="route('instructor.users.create')" />
             </div> --}}
         </div>
     </x-slot>
@@ -53,7 +53,11 @@
                                             {{ __('users.' . $key . '_role') }}
                                         </h3>
                                         <div>
-                                            <a href="{{ route('technician.users.filter') }}">
+                                            @php
+                                                $authRole = auth()->user()->getRole();
+                                                $filterRoute = $authRole === 'admin' ? 'users.filter' : $authRole . '.users.filter';
+                                            @endphp
+                                            <a href="{{ route($filterRoute) }}">
                                                 <x-primary-button>
                                                     {{ __('users.filter_by') }}
                                                 </x-primary-button>
@@ -137,7 +141,7 @@
                                             </td>
                                             {{-- <td
                                                 class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                                <a x-bind:href="'/users/' + row.id">
+                                                <a x-bind:href="'/instructor/users/' + row.id">
                                                     <x-lucide-pencil
                                                         class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                                                 </a>
@@ -175,7 +179,7 @@
                                                 x-text="row.email"></td>
                                             {{-- <td
                                                 class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                                <a x-bind:href="'/users/' + row.id">
+                                                <a x-bind:href="'/instructor/users/' + row.id">
                                                     <x-lucide-pencil
                                                         class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                                                 </a>

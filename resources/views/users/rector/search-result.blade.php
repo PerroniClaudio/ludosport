@@ -17,9 +17,9 @@
             <x-user.search />
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-background-900 dark:text-background-100">
+                <div class="flex flex-col gap-2 p-6 text-background-900 dark:text-background-100">
                     @foreach ($users as $user)
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 p-2 rounded-md bg-background-50 dark:bg-background-900">
                             <div class="flex-1 flex flex-col gap-2">
                                 <div class="text-xl">{{ $user->name }} {{ $user->surname }}</div>
                                 <div class="text-sm text-background-500 dark:text-background-400">

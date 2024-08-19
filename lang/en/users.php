@@ -60,6 +60,7 @@ return [
     'surname' => 'Surname',
     'email' => 'Email',
     'no_academies' => 'No Academies',
+    'no_schools' => 'No Schools',
     'profile_picture' => 'Profile Picture',
     'upload_picture' => 'Upload Picture',
     'filter_by' => 'Filter By',

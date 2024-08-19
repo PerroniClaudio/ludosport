@@ -65,7 +65,7 @@
                     </h3>
                     <div class="flex items-center gap-1">
                         <x-academy.personnel :academy="$academy" :personnel="$personnel" />
-                        <x-academy.create-user academy="{{ $academy->id }}" type="personnel" :roles="$roles" />
+                        <x-academy.create-user academy="{{ $academy->id }}" type="personnel" :roles="$editable_roles" />
                     </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>

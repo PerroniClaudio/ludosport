@@ -314,17 +314,12 @@ class User extends Authenticatable implements MustVerifyEmail {
                     (object)[
                         'label' => 'users',
                         'active' => 'users.*',
-                        'name' => 'dashboard',
-                    ],
-                    (object)[
-                        'label' => 'eventi',
-                        'active' => 'events.*',
-                        'name' => 'dashboard',
+                        'name' => 'instructor.users.index',
                     ],
                     (object)[
                         'label' => 'clan',
                         'active' => 'clans.*',
-                        'name' => 'dashboard',
+                        'name' => 'instructor.clans.index',
                     ],
                 ]);
             default:
@@ -369,5 +364,47 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
 
         return false;
+    }
+
+    public function canModifyRole($roleLabel) {
+        $requestingUserRole = $this->getRole();
+
+        switch($requestingUserRole){
+            case 'admin':
+                return true;
+                break;
+            case 'rector':
+                return !in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician']);
+                break;
+            case 'dean':
+                return !in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician', 'dean', 'manager']);
+                break;
+            case 'manager':
+                return !in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician', 'dean', 'manager']);
+                break;
+            default:
+                return false;
+                break;
+        }
+    }
+
+    public function getEditableRoles (){
+        $authRole = $this->getRole();
+        switch ($authRole) {
+            case 'admin':
+                return Role::all();
+                break;
+            case 'rector':
+                return Role::all()->whereNotIn('name', ['admin', 'rector', 'instructor', 'technician']);
+                break;
+            case 'dean':
+                return Role::all()->whereNotIn('name', ['admin', 'rector', 'instructor', 'technician', 'dean', 'manager']);
+                break;
+            case 'manager':
+                return Role::all()->whereNotIn('name', ['admin', 'rector', 'instructor', 'technician', 'dean', 'manager']);
+                break;
+            default:
+                return collect([]);
+        }
     }
 }

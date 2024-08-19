@@ -146,7 +146,7 @@ class EventController extends Controller {
             $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
-        if ($event->is_approved && $authRole !== 'admin') {
+        if ($event->is_approved && ! in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'technician'])) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 

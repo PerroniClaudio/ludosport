@@ -121,12 +121,12 @@
                                 ],
                             ]" :rows="$approved_events" >
 
-                                {{-- <x-slot name="tableActions">
+                                <x-slot name="tableActions">
                                     <a x-bind:href="'/technician/events/' + row.id">
                                         <x-lucide-pencil
                                             class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                                     </a>
-                                </x-slot> --}}
+                                </x-slot>
                                 
                             </x-table>
                         </div>

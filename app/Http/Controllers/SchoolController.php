@@ -160,7 +160,8 @@ class SchoolController extends Controller {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
         $nations = Nation::all();
 
@@ -198,6 +199,7 @@ class SchoolController extends Controller {
         $athletes = User::where('is_disabled', '0')->whereNotIn('id', $school->athletes->pluck('id'))->get();
 
         $roles = Role::all();
+        $editable_roles = $authUser->getEditableRoles();
 
         $viewPath = $authRole === 'admin' ? 'school.edit' : 'school.' . $authRole . '.edit';
         return view($viewPath, [
@@ -210,6 +212,7 @@ class SchoolController extends Controller {
             'associated_athletes' => $associated_athletes,
             'academies' => $school->academy->nation->academies ?? [],
             'roles' => $roles,
+            'editable_roles' => $editable_roles,
         ]);
     }
 
@@ -331,12 +334,21 @@ class SchoolController extends Controller {
 
     public function getByAcademy(Request $request) {
 
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
         $academies = json_decode($request->academies);
 
         $schools = School::whereIn('academy_id', $academies)->where('is_disabled', '0')->with(['academy'])->get();
         $formatted_schools = [];
 
+        // Se l'utente è un istruttore, si filtrano le scuole per quelle a cui è associato
+        $instructorSchools = $authUser->schools->pluck('id')->toArray();
+
         foreach ($schools as $key => $school) {
+            if($authRole === 'instructor' && !in_array($school->id, $instructorSchools)){
+                continue;
+            }
             $formatted_schools[] = [
                 'id' => $school->id,
                 'academy' => $school->academy->name,

@@ -284,6 +284,7 @@ require __DIR__ . '/site.php';
 require __DIR__ . '/dean.php';
 require __DIR__ . '/manager.php';
 require __DIR__ . '/rector.php';
+require __DIR__ . '/instructor.php';
 require __DIR__ . '/script.php';
 
 Route::group([], function () {

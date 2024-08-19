@@ -5,7 +5,7 @@
                 {{ __('users.search_result') }}
             </h2>
             <div>
-                <x-create-new-button :href="route('dean.users.create')" />
+                <x-create-new-button :href="route('instructor.users.create')" />
             </div>
         </div>
     </x-slot>
@@ -20,7 +20,7 @@
                 <div class="flex flex-col gap-2 p-6 text-background-900 dark:text-background-100">
                     @foreach ($users as $user)
                         <div class="flex items-center gap-2 p-2 rounded-md bg-background-50 dark:bg-background-900">
-                            <div class="flex-1 flex flex-col gap-2">
+                            <div class="flex-1 flex flex-col gap-2 ">
                                 <div class="text-xl">{{ $user->name }} {{ $user->surname }}</div>
                                 <div class="text-sm text-background-500 dark:text-background-400">
                                     {{ $user->email }}
@@ -64,11 +64,11 @@
 
                             </div>
 
-                            <a href="{{ route('dean.users.edit', $user->id) }}">
+                            {{-- <a href="{{ route('instructor.users.edit', $user->id) }}">
                                 <x-secondary-button>
                                     <x-lucide-edit class="h-5 w-5 text-white" />
                                 </x-secondary-button>
-                            </a>
+                            </a> --}}
 
                         </div>
                     @endforeach

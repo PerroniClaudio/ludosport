@@ -33,13 +33,8 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('clan.instructors') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        @php
-                            $filteredRoles = $roles->reject(function ($role) {
-                                return in_array($role->label, ['rector', 'dean']);
-                            });
-                        @endphp
                         <x-clan.instructors :clan="$clan" :instructors="$instructors" />
-                        <x-clan.create-user :clan="$clan->id" type="personnel" :roles="$filteredRoles" />
+                        {{-- <x-clan.create-user :clan="$clan->id" type="personnel" :roles="$editable_roles" /> --}}
                     </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>

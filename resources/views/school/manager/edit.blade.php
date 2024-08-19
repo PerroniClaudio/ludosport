@@ -67,12 +67,7 @@
                     </h3>
                     <div class="flex items-center gap-1">
                         <x-school.personnel :school="$school" :personnel="$personnel" />
-                        @php
-                            $filteredRoles = $roles->reject(function ($role) {
-                                return in_array($role->label, ['rector', 'dean']);
-                            });
-                        @endphp
-                        <x-school.create-user :school="$school->id" type="personnel" :roles="$filteredRoles" />
+                        {{-- <x-school.create-user :school="$school->id" type="personnel" :roles="$editable_roles" /> --}}
                     </div>
 
                 </div>

@@ -1,8 +1,10 @@
 {{-- 
-    Dean cannot assign roles higher than his own.
+    I ruoli admin, rettore, istruttore e tecnico sono assegnabili solo dall'admin. 
+    dean e manager da admin e rettore. 
+    atleta da admin, rettore, dean e manager.
 --}}
 @php
-    $no_access_roles = ['admin', 'rector'];
+    $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -126,7 +128,7 @@
                         x-data="{
                             selected: {{ collect($user->roles) }},
                             selectRole(role) {
-                                if (!{{ collect($no_access_roles) }}.includes(role)) {
+                                if ({{ collect($editable_roles) }}.includes(role)) {
                                     if (this.selected.includes(role)) {
                                         this.selected = this.selected.filter(item => item !== role);
                                     } else {

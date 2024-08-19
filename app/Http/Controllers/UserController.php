@@ -25,6 +25,11 @@ class UserController extends Controller {
         // Qui si dovrebbero filtrare gli utenti visualizzabili in base al ruolo dell'utente loggato.
         // Es. dean vede solo gli utenti della sua scuola, admin vede tutti gli utenti, ecc.
         $authUserRole = User::find(auth()->user()->id)->getRole();
+
+        if(!in_array($authUserRole, ['admin', 'rector', 'dean', 'manager', 'technician', 'instructor'])){
+            return redirect()->route("dashboard")->with('error', 'You do not have the required role to access this page!');
+        }
+
         $roles = Role::all();
         $users_sorted_by_role = [];
         foreach ($roles as $role) {
@@ -36,42 +41,61 @@ class UserController extends Controller {
                     continue;
                 }
 
-                // Se l'utente è un admin, non filtra nulla
-
-                // Se l'utente è rector, filtra solo gli utenti della sua accademia (sia personale che atleti)
-                // è stato stabilito che rector, dean e manager vengono assegnati con questo ruolo ad una sola scuola 
-                // e che questa scuola è la prima alla quale sono stati associati, quindi recuperabile col metodo first().
-                if ($authUserRole === 'rector') {
-                    if (
-                        $user->academies->where('id', auth()->user()->academies->first()->id)->isEmpty()
-                        && $user->academyAthletes->where('id', auth()->user()->academies->first()->id)->isEmpty()
-                    ) {
+                // admin, rector, dean, manager e technician possono vedere tutti gli utenti.
+                // instructor può vedere solo gli utenti delle scuole in cui ha corsi in cui è associato come personale.
+                if ($authUserRole === 'instructor') {
+                    $authSchools = auth()->user()->schools->pluck('id')->toArray();
+                    if(
+                        $user->schools->whereIn('id', $authSchools)->isEmpty()
+                        && $user->schoolAthletes->whereIn('id', $authSchools)->isEmpty()
+                    ){
                         continue;
                     }
                 }
 
-                // Se l'utente è un dean o manager, filtra solo gli utenti della sua scuola
-                if (in_array($authUserRole, ['dean', 'manager'])) {
-                    $authSchool = auth()->user()->schools->where('is_disabled', '0')->first();
-                    if (
-                        $user->schools->where('id', $authSchool->id)->isEmpty()
-                        && $user->schoolAthletes->where('id', $authSchool->id)->isEmpty()
-                    ) {
-                        continue;
-                    }
-                }
-
-                // Se l'utente è un instructor, filtra solo gli utenti dei corsi a cui è associato? tutti?
-                if ($authUserRole == 'instructor') {
-                    $authClans = auth()->user()->clansPersonnel->where('is_disabled', '0')->pluck('id')->toArray();
-
-                    if (
-                        $user->clansPersonnel->whereIn('id', $authClans)->isEmpty()
-                        && $user->clans->whereIn('id', $authClans)->isEmpty()
-                    ) {
-                        continue;
-                    }
-                }
+                // switch($authUserRole){
+                //     case 'admin':
+                //     case 'technician':
+                //         // Con autorizzazione admin o technician, non filtra nulla
+                //         break;
+                //     case 'rector':
+                //         // Con autorizzazione rector, filtra solo gli utenti della sua accademia (sia personale che atleti)
+                //         // è stato stabilito che rector, dean e manager vengono assegnati con questo ruolo ad una sola scuola 
+                //         // e che questa scuola è la prima alla quale sono stati associati, quindi recuperabile col metodo first().
+                //         if (
+                //             $user->academies->where('id', auth()->user()->academies->first()->id)->isEmpty()
+                //             && $user->academyAthletes->where('id', auth()->user()->academies->first()->id)->isEmpty()
+                //         ) {
+                //             continue 2;
+                //         }
+                //         break;
+                //     case 'dean':
+                //     case 'manager':
+                //         // Con autorizzazione dean o manager, filtra solo gli utenti della sua scuola (sia personale che atleti)
+                //         $authSchool = auth()->user()->schools->where('is_disabled', '0')->first();
+                //         if (
+                //             $user->schools->where('id', $authSchool->id)->isEmpty()
+                //             && $user->schoolAthletes->where('id', $authSchool->id)->isEmpty()
+                //         ) {
+                //             continue 2;
+                //         }
+                //         break;
+                //     case 'instructor':
+                //         // Con autorizzazione instructor, filtra solo gli utenti dei corsi a cui è associato? tutti?
+                //         $authClans = auth()->user()->clansPersonnel->where('is_disabled', '0')->pluck('id')->toArray();
+                //         if (
+                //             $user->clansPersonnel->whereIn('id', $authClans)->isEmpty()
+                //             && $user->clans->whereIn('id', $authClans)->isEmpty()
+                //         ) {
+                //             continue 2;
+                //         }
+                //         break;
+                //     default:
+                //         // Senza autorizzazioni, non può vedere nulla
+                //         return back()->with('error', 'You do not have the required role to access this page!');
+                //         continue 2;
+                //         break;
+                // }
                 
                 // Se l'utente è un technician, può vedere tutti gli utenti, non essendoci limitazioni per associarli agli eventi.
                 // if ($authUserRole == 'technician') {
@@ -109,26 +133,26 @@ class UserController extends Controller {
     }
 
     public function create() {
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
+        $roles = $authUser->getEditableRoles();
+
         switch ($authRole) {
             case 'admin':
-                $roles = Role::all();
                 $academies = Academy::where('is_disabled', false)->get();
                 break;
             case 'rector':
-                $roles = Role::all()->whereNotIn('name', ['admin']);
                 $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->academies->first()->id)->get();
                 break;
             case 'dean':
-                $roles = Role::all()->whereNotIn('name', ['admin', 'rector']);
                 $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->schools->first()->academy->id)->get();
                 break;
             case 'manager':
-                $roles = Role::all()->whereNotIn('name', ['admin', 'rector', 'dean']);
                 $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->schools->first()->academy->id)->get();
                 break;
             default:
@@ -144,17 +168,18 @@ class UserController extends Controller {
     }
 
     public function store(Request $request) {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-
-        ]);
-
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+        ]);
+
 
         $nation = Nation::where('name', $request->nationality)->first();
         $user = User::create([
@@ -171,7 +196,9 @@ class UserController extends Controller {
         $roles = explode(',', $request->roles);
 
         foreach ($roles as $role) {
-
+            if(!$authUser->canModifyRole($role)){
+                continue;
+            }
             $roleElement = Role::where('label', $role)->first();
 
             if ($roleElement) {
@@ -203,12 +230,19 @@ class UserController extends Controller {
     }
 
     public function storeForAcademy(Request $request) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
 
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'surname' => 'required|string|max:255',
         ]);
+
 
         $code_valid = false;
 
@@ -241,6 +275,9 @@ class UserController extends Controller {
             $roles = explode(',', $request->roles);
 
             foreach ($roles as $role) {
+                if(!$authUser->canModifyRole($role)){
+                    continue;
+                }
                 $roleElement = Role::where('label', $role)->first();
                 if ($roleElement) {
                     $user->roles()->attach($roleElement->id);
@@ -249,7 +286,7 @@ class UserController extends Controller {
             $academy->personnel()->attach($user->id);
         }
 
-        $authRole = User::find(auth()->user()->id)->getRole();
+
         if ($request->go_to_edit === 'on') {
             $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
             return redirect()->route($redirectRoute, $user->id)->with('success', 'User created successfully!');
@@ -260,16 +297,18 @@ class UserController extends Controller {
     }
 
     public function  storeForSchool(Request $request) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'surname' => 'required|string|max:255',
         ]);
-
-        $authRole = User::find(auth()->user()->id)->getRole();
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
-            return back()->with('error', 'You do not have the required role to access this page!');
-        }
 
         $code_valid = false;
 
@@ -304,6 +343,9 @@ class UserController extends Controller {
             $roles = explode(',', $request->roles);
 
             foreach ($roles as $role) {
+                if(!$authUser->canModifyRole($role)){
+                    continue;
+                }
                 $roleElement = Role::where('label', $role)->first();
                 if ($roleElement) {
                     $user->roles()->attach($roleElement->id);
@@ -313,7 +355,7 @@ class UserController extends Controller {
             $school->personnel()->attach($user->id);
         }
 
-        $authRole = User::find(auth()->user()->id)->getRole();
+
         if ($request->go_to_edit === 'on') {
             $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
             return redirect()->route($redirectRoute, $user->id)->with('success', 'User created successfully!');
@@ -324,7 +366,9 @@ class UserController extends Controller {
     }
 
     public function  storeForClan(Request $request) {
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
@@ -370,6 +414,9 @@ class UserController extends Controller {
             $roles = explode(',', $request->roles);
 
             foreach ($roles as $role) {
+                if(!$authUser->canModifyRole($role)){
+                    continue;
+                }
                 $roleElement = Role::where('label', $role)->first();
                 if ($roleElement) {
                     $user->roles()->attach($roleElement->id);
@@ -484,6 +531,11 @@ class UserController extends Controller {
     }
 
     public function update(Request $request, User $user) {
+        $authRole = User::find(auth()->user()->id)->getRole();
+        
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -492,10 +544,6 @@ class UserController extends Controller {
             'nationality' => 'required|string|exists:nations,id',
         ]);
 
-        $authRole = User::find(auth()->user()->id)->getRole();
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
-            return back()->with('error', 'You do not have the required role to access this page!');
-        }
 
         $user->update([
             'name' => $request->name,
@@ -505,15 +553,26 @@ class UserController extends Controller {
             'nation_id' => $request->nationality,
         ]);
 
-        $user->roles()->detach();
-
-        $roles = explode(',', $request->roles);
-
-        foreach ($roles as $role) {
-
-            $roleElement = Role::where('label', $role)->first();
-
-            if ($roleElement) {
+        // Recupera i ruoli attuali dell'utente
+        $currentRoles = $user->roles->pluck('label')->toArray();
+        // Recupera i nuovi ruoli dal request
+        $newRoles = explode(',', $request->roles);
+        // Determina i ruoli da aggiungere e da rimuovere
+        $rolesToAdd = array_diff($newRoles, $currentRoles);
+        $rolesToRemove = array_diff($currentRoles, $newRoles);
+        // Recupera l'utente che ha fatto la richiesta
+        $authUser = User::find(auth()->user()->id);
+        // Rimuovi i ruoli che non sono più presenti, controllando l'autorizzazione
+        foreach ($rolesToRemove as $roleLabel) {
+            $roleElement = Role::where('label', $roleLabel)->first();
+            if ($roleElement && $authUser->canModifyRole($roleLabel)) {
+                $user->roles()->detach($roleElement->id);
+            }
+        }
+        // Aggiungi i nuovi ruoli, controllando l'autorizzazione
+        foreach ($rolesToAdd as $roleLabel) {
+            $roleElement = Role::where('label', $roleLabel)->first();
+            if ($roleElement && $authUser->canModifyRole($roleLabel)) {
                 $user->roles()->attach($roleElement->id);
             }
         }
@@ -526,9 +585,11 @@ class UserController extends Controller {
 
     public function destroy(User $user) {
         $authRole = User::find(auth()->user()->id)->getRole();
+        
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
+
         $user->is_disabled = true;
         $user->save();
 
@@ -558,58 +619,77 @@ class UserController extends Controller {
 
         $authRole = User::find(auth()->user()->id)->getRole();
 
-        switch($authRole){
-            case 'admin':
-                $users = User::query()
+        if(in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'technician'])){
+            $users = User::query()
                     ->when($request->search, function (Builder $q, $value) {
                         return $q->whereIn('id', User::search($value)->keys());
                     })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
-                break;
-            case 'rector':
-                $users = User::query()
-                    ->when($request->search, function (Builder $q, $value) {
-                        return $q->whereIn('users.id', User::search($value)->keys());
-                    })->where(function ($query) {
-                        $query->whereHas('academies', function ($q) {
-                            return $q->where('academies.id', auth()->user()->academies->first()->id);
-                        })->orWhereHas('academyAthletes', function ($q) {
-                            return $q->where('academies.id', auth()->user()->academies->first()->id);
-                        });
-                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
-                break;
-            case 'dean':
-            case 'manager':
-                $users = User::query()
+        } else if ($authRole == 'instructor') {
+            $users = User::query()
                     ->when($request->search, function (Builder $q, $value) {
                         return $q->whereIn('users.id', User::search($value)->keys());
                     })->where(function ($query) {
                         $query->whereHas('schools', function ($q) {
-                            return $q->where('schools.id', auth()->user()->schools->first()->id);
-                        })
-                        ->orWhereHas('schoolAthletes', function ($q) {
-                            return $q->where('schools.id', auth()->user()->schools->first()->id);
+                            return $q->whereIn('schools.id', auth()->user()->schools->pluck('id'));
+                        })->orWhereHas('schoolAthletes', function ($q) {
+                            return $q->whereIn('schools.id', auth()->user()->schools->pluck('id'));
                         });
                     })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
-                break;
-            case 'technician':
-                $users = User::query()
-                    ->when($request->search, function (Builder $q, $value) {
-                        return $q->whereIn('id', User::search($value)->keys());
-                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
-                break;
-            case 'instructor': // Da controllare
-                $users = User::query()
-                    ->when($request->search, function (Builder $q, $value) {
-                        return $q->whereIn('users.id', User::search($value)->keys());
-                    })->where(function ($query) {
-                        $query->whereHas('clans', function ($q) {
-                            return $q->whereIn('clans.id', auth()->user()->clansPersonnel->pluck('id'));
-                        })->orWhereHas('clansPersonnel', function ($q) {
-                            return $q->whereIn('clans.id', auth()->user()->clansPersonnel->pluck('id'));
-                        });
-                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
-                break;
         }
+
+        // switch($authRole){
+        //     case 'admin':
+        //         $users = User::query()
+        //             ->when($request->search, function (Builder $q, $value) {
+        //                 return $q->whereIn('id', User::search($value)->keys());
+        //             })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+        //         break;
+        //     case 'rector':
+        //         $users = User::query()
+        //             ->when($request->search, function (Builder $q, $value) {
+        //                 return $q->whereIn('users.id', User::search($value)->keys());
+        //             })->where(function ($query) {
+        //                 $query->whereHas('academies', function ($q) {
+        //                     return $q->where('academies.id', auth()->user()->academies->first()->id);
+        //                 })->orWhereHas('academyAthletes', function ($q) {
+        //                     return $q->where('academies.id', auth()->user()->academies->first()->id);
+        //                 });
+        //             })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+        //         break;
+        //     case 'dean':
+        //     case 'manager':
+        //         $users = User::query()
+        //             ->when($request->search, function (Builder $q, $value) {
+        //                 return $q->whereIn('users.id', User::search($value)->keys());
+        //             })->where(function ($query) {
+        //                 $query->whereHas('schools', function ($q) {
+        //                     return $q->where('schools.id', auth()->user()->schools->first()->id);
+        //                 })
+        //                 ->orWhereHas('schoolAthletes', function ($q) {
+        //                     return $q->where('schools.id', auth()->user()->schools->first()->id);
+        //                 });
+        //             })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+        //         break;
+        //     case 'technician':
+        //         $users = User::query()
+        //             ->when($request->search, function (Builder $q, $value) {
+        //                 return $q->whereIn('id', User::search($value)->keys());
+        //             })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+        //         break;
+        //     case 'instructor': // deve cercare solo tra gli utenti della sua acacdemia, solo tra i suoi corsi o tra tutti gli utenti (come il filtro)
+                
+        //         $users = User::query()
+        //             ->when($request->search, function (Builder $q, $value) {
+        //                 return $q->whereIn('users.id', User::search($value)->keys());
+        //             })->where(function ($query) {
+        //                 $query->whereHas('academies', function ($q) {
+        //                     return $q->whereIn('academies.id', auth()->user()->academies->first()->id);
+        //                 })->orWhereHas('academyAthletes', function ($q) {
+        //                     return $q->whereIn('academies.id', auth()->user()->academies->first()->id);
+        //                 });
+        //             })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+        //         break;
+        // }
 
         $viewPath = $authRole === 'admin' ? 'users.search-result' :  'users.' . $authRole . '.search-result';
         return view($viewPath, [
@@ -649,6 +729,9 @@ class UserController extends Controller {
             case 'technician':
                 $academies = Academy::where('is_disabled', false)->with('nation')->get();
                 break;
+            case 'instructor':
+                $academies = collect([auth()->user()->academies->first()]);
+                break;
             default:
                 return back()->with('error', 'You do not have the required role to access this page!');
         }
@@ -660,6 +743,8 @@ class UserController extends Controller {
     }
 
     public function filterResult(Request $request) {
+
+        $authUserRole = User::find(auth()->user()->id)->getRole();
 
         $users = [];
 
@@ -723,11 +808,23 @@ class UserController extends Controller {
         $shouldCheckForCreationDateFrom = $request->from != null;
         $shouldCheckForCreationDateTo = $request->to != null;
 
+        // Serve solo per l'istruttore. elenco delle scuole in cui ha un corso.
+        $authSchools = auth()->user()->schools->pluck('id')->toArray();
 
         $filteredUsers = [];
 
         foreach ($users as $user) {
             $shouldAdd = true;
+
+            // L'istruttore può vedere solo gli utenti delle scuole in cui ha un corso.
+            if ($authUserRole === 'instructor') {
+                if(
+                    $user->schools->whereIn('id', $authSchools)->isEmpty()
+                    && $user->schoolAthletes->whereIn('id', $authSchools)->isEmpty()
+                ){
+                    $shouldAdd = false;
+                }
+            }
 
             if ($shouldCheckForYear) {
                 if ($user->subscription_year != $request->year) {

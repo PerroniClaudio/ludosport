@@ -34,7 +34,7 @@
                     </h3>
                     <div class="flex items-center gap-1">
                         <x-clan.instructors :clan="$clan" :instructors="$instructors" />
-                        <x-clan.create-user :clan="$clan->id" type="personnel" :roles="$roles" />
+                        <x-clan.create-user :clan="$clan->id" type="personnel" :roles="$editable_roles" />
                     </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
