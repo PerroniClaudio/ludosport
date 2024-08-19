@@ -8,6 +8,7 @@ use App\Models\Clan;
 use App\Models\Invoice;
 use App\Models\Language;
 use App\Models\Nation;
+use App\Models\Rank;
 use App\Models\Role;
 use App\Models\School;
 use App\Models\User;
@@ -496,6 +497,14 @@ class UserController extends Controller {
 
         $roles = Role::all();
         $user->roles = $user->roles->pluck('label')->toArray();
+
+        if (!$user->nation()->exists()) {
+            $user->nation = Nation::find(2);
+        }
+
+        if (!$user->rank()->exists()) {
+            $user->rank = Rank::find(1);
+        }
 
         return view('website.user-show', [
             'user' => $user,

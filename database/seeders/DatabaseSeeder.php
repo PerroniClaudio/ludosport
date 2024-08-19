@@ -65,13 +65,8 @@ class DatabaseSeeder extends Seeder {
             \App\Models\Role::factory()->create($role);
         }
 
-        $user = User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-        ]);
 
-        $adminRole = \App\Models\Role::where('name', 'admin')->first();
-        $user->roles()->attach($adminRole);
+
 
         $event_types = [
             [
@@ -96,6 +91,15 @@ class DatabaseSeeder extends Seeder {
         }
 
         $this->populateCountries();
+
+
+        $user = User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+        ]);
+
+        $adminRole = \App\Models\Role::where('name', 'admin')->first();
+        $user->roles()->attach($adminRole);
     }
 
     private function populateCountries() {

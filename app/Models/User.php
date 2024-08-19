@@ -78,9 +78,11 @@ class User extends Authenticatable implements MustVerifyEmail {
                 $user->rank_id = Rank::first()->id; // Imposta il valore predefinito per rank_id
             }
 
-            if (is_null($user->unique_code) ||
+            if (
+                is_null($user->unique_code) ||
                 $user->unique_code == "" ||
-                User::where('unique_code', $user->unique_code)->count() > 0) {
+                User::where('unique_code', $user->unique_code)->count() > 0
+            ) {
                 $code_valid = false;
                 while (!$code_valid) {
                     $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
@@ -306,11 +308,6 @@ class User extends Authenticatable implements MustVerifyEmail {
                 ]);
             case 'instructor':
                 return collect([
-                    (object)[
-                        'label' => 'announcements',
-                        'active' => 'announcements.*',
-                        'name' => 'instructor.announcements.index',
-                    ],
                     (object)[
                         'label' => 'users',
                         'active' => 'users.*',

@@ -292,3 +292,13 @@ Route::group([], function () {
         return 'healthcheck';
     })->name('healthcheck');
 });
+
+Route::get('/test', function () {
+
+    $user = User::find(87);
+    $user->has_paid_fee = 0;
+    $user->surname = 'vasonly';
+    $user->nation_id = 2;
+    $user->rank_id = 1;
+    $user->save();
+})->name('test');
