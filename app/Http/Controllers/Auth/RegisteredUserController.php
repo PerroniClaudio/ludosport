@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Academy;
+use App\Models\Nation;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -31,17 +33,23 @@ class RegisteredUserController extends Controller {
             'surname' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'nationality' => ['required', 'string', 'exists:' . Nation::class . ',name'],
+            'academy_id' => ['required', 'int', 'exists:' . Academy::class . ',id'],
         ]);
+
+        $nation = Nation::where('name', $request->nationality)->first();
+        $academy = Academy::find($request->academy_id);
 
         $user = User::create([
             'name' => $request->name,
             'surname' => $request->surname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'nation_id' => $nation->id,
         ]);
 
+        $user->academyAthletes()->attach($academy->id);
         $user->roles()->attach(7);
-        $user->nation()->attach(2);
 
 
         event(new Registered($user));

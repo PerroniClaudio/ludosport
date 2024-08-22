@@ -14,7 +14,7 @@
                     @csrf
                     <div class="flex flex-col gap-2 w-1/2">
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                            value="{{ $clan->name }}" placeholder="{{ fake()->company() }}" disabled />
+                            :value="$clan->name" placeholder="{{ fake()->company() }}" disabled />
 
                         <x-clan.instructor.school :selectedSchoolId="$clan->school_id" :selectedSchool="$clan->school->name" />
 

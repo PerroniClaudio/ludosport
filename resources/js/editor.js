@@ -14,9 +14,9 @@ String.prototype.deentitize = function () {
     return ret;
 };
 
-export const editor = (content) => {
+export const editor = (content, isEditable = true) => {
     let editor; // Alpine's reactive engine automatically wraps component properties in proxy objects. Attempting to use a proxied editor instance to apply a transaction will cause a "Range Error: Applying a mismatched transaction", so be sure to unwrap it using Alpine.raw(), or simply avoid storing your editor as a component property, as shown in this example.
-
+console.log(isEditable)
     return {
         updatedAt: Date.now(), // force Alpine to rerender on selection change
         init() {
@@ -42,7 +42,7 @@ export const editor = (content) => {
                     }),
                 ],
                 content: content.deentitize(),
-                editable: true,
+                editable: isEditable,
                 autofocus: true,
                 editorProps: {
                     attributes: {

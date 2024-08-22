@@ -10,6 +10,7 @@ import { mapsearcher } from "./mapsearcher.js";
 import { userschoolgraph } from "./userschoolgraph.js";
 import { usersclangraph } from "./usersclangraph.js";
 import { rankingschart } from "./rankingschart.js";
+import { eventpersonnel } from "./eventpersonnel.js";
 
 document.addEventListener("alpine:init", () => {
     Alpine.data("editor", editor);
@@ -17,6 +18,7 @@ document.addEventListener("alpine:init", () => {
     Alpine.data("calendar", calendar);
     Alpine.data("chart", chart);
     Alpine.data("participants", participants);
+    Alpine.data("eventpersonnel", eventpersonnel);
     Alpine.data("mapsearcher", mapsearcher);
     Alpine.data("userschoolgraph", userschoolgraph);
     Alpine.data("usersclangraph", usersclangraph);

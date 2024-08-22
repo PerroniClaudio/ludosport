@@ -60,7 +60,7 @@
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 <div class="flex flex-col gap-2 w-1/2">
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}" disabled="{{ true }}"
-                        value="{{ $academy->name }}" placeholder="{{ fake()->company() }}" />
+                        :value="$academy->name" placeholder="{{ fake()->company() }}" />
                     @php
                         $nationId = $academy->nation_id;
                         $nationName = '';
@@ -82,7 +82,7 @@
                     <x-form.input name="name" label="Nationality" type="text" required="{{ true }}" disabled="{{ true }}"
                         value="{{ $nationName }}" placeholder="{{ fake()->company() }}" />
 
-                        <x-form.input name="address" label="Address" type="text" required="{{ true }}" disabled="{{ true }}"
+                    <x-form.input name="address" label="Address" type="text" required="{{ true }}" disabled="{{ true }}"
                         value="{{ $academy->address }}" placeholder="{{ fake()->address() }}" />
                     <x-form.input name="city" label="City" type="text" required="{{ true }}" disabled="{{ true }}"
                         value="{{ $academy->city }}" placeholder="{{ fake()->city() }}" />

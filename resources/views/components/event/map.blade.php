@@ -20,7 +20,11 @@
             $authRole = auth()->user()->getRole();
             $formRoute = $authRole === 'admin' ? 'events.save.location' : $authRole . '.events.save.location';
         @endphp
-        <form action="{{ route($formRoute, $event->id) }}" method="POST" class="h-96">
+        @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
+            <form action="{{ route($formRoute, $event->id) }}" method="POST" class="h-96">
+        @else
+            <form>
+        @endif
             @csrf
             <div>
                 <x-input-label value="City" />
@@ -60,7 +64,7 @@
                     </div>
                 </div>
             @else
-                @if (!$event->is_approved)
+                @if (!$event->is_approved && $authRole === 'rector')
                     <div class="col-span-2 flex items-center gap-2 mt-8">
                         <div class="flex-1">
                             <x-primary-button type="button" class="w-full" @click="updateMap()">

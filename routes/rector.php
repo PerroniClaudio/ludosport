@@ -135,50 +135,53 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
       /** Eventi */
   
       // Questo gruppo di route (Eventi) qui commentate sono funzionanti ma il preside non è al momento abilitato al loro utilizzo
-      // Route::group([], function () {
-      //   Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('rector.events.index');
-      //   Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('rector.events.calendar');
-      //   Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('rector.events.create');
-      //   Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('rector.events.edit');
-      //   Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('rector.events.store');
-      //   Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('rector.events.update');
-      //   Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('rector.events.save.description');
-      //   Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('rector.events.save.location');
-      //   Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('rector.events.update.thumbnail');
-      //   Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('rector.events.participants');
-      //   Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('rector.events.available');
-      //   Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('rector.events.participants.add');
-      //   Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('rector.events.participants.export');
-      //   Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('rector.events.types');
-      // });
+      Route::group([], function () {
+        Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('rector.events.index');
+        Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('rector.events.calendar');
+        Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('rector.events.create');
+        Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('rector.events.edit');
+        Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('rector.events.store');
+        Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('rector.events.update');
+        Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('rector.events.save.description');
+        Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('rector.events.save.location');
+        Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('rector.events.update.thumbnail');
+        Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('rector.events.participants');
+        Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('rector.events.available');
+        Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('rector.events.participants.add');
+        Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('rector.events.participants.export');
+        Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('rector.events.types');
+        Route::get('events/{event}/available-personnel', [App\Http\Controllers\EventController::class, 'availablePersonnel'])->name('rector.events.available_personnel');
+        Route::get('events/{event}/personnel', [App\Http\Controllers\EventController::class, 'personnel'])->name('rector.events.personnel');
+        Route::post('events/{event}/add-personnel', [App\Http\Controllers\EventController::class, 'addPersonnel'])->name('rector.events.add_personnel');
+      });
   
       /** Imports */
   
       Route::group([], function () {
   
-          // Route::get('/imports', [App\Http\Controllers\ImportController::class, 'index'])->name('rector.imports.index');
-          // Route::get('/imports/create', [App\Http\Controllers\ImportController::class, 'create'])->name('rector.imports.create');
+          Route::get('/imports', [App\Http\Controllers\ImportController::class, 'index'])->name('rector.imports.index');
+          Route::get('/imports/create', [App\Http\Controllers\ImportController::class, 'create'])->name('rector.imports.create');
           // Route::delete('/imports/{import}', [App\Http\Controllers\ImportController::class, 'destroy'])->name('rector.imports.disable');
   
   
-          // Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('rector.imports.store');
-          // Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('rector.imports.update');
-          // Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('rector.imports.download');
+          Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('rector.imports.store');
+          Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('rector.imports.update');
+          Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('rector.imports.download');
   
-          // Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('rector.imports.template');
+          Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('rector.imports.template');
       });
   
       /** Exports */
   
       Route::group([], function () {
-          // Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('rector.exports.index');
-          // Route::get('/exports/create', [App\Http\Controllers\ExportController::class, 'create'])->name('rector.exports.create');
-          // Route::get('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('rector.exports.download');
+          Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('rector.exports.index');
+          Route::get('/exports/create', [App\Http\Controllers\ExportController::class, 'create'])->name('rector.exports.create');
+          Route::get('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('rector.exports.download');
           // Route::delete('/exports/{export}', [App\Http\Controllers\ExportController::class, 'destroy'])->name('rector.exports.disable');
   
-          // Route::post('/exports', [App\Http\Controllers\ExportController::class, 'store'])->name('rector.exports.store');
-          // Route::post('/exports/{export}', [App\Http\Controllers\ExportController::class, 'update'])->name('rector.exports.update');
-          // Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('rector.exports.download');
+          Route::post('/exports', [App\Http\Controllers\ExportController::class, 'store'])->name('rector.exports.store');
+          Route::post('/exports/{export}', [App\Http\Controllers\ExportController::class, 'update'])->name('rector.exports.update');
+          Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('rector.exports.download');
       });
   
   

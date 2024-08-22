@@ -86,7 +86,7 @@
                             <x-dropdown-link :href="route('dashboard')">
                                 {{ __('dashboard.title') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('dashboard')">
+                            <x-dropdown-link :href="route('profile.edit')">
                                 {{ __('Profile') }}
                             </x-dropdown-link>
                             <!-- Authentication -->

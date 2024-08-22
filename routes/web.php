@@ -192,6 +192,9 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('events.participants');
     Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('events.available');
+    Route::get('events/{event}/available-personnel', [App\Http\Controllers\EventController::class, 'availablePersonnel'])->name('events.available_personnel');
+    Route::get('events/{event}/personnel', [App\Http\Controllers\EventController::class, 'personnel'])->name('events.personnel');
+    Route::post('events/{event}/add-personnel', [App\Http\Controllers\EventController::class, 'addPersonnel'])->name('events.add_personnel');
 
     Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('events.participants.add');
     Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('events.participants.export');
@@ -294,7 +297,7 @@ Route::group([], function () {
 });
 
 Route::get('/test', function () {
-
+    return 'test';
     $user = User::find(87);
     $user->has_paid_fee = 0;
     $user->surname = 'vasonly';

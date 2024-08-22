@@ -6,6 +6,7 @@ use App\Models\EventResult;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
 class EventsWarExport implements WithMultipleSheets {
 
@@ -20,14 +21,13 @@ class EventsWarExport implements WithMultipleSheets {
     public function sheets(): array {
         $sheets = [];
 
-        $filters = json_decode($this->export->filters);
-
-        $events = [];
-
-        foreach ($filters->events as $event) {
+        $filters = collect(json_decode($this->export->filters)->filters);
 
 
-            $users = EventResult::where('event_id', '=', $event->id)->with('user')->get()->map(function ($event_result) {
+        foreach ($filters as $event) {
+
+
+            $users = EventResult::where('event_id', '=', $event->id)->with('user')->get()->map(function ($event_result) use ($event) {
                 return [
                     $event_result->user->unique_code,
                     $event_result->user->name,
@@ -36,21 +36,23 @@ class EventsWarExport implements WithMultipleSheets {
                 ];
             })->toArray();
 
-            $sheets[] = new EventsWarPointsSheet($users, $event->id);
+            $sheets[] = new EventsWarPointsSheet($users, $event->id, $event->name);
         }
 
         return $sheets;
     }
 }
 
-class EventsWarPointsSheet implements FromArray {
+class EventsWarPointsSheet implements FromArray, WithTitle {
 
     private $users;
     private $event_id;
+    private $event_name;
 
-    public function __construct($users, $event_id) {
+    public function __construct($users, $event_id, $event_name) {
         $this->users = $users;
         $this->event_id = $event_id;
+        $this->event_name = $event_name;
     }
 
     public function array(): array {
@@ -65,6 +67,6 @@ class EventsWarPointsSheet implements FromArray {
     }
 
     public function title(): string {
-        return 'Event ' . $this->event_id;
+        return 'Event ' . $this->event_id . ' - ' . $this->event_name;
     }
 }

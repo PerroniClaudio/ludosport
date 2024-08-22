@@ -13,7 +13,8 @@
                 $authRole = auth()->user()->getRole();
                 $canSetPrice = in_array($authRole, ['admin']);
             @endphp --}}
-            <form method="POST" action={{ route('manager.events.update', $event->id) }}
+            {{-- <form method="POST" action={{ route('manager.events.update', $event->id) }} --}}
+            <form 
                 class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 @csrf
                 <div class="flex items-center justify-between">
@@ -28,8 +29,9 @@
 
                 <div class="flex flex-col gap-2 w-1/2">
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                        value="{!! $event->name !!}" placeholder="{{ fake()->company() }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                        :value="$event->name" placeholder="{{ fake()->company() }}" 
+                        disabled="true" />
+                        {{-- disabled="{{!!$event->is_approved}}" /> --}}
 
                     {{-- <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
                         selected="{{ $event->type->id }}" /> --}}
@@ -37,11 +39,13 @@
                     <x-form.input name="start_date" label="Start Date" type="datetime-local"
                         required="{{ true }}" value="{{ $event->start_date }}"
                         placeholder="{{ fake()->date() }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                        disabled="true" />
+                        {{-- disabled="{{!!$event->is_approved}}" /> --}}
 
                     <x-form.input name="end_date" label="End Date" type="datetime-local" required="{{ true }}"
-                        value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                        value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}"
+                        disabled="true" /> 
+                        {{-- disabled="{{!!$event->is_approved}}" /> --}}
 
                     {{-- <x-form.checkbox id="is_free" name="is_free" label="Free Event" disabled="{{ !$canSetPrice }}"
                         isChecked="{{ $event->is_free }}" />
@@ -58,6 +62,8 @@
             <x-event.map :event="$event" />
 
             <x-event.thumbnail :event="$event" />
+
+            <x-event.personnel :event="$event" />
 
             @if ($event->is_approved)
                 @php

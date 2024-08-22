@@ -92,22 +92,23 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
     /** Eventi */
 
     // Questo gruppo di route (Eventi) qui commentate sono funzionanti ma il manager non è al momento abilitato al loro utilizzo
-    // Route::group([], function () {
-    //   Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('manager.events.index');
-    //   Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('manager.events.calendar');
-    //   Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('manager.events.create');
-    //   Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('manager.events.edit');
-    //   Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('manager.events.store');
-    //   Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('manager.events.update');
-    //   Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('manager.events.save.description');
-    //   Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('manager.events.save.location');
-    //   Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('manager.events.update.thumbnail');
-    //   Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('manager.events.participants');
-    //   Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('manager.events.available');
-    //   Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('manager.events.participants.add');
-    //   Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('manager.events.participants.export');
-    //   Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('manager.events.types');
-    // });
+    Route::group([], function () {
+      Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('manager.events.index');
+      Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('manager.events.calendar');
+      // Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('manager.events.create');
+      Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('manager.events.edit');
+      // Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('manager.events.store');
+      // Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('manager.events.update');
+      // Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('manager.events.save.description');
+      // Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('manager.events.save.location');
+      // Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('manager.events.update.thumbnail');
+      Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('manager.events.participants');
+      Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('manager.events.available');
+      Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('manager.events.participants.add');
+      Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('manager.events.participants.export');
+      Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('manager.events.types');
+      Route::get('events/{event}/personnel', [App\Http\Controllers\EventController::class, 'personnel'])->name('manager.events.personnel');
+    });
 
     /** Imports */
 

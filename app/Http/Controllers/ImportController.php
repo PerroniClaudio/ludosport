@@ -11,8 +11,8 @@ use App\Imports\UsersEventImport;
 use App\Imports\UsersImport;
 use App\Imports\UsersSchoolImport;
 use App\Models\Import;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ImportController extends Controller {
@@ -20,9 +20,10 @@ class ImportController extends Controller {
      * Display a listing of the resource.
      */
     public function index() {
-        //
+        // new_users,users_course,users_academy,users_school,event_participants,event_war,event_style
+        $authRole = User::find(auth()->user()->id)->getRole();
 
-        $imports = Import::with('user')->orderBy('created_at', 'desc')->get();
+        $imports = Import::whereIn('type', Import::getAvailableImportsByRole($authRole))->with('user')->orderBy('created_at', 'desc')->get();
 
         foreach ($imports as $key => $import) {
             $imports[$key]->type = __('imports.' . $import->type);
@@ -39,9 +40,11 @@ class ImportController extends Controller {
      */
     public function create() {
         //
+        $authRole = User::find(auth()->user()->id)->getRole();
 
         $import = new Import();
-        $types = $import->getImportTypes();
+        // $types = $import->getImportTypes();
+        $types = Import::getAvailableImportsByRole($authRole);
         $typesSelect = [];
 
         foreach ($types as $type) {
@@ -51,7 +54,9 @@ class ImportController extends Controller {
             ];
         }
 
-        return view('import.create', [
+        $authRole = User::find(auth()->user()->id)->getRole();
+        $viewPath = $authRole == 'admin' ? 'import.create' : 'import.' . $authRole . '.create';
+        return view($viewPath, [
             'types' => $typesSelect
         ]);
     }

@@ -1014,7 +1014,10 @@ class UserController extends Controller {
 
     private function handleAthlere($user) {
 
-        $announcements = Announcement::where('is_deleted', false)->get();
+        $announcements = Announcement::where('is_deleted', false)->whereIn('role_id', $user->roles->pluck('id'))->where('type', '!=', '4')->orderBy('created_at', 'desc')->get();
+        $direct_messages = Announcement::where([['is_deleted', false], ['type', '4'], ['user_id', $user->id]])->orderBy('created_at', 'desc')->get();
+        $announcements = $announcements->merge($direct_messages);
+
         $seen_by_user = $user->seenAnnouncements()->get();
 
         $not_seen = [];

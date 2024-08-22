@@ -89,7 +89,7 @@
 }">
     @csrf
 
-    <input name="type" type="hidden" value="users_academy">
+    <input name="type" type="hidden" value="users_school">
     <input name="filters" type="hidden" x-model="filtersJson">
 
     <div class="w-1/2">

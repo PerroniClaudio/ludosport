@@ -24,7 +24,7 @@
 
                 <div class="flex flex-col gap-2 w-1/2 mb-8">
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                        value="{{ $academy->name }}" placeholder="{{ fake()->company() }}" />
+                        :value="$academy->name" placeholder="{{ fake()->company() }}" />
                     <div>
                         <x-input-label for="nationality" value="Nationality" />
                         <select x-model="selectedNationality" x-on:change="updateNationId()" name="nationality"

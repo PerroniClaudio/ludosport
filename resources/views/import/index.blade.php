@@ -5,7 +5,11 @@
                 {{ __('imports.title') }}
             </h2>
             <div>
-                <x-create-new-button :href="route('imports.create')" />
+                @php
+                    $authRole = Auth::user()->getRole();
+                    $redirectRoute = $authRole === 'admin' ? 'imports.create' : $authRole . '.imports.create';
+                @endphp
+                <x-create-new-button :href="route($redirectRoute)" />
             </div>
         </div>
     </x-slot>

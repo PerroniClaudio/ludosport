@@ -33,4 +33,19 @@ class Import extends Model {
     public function getImportTypes() {
         return collect($this->import_types);
     }
+
+    public static function getAvailableImportsByRole($role) {
+        switch ($role) {
+            case 'admin':
+            case 'rector':
+                return ['new_users', 'users_course', 'users_academy', 'users_school', 'event_participants', 'event_war', 'event_style'];
+            case 'dean':
+            case 'manager':
+                return ['new_users', 'users_course', 'users_school', 'event_participants'];
+            case 'technician':
+                return ['event_participants', 'event_war', 'event_style'];
+            default:
+                return [];
+        }
+    }
 }

@@ -59,6 +59,10 @@ class Event extends Model {
         return $this->belongsTo(User::class);
     }
 
+    public function personnel() {
+        return $this->belongsToMany(User::class, 'events_personnel', 'event_id', 'user_id')->where('is_disabled', '0');
+    }
+
     public function type() {
         return $this->belongsTo(EventType::class, 'event_type');
     }

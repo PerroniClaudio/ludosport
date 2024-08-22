@@ -82,48 +82,49 @@ Route::prefix('dean')->middleware('auth')->middleware('role:admin,dean')->group(
     /** Eventi */
 
     // Questo gruppo di route (Eventi) qui commentate sono funzionanti ma il preside non è al momento abilitato al loro utilizzo
-    // Route::group([], function () {
-    //   // Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('dean.events.index');
-    //   // Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('dean.events.calendar');
-    //   // Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('dean.events.create');
-    //   // Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('dean.events.edit');
-    //   // Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('dean.events.store');
-    //   // Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('dean.events.update');
-    //   // Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('dean.events.save.description');
-    //   // Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('dean.events.save.location');
-    //   // Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('dean.events.update.thumbnail');
-    //   // Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('dean.events.participants');
-    //   // Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('dean.events.available');
-    //   // Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('dean.events.participants.add');
-    //   // Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('dean.events.participants.export');
-    //   // Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('dean.events.types');
-    // });
+    Route::group([], function () {
+      Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('dean.events.index');
+      Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('dean.events.calendar');
+      // Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('dean.events.create');
+      Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('dean.events.edit');
+      // Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('dean.events.store');
+      // Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('dean.events.update');
+      // Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('dean.events.save.description');
+      // Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('dean.events.save.location');
+      // Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('dean.events.update.thumbnail');
+      Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('dean.events.participants');
+      Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('dean.events.available');
+      Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('dean.events.participants.add');
+      Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('dean.events.participants.export');
+      Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('dean.events.types');
+      Route::get('events/{event}/personnel', [App\Http\Controllers\EventController::class, 'personnel'])->name('dean.events.personnel');
+    });
 
     /** Imports */
 
     Route::group([], function () {
-        // Route::get('/imports', [App\Http\Controllers\ImportController::class, 'index'])->name('dean.imports.index');
-        // Route::get('/imports/create', [App\Http\Controllers\ImportController::class, 'create'])->name('dean.imports.create');
+        Route::get('/imports', [App\Http\Controllers\ImportController::class, 'index'])->name('dean.imports.index');
+        Route::get('/imports/create', [App\Http\Controllers\ImportController::class, 'create'])->name('dean.imports.create');
         // Route::delete('/imports/{import}', [App\Http\Controllers\ImportController::class, 'destroy'])->name('dean.imports.disable');
 
-        // Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('dean.imports.store');
-        // Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('dean.imports.update');
-        // Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('dean.imports.download');
+        Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('dean.imports.store');
+        Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('dean.imports.update');
+        Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('dean.imports.download');
 
-        // Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('dean.imports.template');
+        Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('dean.imports.template');
     });
 
     /** Exports */
 
     Route::group([], function () {
-        // Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('dean.exports.index');
-        // Route::get('/exports/create', [App\Http\Controllers\ExportController::class, 'create'])->name('dean.exports.create');
-        // Route::get('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('dean.exports.download');
+        Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('dean.exports.index');
+        Route::get('/exports/create', [App\Http\Controllers\ExportController::class, 'create'])->name('dean.exports.create');
+        Route::get('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('dean.exports.download');
         // Route::delete('/exports/{export}', [App\Http\Controllers\ExportController::class, 'destroy'])->name('dean.exports.disable');
 
-        // Route::post('/exports', [App\Http\Controllers\ExportController::class, 'store'])->name('dean.exports.store');
-        // Route::post('/exports/{export}', [App\Http\Controllers\ExportController::class, 'update'])->name('dean.exports.update');
-        // Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('dean.exports.download');
+        Route::post('/exports', [App\Http\Controllers\ExportController::class, 'store'])->name('dean.exports.store');
+        Route::post('/exports/{export}', [App\Http\Controllers\ExportController::class, 'update'])->name('dean.exports.update');
+        Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('dean.exports.download');
     });
 
 

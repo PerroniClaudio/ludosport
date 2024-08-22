@@ -109,9 +109,9 @@
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <div class="flex flex-col gap-2">
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                            value="{{ $user->name }}" placeholder="{{ fake()->firstName() }}" />
+                            :value="$user->name" placeholder="{{ fake()->firstName() }}" />
                         <x-form.input name="surname" label="Surname" type="text" required="{{ true }}"
-                            value="{{ $user->surname }}" placeholder="{{ fake()->lastName() }}" />
+                            :value="$user->surname" placeholder="{{ fake()->lastName() }}" />
                         <x-form.input name="email" label="Email" type="email" required="{{ true }}"
                             value="{{ $user->email }}" placeholder="{{ fake()->email() }}" />
                         <x-form.input name="year" label="Subscription year" type="text"

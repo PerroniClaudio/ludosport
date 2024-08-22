@@ -16,6 +16,7 @@ return [
     'disable_announcement' => 'Disable Announcement',
     'disable_announcement_message' => 'Disabling the announcement will prevent users from seeing it.',
     'disable_announcement_confirmation' => 'Are you sure you want to disable this announcement? Users will not be able to see it anymore.',
+    'no_announcements' => 'No announcements',
     'no_selected_announcement' => 'No announcement selected',
     'no_selected_announcement_info' => 'Please select an announcement to see its details.',
 ];

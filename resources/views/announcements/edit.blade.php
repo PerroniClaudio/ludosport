@@ -20,7 +20,7 @@
                     @csrf
 
                     <x-form.input name="object" label="Object" type="text" required="{{ true }}"
-                        value="{{ $announcement->object }}" placeholder="{{ fake()->sentence() }}" />
+                        :value="$announcement->object" placeholder="{{ fake()->sentence() }}" />
 
                     <div class="flex items-center gap-4">
                         <div class="flex-1">
@@ -34,7 +34,7 @@
                     </div>
 
                     <x-form.textarea name="content" label="Content" required="{{ true }}"
-                        value="{{ $announcement->content }}" placeholder="Write a message..." />
+                        :value="$announcement->content" placeholder="Write a message..." />
 
                     <div class="flex items-end justify-end gap-4">
                         <x-primary-button>

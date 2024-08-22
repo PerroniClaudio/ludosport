@@ -3,7 +3,6 @@
 namespace App\Exports;
 
 use App\Models\Clan;
-use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromArray;
 
 class UsersCourseExport implements FromArray {
@@ -23,34 +22,33 @@ class UsersCourseExport implements FromArray {
         foreach ($filters->courses as $course) {
             $courses[] = $course->id;
         }
-
-        if ($filters->users_type == "athletes") {
-            $users = Clan::whereIn('id', $courses)->with('users')->get()->map(function ($course) {
-                return $course->users->map(function ($user) {
+// Così va bene. va fatto anche per personnel e l'altro
+        if ($filters->users_type == "athletes") { 
+            $users = [];
+            $users = Clan::whereIn('id', $courses)->with('users')->get()->flatMap(function ($course) {
+                return $course->users->map(function ($user) use ($course) {
                     return [
+                        $course->name,
                         $user->unique_code,
                         $user->name,
                         $user->surname,
                         $user->email,
-                        $user->roles->map(function ($role) {
-                            return $role->name;
-                        })->implode(', '),
+                        $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
                         $user->updated_at
                     ];
                 });
             })->toArray();
         } else if ($filters->users_type == "personnel") {
-            $users = Clan::whereIn('id', $courses)->with('personnel')->get()->map(function ($course) {
-                return $course->users->map(function ($user) {
+            $users = Clan::whereIn('id', $courses)->with('personnel')->get()->flatMap(function ($course) {
+                return $course->personnel->map(function ($user) use ($course){
                     return [
+                        $course->name,
                         $user->unique_code,
                         $user->name,
                         $user->surname,
                         $user->email,
-                        $user->roles->map(function ($role) {
-                            return $role->name;
-                        })->implode(', '),
+                        $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
                         $user->updated_at
                     ];
@@ -58,32 +56,30 @@ class UsersCourseExport implements FromArray {
             })->toArray();
         } else {
 
-            $users = Clan::whereIn('id', $courses)->with('users')->get()->map(function ($course) {
-                return $course->users->map(function ($user) {
+            $users = Clan::whereIn('id', $courses)->with('users')->get()->flatMap(function ($course) {
+                return $course->users->map(function ($user) use ($course) {
                     return [
+                        $course->name,
                         $user->unique_code,
                         $user->name,
                         $user->surname,
                         $user->email,
-                        $user->roles->map(function ($role) {
-                            return $role->name;
-                        })->implode(', '),
+                        $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
                         $user->updated_at
                     ];
                 });
             })->toArray();
 
-            $personnel = Clan::whereIn('id', $courses)->with('personnel')->get()->map(function ($course) {
-                return $course->users->map(function ($user) {
+            $personnel = Clan::whereIn('id', $courses)->with('personnel')->get()->flatMap(function ($course) {
+                return $course->personnel->map(function ($user) use ($course){
                     return [
+                        $course->name,
                         $user->unique_code,
                         $user->name,
                         $user->surname,
                         $user->email,
-                        $user->roles->map(function ($role) {
-                            return $role->name;
-                        })->implode(', '),
+                        $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
                         $user->updated_at
                     ];
@@ -96,6 +92,7 @@ class UsersCourseExport implements FromArray {
 
         return [
             [
+                "Clan",
                 "Code",
                 "Name",
                 "Surname",

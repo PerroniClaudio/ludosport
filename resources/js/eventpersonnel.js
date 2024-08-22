@@ -1,7 +1,7 @@
-export const participants = (eventid, role) => {
+export const eventpersonnel = (eventid, role) => {
     return {
         eventid,
-        participants: [],
+        eventPersonnel: [],
         availableUsers: [],
         paginatedUsers: [],
         currentPage: 1,
@@ -10,36 +10,34 @@ export const participants = (eventid, role) => {
         getAvailableUsers: async function () {
             console.log("getAvailableUsers");
 
-            const url = `${ role == 'admin' ? '' : '/' + role }/events/${this.eventid}/available-users`;
+            const url = `${ role == 'admin' ? '' : '/' + role }/events/${this.eventid}/available-personnel`;
             const response = await fetch(url);
 
             if (response.ok) {
                 const data = await response.json();
-                if (this.participants.length > 0) {
+                if (this.eventPersonnel.length > 0) {
                     this.availableUsers = data.filter((user) =>
-                            !this.participants.some((participant) => participant.id === user.id)
+                            !this.eventPersonnel.some((person) => person.id === user.id)
                     );
                 } else {
                     this.availableUsers = data;
                 }
             }
         },
-        getParticipants: async function () {
-            console.log("getParticipants");
+        getPersonnel: async function () {
+            console.log("getPersonnel");
 
-            const url = `${ role == 'admin' ? '' : '/' + role }/events/${this.eventid}/participants`;
+            const url = `${ role == 'admin' ? '' : '/' + role }/events/${this.eventid}/personnel`;
             const response = await fetch(url);
 
             if (response.ok) {
                 const data = await response.json();
-                if (Array.isArray(data)){
 
-                    this.participants = data;
-                    if (this.availableUsers.length > 0) {
-                        this.availableUsers = this.availableUsers.filter((user) =>
-                                !this.participants.some((participant) => participant.id === user.id)
-                        );
-                    }
+                this.eventPersonnel = data;
+                if (this.availableUsers.length > 0) {
+                    this.availableUsers = this.availableUsers.filter((user) =>
+                            !this.eventPersonnel.some((person) => person.id === user.id)
+                    );
                 }
             }
         },
@@ -62,32 +60,32 @@ export const participants = (eventid, role) => {
                 );
             });
         },
-        searchParticipants: function (search) {
-            console.log("searchParticipants");
+        searchPersonnel: function (search) {
+            console.log("searchPersonnel");
 
-            return this.participants.filter((user) => {
+            return this.eventPersonnel.filter((user) => {
                 return (
                     user.name.toLowerCase().includes(search.toLowerCase()) ||
                     user.surname.toLowerCase().includes(search.toLowerCase())
                 );
             });
         },
-        addParticipant: async function (userid) {
-            console.log("addParticipant");
+        addPersonnel: async function (userid) {
+            console.log("addPersonnel");
             const user = this.availableUsers.find((user) => user.id === userid);
             if (user) {
-                this.participants.push(user);
+                this.eventPersonnel.push(user);
             }
 
-            let participants_id = JSON.stringify(
-                this.participants.map((user) => user.id)
+            let personnel_id = JSON.stringify(
+                this.eventPersonnel.map((user) => user.id)
             );
 
-            const url = `${ role == 'admin' ? '' : '/' + role }/add-participants`;
+            const url = `${ role == 'admin' ? '' : '/' + role }/events/${this.eventid}/add-personnel`;
 
             const fd = new FormData();
             fd.append("event_id", this.eventid);
-            fd.append("participants", participants_id);
+            fd.append("personnel", personnel_id);
 
             const response = await fetch(url, {
                 method: "POST",
@@ -104,22 +102,23 @@ export const participants = (eventid, role) => {
             );
             this.paginateAvailableUsers();
         },
-        removeParticipant: async function (userid) {
-            console.log("removeParticipant");
-            const user = this.participants.find((user) => user.id === userid);
+        removePersonnel: async function (userid) {
+            console.log("removePersonnel");
+            console.log(this.eventPersonnel)
+            const user = this.eventPersonnel.find((user) => user.id === userid);
             if (user) {
-                this.participants = this.participants.filter(part => part.id !== userid);
+                this.eventPersonnel = this.eventPersonnel.filter(part => part.id !== userid);
             }
 
-            let participants_id = JSON.stringify(
-                this.participants.map((user) => user.id)
+            let personnel_id = JSON.stringify(
+                this.eventPersonnel.map((user) => user.id)
             );
 
-            const url = `${ role == 'admin' ? '' : '/' + role }/add-participants`;
+            const url = `${ role == 'admin' ? '' : '/' + role }/events/${this.eventid}/add-personnel`;
 
             const fd = new FormData();
             fd.append("event_id", this.eventid);
-            fd.append("participants", participants_id);
+            fd.append("personnel", personnel_id);
 
             const response = await fetch(url, {
                 method: "POST",
@@ -134,8 +133,8 @@ export const participants = (eventid, role) => {
             this.availableUsers.push(user);
             this.paginateAvailableUsers();
         },
-        saveParticipants: async function () {
-            console.log("saveParticipants");
+        savePersonnel: async function () {
+            console.log("savePersonnel");
         },
 
         paginateAvailableUsers: function () {
@@ -157,7 +156,7 @@ export const participants = (eventid, role) => {
         },
         init: async function () {
             await this.getAvailableUsers();
-            await this.getParticipants();
+            await this.getPersonnel();
             this.paginateAvailableUsers();
         },
     };

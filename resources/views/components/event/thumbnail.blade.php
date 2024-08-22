@@ -8,7 +8,7 @@
                 $authRole = auth()->user()->getRole();
                 $formRoute = $authRole === 'admin' ? 'events.update.thumbnail' : $authRole . '.events.update.thumbnail';
             @endphp
-            @if ($authRole === 'admin' || !$event->is_approved)
+            @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
                 <form method="POST" action="{{ route($formRoute, $event->id) }}"
                     enctype="multipart/form-data" x-ref="thumbform">
                     @csrf

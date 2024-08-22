@@ -13,27 +13,30 @@
                 @csrf
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.info') }}</h3>
-                    @if (!$event->is_approved)
+                    {{-- @if (!$event->is_approved)
                         <x-primary-button type="sumbit">
                             <x-lucide-save class="w-5 h-5 text-white" />
                         </x-primary-button>
-                    @endif
+                    @endif --}}
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
                 <div class="flex flex-col gap-2 w-1/2">
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                        value="{!! $event->name !!}" placeholder="{{ fake()->company() }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                        :value="$event->name" placeholder="{{ fake()->company() }}" 
+                        disabled />
+                        {{-- disabled="{{!!$event->is_approved}}" /> --}}
 
                     <x-form.input name="start_date" label="Start Date" type="datetime-local"
                         required="{{ true }}" value="{{ $event->start_date }}"
                         placeholder="{{ fake()->date() }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                        disabled />
+                        {{-- disabled="{{!!$event->is_approved}}" /> --}}
 
                     <x-form.input name="end_date" label="End Date" type="datetime-local" required="{{ true }}"
                         value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                        disabled />
+                        {{-- disabled="{{!!$event->is_approved}}" /> --}}
 
                 </div>
             </form>
@@ -43,6 +46,8 @@
             <x-event.map :event="$event" />
 
             <x-event.thumbnail :event="$event" />
+
+            <x-event.personnel :event="$event" />
 
             @if ($event->is_approved)
                 <x-event.participants :event="$event" />

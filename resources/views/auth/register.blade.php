@@ -24,6 +24,20 @@
                 required autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
+       
+        
+        <!-- Nationality -->
+        <div class="mt-4">
+            <x-form.nationality-select selectedvalue="{{ old('nationality') }}" />
+        </div>
+        
+        <!-- Academy -->
+        @php
+            $academies = App\Models\Academy::all();
+            @endphp
+        <div class="mt-4">
+            <x-form.academy-select :academies="$academies" />
+        </div>
 
         <!-- Password -->
         <div class="mt-4">

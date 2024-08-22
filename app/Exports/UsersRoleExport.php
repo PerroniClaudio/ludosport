@@ -1,8 +1,8 @@
 <?php
-
 namespace App\Exports;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromArray;
 
 class UsersRoleExport implements FromArray {
@@ -15,7 +15,7 @@ class UsersRoleExport implements FromArray {
 
     public function array(): array {
 
-        $selected_roles = json_decode($this->export->filters);
+        $selected_roles = json_decode($this->export->filters)->selected_roles;
         $users = User::whereHas('roles', function ($query) use ($selected_roles) {
             $query->whereIn('role_id', $selected_roles);
         })->with('roles')->get()->map(function ($user) {

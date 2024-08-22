@@ -51,51 +51,57 @@
                 
                 }">
                     <div class="col-span-4 border-r dark:border-background-700 flex flex-col pb-4">
-                        <template x-for="announcement in announcements" :key="announcement.id">
-
-                            <div
-                                :class="{
-                                
-                                    'text-primary-500': shouldShowSelectedItem(announcement),
-                                    'text-background-800 dark:text-background-200': !shouldShowSelectedItem(
-                                        announcement),
-                                
-                                }">
-                                <div x-show="shouldShowAsNew(announcement)"
-                                    x-on:click="setSelectedAnnouncement(announcement)"
-                                    class="cursor-pointer p-2 border-b dark:border-background-700 flex items-center justify-between">
-                                    <div class="flex flex-col gap-1">
-                                        <p x-text="announcement.object" class="font-bold"></p>
-                                        <p x-text="new Date(announcement.created_at).toLocaleDateString('it-IT', {
-                                            hour: 'numeric', 
-                                            minute: 'numeric' 
-                                        })"
-                                            class="font-bold text-xs">
-                                        </p>
-                                    </div>
-                                    <x-lucide-chevron-right class="h-6 w-6 font-bold" />
-                                </div>
-
-                                <div x-show="!shouldShowAsNew(announcement)"
-                                    x-on:click="setSelectedAnnouncement(announcement)"
-                                    x-on:click="selectedAnnouncement = announcement.id"
-                                    class="cursor-pointer p-2 border-b dark:border-background-700 flex items-center justify-between">
-                                    <div class="flex flex-col gap-1">
-                                        <p x-text="announcement.object" class=""></p>
-                                        <p x-text="new Date(announcement.created_at).toLocaleDateString('it-IT', {
-                                            hour: 'numeric', 
-                                            minute: 'numeric' 
-                                        })"
-                                            class=" text-xs">
-                                        </p>
-                                    </div>
-                                    <x-lucide-chevron-right class="h-6 w-6" />
-
-                                </div>
+                        @if ($announcements->isEmpty())
+                            <div class="text-center p-4">
+                                <p>{{ __('announcements.no_announcements') }}</p>
                             </div>
+                        @else
+                            <template x-for="announcement in announcements" :key="announcement.id">
+
+                                <div
+                                    :class="{
+                                    
+                                        'text-primary-500': shouldShowSelectedItem(announcement),
+                                        'text-background-800 dark:text-background-200': !shouldShowSelectedItem(
+                                            announcement),
+                                    
+                                    }">
+                                    <div x-show="shouldShowAsNew(announcement)"
+                                        x-on:click="setSelectedAnnouncement(announcement)"
+                                        class="cursor-pointer p-2 border-b dark:border-background-700 flex items-center justify-between">
+                                        <div class="flex flex-col gap-1">
+                                            <p x-text="announcement.object" class="font-bold"></p>
+                                            <p x-text="new Date(announcement.created_at).toLocaleDateString('it-IT', {
+                                                hour: 'numeric', 
+                                                minute: 'numeric' 
+                                            })"
+                                                class="font-bold text-xs">
+                                            </p>
+                                        </div>
+                                        <x-lucide-chevron-right class="h-6 w-6 font-bold" />
+                                    </div>
+
+                                    <div x-show="!shouldShowAsNew(announcement)"
+                                        x-on:click="setSelectedAnnouncement(announcement)"
+                                        x-on:click="selectedAnnouncement = announcement.id"
+                                        class="cursor-pointer p-2 border-b dark:border-background-700 flex items-center justify-between">
+                                        <div class="flex flex-col gap-1">
+                                            <p x-text="announcement.object" class=""></p>
+                                            <p x-text="new Date(announcement.created_at).toLocaleDateString('it-IT', {
+                                                hour: 'numeric', 
+                                                minute: 'numeric' 
+                                            })"
+                                                class=" text-xs">
+                                            </p>
+                                        </div>
+                                        <x-lucide-chevron-right class="h-6 w-6" />
+
+                                    </div>
+                                </div>
 
 
-                        </template>
+                            </template>
+                        @endif
                     </div>
                     <div class="col-span-8 text-background-800 dark:text-background-200 p-8">
                         <div x-show="!selectedAnnouncement" class="min-h-[55vh] flex flex-col justify-between">

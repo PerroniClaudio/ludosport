@@ -33,12 +33,15 @@ class EventController extends Controller {
         $authRole = $authUser->getRole();
 
         switch ($authRole) {
+            case 'rector':
             case 'dean':
             case 'manager':
-                $events = Event::where('school_id', $authUser->schools->first())->get();
+                $events = Event::where('academy_id', $authUser->academies->first())->get();
                 break;
             case 'technician':
-                $events = Event::where('user_id', $authUser->id)->get();
+                $events = Event::whereHas('personnel', function ($query) use ($authUser) {
+                    $query->where('user_id', $authUser->id);
+                })->get();
                 break;
             default:
                 $events = Event::all();
@@ -140,13 +143,15 @@ class EventController extends Controller {
         $authRole = $authUser->getRole();
 
         // Questa parte si può spostare in una funzione tipo checkPermission
-        // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato (tecnico). 
+        // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato. dean e manager interni all'accademia e tecnici possono aggiungere partecipanti. 
         if (!($authRole === 'admin' ||
             ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
-            $event->user_id === $authUser->id)) {
+            (in_array($authRole, ['dean', 'manager']) && $event->academy_id === $authUser->academies->first()->id) ||
+            ($event->personnel()->where('user_id', $authUser->id)->exists()))
+        ) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
-        if ($event->is_approved && ! in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'technician'])) {
+        if ($event->is_approved && !in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'technician'])) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
@@ -358,10 +363,37 @@ class EventController extends Controller {
 
         $authRole = User::find(auth()->user()->id)->getRole();
 
-        $events = Event::where('start_date', '>=', $request->start)
-            ->where('end_date', '<=', $request->end)
-            ->with('user')
-            ->get();
+        switch($authRole){
+            case 'admin':
+                $events = Event::where('start_date', '>=', $request->start)
+                    ->where('end_date', '<=', $request->end)
+                    ->with('user')
+                    ->get();
+                break;
+            case 'rector':
+            case 'dean':
+            case 'manager':
+                $events = Event::where('academy_id', User::find(auth()->user()->id)->academies->first()->id)
+                    ->where('start_date', '>=', $request->start)
+                    ->where('end_date', '<=', $request->end)
+                    ->with('user')
+                    ->get();
+                break;
+            case 'technician':
+                $events = Event::whereHas('personnel', function ($query) {
+                    $query->where('user_id', auth()->user()->id);
+                })->where('start_date', '>=', $request->start)
+                    ->where('end_date', '<=', $request->end)
+                    ->with('user')
+                    ->get();
+                break; 
+            default:
+                $events = Event::where('start_date', '>=', $request->start)
+                    ->where('end_date', '<=', $request->end)
+                    ->with('user')
+                    ->get();
+                break;
+        }
 
         $events_data = [];
 
@@ -437,6 +469,45 @@ class EventController extends Controller {
         $users = User::where('is_disabled', '0')->get();
         return response()->json($users);
     }
+    
+    public function availablePersonnel(Event $event) {
+        $users = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
+            $query->where('name', 'technician');
+        })->get();
+        return response()->json($users);
+    }
+    
+    public function personnel(Event $event) {
+        $users = $event->personnel;
+    return response()->json($users);
+    }
+
+    public function addPersonnel(Request $request) {
+        $authRole = User::find(auth()->user()->id)->getRole();
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return response()->json(['error' => 'You are not authorized to add personnel']);
+        }
+    
+        $event = Event::find($request->event_id);
+        $personnel = json_decode($request->personnel);
+
+        $event->personnel()->whereNotIn('user_id', $personnel)->detach();
+        
+        foreach ($personnel as $person) {
+            // Aggiunge la persona all'accademia se non è già presente
+            if (!$event->academy->personnel()->where('user_id', $person)->exists()) {
+                $event->academy->personnel()->attach($person);
+            }
+            // Aggiunge la persona all'evento se non è già presente
+            if($event->personnel()->where('user_id', $person)->exists()) {
+                continue;
+            }
+            $event->personnel()->attach($person);
+        }
+
+
+        return response()->json(['success' => 'Personnel added successfully!']);
+    }
 
     public function participants(Event $event) {
         $participants = $event->results()->with('user')->get();
@@ -455,9 +526,14 @@ class EventController extends Controller {
 
         $participants = json_decode($request->participants);
 
-        $event->results()->delete();
+        // Elimina i partecipanti che non sono più presenti (possibile rischio di perdita di dati, cioè elimiinazione di eventuali risultati già presenti)
+        $event->results()->whereNotIn('user_id', $participants)->delete();
 
         foreach ($participants as $participant) {
+            if($event->results()->where('user_id', $participant)->exists()) {
+                continue;
+            }
+
             $event->results()->create([
                 'user_id' => $participant,
                 'war_points' => 0,

@@ -26,16 +26,15 @@ class UsersSchoolExport implements FromArray {
 
         if ($filters->users_type == "athletes") {
 
-            $users = School::whereIn('id', $schools)->with('athletes')->get()->map(function ($school) {
-                return $school->athletes->map(function ($user) {
+            $users = School::whereIn('id', $schools)->with('athletes')->get()->flatMap(function ($school) {
+                return $school->athletes->map(function ($user) use ($school) {
                     return [
+                        $school->name,
                         $user->unique_code,
                         $user->name,
                         $user->surname,
                         $user->email,
-                        $user->roles->map(function ($role) {
-                            return $role->name;
-                        })->implode(', '),
+                        $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
                         $user->updated_at
                     ];
@@ -43,16 +42,15 @@ class UsersSchoolExport implements FromArray {
             })->toArray();
         } else if ($filters->users_type == "personnel") {
 
-            $users = School::whereIn('id', $schools)->with('personnel')->get()->map(function ($school) {
-                return $school->personnel->map(function ($user) {
+            $users = School::whereIn('id', $schools)->with('personnel')->get()->flatMap(function ($school) {
+                return $school->personnel->map(function ($user) use ($school) {
                     return [
+                        $school->name,
                         $user->unique_code,
                         $user->name,
                         $user->surname,
                         $user->email,
-                        $user->roles->map(function ($role) {
-                            return $role->name;
-                        })->implode(', '),
+                        $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
                         $user->updated_at
                     ];
@@ -60,32 +58,30 @@ class UsersSchoolExport implements FromArray {
             })->toArray();
         } else {
 
-            $users = School::whereIn('id', $schools)->with('users')->get()->map(function ($school) {
-                return $school->users->map(function ($user) {
+            $users = School::whereIn('id', $schools)->with('athletes')->get()->flatMap(function ($school) {
+                return $school->athletes->map(function ($user) use ($school) {
                     return [
+                        $school->name,
                         $user->unique_code,
                         $user->name,
                         $user->surname,
                         $user->email,
-                        $user->roles->map(function ($role) {
-                            return $role->name;
-                        })->implode(', '),
+                        $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
                         $user->updated_at
                     ];
                 });
             })->toArray();
 
-            $personnel = School::whereIn('id', $schools)->with('personnel')->get()->map(function ($school) {
-                return $school->personnel->map(function ($user) {
+            $personnel = School::whereIn('id', $schools)->with('personnel')->get()->flatMap(function ($school) {
+                return $school->personnel->map(function ($user) use ($school) {
                     return [
+                        $school->name,
                         $user->unique_code,
                         $user->name,
                         $user->surname,
                         $user->email,
-                        $user->roles->map(function ($role) {
-                            return $role->name;
-                        })->implode(', '),
+                        $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
                         $user->updated_at
                     ];
@@ -97,6 +93,7 @@ class UsersSchoolExport implements FromArray {
 
         return [
             [
+                "School",
                 "Code",
                 "Name",
                 "Surname",

@@ -21,7 +21,7 @@
 
                 <div class="flex flex-col gap-2 w-1/2">
                     @csrf
-                    <x-form.input name="name" label="Name" value="{{ $eventType->name }}" required />
+                    <x-form.input name="name" label="Name" :value="$eventType->name" required />
                 </div>
 
             </form>

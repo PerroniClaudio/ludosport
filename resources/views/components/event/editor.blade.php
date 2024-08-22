@@ -18,9 +18,13 @@
             $authRole = auth()->user()->getRole();
             $formRoute = $authRole === 'admin' ? 'events.save.description' : $authRole . '.events.save.description';
         @endphp
-        <form method="POST" action={{ route($formRoute, $event->id) }}>
+        @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
+            <form method="POST" action={{ route($formRoute, $event->id) }}>
+        @else
+            <form>
+        @endif
             @csrf
-            @if ($authRole === 'admin' || !$event->is_approved)
+            @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
                 <x-primary-button type="sumbit">
                     <x-lucide-save class="w-5 h-5 text-white" />
                 </x-primary-button>
@@ -28,9 +32,8 @@
             <input type="hidden" name="description" value="{{ $value }}" id="editor-content">
         </form>
     </div>
-
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-    <div x-data="editor('{{ $value }}')">
+    <div x-data="editor('{{ $value }}', {{ ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector')) ? 'true' : 'false' }})">
 
         <template x-if="isLoaded()">
             <div class="menu flex items-center justify-between">

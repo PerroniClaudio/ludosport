@@ -223,7 +223,7 @@ class AnnouncementController extends Controller {
                 $seen_announcements = $user->seenAnnouncements()->get();
             }
         } else {
-            $first_announcement = [];
+            $first_announcement = "";
         }
 
 

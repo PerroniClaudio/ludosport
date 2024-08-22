@@ -188,6 +188,12 @@
                 <x-responsive-nav-link :href="route('rankings.index')" :active="request()->routeIs('rankings.*')">
                     {{ __('navigation.classifiche') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('imports.index')" :active="request()->routeIs('imports.*')">
+                    {{ __('navigation.imports') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('exports.index')" :active="request()->routeIs('exports.*')">
+                    {{ __('navigation.exports') }}
+                </x-responsive-nav-link>
             @endif
         </div>
 

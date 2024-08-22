@@ -138,10 +138,17 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasMany(Export::class);
     }
 
+    // Eventi creati dall'utente
     public function events() {
         return $this->hasMany(Event::class);
     }
 
+    // Eventi in cui l'utente è stato inserito come personale
+    public function eventsPersonnel() {
+        return $this->belongsToMany(Event::class, 'events_personnel', 'user_id', 'event_id');
+    }
+
+    // Eventi a cui l'utente partecipa da atleta
     public function eventResults() {
         return $this->hasMany(EventResult::class);
     }
@@ -215,15 +222,25 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'active' => 'users.*',
                         'name' => 'rector.users.index',
                     ],
-                    // (object)[
-                    //     'label' => 'eventi',
-                    //     'active' => 'events.*',
-                    //     'name' => 'rector.events.index',
-                    // ],
+                    (object)[
+                        'label' => 'eventi',
+                        'active' => 'events.*',
+                        'name' => 'rector.events.index',
+                    ],
                     (object)[
                         'label' => 'fees',
                         'active' => 'fees.*',
                         'name' => 'rector.fees.index',
+                    ],
+                    (object)[
+                        'label' => 'imports',
+                        'active' => 'imports.*',
+                        'name' => 'rector.imports.index',
+                    ],
+                    (object)[
+                        'label' => 'exports',
+                        'active' => 'exports.*',
+                        'name' => 'rector.exports.index',
                     ],
 
                 ]);
@@ -249,11 +266,21 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'active' => 'users.*',
                         'name' => 'dean.users.index',
                     ],
-                    // (object)[
-                    //     'label' => 'eventi',
-                    //     'active' => 'events.*',
-                    //     'name' => 'dean.events.index',
-                    // ],
+                    (object)[
+                        'label' => 'eventi',
+                        'active' => 'events.*',
+                        'name' => 'dean.events.index',
+                    ],
+                    (object)[
+                        'label' => 'imports',
+                        'active' => 'imports.*',
+                        'name' => 'dean.imports.index',
+                    ],
+                    (object)[
+                        'label' => 'exports',
+                        'active' => 'exports.*',
+                        'name' => 'dean.exports.index',
+                    ],
                 ]);
             case 'manager':
                 return collect([
@@ -277,11 +304,21 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'active' => 'users.*',
                         'name' => 'manager.users.index',
                     ],
-                    // (object)[
-                    //     'label' => 'eventi',
-                    //     'active' => 'events.*',
-                    //     'name' => 'manager.events.index',
-                    // ],
+                    (object)[
+                        'label' => 'eventi',
+                        'active' => 'events.*',
+                        'name' => 'manager.events.index',
+                    ],
+                    (object)[
+                        'label' => 'imports',
+                        'active' => 'imports.*',
+                        'name' => 'manager.imports.index',
+                    ],
+                    (object)[
+                        'label' => 'exports',
+                        'active' => 'exports.*',
+                        'name' => 'manager.exports.index',
+                    ],
                 ]);
             case 'technician':
                 return collect([
@@ -299,6 +336,16 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'label' => 'eventi',
                         'active' => 'events.*',
                         'name' => 'technician.events.index',
+                    ],
+                    (object)[
+                        'label' => 'imports',
+                        'active' => 'imports.*',
+                        'name' => 'technician.imports.index',
+                    ],
+                    (object)[
+                        'label' => 'exports',
+                        'active' => 'exports.*',
+                        'name' => 'technician.exports.index',
                     ],
                     // (object)[
                     //     'label' => 'istruttori',

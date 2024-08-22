@@ -28,7 +28,7 @@
 
                 <div class="flex flex-col gap-2 w-1/2">
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                        value="{!! $event->name !!}" placeholder="{{ fake()->company() }}" 
+                        :value="$event->name" placeholder="{{ fake()->company() }}" 
                         disabled="{{!!$event->is_approved}}" />
 
                     {{-- <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
@@ -59,6 +59,8 @@
 
             <x-event.thumbnail :event="$event" />
 
+            <x-event.personnel :event="$event" />
+            
             @if ($event->is_approved)
                 <x-event.participants :event="$event" />
             @endif

@@ -34,7 +34,7 @@
                 <div>
                     <div class="flex flex-col gap-2 w-1/2">
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}" disabled="{{ true }}"
-                            value="{{ $school->name }}" placeholder="{{ fake()->company() }}" />
+                            :value="$school->name" placeholder="{{ fake()->company() }}" />
                         @php
                             $nationId = $school->nation_id;
                             $nationName = '';
@@ -54,9 +54,9 @@
                             }
                         @endphp
                         <x-form.input name="name" label="Nationality" type="text" required="{{ true }}" disabled="{{ true }}"
-                            value="{{ $nationName }}" placeholder="{{ fake()->company() }}" />
+                            :value="$nationName" placeholder="{{ fake()->company() }}" />
                         <x-form.input name="name" label="Academy" type="text" required="{{ true }}" disabled="{{ true }}"
-                            value="{{ $school->academy->name }}" placeholder="{{ fake()->company() }}" />
+                            :value="$school->academy->name" placeholder="{{ fake()->company() }}" />
                     </div>
                 </div>
             </div>
