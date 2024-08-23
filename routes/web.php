@@ -298,10 +298,10 @@ Route::group([], function () {
 
 Route::get('/test', function () {
     return 'test';
-    $user = User::find(87);
-    $user->has_paid_fee = 0;
-    $user->surname = 'vasonly';
-    $user->nation_id = 2;
-    $user->rank_id = 1;
-    $user->save();
+    // $user = User::find(87);
+    // $user->has_paid_fee = 0;
+    // $user->surname = 'vasonly';
+    // $user->nation_id = 2;
+    // $user->rank_id = 1;
+    // $user->save();
 })->name('test');

@@ -5,7 +5,11 @@
                 {{ __('exports.title') }}
             </h2>
             <div>
-                <x-create-new-button :href="route('exports.create')" />
+                @php
+                    $authRole = auth()->user()->getRole();
+                    $redirectRoute = $authRole === 'admin' ? 'exports.create' : $authRole . '.exports.create';
+                @endphp
+                <x-create-new-button :href="route($redirectRoute)" />
             </div>
         </div>
     </x-slot>

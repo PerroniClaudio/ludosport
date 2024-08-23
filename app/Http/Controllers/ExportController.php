@@ -12,6 +12,7 @@ use App\Exports\UsersRoleExport;
 use App\Exports\UsersSchoolExport;
 use App\Models\Export;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -22,13 +23,16 @@ class ExportController extends Controller {
      */
     public function index() {
         //
+        $authRole = User::find(auth()->user()->id)->getRole();
 
         $exports = Export::with('user')->orderBy('created_at', 'desc')->get();
+
+        $addToRoute = $authRole == 'admin' ? '' : $authRole . '.';
 
         foreach ($exports as $key => $export) {
 
             if ($export->status == "finished") {
-                $exports[$key]->url = route('exports.download', $export);
+                $exports[$key]->url = route($addToRoute . 'exports.download', $export);
             }
 
             $exports[$key]->type = __('exports.' . $export->type);
@@ -50,7 +54,11 @@ class ExportController extends Controller {
         $types = $export->getExportTypes();
         $typesSelect = [];
 
+        $authRole = User::find(auth()->user()->id)->getRole();
         foreach ($types as $type) {
+            if(in_array($authRole, ['dean', 'manager']) && in_array($type, ['event_war', 'event_style'])) {
+                continue;
+            }
             $typesSelect[] = [
                 'value' => $type,
                 'label' => __('exports.' . $type)
@@ -63,7 +71,9 @@ class ExportController extends Controller {
             $roles[$key]->name = __('users.' . $role->name);
         }
 
-        return view('export.create', [
+        $authRole = User::find(auth()->user()->id)->getRole();
+        $viewPath = $authRole == 'admin' ? 'export.create' : 'export.' . $authRole . '.create';
+        return view($viewPath, [
             'types' => $typesSelect,
             'roles' => $roles
         ]);
@@ -136,7 +146,10 @@ class ExportController extends Controller {
 
         $export->save();
 
-        return redirect()->route('exports.index');
+        $authRole = User::find(auth()->user()->id)->getRole();
+
+        $redirectRoute = $authRole == 'admin' ? 'exports.index' : $authRole . '.exports.index';
+        return redirect()->route($redirectRoute);
     }
 
     /**

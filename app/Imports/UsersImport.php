@@ -23,10 +23,17 @@ class UsersImport implements ToCollection {
 
             $nationality = Nation::where('name', $row[3])->first();
 
+            $noAcademy = Academy::where('slug', 'no-academy')->first();
+            
             if ($row[4] == null) {
-                $row[4] = 1;
+                if($noAcademy) {
+                    $row[4] = $noAcademy->id;
+                } else {
+                    $row[4] = 1;
+                }
             }
             $academy = Academy::where('id', $row[4])->first();
+            
             if (!User::where('email', $row[2])->exists()) {
                 $user = User::create([
                     'name'     => $row[0],

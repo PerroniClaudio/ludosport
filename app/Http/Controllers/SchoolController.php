@@ -163,6 +163,10 @@ class SchoolController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
+        if($school->is_disabled && $authRole !== 'admin'){
+            return redirect()->route('dashboard')->with('error', 'School disabled.');
+        }
+
         $nations = Nation::all();
 
         foreach ($nations as $nation) {

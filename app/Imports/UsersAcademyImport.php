@@ -24,9 +24,8 @@ class UsersAcademyImport implements ToCollection {
             $user = User::where('email', $row[0])->first();
             $academy = Academy::where('id', $row[1])->first();
 
-            if ($user && $academy && !$user->academyAthletes->contains($academy->id)) {
-                $user->academyAthletes()->attach($academy->id);
-                $user->save();
+            if ($user && $academy) {
+                $user->academyAthletes()->syncWithoutDetaching([$academy->id]);
             }
         }
     }

@@ -33,6 +33,18 @@ Route::prefix('dean')->middleware('auth')->middleware('role:admin,dean')->group(
 
     /** Accademie */
 
+    Route::group([], function () {
+      Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('dean.academies.all');
+      Route::get('/academies/search', [App\Http\Controllers\AcademyController::class, 'search'])->name('dean.academies.search');
+    });
+    
+    /** Eventi */
+
+    Route::group([], function () {
+      Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('dean.events.all');
+      Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('dean.events.search');
+    });
+
     // Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'show'])->name('dean.academies.show');
     
     /** Scuole */
@@ -63,9 +75,10 @@ Route::prefix('dean')->middleware('auth')->middleware('role:admin,dean')->group(
     Route::group([], function () {
       Route::get('/courses', [App\Http\Controllers\ClanController::class, 'index'])->name('dean.clans.index');
       Route::get('/courses/school', [App\Http\Controllers\ClanController::class, 'getBySchool'])->name('dean.clans.school');
+      Route::get('/courses/all', [App\Http\Controllers\ClanController::class, 'all'])->name('dean.clans.all');
 
       Route::get('/courses/create', [App\Http\Controllers\ClanController::class, 'create'])->name('dean.clans.create');
-      // Route::get('/courses/search', [App\Http\Controllers\ClanController::class, 'search'])->name('dean.clans.search');
+      Route::get('/courses/search', [App\Http\Controllers\ClanController::class, 'search'])->name('dean.clans.search');
   
       Route::get('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'edit'])->name('dean.clans.edit');
       Route::delete('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'destroy'])->name('dean.clans.disable');

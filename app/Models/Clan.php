@@ -41,6 +41,6 @@ class Clan extends Model {
     }
 
     public function academy() {
-        return $this->belongsTo(Academy::class);
+        return $this->school->belongsTo(Academy::class);
     }
 }

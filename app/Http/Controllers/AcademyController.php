@@ -117,7 +117,12 @@ class AcademyController extends Controller {
      */
     public function edit(Academy $academy) {
         $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
+        if($academy->is_disabled && $authRole !== 'admin') {
+            return redirect()->route('academies.index')->with('error', 'Academy is disabled.');
+        }
+        
         $nations = Nation::all();
 
         foreach ($nations as $nation) {
@@ -165,7 +170,6 @@ class AcademyController extends Controller {
         $roles = Role::all();
         $editable_roles = $authUser->getEditableRoles();
 
-        $authRole = User::find(auth()->user()->id)->getRole();
         $viewPath = $authRole === 'admin' ? 'academy.edit' : 'academy.' . $authRole . '.edit';
 
         return view($viewPath, [

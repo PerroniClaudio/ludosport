@@ -1,6 +1,9 @@
 @props(['roles' => []])
-
-<form action="{{ route('exports.store') }}" method="POST" x-data="{
+@php
+    $authRole = auth()->user()->getRole();
+    $actionRoute = $authRole === 'admin' ? 'exports.store' : $authRole . '.exports.store';
+@endphp
+<form action="{{ route($actionRoute) }}" method="POST" x-data="{
     selectedRoles: [],
     selectedRolesJson: '',
     isSubmitEnabled: false,

@@ -15,6 +15,9 @@ class UserRoleMiddleware {
      */
     public function handle(Request $request, Closure $next, ...$roles): Response {
 
+        if(!auth()->check()){
+            return redirect()->route('login')->with('error', 'You need to login to access this page');
+        }
         $authRole = User::find(auth()->user()->id)->getRole();
         if(!in_array($authRole, $roles)){
             return redirect()->route('dashboard');

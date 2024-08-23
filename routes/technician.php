@@ -24,9 +24,32 @@ Route::prefix('technician')->middleware('auth')->middleware('role:admin,technici
         Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('technician.users.picture.update');
     });
 
+    /** Accademie */
+
+    Route::group([], function () {
+        Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('technician.academies.all');
+        Route::get('/academies/search', [App\Http\Controllers\AcademyController::class, 'search'])->name('technician.academies.search');
+            });
+    
+    /** Scuole */
+
+    Route::group([], function () {
+        Route::get('/schools/all', [App\Http\Controllers\SchoolController::class, 'all'])->name('technician.schools.all');
+            });
+
+
+    /** Clan */
+    
+    Route::group([], function () {
+        Route::get('/courses/all', [App\Http\Controllers\ClanController::class, 'all'])->name('technician.clans.all');
+        Route::get('/courses/search', [App\Http\Controllers\ClanController::class, 'search'])->name('technician.clans.search');
+      });
+
     /** Events */
 
     Route::group([], function () {
+        Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('technician.events.all');
+        Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('technician.events.search');
         Route::get('events', [App\Http\Controllers\EventController::class, 'index'])->name('technician.events.index');
         // Route::get('events/create', [App\Http\Controllers\EventController::class, 'create'])->name('technician.events.create');
         // Route::post('events/create', [App\Http\Controllers\EventController::class, 'store'])->name('technician.events.store');

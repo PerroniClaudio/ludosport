@@ -33,6 +33,11 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
 
     /** Accademie */
 
+    Route::group([], function () {
+      Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('manager.academies.all');
+      Route::get('/academies/search', [App\Http\Controllers\AcademyController::class, 'search'])->name('manager.academies.search');
+    });
+
     // Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'show'])->name('manager.academies.show');
     
     /** Scuole */
@@ -72,10 +77,10 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
     Route::group([], function () {
       Route::get('/courses', [App\Http\Controllers\ClanController::class, 'index'])->name('manager.clans.index');
       Route::get('/courses/school', [App\Http\Controllers\ClanController::class, 'getBySchool'])->name('manager.clans.school');
-      // Route::get('/courses/all', [App\Http\Controllers\ClanController::class, 'all'])->name('manager.clans.all');
+      Route::get('/courses/all', [App\Http\Controllers\ClanController::class, 'all'])->name('manager.clans.all');
 
       Route::get('/courses/create', [App\Http\Controllers\ClanController::class, 'create'])->name('manager.clans.create');
-      // Route::get('/courses/search', [App\Http\Controllers\ClanController::class, 'search'])->name('manager.clans.search');
+      Route::get('/courses/search', [App\Http\Controllers\ClanController::class, 'search'])->name('manager.clans.search');
   
       Route::get('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'edit'])->name('manager.clans.edit');
       Route::delete('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'destroy'])->name('manager.clans.disable');
@@ -93,6 +98,8 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
 
     // Questo gruppo di route (Eventi) qui commentate sono funzionanti ma il manager non è al momento abilitato al loro utilizzo
     Route::group([], function () {
+      Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('manager.events.all');
+      Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('manager.events.search');
       Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('manager.events.index');
       Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('manager.events.calendar');
       // Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('manager.events.create');
@@ -114,29 +121,29 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
 
     Route::group([], function () {
 
-        // Route::get('/imports', [App\Http\Controllers\ImportController::class, 'index'])->name('manager.imports.index');
-        // Route::get('/imports/create', [App\Http\Controllers\ImportController::class, 'create'])->name('manager.imports.create');
+        Route::get('/imports', [App\Http\Controllers\ImportController::class, 'index'])->name('manager.imports.index');
+        Route::get('/imports/create', [App\Http\Controllers\ImportController::class, 'create'])->name('manager.imports.create');
         // Route::delete('/imports/{import}', [App\Http\Controllers\ImportController::class, 'destroy'])->name('manager.imports.disable');
 
 
-        // Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('manager.imports.store');
-        // Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('manager.imports.update');
-        // Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('manager.imports.download');
+        Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('manager.imports.store');
+        Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('manager.imports.update');
+        Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('manager.imports.download');
 
-        // Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('manager.imports.template');
+        Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('manager.imports.template');
     });
 
     /** Exports */
 
     Route::group([], function () {
-        // Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('manager.exports.index');
-        // Route::get('/exports/create', [App\Http\Controllers\ExportController::class, 'create'])->name('manager.exports.create');
-        // Route::get('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('manager.exports.download');
+        Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('manager.exports.index');
+        Route::get('/exports/create', [App\Http\Controllers\ExportController::class, 'create'])->name('manager.exports.create');
+        Route::get('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('manager.exports.download');
         // Route::delete('/exports/{export}', [App\Http\Controllers\ExportController::class, 'destroy'])->name('manager.exports.disable');
 
-        // Route::post('/exports', [App\Http\Controllers\ExportController::class, 'store'])->name('manager.exports.store');
-        // Route::post('/exports/{export}', [App\Http\Controllers\ExportController::class, 'update'])->name('manager.exports.update');
-        // Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('manager.exports.download');
+        Route::post('/exports', [App\Http\Controllers\ExportController::class, 'store'])->name('manager.exports.store');
+        Route::post('/exports/{export}', [App\Http\Controllers\ExportController::class, 'update'])->name('manager.exports.update');
+        Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('manager.exports.download');
     });
 
 

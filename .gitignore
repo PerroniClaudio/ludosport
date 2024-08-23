@@ -20,3 +20,5 @@ yarn-error.log
 /keys
 .DS_Store
 dump.rdb
+/data.ms
+dump.rdb

@@ -86,14 +86,17 @@ class ImportController extends Controller {
         $path = "imports/{$import->id}/{$file_name}";
         $storeFile = $file->storeAs("imports/{$import->id}/", $file_name, "gcs");
 
+        $authRole = User::find(auth()->user()->id)->getRole();
 
         if ($storeFile) {
             $import->file = $path;
             $import->save();
 
-            return redirect()->route('imports.index');
+            $redirectRoute = $authRole == 'admin' ? 'imports.index' : $authRole . '.imports.index';
+            return redirect()->route($redirectRoute);
         } else {
-            return redirect()->route('imports.create')->with('error', 'Error uploading file');
+            $redirectRoute = $authRole == 'admin' ? 'imports.create' : $authRole . '.imports.create';
+            return redirect()->route($redirectRoute)->with('error', 'Error uploading file');
         }
     }
 

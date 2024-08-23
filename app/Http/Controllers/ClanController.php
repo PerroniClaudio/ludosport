@@ -28,7 +28,7 @@ class ClanController extends Controller {
                 break;
             case 'dean':
             case 'manager':
-                $clans = $authUser->schools->first()->clan;
+                $clans = $authUser->schools->where('is_disabled', '0')->first()->clan;
                 break;
             case 'instructor':
                 // Gli istruttori possono vedere tutti i corsi delle scuole a cui sono associati
@@ -197,6 +197,9 @@ class ClanController extends Controller {
         $authRole = $authUser->getRole();
         if(!in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'instructor'])){
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
+        }
+        if($clan->is_disabled && $authRole !== 'admin'){
+            return redirect()->route('dashboard')->with('error', 'Course disabled.');
         }
         switch($authRole){
             case 'admin':
