@@ -62,7 +62,7 @@
             <x-event.personnel :event="$event" />
             
             @if ($event->is_approved)
-                <x-event.participants :event="$event" />
+                <x-event.ranking-participants :event="$event" />
             @endif
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">

@@ -74,6 +74,11 @@ class User extends Authenticatable implements MustVerifyEmail {
         parent::boot();
 
         static::creating(function ($user) {
+
+            if ($user->email){
+                $user->email = strtolower($user->email);
+            }
+
             if (is_null($user->rank_id)) {
                 $user->rank_id = Rank::first()->id; // Imposta il valore predefinito per rank_id
             }
@@ -162,6 +167,14 @@ class User extends Authenticatable implements MustVerifyEmail {
             ->withPivot('created_at as awarded_at');
     }
 
+    // Solo le richieste approvate. Le altre le vedono gli admin partendo da weaponForms
+    public function weaponFormsPersonnel() {
+        return $this->belongsToMany(WeaponForm::class, 'weapon_forms_personnel', 'user_id', 'weapon_form_id')
+            ->wherePivot('status', 'approved')            
+            ->withPivot(['status', 'created_at as awarded_at'])
+            ->withTimestamps();
+    }
+    
     public function languages() {
         return $this->belongsToMany(Language::class, 'users_languages', 'user_id', 'language_id');
     }

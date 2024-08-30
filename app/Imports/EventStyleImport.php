@@ -35,7 +35,7 @@ class EventStyleImport implements ToCollection {
                 $this->event = Event::find($row[0]);
             }
 
-            if(!$this->event) {
+            if(!$this->event || $this->event->result_type != 'ranking') {
                 continue;
             }
 

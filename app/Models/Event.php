@@ -15,6 +15,8 @@ class Event extends Model {
      * @var array<int, string>
      */
 
+    // result_type enum: 'ranking', 'enabling'
+
     protected $fillable = [
         'name',
         'description',
@@ -37,6 +39,7 @@ class Event extends Model {
         'is_free',
         'price',
         'weapon_form_id',
+        'result_type',
     ];
 
     public function nation() {
@@ -53,6 +56,10 @@ class Event extends Model {
 
     public function results() {
         return $this->hasMany(EventResult::class);
+    }
+    
+    public function instructorResults() {
+        return $this->hasMany(EventInstructorResult::class);
     }
 
     public function user() {

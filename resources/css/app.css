@@ -63,6 +63,38 @@
         --accent-800: #403426;
         --accent-900: #201a13;
         --accent-950: #100d09;
+
+        --success-100: #e6f4ea;
+        --success-200: #cce9d5;
+        --success-300: #99d3aa;
+        --success-400: #66bd7f;
+        --success-500: #33a754;
+        --success-600: #008b2a;
+        --success-700: #007f26;
+
+        --error-100: #f9e6e6;
+        --error-200: #f3cdcd;
+        --error-300: #e69999;
+        --error-400: #d96666;
+        --error-500: #cc3333;
+        --error-600: #b30000;
+        --error-700: #a30000;
+
+        --warning-100: #fff7e6;
+        --warning-200: #ffedcd;
+        --warning-300: #ffdb99;
+        --warning-400: #ffca66;
+        --warning-500: #ffb933;
+        --warning-600: #ffa500;
+        --warning-700: #e69500;
+
+        --info-100: #e6f4f9;
+        --info-200: #cce9f3;
+        --info-300: #99d3e6;
+        --info-400: #66bde9;
+        --info-500: #33a7cc;
+        --info-600: #008bb3;
+        --info-700: #007fa3;
     }
     .dark {
         --text-50: #0d0d0c;
@@ -124,6 +156,38 @@
         --accent-800: #d9cdbf;
         --accent-900: #ece6df;
         --accent-950: #f6f3ef;
+
+        --success-100: #e6f4ea;
+        --success-200: #cce9d5;
+        --success-300: #99d3aa;
+        --success-400: #66bd7f;
+        --success-500: #33a754;
+        --success-600: #008b2a;
+        --success-700: #007f26;
+
+        --error-100: #f9e6e6;
+        --error-200: #f3cdcd;
+        --error-300: #e69999;
+        --error-400: #d96666;
+        --error-500: #cc3333;
+        --error-600: #b30000;
+        --error-700: #a30000;
+
+        --warning-100: #fff7e6;
+        --warning-200: #ffedcd;
+        --warning-300: #ffdb99;
+        --warning-400: #ffca66;
+        --warning-500: #ffb933;
+        --warning-600: #ffa500;
+        --warning-700: #e69500;
+
+        --info-100: #e6f4f9;
+        --info-200: #cce9f3;
+        --info-300: #99d3e6;
+        --info-400: #66bde9;
+        --info-500: #33a7cc;
+        --info-600: #008bb3;
+        --info-700: #007fa3;
     }
 }
 

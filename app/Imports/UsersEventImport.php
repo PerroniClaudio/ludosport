@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Event;
+use App\Models\EventInstructorResult;
 use App\Models\EventResult;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -26,15 +27,26 @@ class UsersEventImport implements ToCollection {
             }
 
             $user = User::where('email', $row[1])->first();
-
-            if ($user && !EventResult::where('event_id', $row[0])->where('user_id', $user->id)->exists()) {
-                $eventResult = EventResult::create([
-                    'event_id' => $row[0],
-                    'user_id' => $user->id,
-                    'war_points' => 0,
-                    'style_points' => 0,
-                    'total_points' => 0,
-                ]);
+            $event = Event::find($row[0]);
+            if ($user && $event) {
+                if($event->result_type == 'enabling') {
+                    if (!EventInstructorResult::where('event_id', $row[0])->where('user_id', $user->id)->exists()) {
+                        $eventInstructorResult = EventInstructorResult::create([
+                            'event_id' => $row[0],
+                            'user_id' => $user->id,
+                        ]);
+                    }
+                } else if ($event->result_type == 'ranking') {
+                    if(!EventResult::where('event_id', $row[0])->where('user_id', $user->id)->exists()) {
+                        $eventResult = EventResult::create([
+                            'event_id' => $row[0],
+                            'user_id' => $user->id,
+                            'war_points' => 0,
+                            'style_points' => 0,
+                            'total_points' => 0,
+                        ]);
+                    }
+                }
             }
         }
     }

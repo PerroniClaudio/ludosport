@@ -24,6 +24,7 @@ class Export extends Model {
         'users_academy',
         'users_school',
         'event_participants',
+        'instructor_event_results',
         'event_war',
         'event_style',
     ];

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Models\User;
+use App\Models\WeaponForm;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -171,7 +172,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::delete('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'destroy'])->name('events.type_disable');
     Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('events.types');
     Route::get('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'edit'])->name('events.edit_type');
-
+    
+    Route::get('/event-result-types/json', [App\Http\Controllers\EventController::class, 'resultTypesList'])->name('events.result_types');
     Route::get('/events/{event}/review', [App\Http\Controllers\EventController::class, 'review'])->name('events.review');
     Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('events.all');
     Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('events.search');
@@ -198,6 +200,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('events.participants.add');
     Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('events.participants.export');
+
+    Route::post('/submit-enabling-result/{event}', [App\Http\Controllers\EventController::class, 'confirmEventInstructorResult'])->name('events.instructor_result');
 });
 
 /** Imports */

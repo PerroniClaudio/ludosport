@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\EventParticipantsExport;
+use App\Exports\EventsInstructorResultsExport;
+use App\Exports\EventsParticipantsExport;
 use App\Exports\EventsStyleExport;
 use App\Exports\EventsWarExport;
 use App\Exports\UsersAcademyExport;
@@ -126,6 +127,7 @@ class ExportController extends Controller {
                 break;
 
             case 'event_participants':
+            case 'instructor_event_results':
             case 'event_war':
             case 'event_style':
                 $filters = [
@@ -232,7 +234,14 @@ class ExportController extends Controller {
                     case 'event_participants':
                         $log[] = "['Exporting event participants']";
                         $file_path = 'exports/' . $export->id . '/event_participants.xlsx';
-                        Excel::store(new EventParticipantsExport($export), $file_path, 'gcs');
+                        Excel::store(new EventsParticipantsExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'instructor_event_results':
+                        $log[] = "['Exporting event participants']";
+                        $file_path = 'exports/' . $export->id . '/event_participants.xlsx';
+                        Excel::store(new EventsInstructorResultsExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
                         $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
                         break;

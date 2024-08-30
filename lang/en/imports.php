@@ -10,6 +10,8 @@ return [
     'event_participants' => 'Associate Users to Events',
     'event_war' => 'Register War Points',
     'event_style' => 'Register Style Points',
+    'event_instructor_participants' => 'Associate Users to Instructor Events',
+    'event_instructor_results' => 'Register Instructor Events Results',
     'upload_file' => 'Upload File',
     'choose_file' => 'Choose File',
     'download_template' => 'Download Template',

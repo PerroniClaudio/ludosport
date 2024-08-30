@@ -11,6 +11,7 @@ import { userschoolgraph } from "./userschoolgraph.js";
 import { usersclangraph } from "./usersclangraph.js";
 import { rankingschart } from "./rankingschart.js";
 import { eventpersonnel } from "./eventpersonnel.js";
+import { enablingresults } from "./enablingresults.js";
 
 document.addEventListener("alpine:init", () => {
     Alpine.data("editor", editor);
@@ -23,6 +24,7 @@ document.addEventListener("alpine:init", () => {
     Alpine.data("userschoolgraph", userschoolgraph);
     Alpine.data("usersclangraph", usersclangraph);
     Alpine.data("rankingschart", rankingschart);
+    Alpine.data("enablingresults", enablingresults);
 });
 
 window.Alpine = Alpine;

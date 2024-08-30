@@ -11,6 +11,8 @@ return [
     'event_participants' => 'Export event participants',
     'event_war' => 'Export event war points ranking',
     'event_style' => 'Export event style points ranking',
+    'event_instructor_participants' => 'Export instructor event participants',
+    'instructor_event_results' => 'Export instructor event results',
     'download_template' => 'Download Template',
     'submit' => 'Submit',
     'pending' => 'Pending',

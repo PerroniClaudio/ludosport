@@ -67,6 +67,9 @@
 
                     <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
                         selected="{{ $event->type->id }}" />
+                    
+                    <x-event.result-type-selector event_id="{{ $event->id }}"
+                        selected_result_type="{{ $event->result_type }}" />
 
                     <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms" />
 
@@ -99,59 +102,16 @@
             <x-event.personnel :event="$event" />
             
             @if ($event->is_approved)
-                <x-event.participants :event="$event" />
+                @if ($event->result_type === 'enabling')
+                    <x-event.enabling-participants :event="$event" />
+                    <x-event.enabling-results :event="$event" :results="$enablingResults" />
+                @elseif ($event->result_type === 'ranking')
+                    <x-event.ranking-participants :event="$event" />
+                    <x-event.ranking-results :results="$rankingResults" />
+                @endif
             @endif
-
-            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-background-900 dark:text-background-100">
-                    <x-table striped="false" :columns="[
-                        [
-                            'name' => 'User',
-                            'field' => 'user_fullname',
-                            'columnClasses' => '', // classes to style table th
-                            'rowClasses' => '', // classes to style table td
-                        ],
-                        [
-                            'name' => 'War Points',
-                            'field' => 'war_points',
-                            'columnClasses' => '', // classes to style table th
-                            'rowClasses' => '', // classes to style table td]
-                        ],
-                        [
-                            'name' => 'Bonus',
-                            'field' => 'bonus_war_points',
-                            'columnClasses' => '', // classes to style table th
-                            'rowClasses' => '', // classes to style table td]
-                        ],
-                        [
-                            'name' => 'Style Points',
-                            'field' => 'style_points',
-                            'columnClasses' => '', // classes to style table th
-                            'rowClasses' => '', // classes to style table td]
-                        ],
-                        [
-                            'name' => 'Bonus',
-                            'field' => 'bonus_style_points',
-                            'columnClasses' => '', // classes to style table th
-                            'rowClasses' => '', // classes to style table td]
-                        ],
-                        [
-                            'name' => 'Total War Points',
-                            'field' => 'total_war_points',
-                            'columnClasses' => '', // classes to style table th
-                            'rowClasses' => '', // classes to style table td]
-                        ],
-                        [
-                            'name' => 'Total Style Points',
-                            'field' => 'total_style_points',
-                            'columnClasses' => '', // classes to style table th
-                            'rowClasses' => '', // classes to style table td]
-                        ],
-                    ]" :rows="$results">
-
-                    </x-table>
-                </div>
-            </div>
+            
+            
 
         </div>
     </div>

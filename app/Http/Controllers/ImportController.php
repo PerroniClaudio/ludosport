@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\TemplateExport;
+use App\Imports\EventInstructorImport;
 use App\Imports\EventStyleImport;
 use App\Imports\EventWarImport;
 use App\Imports\UsersAcademyImport;
@@ -68,7 +69,7 @@ class ImportController extends Controller {
         //
 
         $request->validate([
-            'type' => 'required|in:new_users,users_course,users_academy,users_school,event_participants,event_war,event_style',
+            'type' => 'required|in:new_users,users_course,users_academy,users_school,event_participants,event_war,event_style,event_instructor_results',
         ]);
 
         $import = Import::create([
@@ -173,7 +174,6 @@ class ImportController extends Controller {
                         Excel::import(new UsersSchoolImport, $import->file, 'gcs');
                         $log[] = "['Users school imported at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
-
                     case 'event_participants':
                         $log[] = "['Processing event participants']";
                         Excel::import(new UsersEventImport, $import->file, 'gcs');
@@ -188,6 +188,11 @@ class ImportController extends Controller {
                         $log[] = "['Processing event style']";
                         Excel::import(new EventStyleImport, $import->file, 'gcs');
                         $log[] = "['Event style imported at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'event_instructor_results':
+                        $log[] = "['Processing event instructor']";
+                        Excel::import(new EventInstructorImport, $import->file, 'gcs');
+                        $log[] = "['Event instructor imported at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
 
                     default:

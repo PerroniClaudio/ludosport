@@ -24,6 +24,7 @@ class Import extends Model {
         'event_participants',
         'event_war',
         'event_style',
+        'event_instructor_results',
     ];
 
     public function user() {
@@ -38,12 +39,12 @@ class Import extends Model {
         switch ($role) {
             case 'admin':
             case 'rector':
-                return ['new_users', 'users_course', 'users_academy', 'users_school', 'event_participants', 'event_war', 'event_style'];
+                return ['new_users', 'users_course', 'users_academy', 'users_school', 'event_participants', 'event_war', 'event_style', 'event_instructor_results'];
             case 'dean':
             case 'manager':
                 return ['new_users', 'users_course', 'users_school', 'event_participants'];
             case 'technician':
-                return ['event_participants', 'event_war', 'event_style'];
+                return ['event_participants', 'event_war', 'event_style', 'event_instructor_results'];
             default:
                 return [];
         }

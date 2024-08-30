@@ -9,7 +9,7 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-class EventsParticipantsExport implements WithMultipleSheets {
+class EventsInstructorResultsExport implements WithMultipleSheets {
 
     use Exportable;
 
@@ -24,7 +24,15 @@ class EventsParticipantsExport implements WithMultipleSheets {
 
         $filters = collect(json_decode($this->export->filters)->filters);
 
+        // 'event_id',
+        // 'user_id',
+        // 'result',
+        // 'notes',
+        // 'stage',
+        // 'weapon_form_id',
+
         foreach ($filters as $event) {
+            $users = [];
             if($event->result_type == 'enabling'){
                 $users = EventInstructorResult::where('event_id', $event->id)->with('user')->get()->map(function ($event_result) {
                     return [
@@ -32,25 +40,14 @@ class EventsParticipantsExport implements WithMultipleSheets {
                         $event_result->user->name,
                         $event_result->user->surname,
                         $event_result->user->email,
-                        $event_result->user->roles->pluck('name')->implode(', '),
-                        $event_result->user->created_at,
-                        $event_result->user->updated_at
-                    ];
-                })->toArray();
-            } else {
-                $users = EventResult::where('event_id', $event->id)->with('user')->get()->map(function ($event_result) {
-                    return [
-                        $event_result->user->unique_code,
-                        $event_result->user->name,
-                        $event_result->user->surname,
-                        $event_result->user->email,
-                        $event_result->user->roles->pluck('name')->implode(', '),
-                        $event_result->user->created_at,
-                        $event_result->user->updated_at
+                        $event_result->weaponForm ? $event_result->weaponForm->id : '',
+                        $event_result->weaponForm ? $event_result->weaponForm->name : '',
+                        $event_result->result,
+                        $event_result->stage,
+                        $event_result->notes,
                     ];
                 })->toArray();
             }
-
 
             $sheets[] = new EventsParticipantsSheet($users, $event->id, $event->name);
         }
@@ -78,9 +75,11 @@ class EventsParticipantsSheet implements FromArray, WithTitle{
                 "Name",
                 "Surname",
                 "Email",
-                "Roles",
-                "Created At",
-                "Updated At"
+                "Weapon Form ID",
+                "Weapon Form Name",
+                "Result",
+                "Stage",
+                "Notes",
             ], $this->users
         ];
     }

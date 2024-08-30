@@ -15,6 +15,7 @@ use App\Models\WeaponForm;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -162,10 +163,18 @@ class EventController extends Controller {
             );
         }
 
-        $results = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
+        $rankingResults = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
 
-        foreach ($results as $key => $result) {
-            $results[$key]['user_fullname'] = $result->user['name'] . ' ' . $result->user['surname'];
+        foreach ($rankingResults as $key => $result) {
+            $rankingResults[$key]['user_fullname'] = $result->user['name'] . ' ' . $result->user['surname'];
+        }
+
+        $enablingResults = $event->instructorResults()->with(['user', 'weaponForm'])->orderBy('stage', 'asc')->get();
+
+        foreach ($enablingResults as $key => $result) {
+            $enablingResults[$key]['user_fullname'] = $result->user['name'] . ' ' . $result->user['surname'];
+            $enablingResults[$key]['weapon_form_name'] = ($result->weaponForm ? $result->weaponForm['name'] : '');
+            $enablingResults[$key]['notes'] = $result->notes ? $result->notes : '';
         }
 
         if ($authRole === 'technician') {
@@ -177,7 +186,8 @@ class EventController extends Controller {
         $viewPath = $authRole === 'admin' ? 'event.edit' : 'event.' . $authRole . '.edit';
         return view($viewPath, [
             'event' => $event,
-            'results' => $results,
+            'rankingResults' => $rankingResults,
+            'enablingResults' => $enablingResults,
             'weaponForms' => $weaponForms,
         ]);
     }
@@ -237,12 +247,14 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
+        Log::info('Request result_type: ' . $request->result_type);
         $request->validate([
             'name' => 'required',
             'event_type' => 'string',
             'start_date' => 'required',
             'end_date' => 'required',
             'price' => 'min:0',
+            'result_type' => 'required|in:ranking,enabling',
         ]);
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
@@ -268,8 +280,6 @@ class EventController extends Controller {
             $event_type = EventType::where('name', $request->event_type)->first();
             $event->event_type = $event_type->id;
 
-
-
             if ($request->is_free == 'on') {
                 $event->is_free = true;
                 $event->price = 0;
@@ -277,6 +287,12 @@ class EventController extends Controller {
                 $event->is_free = false;
                 $event->price = $request->price;
             }
+
+            // Si può modificare il tipo di risultato solo se non ci sono già iscritti in nessuno dei due tipi
+            if(!$event->is_approved || $event->results()->count() == 0 || $event->instructorResults()->count() == 0) {
+                $event->result_type = $request->result_type;
+            }
+
         }
 
         if (isset($request->weapon_form_id)) {
@@ -356,6 +372,30 @@ class EventController extends Controller {
             return redirect()->route($redirectRoute, $id)->with('error', 'Error uploading thumbnail!');
         }
     }
+
+    public function resultTypesList(Request $request) {
+
+        // $resultTypes = [
+        //     [
+        //         'label' => 'Ranking',
+        //         'value' => 'ranking',
+        //     ],
+        //     [
+        //         'label' => 'Enabling',
+        //         'value' => 'enabling',
+        //     ],
+        // ];
+
+        // return response()->json([
+        //     'resultTypes' => $resultTypes
+        // ]);
+
+        return response()->json([
+            'ranking',
+            'enabling',
+        ]);
+    }
+
 
     public function calendar(Request $request) {
 
@@ -510,7 +550,12 @@ class EventController extends Controller {
     }
 
     public function participants(Event $event) {
-        $participants = $event->results()->with('user')->get();
+        if($event->result_type === 'enabling') {
+            $participants = $event->instructorResults()->with('user')->get();
+        } else if ($event->result_type === 'ranking') {
+            $participants = $event->results()->with('user')->get();
+        }
+        
         $users = [];
 
         foreach ($participants as $key => $participant) {
@@ -521,33 +566,95 @@ class EventController extends Controller {
     }
 
     public function selectParticipants(Request $request) {
-
         $event = Event::find($request->event_id);
 
-        $participants = json_decode($request->participants);
+        $participants = json_decode($request->participants, true);
 
-        // Elimina i partecipanti che non sono più presenti (possibile rischio di perdita di dati, cioè elimiinazione di eventuali risultati già presenti)
-        $event->results()->whereNotIn('user_id', $participants)->delete();
-
-        foreach ($participants as $participant) {
-            if($event->results()->where('user_id', $participant)->exists()) {
-                continue;
-            }
-
-            $event->results()->create([
-                'user_id' => $participant,
-                'war_points' => 0,
-                'style_points' => 0,
-            ]);
+        Log::info('Participants:', ['participants' => $participants]);
+        if (!is_array($participants)) {
+            Log::error('Invalid participants data', ['participants' => $participants]);
+            return response()->json(['error' => 'Invalid participants data'], 400);
         }
 
-        return response()->json(['success' => 'Participants added successfully!']);
+        if($event->result_type === 'enabling') {
+            // Elimina i partecipanti che non sono più presenti (possibile rischio di perdita di dati, cioè elimiinazione di eventuali risultati già presenti)
+            $event->instructorResults()->whereNotIn('user_id', $participants)->whereNotIn('stage', ['confirmed'])->delete();
+        
+            foreach ($participants as $participant) {
+                if($event->instructorResults()->where('user_id', $participant)->exists()) {
+                    continue;
+                }
+                $event->instructorResults()->create([
+                    'user_id' => $participant,
+                    'weapon_form_id' => $event->weaponForm ? $event->weaponForm->id : null,
+                ]);
+            }
+        } else if ($event->result_type === 'ranking') {
+            // Elimina i partecipanti che non sono più presenti (possibile rischio di perdita di dati, cioè elimiinazione di eventuali risultati già presenti)
+            $event->results()->whereNotIn('user_id', $participants)->delete();
+    
+            foreach ($participants as $participant) {
+                if($event->results()->where('user_id', $participant)->exists()) {
+                    continue;
+                }
+    
+                $event->results()->create([
+                    'user_id' => $participant,
+                    'war_points' => 0,
+                    'style_points' => 0,
+                ]);
+            }
+        }
+
+        return response()->json(['success' => 'Participants modified successfully!']);
+    }
+
+    public function confirmEventInstructorResult(Event $event, Request $request) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        if ($authRole !== 'admin') {
+            return response()->json(['error' => 'You are not authorized to confirm results']);
+        }
+        $request->validate([
+            'result_id' => 'required|exists:event_instructor_results,id',
+            'result' => 'string|in:passed,failed',
+        ]);
+        
+        $result = $event->instructorResults()->find($request->result_id);
+        if(!$result){
+            return response()->json(['error' => 'Result not related to this event']);
+        }
+        
+        $result->result = $request->result;
+        $result->stage = 'confirmed';
+
+        if($result->weaponForm && $result->result === 'passed') {
+            // Aggiunge la forma da atleta all'utente se non ce l'ha già (deve aggiungere anche il ruolo?)
+            if (!$result->weaponForm->users()->where('user_id', $result->user->id)->exists()) {
+                $result->weaponForm->users()->attach($result->user->id);
+            }
+            // Aggiunge la forma da istruttore all'utente se non ce l'ha già
+            if (!$result->weaponForm->personnel()->where('user_id', $result->user->id)->exists()) {
+                $result->weaponForm->personnel()->attach($result->user->id, [
+                    'event_id' => $event->id,
+                    'admin_id' => $authUser->id,
+                ]);
+            }
+        }
+
+        $result->save();
+
+        return response()->json([
+            'success' => 'Result confirmed successfully!',
+            'result' => $result
+        ]);
+
     }
 
     public function exportParticipants(Event $event) {
-        $name = "event_" . $event->name . '_participants.xlsx';
+        $name = "event_" . $event->name . '-' . $event->result_type . '_participants.xlsx';
 
-        return Excel::download(new EventParticipantsExport($event->id), $name);
+        return Excel::download(new EventParticipantsExport($event->id, $event->result_type), $name);
     }
 
     public function all() {
