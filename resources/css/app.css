@@ -362,3 +362,29 @@ hr {
 .has-tooltip:hover .tooltip {
     @apply visible z-50;
 }
+
+/* Transition */
+
+#bigone {
+    flex: 1 1 0%;
+    height: 100vh;
+    z-index: 1000;
+    background-color: var(--background-900);
+    transition: flex 1s ease-in-out;
+}
+
+#smallone {
+    flex: 1 1 0%;
+    height: 100vh;
+    z-index: 0;
+    background-color: var(--background-700);
+    transition: flex 1s ease-in-out;
+}
+
+.reduce {
+    flex: 0 0 0% !important;
+}
+
+.expand {
+    flex: 1 1 100%;
+}
