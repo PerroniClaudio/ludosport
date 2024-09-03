@@ -28,7 +28,8 @@
         })
         ({
             key: "{{ env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN') }}",
-            v: "weekly"
+            v: "weekly",
+
         });
     </script>
 
@@ -42,8 +43,14 @@
             <p class="text-background-800 dark:text-background-200 text-justify">{{ __('website.academies_map_text') }}
             </p>
 
-            <div class="grid grid-cols-6 rounded  min-h-[60vh]  mt-8" x-data="mapsearcher">
+            <div class="grid grid-cols-6 rounded  min-h-[60vh]  mt-8" x-data="mapsearcher({{ $academies_json }})" x-init="$watch('nationFilter', (value) => fiterByNation(value))">
                 <div class="flex flex-col gap-2 col-span-2">
+
+                    <div class="w-full p-2">
+                        <x-form.select name="country" label="{{ __('website.academies_map_nations') }}"
+                            x-model="nationFilter" shouldHaveEmptyOption="true" :options="$nations" />
+                    </div>
+
                     <div class="flex items-center gap-2 p-2">
                         <input type="text" placeholder="City/Zip Code" id="search"
                             class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm"
@@ -54,8 +61,8 @@
                     </div>
 
                     <div class="flex flex-col gap-2 p-2">
-                        <template x-for="academy in results" :key="academy.id">
-                            <a x-bind:href="'{{ env('APP_URL') }}/academy-profile/' + academy.id">
+                        <template x-for="academy in paginatedResults" :key="academy.id">
+                            <a x-bind:href="'{{ env('APP_URL') }}/academy-profile/' + academy.slug">
                                 <div
                                     class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2">
                                     <div class="flex flex-col gap-1">
@@ -70,10 +77,17 @@
                                 </div>
                             </a>
                         </template>
+
+                        <div class="flex justify-center gap-2">
+                            <button x-show="currentPage > 1" @click="prevPage"
+                                class="flex-1 bg-primary-500 text-white rounded p-2">Previous</button>
+                            <button x-show="currentPage < totalPages" @click="nextPage"
+                                class="flex-1 bg-primary-500 text-white rounded p-2">Next</button>
+                        </div>
                     </div>
                 </div>
                 <div class="col-span-4">
-                    <div id="google-map" class="h-full w-full"></div>
+                    <div id="google-map" class="h-[600px] w-full"></div>
                 </div>
             </div>
 

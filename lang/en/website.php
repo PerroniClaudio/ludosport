@@ -22,6 +22,7 @@ return [
     'academies_map_text' => 'Find the nearest LudoSport Academy, and start your journey today!',
     'academies_detail_users' => 'Academy members',
     'academies_detail_location' => 'Academy location',
+    'academies_map_nations' => 'Nations',
     'rankings' => 'Rankings',
     'shop' => 'Shop',
     'user_search' => 'User Search',
