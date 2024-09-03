@@ -26,9 +26,8 @@ Route::get('/athlete-profile/{id}', function () {
     return view('website.athlete-profile');
 })->name('athlete-profile');
 
-Route::get('/academy-profile/{id}', function () {
-    return view('website.academy-profile');
-})->name('academy-profile');
+Route::get('/academy-profile/{academy}', [App\Http\Controllers\AcademyController::class, 'detail'])->name('academy-profile');
+Route::get('/academy-image/{academy}', [App\Http\Controllers\AcademyController::class, 'academyImage'])->name('academy-image');
 
 /** Rankings */
 

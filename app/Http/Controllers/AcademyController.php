@@ -10,6 +10,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class AcademyController extends Controller {
     /**
@@ -119,10 +122,10 @@ class AcademyController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if($academy->is_disabled && $authRole !== 'admin') {
+        if ($academy->is_disabled && $authRole !== 'admin') {
             return redirect()->route('academies.index')->with('error', 'Academy is disabled.');
         }
-        
+
         $nations = Nation::all();
 
         foreach ($nations as $nation) {
@@ -340,10 +343,11 @@ class AcademyController extends Controller {
         }
 
 
+
         return [
             'lat' => $json['results'][0]['geometry']['location']['lat'],
             'lng' => $json['results'][0]['geometry']['location']['lng'],
-            'city' => $json['results'][0]['address_components'][2]['long_name'],
+            'city' => $json['results'][0]['address_components'][2]['types'][0] == "route" ? $json['results'][0]['address_components'][3]['long_name'] : $json['results'][0]['address_components'][2]['long_name'],
             'state' => $json['results'][0]['address_components'][5]['long_name'] ?? "",
             'country' => $json['results'][0]['address_components'][6]['long_name']  ?? "",
         ];
@@ -608,5 +612,36 @@ class AcademyController extends Controller {
         }
 
         return $authorized;
+    }
+
+    public function detail(Academy $academy) {
+
+        return view('website.academy-profile', [
+            'academy' => $academy,
+            'athletes' => $academy->athletes,
+        ]);
+    }
+
+    public function academyImage(Academy $academy) {
+
+        $cacheKey = 'academy-img-' . $academy->id;
+
+        $image = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($academy) {
+
+            $url = Storage::disk('gcs')->temporaryUrl(
+                '/academies/' . $academy->id . '/image.png',
+                now()->addMinutes(5)
+            );
+            $response = Http::get($url);
+
+            return $response->body();
+        });
+
+        $headers = [
+            'Content-Type' => 'image/png',
+            'Content-Length' => strlen($image),
+        ];
+
+        return response($image, 200, $headers);
     }
 }

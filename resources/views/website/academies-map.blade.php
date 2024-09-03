@@ -55,18 +55,20 @@
 
                     <div class="flex flex-col gap-2 p-2">
                         <template x-for="academy in results" :key="academy.id">
-                            <div class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2"
-                                @click="zoomToMarker(academy.id)">
-                                <div class="flex flex-col gap-1">
-                                    <h1 class="font-bold dark:text-background-100" x-text="academy.name"></h1>
-                                    <p x-text="academy.address"></p>
-                                    <p x-text="academy.city"></p>
-                                </div>
+                            <a x-bind:href="'{{ env('APP_URL') }}/academy-profile/' + academy.id">
                                 <div
-                                    class="flex flex-col justify-center align-center cursor-pointer hover:text-primary-500">
-                                    <x-lucide-chevron-right class="w-6 h-6" />
+                                    class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2">
+                                    <div class="flex flex-col gap-1">
+                                        <h1 class="font-bold dark:text-background-100" x-text="academy.name"></h1>
+                                        <p x-text="academy.address"></p>
+                                        <p x-text="academy.city"></p>
+                                    </div>
+                                    <div
+                                        class="flex flex-col justify-center align-center cursor-pointer hover:text-primary-500">
+                                        <x-lucide-chevron-right class="w-6 h-6" />
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                         </template>
                     </div>
                 </div>
