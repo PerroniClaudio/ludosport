@@ -85,4 +85,11 @@ return [
     'initiate' => 'Initiate',
     'academic' => 'Academic',
     'chevalier' => 'Chevalier',
+    'main_academy' => 'Main Academy',
+    'main_school' => 'Main School',
+    'set_main_personnel_academy' => 'Set main academy as personnel',
+    'set_main_athletes_academy' => 'Set main academy as athlete',
+    'set_main_personnel_school' => 'Set main school as personnel',
+    'set_main_athletes_school' => 'Set main school as athlete',
+    'confirm' => 'Confirm',
 ];

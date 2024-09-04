@@ -15,7 +15,7 @@ class Event extends Model {
      * @var array<int, string>
      */
 
-    // result_type enum: 'ranking', 'enabling'
+    // resultType: 'ranking', 'enabling'
 
     protected $fillable = [
         'name',
@@ -39,7 +39,6 @@ class Event extends Model {
         'is_free',
         'price',
         'weapon_form_id',
-        'result_type',
     ];
 
     public function nation() {
@@ -72,6 +71,10 @@ class Event extends Model {
 
     public function type() {
         return $this->belongsTo(EventType::class, 'event_type');
+    }
+    
+    public function resultType() {
+        return strtolower($this->type->name ?? '') == 'training course' ? 'enabling' : 'ranking';
     }
 
     public function weaponForm() {

@@ -2,6 +2,7 @@ export const eventpersonnel = (eventid, role) => {
     return {
         eventid,
         eventPersonnel: [],
+        filteredPersonnel: [],
         availableUsers: [],
         paginatedUsers: [],
         currentPage: 1,
@@ -34,6 +35,7 @@ export const eventpersonnel = (eventid, role) => {
                 const data = await response.json();
 
                 this.eventPersonnel = data;
+                this.filteredPersonnel = data;
                 if (this.availableUsers.length > 0) {
                     this.availableUsers = this.availableUsers.filter((user) =>
                             !this.eventPersonnel.some((person) => person.id === user.id)
@@ -42,6 +44,7 @@ export const eventpersonnel = (eventid, role) => {
             }
         },
         searchAvailableUsers: function (search) {
+            console.log("searchAvailableUsers");
             let searchvalue = search.target.value;
 
             if (searchvalue.length === 0) {
@@ -62,11 +65,12 @@ export const eventpersonnel = (eventid, role) => {
         },
         searchPersonnel: function (search) {
             console.log("searchPersonnel");
+            let searchvalue = search.target.value;
 
-            return this.eventPersonnel.filter((user) => {
+            this.filteredPersonnel = this.eventPersonnel.filter((user) => {
                 return (
-                    user.name.toLowerCase().includes(search.toLowerCase()) ||
-                    user.surname.toLowerCase().includes(search.toLowerCase())
+                    user.name.toLowerCase().includes(searchvalue.toLowerCase()) ||
+                    user.surname.toLowerCase().includes(searchvalue.toLowerCase())
                 );
             });
         },

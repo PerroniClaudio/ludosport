@@ -29,14 +29,16 @@ class UsersEventImport implements ToCollection {
             $user = User::where('email', $row[1])->first();
             $event = Event::find($row[0]);
             if ($user && $event) {
-                if($event->result_type == 'enabling') {
+                if($event->resultType() == 'enabling') {
+                    $weaponForm = $event->weaponForm();
                     if (!EventInstructorResult::where('event_id', $row[0])->where('user_id', $user->id)->exists()) {
                         $eventInstructorResult = EventInstructorResult::create([
                             'event_id' => $row[0],
                             'user_id' => $user->id,
+                            'weapon_form_id' => $weaponForm->id ?? null,
                         ]);
                     }
-                } else if ($event->result_type == 'ranking') {
+                } else if ($event->resultType() == 'ranking') {
                     if(!EventResult::where('event_id', $row[0])->where('user_id', $user->id)->exists()) {
                         $eventResult = EventResult::create([
                             'event_id' => $row[0],

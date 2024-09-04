@@ -37,4 +37,20 @@ class Export extends Model {
     public function getExportTypes() {
         return collect($this->export_types);
     }
+
+    public static function getAvailableExportsByRole($role) {
+        switch ($role) {
+            case 'admin':
+                return ['users', 'user_roles', 'users_course', 'users_academy', 'users_school', 'event_participants', 'instructor_event_results', 'event_war', 'event_style'];
+            case 'rector':
+                return ['users', 'user_roles', 'users_course', 'users_academy', 'users_school', 'event_participants'];
+            case 'dean':
+            case 'manager':
+                return ['users', 'user_roles', 'users_course', 'users_school', 'event_participants'];
+            case 'technician':
+                return ['event_participants', 'instructor_event_results', 'event_war', 'event_style'];
+            default:
+                return [];
+        }
+    }
 }

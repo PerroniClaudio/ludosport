@@ -35,7 +35,7 @@ class EventWarImport implements ToCollection
                 $this->event = Event::find($row[0]);
             }
 
-            if(!$this->event || $this->event->result_type != 'ranking') {
+            if(!$this->event || $this->event->resultType() != 'ranking') {
                 continue;
             }
 

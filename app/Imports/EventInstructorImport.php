@@ -50,7 +50,7 @@ class EventInstructorImport implements ToCollection {
                 $this->event = Event::find($row[0]);
             }
 
-            if(!$this->event || $this->event->result_type != 'enabling') {
+            if(!$this->event || $this->event->resultType() != 'enabling') {
                 continue;
             }
 
@@ -71,8 +71,10 @@ class EventInstructorImport implements ToCollection {
             $result = $row[3] ?? null;
             $notes = $row[4] ?? null;
 
+            $eventWeaponForm = $this->event->weaponForm;
+
             if (in_array($participation->stage, ['registered', 'pending'])) {
-                $participation->weapon_form_id = $weaponForm->id ?? null;
+                $participation->weapon_form_id = $weaponForm->id ?? ($eventWeaponForm->id ?? null);
                 $participation->result = $result;
                 $participation->notes = $notes;
 
@@ -84,7 +86,7 @@ class EventInstructorImport implements ToCollection {
 
                     // Se il risultato è 'passed' o 'review' si dà comunque la forma da atleta. Per quella da istruttore decidono gli admin.
                     if (in_array($result, ['passed', 'review']) && !$weaponForm->users()->where('user_id', $user->id)->exists()) {
-                        // deve aggiungere anche il ruolo da atleta se non ce l'ha?
+                        // Il ruolo da atleta non va aggiunto se non c'è già
                         $weaponForm->users()->attach($user->id);
                     }
                 }

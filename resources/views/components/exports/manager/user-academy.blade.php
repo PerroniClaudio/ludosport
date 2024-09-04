@@ -46,6 +46,9 @@
         }
     },
     addAcademy: function(id) {
+        if (this.selectedAcademies.find(academy => academy.id === id)) {
+            return;
+        }
         let course = this.availableAcademies.find(course => course.id === id);
         this.selectedAcademies.push(course);
         this.paginatedselectedAcademies = this.selectedAcademies;

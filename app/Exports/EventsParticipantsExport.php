@@ -25,7 +25,7 @@ class EventsParticipantsExport implements WithMultipleSheets {
         $filters = collect(json_decode($this->export->filters)->filters);
 
         foreach ($filters as $event) {
-            if($event->result_type == 'enabling'){
+            if($event->resultType() == 'enabling'){
                 $users = EventInstructorResult::where('event_id', $event->id)->with('user')->get()->map(function ($event_result) {
                     return [
                         $event_result->user->unique_code,

@@ -2,6 +2,7 @@
     'types' => [],
     'selected' => null,
     'event_id' => null,
+    'disabled' => false,
 ])
 
 @php
@@ -63,11 +64,14 @@
 }">
     <x-input-label for="event_type" value="Event Type" />
     <div class="flex items-center gap-2">
-        <a x-on:click.prevent="$dispatch('open-modal', 'new-type-modal')">
-            <x-lucide-plus-circle class="w-5 h-5 text-primary-500 dark:text-primary-600" />
-        </a>
+        @if ($canCreateType && !$disabled)
+            <a x-on:click.prevent="$dispatch('open-modal', 'new-type-modal')">
+                <x-lucide-plus-circle class="w-5 h-5 text-primary-500 dark:text-primary-600" />
+            </a>
+        @endif
         <select name="event_type" id="event_type" x-model="selected"
-            class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
+            class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm"
+            x-bind:disabled="{{ $disabled }}">
 
             <template x-for="type in eventTypes" :key="type.id">
                 <option x-text="type.name"></option>
@@ -75,7 +79,7 @@
 
         </select>
     </div>
-    @if ($canCreateType)
+    @if ($canCreateType && !$disabled)
         <x-modal name="new-type-modal" :show="$errors->userId->isNotEmpty()" focusable>
 
             <div class="p-6 flex flex-col gap-2">

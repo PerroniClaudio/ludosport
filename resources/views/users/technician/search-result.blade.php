@@ -44,14 +44,10 @@
                                     <x-lucide-graduation-cap
                                         class="h-5 w-5 text-background-500 dark:text-background-400" />
                                     <div>
-                                        @php
-                                            $mergedAcademies = $user->academies->merge($user->academyAthletes);
-                                        @endphp
                                         <span class="text-sm">
-                                            @if (count($mergedAcademies) > 0)
-                                                
-                                                @foreach ($mergedAcademies as $index => $academy)
-                                                    {{ $academy->name . ($index < (count($mergedAcademies) - 1) ? ', ' : '') }}
+                                            @if (count($user->academies) > 0)
+                                                @foreach ($user->academies as $index => $academy)
+                                                    {{ $academy->name . ($index < (count($user->academies) - 1) ? ', ' : '') }}
                                                 @endforeach
                                             @else
                                                 {{ __('users.no_academies') }}
@@ -66,13 +62,15 @@
                                             $mergedSchools = $user->schools->merge($user->schoolAthletes);
                                         @endphp
                                         <span class="text-sm">
-                                            @if(count($mergedSchools) > 0)
-                                                @foreach ($mergedSchools as $index => $school)
-                                                    {{ $school->name . ($index < (count($mergedSchools) - 1) ? ', ' : '') }}
-                                                @endforeach
-                                            @else
-                                                {{ __('users.no_schools') }}
-                                            @endif
+                                            <span class="text-sm">
+                                                @if (count($user->academyAthletes) > 0)
+                                                    @foreach ($user->academyAthletes as $index => $academy)
+                                                        {{ $academy->name . ($index < (count($user->academyAthletes) - 1) ? ', ' : '') }}
+                                                    @endforeach
+                                                @else
+                                                    {{ __('users.no_academies') }}
+                                                @endif
+                                            </span>
                                         </span>
                                     </div>
                                 </div>

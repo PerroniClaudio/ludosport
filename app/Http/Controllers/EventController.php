@@ -247,14 +247,12 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        Log::info('Request result_type: ' . $request->result_type);
         $request->validate([
             'name' => 'required',
             'event_type' => 'string',
             'start_date' => 'required',
             'end_date' => 'required',
             'price' => 'min:0',
-            'result_type' => 'required|in:ranking,enabling',
         ]);
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
@@ -264,16 +262,14 @@ class EventController extends Controller {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
-        // Da quando è approvato può modificarlo solo l'admin
-        if ($event->is_approved && $authRole !== 'admin') {
+        // Da quando è approvato non si può modificare
+        if ($event->is_approved) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
         $event->name = $request->name;
         $event->start_date = $request->start_date;
         $event->end_date = $request->end_date;
-
-
 
         if ($authRole === 'admin') {
 
@@ -286,11 +282,6 @@ class EventController extends Controller {
             } else {
                 $event->is_free = false;
                 $event->price = $request->price;
-            }
-
-            // Si può modificare il tipo di risultato solo se non ci sono già iscritti in nessuno dei due tipi
-            if(!$event->is_approved || $event->results()->count() == 0 || $event->instructorResults()->count() == 0) {
-                $event->result_type = $request->result_type;
             }
 
         }
@@ -372,30 +363,6 @@ class EventController extends Controller {
             return redirect()->route($redirectRoute, $id)->with('error', 'Error uploading thumbnail!');
         }
     }
-
-    public function resultTypesList(Request $request) {
-
-        // $resultTypes = [
-        //     [
-        //         'label' => 'Ranking',
-        //         'value' => 'ranking',
-        //     ],
-        //     [
-        //         'label' => 'Enabling',
-        //         'value' => 'enabling',
-        //     ],
-        // ];
-
-        // return response()->json([
-        //     'resultTypes' => $resultTypes
-        // ]);
-
-        return response()->json([
-            'ranking',
-            'enabling',
-        ]);
-    }
-
 
     public function calendar(Request $request) {
 
@@ -550,9 +517,9 @@ class EventController extends Controller {
     }
 
     public function participants(Event $event) {
-        if($event->result_type === 'enabling') {
+        if($event->resultType() === 'enabling') {
             $participants = $event->instructorResults()->with('user')->get();
-        } else if ($event->result_type === 'ranking') {
+        } else if ($event->resultType() === 'ranking') {
             $participants = $event->results()->with('user')->get();
         }
         
@@ -576,7 +543,7 @@ class EventController extends Controller {
             return response()->json(['error' => 'Invalid participants data'], 400);
         }
 
-        if($event->result_type === 'enabling') {
+        if($event->resultType() === 'enabling') {
             // Elimina i partecipanti che non sono più presenti (possibile rischio di perdita di dati, cioè elimiinazione di eventuali risultati già presenti)
             $event->instructorResults()->whereNotIn('user_id', $participants)->whereNotIn('stage', ['confirmed'])->delete();
         
@@ -589,7 +556,7 @@ class EventController extends Controller {
                     'weapon_form_id' => $event->weaponForm ? $event->weaponForm->id : null,
                 ]);
             }
-        } else if ($event->result_type === 'ranking') {
+        } else if ($event->resultType() === 'ranking') {
             // Elimina i partecipanti che non sono più presenti (possibile rischio di perdita di dati, cioè elimiinazione di eventuali risultati già presenti)
             $event->results()->whereNotIn('user_id', $participants)->delete();
     
@@ -652,9 +619,9 @@ class EventController extends Controller {
     }
 
     public function exportParticipants(Event $event) {
-        $name = "event_" . $event->name . '-' . $event->result_type . '_participants.xlsx';
+        $name = "event_" . $event->name . '-' . $event->resultType() . '_participants.xlsx';
 
-        return Excel::download(new EventParticipantsExport($event->id, $event->result_type), $name);
+        return Excel::download(new EventParticipantsExport($event->id, $event->resultType()), $name);
     }
 
     public function all() {

@@ -126,7 +126,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <template x-for="(personnel, index) in eventPersonnel">
+                    <template x-for="(personnel, index) in filteredPersonnel">
                         <tr>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="personnel.name">
                             </td>

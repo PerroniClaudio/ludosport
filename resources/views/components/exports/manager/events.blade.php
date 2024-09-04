@@ -47,6 +47,9 @@
         }
     },
     addEvent: function(id) {
+        if (this.selectedEvents.find(event => event.id === id)) {
+            return;
+        }
         let course = this.availableEvents.find(course => course.id === id);
         this.selectedEvents.push(course);
         this.paginatedselectedEvents = this.selectedEvents;

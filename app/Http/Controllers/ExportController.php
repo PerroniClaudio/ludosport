@@ -26,7 +26,7 @@ class ExportController extends Controller {
         //
         $authRole = User::find(auth()->user()->id)->getRole();
 
-        $exports = Export::with('user')->orderBy('created_at', 'desc')->get();
+        $exports = Export::whereIn('type', Export::getAvailableExportsByRole($authRole))->with('user')->orderBy('created_at', 'desc')->get();
 
         $addToRoute = $authRole == 'admin' ? '' : $authRole . '.';
 
@@ -50,16 +50,13 @@ class ExportController extends Controller {
      */
     public function create() {
         //
+        $authRole = User::find(auth()->user()->id)->getRole();
 
         $export = new Export();
-        $types = $export->getExportTypes();
+        $types = $export->getAvailableExportsByRole($authRole);
         $typesSelect = [];
 
-        $authRole = User::find(auth()->user()->id)->getRole();
         foreach ($types as $type) {
-            if(in_array($authRole, ['dean', 'manager']) && in_array($type, ['event_war', 'event_style'])) {
-                continue;
-            }
             $typesSelect[] = [
                 'value' => $type,
                 'label' => __('exports.' . $type)

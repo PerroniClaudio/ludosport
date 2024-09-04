@@ -38,8 +38,9 @@ class Import extends Model {
     public static function getAvailableImportsByRole($role) {
         switch ($role) {
             case 'admin':
-            case 'rector':
                 return ['new_users', 'users_course', 'users_academy', 'users_school', 'event_participants', 'event_war', 'event_style', 'event_instructor_results'];
+            case 'rector':
+                return ['new_users', 'users_course', 'users_academy', 'users_school', 'event_participants'];
             case 'dean':
             case 'manager':
                 return ['new_users', 'users_course', 'users_school', 'event_participants'];

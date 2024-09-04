@@ -43,6 +43,9 @@
                         <div x-show="selectedType == 'event_participants'">
                             <x-exports.technician.events type="event_participants" />
                         </div>
+                        <div x-show="selectedType == 'instructor_event_results'">
+                            <x-exports.technician.events type="instructor_event_results" />
+                        </div>
                         <div x-show="selectedType == 'event_war'">
                             <x-exports.technician.events type="event_war" />
                         </div>

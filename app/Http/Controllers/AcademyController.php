@@ -122,6 +122,10 @@ class AcademyController extends Controller {
         if($academy->is_disabled && $authRole !== 'admin') {
             return redirect()->route('academies.index')->with('error', 'Academy is disabled.');
         }
+
+        if (!$this->checkPermission($academy)) {
+            return redirect()->route('dashboard')->with('error', 'Not authorizeddd.');
+        }
         
         $nations = Nation::all();
 
@@ -589,17 +593,18 @@ class AcademyController extends Controller {
     public function checkPermission(Academy $academy, $isStrict = false) {
         // admin -> sempre; rector -> solo se l'accademia è associata a lui; 
         // l'opzione isStrict permette di escludere anche i rector, per funzionalità accessibili solo agli admin
-        $authUser = auth()->user();
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
-        $authorized = true;
+        $authorized = false;
 
         switch ($authRole) {
             case 'admin': // sempre autorizzato
+                $authorized = true;
                 break;
             case 'rector': // non autorizzato se non è la sua accademia
-                if ($authUser->academies->first()->id != $academy->id) {
-                    $authorized = false;
+                if (!$isStrict && $authUser->academies->first()->id == $academy->id) {
+                    $authorized = true;
                 }
                 break;
             default:

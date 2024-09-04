@@ -48,6 +48,9 @@
         }
     },
     addCourse: function(id) {
+        if (this.selectedCourses.find(course => course.id === id)) {
+            return;
+        }
         let course = this.availableCourses.find(course => course.id === id);
         this.selectedCourses.push(course);
         this.paginatedSelectedCourses = this.selectedCourses;

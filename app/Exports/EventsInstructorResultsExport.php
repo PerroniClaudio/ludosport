@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Event;
 use App\Models\EventInstructorResult;
 use App\Models\EventResult;
 use Maatwebsite\Excel\Concerns\Exportable;
@@ -33,18 +34,19 @@ class EventsInstructorResultsExport implements WithMultipleSheets {
 
         foreach ($filters as $event) {
             $users = [];
-            if($event->result_type == 'enabling'){
+            $event = Event::find($event->id);
+            if($event->resultType() == 'enabling'){
                 $users = EventInstructorResult::where('event_id', $event->id)->with('user')->get()->map(function ($event_result) {
                     return [
                         $event_result->user->unique_code,
                         $event_result->user->name,
                         $event_result->user->surname,
                         $event_result->user->email,
-                        $event_result->weaponForm ? $event_result->weaponForm->id : '',
-                        $event_result->weaponForm ? $event_result->weaponForm->name : '',
+                        $event_result->weaponForm->id ?? '',
+                        $event_result->weaponForm->name ?? '',
                         $event_result->result,
                         $event_result->stage,
-                        $event_result->notes,
+                        // $event_result->notes,
                     ];
                 })->toArray();
             }
@@ -79,7 +81,7 @@ class EventsParticipantsSheet implements FromArray, WithTitle{
                 "Weapon Form Name",
                 "Result",
                 "Stage",
-                "Notes",
+                // "Notes",
             ], $this->users
         ];
     }

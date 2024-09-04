@@ -43,7 +43,6 @@ class ImportController extends Controller {
         //
         $authRole = User::find(auth()->user()->id)->getRole();
 
-        $import = new Import();
         // $types = $import->getImportTypes();
         $types = Import::getAvailableImportsByRole($authRole);
         $typesSelect = [];

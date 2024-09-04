@@ -2,6 +2,7 @@ export const participants = (eventid, role) => {
     return {
         eventid,
         participants: [],
+        filteredParticipants: [],
         availableUsers: [],
         paginatedUsers: [],
         currentPage: 1,
@@ -35,6 +36,7 @@ export const participants = (eventid, role) => {
                 if (Array.isArray(data)){
 
                     this.participants = data;
+                    this.filteredParticipants = data;
                     if (this.availableUsers.length > 0) {
                         this.availableUsers = this.availableUsers.filter((user) =>
                                 !this.participants.some((participant) => participant.id === user.id)
@@ -64,11 +66,12 @@ export const participants = (eventid, role) => {
         },
         searchParticipants: function (search) {
             console.log("searchParticipants");
+            let searchvalue = search.target.value;
 
-            return this.participants.filter((user) => {
+            return this.filteredParticipants = this.participants.filter((user) => {
                 return (
-                    user.name.toLowerCase().includes(search.toLowerCase()) ||
-                    user.surname.toLowerCase().includes(search.toLowerCase())
+                    user.name.toLowerCase().includes(searchvalue.toLowerCase()) ||
+                    user.surname.toLowerCase().includes(searchvalue.toLowerCase())
                 );
             });
         },

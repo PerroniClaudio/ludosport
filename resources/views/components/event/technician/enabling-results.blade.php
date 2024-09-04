@@ -46,12 +46,6 @@
                 'columnClasses' => '', // classes to style table th
                 'rowClasses' => '', // classes to style table td]
             ],
-            [
-                'name' => 'Actions',
-                'field' => 'actions',
-                'columnClasses' => '', // classes to style table th
-                'rowClasses' => '', // classes to style table td]
-            ],
         ]" :rows="$results">
             <x-slot name="tableRows">
                 <template x-for="(column, columnIndex) in columns" :key="'column-' + columnIndex">
@@ -78,6 +72,7 @@
                         </td>
                     </template>
                 </template>
+                
                 @if ($authRole === 'admin')
                     <td
                         class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">

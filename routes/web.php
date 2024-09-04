@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Models\Event;
+use App\Models\EventInstructorResult;
 use App\Models\User;
 use App\Models\WeaponForm;
 use Illuminate\Support\Facades\Route;
@@ -61,6 +63,10 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('nation.academies.index');
     Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
     Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('users.picture.update');
+    
+    Route::post('/users/set-main-academy', [App\Http\Controllers\UserController::class, 'setMainAcademy'])->name('users.set-main-academy');
+    Route::post('/users/set-main-school', [App\Http\Controllers\UserController::class, 'setMainSchool'])->name('users.set-main-school');
+    Route::post('/users/set-main-institution', [App\Http\Controllers\UserController::class, 'setMainInstitution'])->name('users.set-main-institution');
 });
 
 /** Nazioni */
@@ -173,7 +179,6 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('events.types');
     Route::get('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'edit'])->name('events.edit_type');
     
-    Route::get('/event-result-types/json', [App\Http\Controllers\EventController::class, 'resultTypesList'])->name('events.result_types');
     Route::get('/events/{event}/review', [App\Http\Controllers\EventController::class, 'review'])->name('events.review');
     Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('events.all');
     Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('events.search');

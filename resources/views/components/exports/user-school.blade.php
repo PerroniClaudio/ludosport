@@ -46,6 +46,9 @@
         }
     },
     addSchool: function(id) {
+        if (this.selectedSchools.find(school => school.id === id)) {
+            return;
+        }
         let course = this.availableSchools.find(course => course.id === id);
         this.selectedSchools.push(course);
         this.paginatedselectedSchools = this.selectedSchools;

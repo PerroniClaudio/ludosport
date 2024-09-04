@@ -62,4 +62,12 @@ return [
     'event_map_tooltip' => 'Insert all data, then click the magnifying glass. If the position is right you can save.',
     'weapon_form' => 'Weapon Form',
     'results' => 'Results',
+    'result_passed' => 'Passed',
+    'result_failed' => 'Failed',
+    'result_review' => 'Review',
+    'result_pending' => 'Pending',
+    'result_null' => 'Pending',
+    'result_stage_registered' => 'Registered',
+    'result_stage_pending' => 'Pending',
+    'result_stage_confirmed' => 'Confirmed',
 ];

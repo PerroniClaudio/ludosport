@@ -18,6 +18,9 @@
     },
     roles: {{ collect($roles) }},
     addRole: function(id) {
+        if(this.selectedRoles.find(role => role.id === id)) {
+            return;
+        }
         let role = this.roles.find(role => role.id === id);
         this.selectedRoles.push(role);
         this.valuateRoles();

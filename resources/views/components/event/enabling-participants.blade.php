@@ -122,7 +122,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <template x-for="(participant, index) in participants">
+                    <template x-for="(participant, index) in filteredParticipants">
                         <tr>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="participant.name">
                             </td>

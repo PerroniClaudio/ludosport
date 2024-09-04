@@ -991,4 +991,56 @@ class UserController extends Controller {
             'success' => true,
         ]);
     }
+
+    public function setMainInstitution(Request $request) {
+
+        $request->validate([
+            'institution_type' => 'required|string|in:academy,school',
+            'role_type' => 'required|string|in:personnel,athlete',
+            'user_id' => 'required|integer',
+            'academy_id' => 'integer',
+            'school_id' => 'integer',
+        ]);
+
+        $user = User::find($request->user_id);
+        
+        if ($request->institution_type == 'academy') {
+            $academy = Academy::find($request->academy_id);
+            if(!$academy){
+                return response()->json([
+                    'error' => 'Academy not found',
+                ]);
+            }
+            if($request->role_type == 'personnel'){
+                // Logica per modificare l'ordine delle accademie - personale
+                
+            } else {
+                $academy->athletes()->attach($user->id);
+                // Logica per modificare l'ordine delle accademie - atleti
+                
+            }
+        } 
+        
+        if ($request->institution_type == 'school') {
+            $school = School::find($request->school_id);
+            if(!$school){
+                return response()->json([
+                    'error' => 'School not found',
+                ]);
+            }
+            if($request->role_type == 'personnel'){
+                // Logica per modificare l'ordine delle scuole - personale
+                
+            } else {
+                $school->athletes()->attach($user->id);
+                // Logica per modificare l'ordine delle scuole - atleti
+                
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
+
+    }
 }
