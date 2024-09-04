@@ -8,9 +8,6 @@ Route::get('/', function () {
     return view('homepage');
 })->name('homepage');
 
-Route::get('/academies-map', function () {
-    return view('website.academies-map');
-})->name('academies-map');
 
 
 
@@ -26,21 +23,21 @@ Route::get('/athlete-profile/{id}', function () {
     return view('website.athlete-profile');
 })->name('athlete-profile');
 
-Route::get('/academy-profile/{id}', function () {
-    return view('website.academy-profile');
-})->name('academy-profile');
+Route::get('/academies-map', [App\Http\Controllers\AcademyController::class, 'academiesMap'])->name('academies-map');
+Route::get('/academies-map/all-location', [App\Http\Controllers\AcademyController::class, 'allWithLocation'])->name('academy-list-location');
+Route::get('/academy-profile/{academy:slug}', [App\Http\Controllers\AcademyController::class, 'detail'])->name('academy-profile');
+Route::get('/academy-image/{academy}', [App\Http\Controllers\AcademyController::class, 'academyImage'])->name('academy-image');
 
 /** Rankings */
 
 Route::prefix('/website-rankings')->group(function () {
 
-    Route::get('/', function () {
-        return view('website.rankings');
-    })->name('rankings-website');
+    Route::get('/', [App\Http\Controllers\EventController::class, 'rankings'])->name('rankings-website');
 
     Route::get('/general', [App\Http\Controllers\EventController::class, 'general'])->name('rankings-events-results');
     Route::get('/events/list', [App\Http\Controllers\EventController::class, 'list'])->name('rankings-events-list');
     Route::get('/events/{event}/rankings', [App\Http\Controllers\EventController::class, 'eventResult'])->name('rankings-events-show');
+    Route::get('/nation/{nation_id}/rankings', [App\Http\Controllers\EventController::class, 'nation'])->name('rankings-events-nation');
 });
 
 Route::prefix('/shop')->group(function () {

@@ -71,6 +71,8 @@ export const googlemap = (location) => {
                     }
                 });
 
+                console.log(data.geometry.location);
+
                 this.map = new google.maps.Map(
                     document.getElementById("eventGoogleMap"),
                     {

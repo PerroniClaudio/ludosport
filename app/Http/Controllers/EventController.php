@@ -148,8 +148,7 @@ class EventController extends Controller {
         if (!($authRole === 'admin' ||
             ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
             (in_array($authRole, ['dean', 'manager']) && $event->academy_id === $authUser->academies->first()->id) ||
-            ($event->personnel()->where('user_id', $authUser->id)->exists()))
-        ) {
+            ($event->personnel()->where('user_id', $authUser->id)->exists()))) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
         if ($event->is_approved && !in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'technician'])) {
@@ -370,7 +369,7 @@ class EventController extends Controller {
 
         $authRole = User::find(auth()->user()->id)->getRole();
 
-        switch($authRole){
+        switch ($authRole) {
             case 'admin':
                 $events = Event::where('start_date', '>=', $request->start)
                     ->where('end_date', '<=', $request->end)
@@ -393,7 +392,7 @@ class EventController extends Controller {
                     ->where('end_date', '<=', $request->end)
                     ->with('user')
                     ->get();
-                break; 
+                break;
             default:
                 $events = Event::where('start_date', '>=', $request->start)
                     ->where('end_date', '<=', $request->end)
@@ -476,17 +475,17 @@ class EventController extends Controller {
         $users = User::where('is_disabled', '0')->get();
         return response()->json($users);
     }
-    
+
     public function availablePersonnel(Event $event) {
         $users = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
             $query->where('name', 'technician');
         })->get();
         return response()->json($users);
     }
-    
+
     public function personnel(Event $event) {
         $users = $event->personnel;
-    return response()->json($users);
+        return response()->json($users);
     }
 
     public function addPersonnel(Request $request) {
@@ -494,19 +493,19 @@ class EventController extends Controller {
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return response()->json(['error' => 'You are not authorized to add personnel']);
         }
-    
+
         $event = Event::find($request->event_id);
         $personnel = json_decode($request->personnel);
 
         $event->personnel()->whereNotIn('user_id', $personnel)->detach();
-        
+
         foreach ($personnel as $person) {
             // Aggiunge la persona all'accademia se non è già presente
             if (!$event->academy->personnel()->where('user_id', $person)->exists()) {
                 $event->academy->personnel()->attach($person);
             }
             // Aggiunge la persona all'evento se non è già presente
-            if($event->personnel()->where('user_id', $person)->exists()) {
+            if ($event->personnel()->where('user_id', $person)->exists()) {
                 continue;
             }
             $event->personnel()->attach($person);
@@ -522,7 +521,7 @@ class EventController extends Controller {
         } else if ($event->resultType() === 'ranking') {
             $participants = $event->results()->with('user')->get();
         }
-        
+
         $users = [];
 
         foreach ($participants as $key => $participant) {
@@ -546,9 +545,9 @@ class EventController extends Controller {
         if($event->resultType() === 'enabling') {
             // Elimina i partecipanti che non sono più presenti (possibile rischio di perdita di dati, cioè elimiinazione di eventuali risultati già presenti)
             $event->instructorResults()->whereNotIn('user_id', $participants)->whereNotIn('stage', ['confirmed'])->delete();
-        
+
             foreach ($participants as $participant) {
-                if($event->instructorResults()->where('user_id', $participant)->exists()) {
+                if ($event->instructorResults()->where('user_id', $participant)->exists()) {
                     continue;
                 }
                 $event->instructorResults()->create([
@@ -559,12 +558,12 @@ class EventController extends Controller {
         } else if ($event->resultType() === 'ranking') {
             // Elimina i partecipanti che non sono più presenti (possibile rischio di perdita di dati, cioè elimiinazione di eventuali risultati già presenti)
             $event->results()->whereNotIn('user_id', $participants)->delete();
-    
+
             foreach ($participants as $participant) {
-                if($event->results()->where('user_id', $participant)->exists()) {
+                if ($event->results()->where('user_id', $participant)->exists()) {
                     continue;
                 }
-    
+
                 $event->results()->create([
                     'user_id' => $participant,
                     'war_points' => 0,
@@ -586,16 +585,16 @@ class EventController extends Controller {
             'result_id' => 'required|exists:event_instructor_results,id',
             'result' => 'string|in:passed,failed',
         ]);
-        
+
         $result = $event->instructorResults()->find($request->result_id);
-        if(!$result){
+        if (!$result) {
             return response()->json(['error' => 'Result not related to this event']);
         }
-        
+
         $result->result = $request->result;
         $result->stage = 'confirmed';
 
-        if($result->weaponForm && $result->result === 'passed') {
+        if ($result->weaponForm && $result->result === 'passed') {
             // Aggiunge la forma da atleta all'utente se non ce l'ha già (deve aggiungere anche il ruolo?)
             if (!$result->weaponForm->users()->where('user_id', $result->user->id)->exists()) {
                 $result->weaponForm->users()->attach($result->user->id);
@@ -615,7 +614,6 @@ class EventController extends Controller {
             'success' => 'Result confirmed successfully!',
             'result' => $result
         ]);
-
     }
 
     public function exportParticipants(Event $event) {
@@ -727,6 +725,46 @@ class EventController extends Controller {
         return response()->json($results);
     }
 
+    public function nation(Request $request) {
+
+        $date = Carbon::parse($request->date);
+        $events = Event::where('end_date', '<', $date->format('Y-m-d'))->get();
+
+        $results = [];
+
+        foreach ($events as $event) {
+
+            $event_result = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
+
+            foreach ($event_result as $key => $value) {
+
+                if ($value->user->nation_id == $request['nation_id']) {
+
+                    if (!isset($results[$value->user_id])) {
+                        $results[$value->user_id] = [
+                            'user_id' => $value->user_id,
+                            'user_name' => $value->user->name . ' ' . $value->user->surname,
+                            'total_war_points' => 0,
+                            'total_style_points' => 0,
+                        ];
+                    }
+
+                    $results[$value->user_id]['total_war_points'] += $value->total_war_points;
+                    $results[$value->user_id]['total_style_points'] += $value->total_style_points;
+                }
+            }
+        }
+
+        usort($results, function ($a, $b) {
+            return $b['total_war_points'] - $a['total_war_points'];
+        });
+
+        return response()->json([
+            'results' => $results,
+            'nation' => Nation::find($request['nation_id']),
+        ]);
+    }
+
     public function eventResult(Event $event) {
 
         $results = [];
@@ -757,6 +795,7 @@ class EventController extends Controller {
     /**
      * Display the specified resource.
      */
+
     public function show(Event $event) {
         //
 
@@ -1035,5 +1074,51 @@ class EventController extends Controller {
         }
 
         return view('website.shop.event-cancel');
+    }
+
+    public function rankings() {
+
+        $countries = Nation::all();
+        $continents = [];
+
+        foreach ($countries as $key => $country) {
+
+            $continent = $country['continent'];
+
+            if (!isset($continents[$continent])) {
+                $continents[$continent] = [];
+            }
+
+            $continents[$continent][] = [
+                'value' => $country->id,
+                'label' => $country->name,
+            ];
+        }
+
+        foreach ($continents as $key => $value) {
+            $options = [];
+
+            foreach ($value as $country) {
+                $options[] = [
+                    "value" => $country['value'],
+                    "label" => $country['label']
+                ];
+            }
+
+            $continents[$key] = [
+                "label" => $key,
+                "options" => $options
+            ];
+        }
+
+
+        $europe = $continents['Europe'];
+        unset($continents['Europe']);
+        $continents = ['Europe' => $europe] + $continents;
+
+
+        return view('website.rankings', [
+            'continents' => $continents,
+        ]);
     }
 }

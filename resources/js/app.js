@@ -29,4 +29,23 @@ document.addEventListener("alpine:init", () => {
 
 window.Alpine = Alpine;
 
+document.addEventListener("click", function (event) {
+    let expandable = document.querySelector("#bigone");
+
+    if (expandable) {
+        if (event.target.tagName === "A" && event.target.hasAttribute("href")) {
+            event.preventDefault();
+
+            let reduceble = document.querySelector("#smallone");
+
+            expandable.classList.add("expand");
+            reduceble.classList.add("reduce");
+
+            setTimeout(() => {
+                window.location.href = event.target.getAttribute("href");
+            }, 1000);
+        }
+    }
+});
+
 Alpine.start();

@@ -10,6 +10,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class AcademyController extends Controller {
     /**
@@ -119,12 +122,12 @@ class AcademyController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if($academy->is_disabled && $authRole !== 'admin') {
+        if ($academy->is_disabled && $authRole !== 'admin') {
             return redirect()->route('academies.index')->with('error', 'Academy is disabled.');
         }
 
         if (!$this->checkPermission($academy)) {
-            return redirect()->route('dashboard')->with('error', 'Not authorizeddd.');
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
         
         $nations = Nation::all();
@@ -311,6 +314,27 @@ class AcademyController extends Controller {
         return response()->json($formatted_academies);
     }
 
+    public function allWithLocation(Request $request) {
+        $academies = Academy::where('is_disabled', '0')->whereNotNull('coordinates')->with(['nation'])->get();
+        $formatted_academies = [];
+
+        foreach ($academies as $key => $academy) {
+            $formatted_academies[] = [
+                'id' => $academy->id,
+                'nation' => $academy->nation->name,
+                'name' => $academy->name,
+                'address' => $academy->address,
+                'city' => $academy->city,
+                'state' => $academy->state,
+                'zip' => $academy->zip,
+                'country' => $academy->country,
+                'coordinates' => json_decode($academy->coordinates, true),
+            ];
+        }
+
+        return response()->json($formatted_academies);
+    }
+
     public function search(Request $request) {
         // $academies = Academy::where('name', 'like', '%' . $request->name . '%')->where('is_disabled', '0')->get();
 
@@ -344,16 +368,55 @@ class AcademyController extends Controller {
         }
 
 
+
         return [
             'lat' => $json['results'][0]['geometry']['location']['lat'],
             'lng' => $json['results'][0]['geometry']['location']['lng'],
-            'city' => $json['results'][0]['address_components'][2]['long_name'],
+            'city' => $json['results'][0]['address_components'][2]['types'][0] == "route" ? $json['results'][0]['address_components'][3]['long_name'] : $json['results'][0]['address_components'][2]['long_name'],
             'state' => $json['results'][0]['address_components'][5]['long_name'] ?? "",
             'country' => $json['results'][0]['address_components'][6]['long_name']  ?? "",
         ];
     }
 
     /** Ricerca lato web */
+
+    public function academiesMap() {
+
+        $academies = Academy::where('is_disabled', '0')->whereNotNull('coordinates')->with(['nation'])->get();
+        $formatted_academies = [];
+        $allnations = [];
+        $available_nations = [];
+
+        foreach ($academies as $key => $academy) {
+            $formatted_academies[] = [
+                'id' => $academy->id,
+                'nation' => $academy->nation->name,
+                'slug' => $academy->slug,
+                'nation_id' => $academy->nation->id,
+                'name' => $academy->name,
+                'address' => $academy->address,
+                'city' => $academy->city,
+                'state' => $academy->state,
+                'zip' => $academy->zip,
+                'country' => $academy->country,
+                'coordinates' => json_decode($academy->coordinates, true),
+            ];
+
+            if (!in_array($academy->nation->name, $allnations)) {
+                $available_nations[] = [
+                    'value' => $academy->nation->id,
+                    'label' => $academy->nation->name,
+                ];
+
+                $allnations[] = $academy->nation->name;
+            }
+        }
+
+        return view('website.academies-map', [
+            'academies_json' => json_encode($formatted_academies),
+            'nations' => $available_nations,
+        ]);
+    }
 
     private function getCoordinates($location) {
         $location = urlencode($location);
@@ -613,5 +676,36 @@ class AcademyController extends Controller {
         }
 
         return $authorized;
+    }
+
+    public function detail(Academy $academy) {
+
+        return view('website.academy-profile', [
+            'academy' => $academy,
+            'athletes' => $academy->athletes,
+        ]);
+    }
+
+    public function academyImage(Academy $academy) {
+
+        $cacheKey = 'academy-img-' . $academy->id;
+
+        $image = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($academy) {
+
+            $url = Storage::disk('gcs')->temporaryUrl(
+                '/academies/' . $academy->id . '/image.png',
+                now()->addMinutes(5)
+            );
+            $response = Http::get($url);
+
+            return $response->body();
+        });
+
+        $headers = [
+            'Content-Type' => 'image/png',
+            'Content-Length' => strlen($image),
+        ];
+
+        return response($image, 200, $headers);
     }
 }
