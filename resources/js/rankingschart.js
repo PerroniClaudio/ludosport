@@ -6,6 +6,7 @@ export const rankingschart = () => {
         selectedEvent: 0,
         selectedEventData: {},
         athletesData: [],
+        nationFilter: "",
         eventName: "General Rankings",
         getEventsList: async function () {
             const url = `/website-rankings/events/list?date=${today.toISOString()}`;
@@ -36,24 +37,48 @@ export const rankingschart = () => {
             }
         },
         getGeneralRankings: async function () {
-            this.selectedEvent = 0;
-            this.athletesData = [];
-            this.eventName = "General Rankings";
-            const url = `/website-rankings/general?date=${today.toISOString()}`;
-            const response = await fetch(url);
+            if (this.nationFilter != "") {
+                this.fiterByNation(this.nationFilter);
+            } else {
+                this.selectedEvent = 0;
+                this.athletesData = [];
+                this.eventName = "General Rankings";
+                const url = `/website-rankings/general?date=${today.toISOString()}`;
+                const response = await fetch(url);
 
-            if (response.ok) {
-                const data = await response.json();
+                if (response.ok) {
+                    const data = await response.json();
 
-                Object.entries(data).forEach(([key, value]) => {
-                    this.athletesData.push({
-                        id: key,
-                        name: value.user_name,
-                        war_points: value.total_war_points,
-                        style_points: value.total_style_points,
+                    Object.entries(data).forEach(([key, value]) => {
+                        this.athletesData.push({
+                            id: key,
+                            name: value.user_name,
+                            war_points: value.total_war_points,
+                            style_points: value.total_style_points,
+                        });
                     });
-                });
+                }
             }
+        },
+        fiterByNation: async function (nationId) {
+            this.events = this.events.filter((a) => a.nation_id == nationId);
+            this.athletesData = [];
+
+            const res = await fetch(
+                `/website-rankings/nation/${nationId}/rankings`
+            );
+
+            const data = await res.json();
+            Object.entries(data.results).forEach(([key, value]) => {
+                this.athletesData.push({
+                    id: key,
+                    name: value.user_name,
+                    war_points: value.total_war_points,
+                    style_points: value.total_style_points,
+                });
+            });
+
+            this.eventName = "General Rankings - " + data.nation.name;
         },
         init() {
             this.getGeneralRankings();

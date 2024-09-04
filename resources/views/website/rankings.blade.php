@@ -9,9 +9,15 @@
             <p class="text-background-800 dark:text-background-200 text-justify">{{ __('website.rankings_text') }}
             </p>
 
-            <div class="grid grid-cols-6 rounded  min-h-[60vh]  mt-8" x-data="rankingschart">
+            <div class="grid grid-cols-6 rounded  min-h-[60vh]  mt-8" x-data="rankingschart" x-init="$watch('nationFilter', (value) => fiterByNation(value))">
                 <div class="flex flex-col gap-2 col-span-2">
                     <!-- Events -->
+
+                    <div class="w-full p-2">
+                        <x-form.select name="country" label="{{ __('website.academies_map_nations') }}"
+                            x-model="nationFilter" shouldHaveEmptyOption="false" :optgroups="$continents" />
+                    </div>
+
                     <div class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer"
                         data-id="0" @click="getGeneralRankings()">
 
