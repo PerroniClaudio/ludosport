@@ -119,7 +119,7 @@
                     <div class="flex flex-col gap-2">
 
                         @foreach ($user->academies as $academy)
-                            <a href="{{ route('academies.edit', $academy->id) }}"
+                            <a href="{{ route('academy-profile', $academy->slug) }}"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>{{ $academy->name }}</span>
@@ -132,7 +132,7 @@
 
                     <div class="flex flex-col gap-2">
                         @foreach ($user->academyAthletes as $academy)
-                            <a href="{{ route('academies.edit', $academy->id) }}"
+                            <a href="{{ route('academy-profile', $academy->slug) }}"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>{{ $academy->name }}</span>
@@ -152,7 +152,7 @@
                     <div class="flex flex-col gap-2">
 
                         @foreach ($user->schools as $school)
-                            <a href="{{ route('schools.edit', $school->id) }}"
+                            <a href="#"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>{{ $school->name }}</span>
@@ -165,7 +165,7 @@
 
                     <div class="flex flex-col gap-2">
                         @foreach ($user->schoolAthletes as $schools)
-                            <a href="{{ route('schools.edit', $schools->id) }}"
+                            <a href="#"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>{{ $schools->name }}</span>
@@ -174,6 +174,46 @@
                     </div>
                 </div>
 
+            </div>
+
+            <div
+                class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 text-background-800 dark:text-background-200 ">
+                <h3 class="text-2xl">
+                    {{ __('website.user_events_placement') }}</h3>
+                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+
+                <x-table striped="false" :columns="[
+                    [
+                        'name' => 'Placement',
+                        'field' => 'placement',
+                        'columnClasses' => '', // classes to style table th
+                        'rowClasses' => '', // classes to style table td
+                    ],
+                    [
+                        'name' => 'Event Name',
+                        'field' => 'event',
+                        'columnClasses' => '', // classes to style table th
+                        'rowClasses' => '', // classes to style table td
+                    ],
+                    [
+                        'name' => 'War Points',
+                        'field' => 'war_points',
+                        'columnClasses' => '', // classes to style table th
+                        'rowClasses' => '', // classes to style table td
+                    ],
+                    [
+                        'name' => 'Style Points',
+                        'field' => 'style_points',
+                        'columnClasses' => '', // classes to style table th
+                        'rowClasses' => '', // classes to style table td
+                    ],
+                    [
+                        'name' => 'Date',
+                        'field' => 'date',
+                        'columnClasses' => '', // classes to style table th
+                        'rowClasses' => '', // classes to style table td
+                    ],
+                ]" :rows="$user->events" />
             </div>
 
 
