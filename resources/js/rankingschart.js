@@ -30,6 +30,9 @@ export const rankingschart = () => {
                     this.athletesData.push({
                         id: key,
                         name: value.user_name,
+                        academy: value.user_academy,
+                        school: value.user_school,
+                        nation: value.nation,
                         war_points: value.total_war_points,
                         style_points: value.total_style_points,
                     });
@@ -53,6 +56,9 @@ export const rankingschart = () => {
                         this.athletesData.push({
                             id: key,
                             name: value.user_name,
+                            academy: value.user_academy,
+                            school: value.user_school,
+                            nation: value.nation,
                             war_points: value.total_war_points,
                             style_points: value.total_style_points,
                         });
@@ -73,6 +79,9 @@ export const rankingschart = () => {
                 this.athletesData.push({
                     id: key,
                     name: value.user_name,
+                    academy: value.user_academy,
+                    school: value.user_school,
+                    nation: value.nation,
                     war_points: value.total_war_points,
                     style_points: value.total_style_points,
                 });

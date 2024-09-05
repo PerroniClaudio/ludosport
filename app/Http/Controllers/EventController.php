@@ -282,7 +282,6 @@ class EventController extends Controller {
                 $event->is_free = false;
                 $event->price = $request->price;
             }
-
         }
 
         if (isset($request->weapon_form_id)) {
@@ -516,7 +515,7 @@ class EventController extends Controller {
     }
 
     public function participants(Event $event) {
-        if($event->resultType() === 'enabling') {
+        if ($event->resultType() === 'enabling') {
             $participants = $event->instructorResults()->with('user')->get();
         } else if ($event->resultType() === 'ranking') {
             $participants = $event->results()->with('user')->get();
@@ -542,7 +541,7 @@ class EventController extends Controller {
             return response()->json(['error' => 'Invalid participants data'], 400);
         }
 
-        if($event->resultType() === 'enabling') {
+        if ($event->resultType() === 'enabling') {
             // Elimina i partecipanti che non sono più presenti (possibile rischio di perdita di dati, cioè elimiinazione di eventuali risultati già presenti)
             $event->instructorResults()->whereNotIn('user_id', $participants)->whereNotIn('stage', ['confirmed'])->delete();
 
@@ -708,6 +707,9 @@ class EventController extends Controller {
                     $results[$value->user_id] = [
                         'user_id' => $value->user_id,
                         'user_name' => $value->user->name . ' ' . $value->user->surname,
+                        'user_academy' => $value->user->academyAthletes->first() ? $value->user->academyAthletes->first()->name : '',
+                        'user_school' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->name : '',
+                        'nation' => $value->user->nation->name,
                         'total_war_points' => 0,
                         'total_style_points' => 0,
                     ];
@@ -744,6 +746,9 @@ class EventController extends Controller {
                         $results[$value->user_id] = [
                             'user_id' => $value->user_id,
                             'user_name' => $value->user->name . ' ' . $value->user->surname,
+                            'user_academy' => $value->user->academyAthletes->first() ? $value->user->academyAthletes->first()->name : '',
+                            'user_school' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->name : '',
+                            'nation' => $value->user->nation->name,
                             'total_war_points' => 0,
                             'total_style_points' => 0,
                         ];
@@ -776,6 +781,9 @@ class EventController extends Controller {
                 $results[$value->user_id] = [
                     'user_id' => $value->user_id,
                     'user_name' => $value->user->name . ' ' . $value->user->surname,
+                    'user_academy' => $value->user->academyAthletes->first() ? $value->user->academyAthletes->first()->name : '',
+                    'user_school' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->name : '',
+                    'nation' => $value->user->nation->name,
                     'total_war_points' => 0,
                     'total_style_points' => 0,
                 ];

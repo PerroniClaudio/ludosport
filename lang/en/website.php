@@ -59,6 +59,8 @@ return [
     'events_list_text' => 'List of all upcoming events.',
     'events_list_button' => 'View event',
     'events_list_participate' => 'Join the event',
+    'events_war_points' => 'War Points',
+    'events_style_points' => 'Style Points',
     'must_pay_fee' => 'You must pay the membership fee to participate in this event.',
     'event_participation_checkout_text' => 'Event participation fee',
     'total_price' => 'Total price',
