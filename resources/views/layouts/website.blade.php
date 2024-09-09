@@ -16,7 +16,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans text-background-900 antialiased bg-background-100 dark:bg-background-800">
+<body class="font-sans text-background-900 antialiased bg-background-100 dark:bg-background-800"
+    x-data="{ open: false }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
@@ -129,6 +130,77 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <!-- Responsive Navigation Menu -->
+    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-center bg-contain bg-no-repeat"
+        style="background-image: url('{{ env('APP_URL') }}/logo-saber-k');">
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('dashboard.title') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('academies-map')" :active="request()->routeIs('academies-map')">
+                {{ __('website.academies_map') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('academies-map')" :active="request()->routeIs('rankings-website')">
+                {{ __('website.rankings') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('academies-map')" :active="request()->routeIs('shop')">
+                {{ __('website.shop') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('academies-map')" :active="request()->routeIs('user-search')">
+                {{ __('website.user_search') }}
+            </x-responsive-nav-link>
+
+
+        </div>
+
+        @if (Auth::check())
+            <!-- Responsive Settings Options -->
+            <div class="pt-4 pb-1 border-t border-background-200 dark:border-background-600">
+                <div class="px-4">
+                    <div class="font-medium text-base text-background-800 dark:text-background-200">
+                        {{ Auth::user()->name }}
+                    </div>
+                    <div class="font-medium text-sm text-background-500">{{ Auth::user()->email }}</div>
+                </div>
+
+                <div class="mt-3 space-y-1">
+                    <x-responsive-nav-link :href="route('profile.edit')">
+                        {{ __('Profile') }}
+                    </x-responsive-nav-link>
+
+                    <!-- Authentication -->
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+
+                        <x-responsive-nav-link :href="route('logout')"
+                            onclick="event.preventDefault();
+                                            this.closest('form').submit();">
+                            {{ __('Log Out') }}
+                        </x-responsive-nav-link>
+                    </form>
+                </div>
+            </div>
+        @else
+            <div class="pt-4 pb-1 border-t border-background-200 dark:border-background-600">
+                <div class="px-4">
+                    <div class="font-medium text-base text-background-800 dark:text-background-200">
+                        {{ __('Log in') }}
+                    </div>
+                </div>
+
+                <div class="mt-3 space-y-1">
+                    <x-responsive-nav-link :href="route('login')">
+                        {{ __('Log in') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('register')">
+                        {{ __('Register') }}
+                    </x-responsive-nav-link>
+                </div>
+            </div>
+        @endif
     </div>
     <main class="min-h-screen bg-background-100 dark:bg-background-900">
         {{ $slot }}

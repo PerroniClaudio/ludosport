@@ -32,7 +32,7 @@
                         </div>
 
                         <template x-for="event in events" :key="event.id">
-                            <div class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer""
+                            <div class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer"
                                 data-id="0" @click="getDataForEvent(event.id); eventName = event.name">
                                 <span x-text="event.name"></span>
                                 <div
@@ -119,10 +119,12 @@
                             <tbody>
 
                                 <template x-for="athlete in athletesData" :key="athlete.id">
-                                    <tr>
+                                    <tr @click="window.location.href = `{{ env('APP_URL') }}/website-users/${athlete.battle_name}`"
+                                        class="cursor-pointer hover:bg-background-100 dark:hover:bg-background-800">
                                         <td
                                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                            <h1 class="font-bold dark:text-background-100" x-text="athlete.name"></h1>
+                                            <h1 class="font-bold dark:text-background-100" x-text="athlete.name">
+                                            </h1>
                                         </td>
                                         <td
                                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">

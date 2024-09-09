@@ -55,6 +55,22 @@ Route::get('/logo-saber', function () {
     return response($image, 200, $headers);
 })->name('logo-saber');
 
+Route::get('/logo-saber-k', function () {
+
+    $url = Storage::disk('gcs')->temporaryUrl(
+        "/assets/saber_K.png",
+        now()->addMinutes(5)
+    );
+
+    $response = Http::get($url);
+    $image = $response->body();
+    $headers = [
+        'Content-Type' => 'image/png',
+        'Content-Length' => strlen($image),
+    ];
+    return response($image, 200, $headers);
+})->name('logo-saber-k');
+
 
 
 Route::middleware('auth')->group(function () {

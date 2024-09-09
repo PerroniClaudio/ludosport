@@ -758,6 +758,8 @@ class EventController extends Controller {
                     $results[$value->user_id] = [
                         'user_id' => $value->user_id,
                         'user_name' => $value->user->name . ' ' . $value->user->surname,
+                        'user_battle_name' => $value->user->battle_name,
+                        'user_battle_name' => $value->user->battle_name,
                         'user_academy' => $value->user->academyAthletes->first() ? $value->user->academyAthletes->first()->name : '',
                         'user_school' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->name : '',
                         'nation' => $value->user->nation->name,
@@ -832,6 +834,7 @@ class EventController extends Controller {
                 $results[$value->user_id] = [
                     'user_id' => $value->user_id,
                     'user_name' => $value->user->name . ' ' . $value->user->surname,
+                    'user_battle_name' => $value->user->battle_name,
                     'user_academy' => $value->user->academyAthletes->first() ? $value->user->academyAthletes->first()->name : '',
                     'user_school' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->name : '',
                     'nation' => $value->user->nation->name,

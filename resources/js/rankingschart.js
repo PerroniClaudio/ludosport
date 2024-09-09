@@ -30,6 +30,7 @@ export const rankingschart = () => {
                     this.athletesData.push({
                         id: key,
                         name: value.user_name,
+                        battle_name: value.user_battle_name,
                         academy: value.user_academy,
                         school: value.user_school,
                         nation: value.nation,
@@ -56,6 +57,7 @@ export const rankingschart = () => {
                         this.athletesData.push({
                             id: key,
                             name: value.user_name,
+                            battle_name: value.user_battle_name,
                             academy: value.user_academy,
                             school: value.user_school,
                             nation: value.nation,
@@ -79,6 +81,7 @@ export const rankingschart = () => {
                 this.athletesData.push({
                     id: key,
                     name: value.user_name,
+                    battle_name: value.user_battle_name,
                     academy: value.user_academy,
                     school: value.user_school,
                     nation: value.nation,
@@ -87,7 +90,7 @@ export const rankingschart = () => {
                 });
             });
 
-            this.eventName = "General Rankings - " + data.nation.name;
+            this.eventName = "National Rankings - " + data.nation.name;
         },
         init() {
             this.getGeneralRankings();
