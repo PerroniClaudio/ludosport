@@ -43,8 +43,11 @@
             <p class="text-background-800 dark:text-background-200 text-justify">{{ __('website.academies_map_text') }}
             </p>
 
-            <div class="grid grid-cols-6 rounded  min-h-[60vh]  mt-8" x-data="mapsearcher({{ $academies_json }})" x-init="$watch('nationFilter', (value) => fiterByNation(value))">
-                <div class="flex flex-col gap-2 col-span-2">
+            <div class="flex flex-col gap-4 rounded  min-h-[60vh]  mt-8" x-data="mapsearcher({{ $academies_json }})" x-init="$watch('nationFilter', (value) => fiterByNation(value))">
+                <div>
+                    <div id="google-map" class="h-[600px] w-full"></div>
+                </div>
+                <div class="flex flex-col gap-2">
 
                     <div class="w-full p-2">
                         <x-form.select name="country" label="{{ __('website.academies_map_nations') }}"
@@ -86,9 +89,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-span-4">
-                    <div id="google-map" class="h-[600px] w-full"></div>
-                </div>
+
             </div>
 
         </section>

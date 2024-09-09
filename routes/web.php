@@ -39,6 +39,24 @@ Route::get('/logo', function () {
     return response($image, 200, $headers);
 })->name('logo');
 
+Route::get('/logo-saber', function () {
+
+    $url = Storage::disk('gcs')->temporaryUrl(
+        "/assets/saber.png",
+        now()->addMinutes(5)
+    );
+
+    $response = Http::get($url);
+    $image = $response->body();
+    $headers = [
+        'Content-Type' => 'image/png',
+        'Content-Length' => strlen($image),
+    ];
+    return response($image, 200, $headers);
+})->name('logo-saber');
+
+
+
 Route::middleware('auth')->group(function () {
     Route::post('/profile/role', [App\Http\Controllers\UserController::class, 'setUserRoleForSession'])->name('profile.role.update');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -63,7 +81,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('nation.academies.index');
     Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
     Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('users.picture.update');
-    
+
     Route::post('/users/set-main-academy', [App\Http\Controllers\UserController::class, 'setMainAcademy'])->name('users.set-main-academy');
     Route::post('/users/set-main-school', [App\Http\Controllers\UserController::class, 'setMainSchool'])->name('users.set-main-school');
     Route::post('/users/set-main-institution', [App\Http\Controllers\UserController::class, 'setMainInstitution'])->name('users.set-main-institution');
@@ -178,7 +196,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::delete('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'destroy'])->name('events.type_disable');
     Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('events.types');
     Route::get('/event-types/{eventType}', [App\Http\Controllers\EventTypeController::class, 'edit'])->name('events.edit_type');
-    
+
     Route::get('/events/{event}/review', [App\Http\Controllers\EventController::class, 'review'])->name('events.review');
     Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('events.all');
     Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('events.search');
