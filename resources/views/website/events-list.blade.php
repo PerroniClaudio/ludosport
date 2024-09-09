@@ -9,7 +9,31 @@
             <p class="text-background-800 dark:text-background-200 text-justify">{{ __('website.events_list_text') }}
             </p>
 
-            <div class="flex flex-col gap-2 p-2">
+            <div class="w-full flex items-end" x-data="{
+                nationFilter: '{{ $nationFilter }}'
+            }" x-init="$watch('nationFilter', (value) => window.location.href = `{{ env('APP_URL') }}/events-list?nation=${value}`)">
+                <div class="flex-1">
+                    <x-form.select name="country" label="{{ __('website.academies_map_nations') }}" x-model="nationFilter"
+                        shouldHaveEmptyOption="false" :optgroups="$continents" />
+                </div>
+                <a href="{{ route('events-list') }}" class="ml-2">
+                    <x-primary-button>
+                        <x-lucide-refresh-ccw class="w-4 h-6" />
+                    </x-primary-button>
+                </a>
+            </div>
+
+            <div class="flex flex-col gap-2 py-2">
+
+                @if ($events->isEmpty())
+                    <div
+                        class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-col justify-between gap-2">
+                        <p class="text-2xl font-semibold group-hover:text-primary-500">
+                            {{ __('website.events_list_no_events') }}
+                        </p>
+                    </div>
+                @endif
+
                 @foreach ($events as $event)
                     <div x-data="{
                         start_date: '{{ $event->start_date }}',

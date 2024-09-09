@@ -59,6 +59,7 @@ return [
     'events_list_text' => 'List of all upcoming events.',
     'events_list_button' => 'View event',
     'events_list_participate' => 'Join the event',
+    'events_list_no_events' => 'There are no upcoming events.',
     'events_general_points' => 'Points',
     'events_war_points' => 'War Points',
     'events_style_points' => 'Style Points',

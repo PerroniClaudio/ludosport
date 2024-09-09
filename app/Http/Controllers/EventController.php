@@ -658,14 +658,63 @@ class EventController extends Controller {
 
     // Sito web 
 
-    public function eventsList() {
+    public function eventsList(Request $request) {
+
+        $countries = Nation::all();
+        $continents = [];
+
+        foreach ($countries as $key => $country) {
+
+            $continent = $country['continent'];
+
+            if (!isset($continents[$continent])) {
+                $continents[$continent] = [];
+            }
+
+            $continents[$continent][] = [
+                'value' => $country->id,
+                'label' => $country->name,
+            ];
+        }
+
+        foreach ($continents as $key => $value) {
+            $options = [];
+
+            foreach ($value as $country) {
+                $options[] = [
+                    "value" => $country['value'],
+                    "label" => $country['label']
+                ];
+            }
+
+            $continents[$key] = [
+                "label" => $key,
+                "options" => $options
+            ];
+        }
+
+
+        $europe = $continents['Europe'];
+        unset($continents['Europe']);
+        $continents = ['Europe' => $europe] + $continents;
+
         $date = Carbon::parse(now());
 
-        $events = Event::where([
-            ['is_approved', '=', 1],
-            ['is_published', '=', 1],
-            ['end_date', '>=', $date->format('Y-m-d')],
-        ])->get();
+        if (isset($request->nation)) {
+            $events = Event::where([
+                ['is_approved', '=', 1],
+                ['is_published', '=', 1],
+                ['end_date', '>=', $date->format('Y-m-d')],
+                ['nation_id', '=', $request->nation],
+            ])->get();
+        } else {
+            $events = Event::where([
+                ['is_approved', '=', 1],
+                ['is_published', '=', 1],
+                ['end_date', '>=', $date->format('Y-m-d')],
+            ])->get();
+        }
+
 
         foreach ($events as $key => $value) {
             $events[$key]['full_address'] = $value['address'] . ", " .  $value['postal_code'] . ", " .  $value['city'] . ", " .  $value['nation']['name'];
@@ -673,7 +722,9 @@ class EventController extends Controller {
 
 
         return view('website.events-list', [
-            'events' => $events
+            'events' => $events,
+            'continents' => $continents,
+            'nationFilter' => $request->nation,
         ]);
     }
 
