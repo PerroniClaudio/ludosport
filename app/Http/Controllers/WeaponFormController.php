@@ -154,11 +154,13 @@ class WeaponFormController extends Controller {
             if(!$person->hasAnyRole(['instructor', 'technician'])) {
                 return redirect()->route('weapon-forms.edit', $weaponForm)->with('error', 'Only instructors and technicians can be added');
             }
-            if(!$weaponForm->personnel()->where('user_id', $person->id)->exists()){
-                $weaponForm->personnel()->attach($person->id, [
-                    'admin_id' => $authUser->id,
-                ]);
-            }
+            $weaponForm->personnel()->syncWithoutDetaching($person->id, [
+                'admin_id' => $authUser->id,
+            ]);
+            // Aggiunge anche la forma da atleta se non ce l'ha già. NON AGGIUNGE IL RUOLO.
+            $weaponForm->users()->syncWithoutDetaching($person->id, [
+                'admin_id' => $authUser->id,
+            ]);
         }
 
         return redirect()->route('weapon-forms.edit', $weaponForm)->with('success', 'Personnel added successfully');

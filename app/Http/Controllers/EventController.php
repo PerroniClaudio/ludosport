@@ -594,7 +594,7 @@ class EventController extends Controller {
         $result->stage = 'confirmed';
 
         if ($result->weaponForm && $result->result === 'passed') {
-            // Aggiunge la forma da atleta all'utente se non ce l'ha già (deve aggiungere anche il ruolo?)
+            // Aggiunge la forma da atleta all'utente se non ce l'ha già. NON DEVE AGGIUNGERE IL RUOLO. 
             if (!$result->weaponForm->users()->where('user_id', $result->user->id)->exists()) {
                 $result->weaponForm->users()->attach($result->user->id);
             }
