@@ -820,10 +820,13 @@ class UserController extends Controller {
         if ($request->file('profilepicture') != null) {
 
             $file = $request->file('profilepicture');
-            $file_name = time() . '_' . $file->getClientOriginalName();
-            $path = "users/" . $id . "/" . $file_name;
 
+            $file_extension = $file->getClientOriginalExtension();
+            $file_name = time() . '_avatar.' . $file_extension;
+            $path = "users/" . $id . "/" . $file_name;
             $storeFile = $file->storeAs("users/" . $id . "/", $file_name, "gcs");
+
+
 
             if ($storeFile) {
                 $user = User::find($id);
@@ -836,6 +839,32 @@ class UserController extends Controller {
             }
         } else {
             return redirect()->route($redirectRoute, $id)->with('error', 'Error uploading profile picture!');
+        }
+    }
+
+    public function userUploadPicture($id, Request $request) {
+
+        if ($request->file('profilepicture') != null) {
+            $file = $request->file('profilepicture');
+
+
+
+            $file_extension = $file->getClientOriginalExtension();
+            $file_name = time() . '_avatar.' . $file_extension;
+            $path = "users/" . $id . "/" . $file_name;
+            $storeFile = $file->storeAs("users/" . $id . "/", $file_name, "gcs");
+
+            if ($storeFile) {
+                $user = User::find($id);
+                $user->profile_picture = $path;
+                $user->save();
+
+                return redirect()->route('profile.edit', $user->id)->with('success', 'Profile picture uploaded successfully!');
+            } else {
+                ddd($storeFile);
+            }
+        } else {
+            return redirect()->route('profile.edit', $id)->with('error', 'Error uploading profile picture!');
         }
     }
 
@@ -1031,44 +1060,43 @@ class UserController extends Controller {
         ]);
 
         $user = User::find($request->user_id);
-        
+
         if ($request->institution_type == 'academy') {
             $academy = Academy::find($request->academy_id);
-            if(!$academy){
+            if (!$academy) {
                 return response()->json([
                     'error' => 'Academy not found',
                 ]);
             }
-            if($request->role_type == 'personnel'){
+            if ($request->role_type == 'personnel') {
                 // Logica per modificare l'ordine delle accademie - personale
-                
+
             } else {
                 $academy->athletes()->attach($user->id);
                 // Logica per modificare l'ordine delle accademie - atleti
-                
+
             }
-        } 
-        
+        }
+
         if ($request->institution_type == 'school') {
             $school = School::find($request->school_id);
-            if(!$school){
+            if (!$school) {
                 return response()->json([
                     'error' => 'School not found',
                 ]);
             }
-            if($request->role_type == 'personnel'){
+            if ($request->role_type == 'personnel') {
                 // Logica per modificare l'ordine delle scuole - personale
-                
+
             } else {
                 $school->athletes()->attach($user->id);
                 // Logica per modificare l'ordine delle scuole - atleti
-                
+
             }
         }
 
         return response()->json([
             'success' => true,
         ]);
-
     }
 }

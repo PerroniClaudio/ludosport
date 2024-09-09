@@ -249,7 +249,8 @@
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
                 @if ($user->profile_picture)
-                    <img src="{{ $user->profile_picture }}" alt="{{ $user->name }}" class="w-1/3 rounded-lg">
+                    <img src="{{ route('user.profile-picture-show', $user->id) }}" alt="{{ $user->name }}"
+                        class="w-1/3 rounded-lg">
                 @endif
 
             </div>
@@ -265,7 +266,7 @@
                 setRoleType(type) {
                     this.roleType = type;
                 }
-
+            
             }">
 
                 <div
@@ -276,12 +277,12 @@
 
                     <div class="flex justify-between">
                         <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
-                        
+
                         {{-- <x-primary-button :disabled="$user->academies()->count() < 2"
                             x-on:click.prevent="setInstitutionType('academy'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
                             <span>{{ __('users.set_main_personnel_academy') }}</span>
                         </x-primary-button> --}}
-                    
+
                     </div>
 
                     <div class="flex flex-col gap-2">
@@ -396,81 +397,83 @@
 
                 {{-- Modal con form dinamico per modifica accademia/scuola principale --}}
                 <x-modal name="set-main-institution-modal" :show="$errors->get('name') || $errors->get('go_to_edit')" focusable>
-                    <form method="post" action="{{ route('users.set-main-institution') }}" class="p-6 flex flex-col gap-4"
-                        x-ref="form">
+                    <form method="post" action="{{ route('users.set-main-institution') }}"
+                        class="p-6 flex flex-col gap-4" x-ref="form">
                         @csrf
-            
+
                         <div>
                             <div class="flex items-center justify-between">
                                 <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
-                                    <div x-show="institutionType == 'academy' && roleType == 'personnel'" >
+                                    <div x-show="institutionType == 'academy' && roleType == 'personnel'">
                                         {{ __('users.set_main_personnel_academy') }}
                                     </div>
-                                    <div x-show="institutionType == 'academy' && roleType == 'athlete'" >
+                                    <div x-show="institutionType == 'academy' && roleType == 'athlete'">
                                         {{ __('users.set_main_athletes_academy') }}
                                     </div>
-                                    <div x-show="institutionType == 'school' && roleType == 'personnel'" >
+                                    <div x-show="institutionType == 'school' && roleType == 'personnel'">
                                         {{ __('users.set_main_personnel_school') }}
                                     </div>
-                                    <div x-show="institutionType == 'school' && roleType == 'athlete'" >
+                                    <div x-show="institutionType == 'school' && roleType == 'athlete'">
                                         {{ __('users.set_main_athletes_school') }}
                                     </div>
                                 </h2>
                                 <div>
-                                    <x-lucide-x class="w-6 h-6 text-background-500 dark:text-background-300 cursor-pointer"
+                                    <x-lucide-x
+                                        class="w-6 h-6 text-background-500 dark:text-background-300 cursor-pointer"
                                         x-on:click="$dispatch('close-modal', 'set-main-institution-modal')" />
                                 </div>
                             </div>
                             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                         </div>
-                       
+
                         <input type="hidden" name="institution_type" :value="institutionType">
                         <input type="hidden" name="role_type" :value="roleType">
-                        <input type="hidden" name="user_id" value="{{$user->id}}">
+                        <input type="hidden" name="user_id" value="{{ $user->id }}">
 
 
-                        <div x-show="institutionType == 'academy' && roleType == 'personnel'" >
+                        <div x-show="institutionType == 'academy' && roleType == 'personnel'">
                             @php
-                                $academiesPersonnelOptions = $user->academies->map(function($academy) {
+                                $academiesPersonnelOptions = $user->academies->map(function ($academy) {
                                     return ['value' => $academy->id, 'label' => $academy->name];
                                 });
-                                $selectedAcademy = ['value' => $user->academies->first()->id ?? null, 'label' => $user->academies->first()->name ?? null];
+                                $selectedAcademy = [
+                                    'value' => $user->academies->first()->id ?? null,
+                                    'label' => $user->academies->first()->name ?? null,
+                                ];
                             @endphp
-                            <x-form.select name="academy_id" label="{{__('academies.academy') }}" 
-                                :options="$academiesPersonnelOptions" x-model="selectedAcademy" />
+                            <x-form.select name="academy_id" label="{{ __('academies.academy') }}" :options="$academiesPersonnelOptions"
+                                x-model="selectedAcademy" />
                         </div>
 
-                        <div x-show="institutionType == 'academy' && roleType == 'athlete'" >
+                        <div x-show="institutionType == 'academy' && roleType == 'athlete'">
                             @php
-                                $academiesAthleteOptions = $user->academyAthletes->map(function($academy) {
+                                $academiesAthleteOptions = $user->academyAthletes->map(function ($academy) {
                                     return ['value' => $academy->id, 'label' => $academy->name];
                                 });
                                 // $selectedAcademy = ['value' => $user->academyAthletes->first()->id, 'label' => $user->academyAthletes->first()->name];
                             @endphp
-                            <x-form.select name="academy_id" label="{{__('academies.academy') }}" 
-                                :options="$academiesAthleteOptions"  />
+                            <x-form.select name="academy_id" label="{{ __('academies.academy') }}"
+                                :options="$academiesAthleteOptions" />
                         </div>
 
-                        <div x-show="institutionType == 'school' && roleType == 'personnel'" >
+                        <div x-show="institutionType == 'school' && roleType == 'personnel'">
                             @php
-                                $schoolsPersonnelOptions = $user->schools->map(function($school) {
+                                $schoolsPersonnelOptions = $user->schools->map(function ($school) {
                                     return ['value' => $school->id, 'label' => $school->name];
                                 });
                                 // $selectedSchool = ['value' => $user->schools->first()->id, 'label' => $user->schools->first()->name];
                             @endphp
-                            <x-form.select name="school_id" label="{{__('school.school') }}" 
-                                :options="$schoolsPersonnelOptions" />
+                            <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsPersonnelOptions" />
                         </div>
 
-                        <div x-show="institutionType == 'school' && roleType == 'athlete'" >
+                        <div x-show="institutionType == 'school' && roleType == 'athlete'">
                             @php
-                                $schoolsAthleteOptions = $user->schoolAthletes->map(function($school) {
+                                $schoolsAthleteOptions = $user->schoolAthletes->map(function ($school) {
                                     return ['value' => $school->id, 'label' => $school->name];
                                 });
                                 // $selectedSchool = ['value' => $user->schoolAthletes->first()->id, 'label' => $user->schoolAthletes->first()->name];
                             @endphp
-                            <x-form.select name="school_id" label="{{__('school.school') }}" 
-                                :options="$schoolsAthleteOptions" />
+                            <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsAthleteOptions" />
                         </div>
 
 
@@ -479,7 +482,7 @@
                                 <span>{{ __('users.confirm') }}</span>
                             </x-primary-button>
                         </div>
-            
+
                     </form>
                 </x-modal>
 

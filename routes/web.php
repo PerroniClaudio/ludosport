@@ -58,7 +58,7 @@ Route::get('/logo-saber', function () {
 Route::get('/logo-saber-k', function () {
 
     $url = Storage::disk('gcs')->temporaryUrl(
-        "/assets/saber_K.png",
+        "/assets/sabe.png",
         now()->addMinutes(5)
     );
 
@@ -71,6 +71,21 @@ Route::get('/logo-saber-k', function () {
     return response($image, 200, $headers);
 })->name('logo-saber-k');
 
+Route::get('/user/{user}/profile-picture', function (User $user) {
+
+    $url = Storage::disk('gcs')->temporaryUrl(
+        $user->profile_picture,
+        now()->addMinutes(5)
+    );
+
+    $response = Http::get($url);
+    $image = $response->body();
+    $headers = [
+        'Content-Type' => 'image/png',
+        'Content-Length' => strlen($image),
+    ];
+    return response($image, 200, $headers);
+})->name('user.profile-picture-show');
 
 
 Route::middleware('auth')->group(function () {
@@ -78,6 +93,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::put('/profile/{user}/picture', [App\Http\Controllers\UserController::class, 'userUploadPicture'])->name('users.update-pfp');
 });
 
 /** Users */
