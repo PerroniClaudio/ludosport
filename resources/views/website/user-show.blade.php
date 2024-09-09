@@ -50,6 +50,16 @@
                             </div>
                         </div>
 
+                        @if ($user->instagram != '')
+                            <div>
+                                <a href="https://www.instagram.com/{{ $user->instagram }}" target="_blank"
+                                    class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex items-center gap-2">
+                                    <x-lucide-camera class="w-6 h-6 text-background-800 dark:text-background-200" />
+                                    <p>{{ $user->instagram }}</p>
+                                </a>
+                            </div>
+                        @endif
+
 
                         <div class="grid grid-cols-2 gap-2 text-background-800 dark:text-background-200"
                             x-data="{
@@ -104,6 +114,17 @@
                 </div>
 
             </section>
+
+            @if ($user->bio != '')
+                <section
+                    class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 text-background-800 dark:text-background-200">
+                    <div class="flex-1">
+                        <h3 class="text-2xl">{{ __('website.user_profile_bio') }}</h3>
+                        <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                        <p class="text-background-800 dark:text-background-200">{{ $user->bio }}</p>
+                    </div>
+                </section>
+            @endif
 
 
             <div class="grid grid-cols-2 gap-4">

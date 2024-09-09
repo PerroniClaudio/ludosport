@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="my-6 space-y-6">
         @csrf
         @method('patch')
 
@@ -50,6 +50,13 @@
             @endif
         </div>
 
+
+        <x-form.input name="instagram" label="Instagram" type="text" required="{{ true }}" :value="$user->instagram"
+            placeholder="{{ fake()->username() }}" />
+
+        <x-form.textarea name="bio" label="Bio" required="{{ false }}" :value="$user->bio" />
+
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
@@ -59,4 +66,8 @@
             @endif
         </div>
     </form>
+
+    <a href={{ '/website-users/' . $user->battle_name }}>
+        <x-secondary-button>{{ __('website.user_profile_visit') }}</x-secondary-button>
+    </a>
 </section>

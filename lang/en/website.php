@@ -26,6 +26,8 @@ return [
     'rankings' => 'Rankings',
     'shop' => 'Shop',
     'user_search' => 'User Search',
+    'user_profile_visit' => 'Visit Profile',
+    'user_profile_bio' => 'About Me',
     'user_events_placement' => 'Events Placement',
     'rankings_text' => 'Global Rank of LudoSport Active Athletes is determined by the sum of the War Scores and Style Scores obtained participating to Individual Rated tournaments up to National Tournament.',
     'shop_title' => 'Shop',

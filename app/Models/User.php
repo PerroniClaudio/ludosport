@@ -35,6 +35,8 @@ class User extends Authenticatable implements MustVerifyEmail {
         'active_fee_id',
         'has_paid_fee',
         'battle_name',
+        'instagram',
+        'bio',
     ];
 
     public function toSearchableArray() {
@@ -75,7 +77,7 @@ class User extends Authenticatable implements MustVerifyEmail {
 
         static::creating(function ($user) {
 
-            if ($user->email){
+            if ($user->email) {
                 $user->email = strtolower($user->email);
             }
 
@@ -170,11 +172,11 @@ class User extends Authenticatable implements MustVerifyEmail {
     // Solo le richieste approvate. Le altre le vedono gli admin partendo da weaponForms
     public function weaponFormsPersonnel() {
         return $this->belongsToMany(WeaponForm::class, 'weapon_forms_personnel', 'user_id', 'weapon_form_id')
-            ->wherePivot('status', 'approved')            
+            ->wherePivot('status', 'approved')
             ->withPivot(['status', 'created_at as awarded_at'])
             ->withTimestamps();
     }
-    
+
     public function languages() {
         return $this->belongsToMany(Language::class, 'users_languages', 'user_id', 'language_id');
     }
@@ -426,7 +428,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     public function canModifyRole($roleLabel) {
         $requestingUserRole = $this->getRole();
 
-        switch($requestingUserRole){
+        switch ($requestingUserRole) {
             case 'admin':
                 return true;
                 break;
@@ -445,7 +447,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
     }
 
-    public function getEditableRoles (){
+    public function getEditableRoles() {
         $authRole = $this->getRole();
         switch ($authRole) {
             case 'admin':
