@@ -51,7 +51,7 @@
         </div>
 
 
-        <x-form.input name="instagram" label="Instagram" type="text" required="{{ true }}" :value="$user->instagram"
+        <x-form.input name="instagram" label="Instagram" type="text" required="{{ false }}" :value="$user->instagram"
             placeholder="{{ fake()->username() }}" />
 
         <x-form.textarea name="bio" label="Bio" required="{{ false }}" :value="$user->bio" />
