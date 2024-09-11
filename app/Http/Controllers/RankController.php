@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Rank;
 use App\Models\RankRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class RankController extends Controller {
@@ -68,6 +69,33 @@ class RankController extends Controller {
         ]);
     }
 
+    public function rankRequestForm() {
+        $ranks = Rank::all();
+        $authUserRole = User::find(auth()->user()->id)->getRole();
+
+        if ($authUserRole === 'instructor') {
+            $authSchools = auth()->user()->schools->pluck('id')->toArray();
+
+            $users = User::whereHas('schools', function ($query) use ($authSchools) {
+                $query->whereIn('school_id', $authSchools);
+            })->get();
+        }
+
+        $formattedRanks = [];
+
+        foreach ($ranks as $rank) {
+            $formattedRanks[] = [
+                'value' => $rank->id,
+                'label' => $rank->name,
+            ];
+        }
+
+        return view('ranks.create-request', [
+            'ranks' => $formattedRanks,
+            'users' => $users ?? User::all(),
+        ]);
+    }
+
     public function newRequest(Request $request) {
         $request->validate([
             'rank_id' => 'required|exists:ranks,id',
@@ -83,7 +111,8 @@ class RankController extends Controller {
             'reason' => $request->reason,
         ]);
 
-        return redirect()->route('users.edit', $request->user_to_promote_id)->with('success', 'Rank promotion request submitted.');
+
+        return redirect()->route('users.rank.request')->with('success', 'Rank promotion request submitted.');
     }
 
     public function acceptRequest(RankRequest $request) {

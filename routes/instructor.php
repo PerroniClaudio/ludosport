@@ -35,10 +35,10 @@ Route::prefix('instructor')->middleware('auth')->middleware('role:admin,instruct
         Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('instructor.events.save.location');
         Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('instructor.events.update.thumbnail');
         Route::post('events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('instructor.events.update');
-    
+
         Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('instructor.events.participants');
         Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('instructor.events.available');
-    
+
         Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('instructor.events.participants.add');
         Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('instructor.events.participants.export');
     });
