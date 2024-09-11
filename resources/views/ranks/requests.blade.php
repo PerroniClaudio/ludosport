@@ -21,12 +21,20 @@
                         this.request_id = id
                         $dispatch('open-modal', 'accept-request-modal')
                     },
+                    showAcceptAllRequestModal: function(id) {
+                        this.request_id = 0
+                        $dispatch('open-modal', 'accept-all-request-modal')
+                    },
                     showRejectRequestModal: function(id) {
                         this.request_id = id
                         $dispatch('open-modal', 'Reject-request-modal')
                     },
                     confirmAcceptRequest: async function() {
                         window.location.href = '/rank-requests/' + this.request_id + '/approve'
+                
+                    },
+                    confirmAcceptAllRequest: async function() {
+                        window.location.href = '/rank-requests/approve-all'
                 
                     },
                     confirmRejectRequest: async function() {
@@ -105,7 +113,7 @@
                     </x-table>
 
                     <div class="flex flex-row-reverse w-full">
-                        <x-primary-button>
+                        <x-primary-button @click="showAcceptAllRequestModal" type="button">
                             {{ __('ranks.requests_accept_all') }}
                         </x-primary-button>
                     </div>
@@ -124,6 +132,19 @@
                                     {{ __('ranks.requests_cancel') }}
                                 </x-secondary-button>
                                 <x-primary-button @click="confirmAcceptRequest">
+                                    {{ __('ranks.requests_accept') }}
+                                </x-primary-button>
+                            </div>
+                        </div>
+                    </x-modal>
+                    <x-modal name="accept-all-request-modal" :show="false">
+                        <div class="p-6 flex flex-col gap-4">
+                            <p>{{ __('ranks.requests_accept_text_all') }}</p>
+                            <div class="flex justify-end gap-4">
+                                <x-secondary-button x-on:click="$dispatch('close-modal', 'accept-request-modal')">
+                                    {{ __('ranks.requests_cancel') }}
+                                </x-secondary-button>
+                                <x-primary-button @click="confirmAcceptAllRequest">
                                     {{ __('ranks.requests_accept') }}
                                 </x-primary-button>
                             </div>

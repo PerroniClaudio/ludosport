@@ -301,11 +301,11 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::get('/rank-requests', [App\Http\Controllers\RankController::class, 'requests'])->name('rank-requests.index');
+    Route::get('/rank-requests/approve-all', [App\Http\Controllers\RankController::class, 'acceptAllRequests'])->name('rank-requests.approve-all');
+
     Route::get('/rank-requests/{request}/approve', [App\Http\Controllers\RankController::class, 'acceptRequest'])->name('rank-requests.approve');
     Route::get('/rank-requests/{request}/reject', [App\Http\Controllers\RankController::class, 'rejectRequest'])->name('rank-requests.reject');
     Route::get('/rank-requests/{request}/delete', [App\Http\Controllers\RankController::class, 'deleteRequest'])->name('rank-requests.delete');
-
-    Route::get('/rank-requests/{rankRequest}/approve-all', [App\Http\Controllers\RankController::class, 'acceptAllRequests'])->name('rank-requests.approve-all');
 });
 
 
