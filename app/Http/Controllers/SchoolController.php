@@ -311,6 +311,10 @@ class SchoolController extends Controller {
         $isInThisAcademy = $academy->athletes->where('id', $athlete->id)->count();
         if(!$isInThisAcademy){
             $academy->athletes()->attach($athlete);
+            if($athlete->academyAthletes()->count() > 1) {
+                $noAcademy = Academy::where('slug', 'no-academy')->first();
+                $noAcademy->athletes()->detach($athlete->id);
+            }
         }
         
         $school->athletes()->attach($athlete);

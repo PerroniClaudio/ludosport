@@ -1,10 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Models\Event;
-use App\Models\EventInstructorResult;
 use App\Models\User;
-use App\Models\WeaponForm;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -333,6 +330,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/weapon-forms', [App\Http\Controllers\WeaponFormController::class, 'index'])->name('weapon-forms.index');
     Route::get('/weapon-forms/{weaponForm}', [App\Http\Controllers\WeaponFormController::class, 'edit'])->name('weapon-forms.edit');
     Route::post('/weapon-forms/{weaponForm}/personnel', [App\Http\Controllers\WeaponFormController::class, 'addPersonnel'])->name('weapon-forms.personnel.store');
+    Route::post('/weapon-forms/{weaponForm}/athletes', [App\Http\Controllers\WeaponFormController::class, 'addAthletes'])->name('weapon-forms.athletes.store');
     Route::post('/weapon-forms/{weaponForm}', [App\Http\Controllers\WeaponFormController::class, 'update'])->name('weapon-forms.update');
 });
 

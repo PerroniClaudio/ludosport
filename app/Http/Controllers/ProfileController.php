@@ -26,6 +26,14 @@ class ProfileController extends Controller {
 
         $request->user()->fill($request->validated());
 
+        $surname = $request->surname;
+        $battle_name = $request->battle_name ?? ($request->name . $request->surname . rand(10, 99));
+        
+        $request->user()->update([
+            'surname' => $surname,
+            'battle_name' => $battle_name,
+        ]);
+
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }

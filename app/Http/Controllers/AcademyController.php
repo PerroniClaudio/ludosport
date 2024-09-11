@@ -294,6 +294,10 @@ class AcademyController extends Controller {
         $athlete = User::find($request->athlete_id);
 
         $academy->athletes()->attach($athlete);
+        if($athlete->academyAthletes()->count() > 1) {
+            $noAcademy = Academy::where('slug', 'no-academy')->first();
+            $noAcademy->athletes()->detach($athlete->id);
+        }
 
         $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
         return redirect()->route($redirectRoute, $academy)->with('success', 'Athlete added successfully!');
@@ -367,14 +371,18 @@ class AcademyController extends Controller {
             return null;
         }
 
-
+        $addressComponents = $json['results'][0]['address_components'];
+        $city = "";
+        if(isset($addressComponents[2])){
+            $city = $addressComponents[2]['types'][0] == "route" ? ($addressComponents[3]['long_name'] ?? "") : $addressComponents[2]['long_name'];
+        }
 
         return [
             'lat' => $json['results'][0]['geometry']['location']['lat'],
             'lng' => $json['results'][0]['geometry']['location']['lng'],
-            'city' => $json['results'][0]['address_components'][2]['types'][0] == "route" ? $json['results'][0]['address_components'][3]['long_name'] : $json['results'][0]['address_components'][2]['long_name'],
-            'state' => $json['results'][0]['address_components'][5]['long_name'] ?? "",
-            'country' => $json['results'][0]['address_components'][6]['long_name']  ?? "",
+            'city' => $city,
+            'state' => $addressComponents[5]['long_name'] ?? "",
+            'country' => $addressComponents[6]['long_name']  ?? "",
         ];
     }
 

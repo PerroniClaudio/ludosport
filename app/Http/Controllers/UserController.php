@@ -882,7 +882,7 @@ class UserController extends Controller {
                     return $this->handleInstructor($user, 0);
                 }
             case 'athlete':
-                return $this->handleAthlere($user);
+                return $this->handleAthlete($user);
             default:
                 $view = 'dashboard.' . $role . '.index';
                 return view($view);
@@ -958,7 +958,7 @@ class UserController extends Controller {
         }
     }
 
-    private function handleAthlere($user) {
+    private function handleAthlete($user) {
 
         $announcements = Announcement::where('is_deleted', false)->whereIn('role_id', $user->roles->pluck('id'))->where('type', '!=', '4')->orderBy('created_at', 'desc')->get();
         $direct_messages = Announcement::where([['is_deleted', false], ['type', '4'], ['user_id', $user->id]])->orderBy('created_at', 'desc')->get();
@@ -1072,7 +1072,7 @@ class UserController extends Controller {
                 // Logica per modificare l'ordine delle accademie - personale
 
             } else {
-                $academy->athletes()->attach($user->id);
+                // $academy->athletes()->attach($user->id);
                 // Logica per modificare l'ordine delle accademie - atleti
 
             }
@@ -1089,7 +1089,7 @@ class UserController extends Controller {
                 // Logica per modificare l'ordine delle scuole - personale
 
             } else {
-                $school->athletes()->attach($user->id);
+                // $school->athletes()->attach($user->id);
                 // Logica per modificare l'ordine delle scuole - atleti
 
             }

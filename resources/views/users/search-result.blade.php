@@ -42,21 +42,31 @@
                                     <x-lucide-graduation-cap
                                         class="h-5 w-5 text-background-500 dark:text-background-400" />
                                     <div>
-                                        @if (count($user->academies) > 0)
-                                            @foreach ($user->academies as $academy)
-                                                <span class="text-sm">{{ $academy->name }}</span>
-                                            @endforeach
-                                        @else
-                                            <span class="text-sm">{{ __('users.no_academies') }}</span>
-                                        @endif
+                                        <span class="text-sm">
+                                            @if (count($user->academies) > 0)
+                                                @foreach ($user->academies as $index => $academy)
+                                                    {{ $academy->name . ($index < (count($user->academies) - 1) ? ', ' : '') }}
+                                                @endforeach
+                                            @else
+                                                {{ __('users.no_academies') }}
+                                            @endif
+                                        </span>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <x-lucide-swords class="h-5 w-5 text-background-500 dark:text-background-400" />
                                     <div>
-                                        @foreach ($user->academyAthletes as $academy)
-                                            <span class="text-sm">{{ $academy->name }}</span>
-                                        @endforeach
+                                        <span class="text-sm">
+                                            <span class="text-sm">
+                                                @if (count($user->academyAthletes) > 0)
+                                                    @foreach ($user->academyAthletes as $index => $academy)
+                                                        {{ $academy->name . ($index < (count($user->academyAthletes) - 1) ? ', ' : '') }}
+                                                    @endforeach
+                                                @else
+                                                    {{ __('users.no_academies') }}
+                                                @endif
+                                            </span>
+                                        </span>
                                     </div>
                                 </div>
 

@@ -44,4 +44,23 @@ class School extends Model {
     public function clan() {
         return $this->hasMany(Clan::class)->where('is_disabled', '0');
     }
+
+    public function dean() {
+        $deans = $this->personnel()->whereHas('roles', function ($query) {
+            $query->where('name', 'dean');
+        })->get();
+        // Se lo trova tra quelli che hanno la scuola come principale restituisce quello
+        foreach ($deans as $r) {
+            if ($r->schools->first()->id == $this->id) {
+                return $r;
+            }
+        }
+        // Altrimenti cerca tra tutto il personale (anche se non ha la scuola come principale)
+        foreach ($deans as $r) {
+            if ($r->schools->firstWhere('id', $this->id)) {
+                return $r;
+            }
+        }
+        return null;
+    }
 }

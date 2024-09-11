@@ -58,7 +58,7 @@
             </x-table>
 
             <form class="flex justify-end" method="POST"
-                action="{{ route('weapon-forms.personnel.store', $weapon_form_id) }}">
+                action="{{ route('weapon-forms.athletes.store', $weapon_form_id) }}">
                 @csrf
                 <input type="hidden" name="users" x-model="selectedUsersJson" />
 

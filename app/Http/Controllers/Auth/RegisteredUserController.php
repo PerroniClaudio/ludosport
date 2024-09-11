@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Academy;
+use App\Models\Announcement;
 use App\Models\Nation;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -46,11 +47,18 @@ class RegisteredUserController extends Controller {
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'nation_id' => $nation->id,
+            'battle_name' => $request->battle_name ?? ($request->name . $request->surname . rand(10, 99)),
         ]);
 
         $user->academyAthletes()->attach($academy->id);
         $user->roles()->attach(7);
 
+        Announcement::create([
+            'object' => 'New user registered',
+            'content' => 'A new user has registered to the platform. - Name: ' . $user->name . ' ' . $user->surname . ' - Email: ' . $user->email . ' - Academy: ' . $academy->name . '.',
+            'type' => 4,
+            'user_id' => $academy->rector()->id ?? null,
+        ]);
 
         event(new Registered($user));
 

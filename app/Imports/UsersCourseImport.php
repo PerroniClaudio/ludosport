@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Clan;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -28,6 +29,7 @@ class UsersCourseImport implements ToCollection {
                 $user->academyAthletes()->syncWithoutDetaching([$course->academy->id]);
                 $user->schoolAthletes()->syncWithoutDetaching([$course->school->id]);
                 $user->clans()->syncWithoutDetaching([$course->id]);
+                $user->roles()->syncWithoutDetaching(Role::where('label', 'athlete')->first()->id);
             }
         }
     }

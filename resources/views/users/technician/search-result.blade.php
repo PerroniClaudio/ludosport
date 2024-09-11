@@ -58,19 +58,14 @@
                                 <div class="flex items-center gap-2">
                                     <x-lucide-swords class="h-5 w-5 text-background-500 dark:text-background-400" />
                                     <div>
-                                        @php
-                                            $mergedSchools = $user->schools->merge($user->schoolAthletes);
-                                        @endphp
                                         <span class="text-sm">
-                                            <span class="text-sm">
-                                                @if (count($user->academyAthletes) > 0)
-                                                    @foreach ($user->academyAthletes as $index => $academy)
-                                                        {{ $academy->name . ($index < (count($user->academyAthletes) - 1) ? ', ' : '') }}
-                                                    @endforeach
-                                                @else
-                                                    {{ __('users.no_academies') }}
-                                                @endif
-                                            </span>
+                                            @if (count($user->academyAthletes) > 0)
+                                                @foreach ($user->academyAthletes as $index => $academy)
+                                                    {{ $academy->name . ($index < (count($user->academyAthletes) - 1) ? ', ' : '') }}
+                                                @endforeach
+                                            @else
+                                                {{ __('users.no_academies') }}
+                                            @endif
                                         </span>
                                     </div>
                                 </div>

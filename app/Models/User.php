@@ -81,6 +81,10 @@ class User extends Authenticatable implements MustVerifyEmail {
                 $user->email = strtolower($user->email);
             }
 
+            if ($user->battle_name) {
+                $user->battle_name = $user->name . $user->surname . rand(10, 99);
+            }
+
             if (is_null($user->rank_id)) {
                 $user->rank_id = Rank::first()->id; // Imposta il valore predefinito per rank_id
             }

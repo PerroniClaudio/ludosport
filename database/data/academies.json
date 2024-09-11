@@ -1,0 +1,875 @@
+[
+ {
+   "academy": "LS Adriatica - Ferrara",
+   "name": "Adriatica - Ferrara",
+   "address": "Via del commercio 32",
+   "city": "Ferrara",
+   "state": "Italy",
+   "zip": "44123",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Aemilia - Bologna",
+   "name": "Aemilia - Bologna",
+   "address": "Via dello sport 6",
+   "city": "Bologna",
+   "state": "Italy",
+   "zip": "40134",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Aemilia - Formigine",
+   "name": "Aemilia - Formigine",
+   "address": "Via della Fornace 2",
+   "city": "Modena",
+   "state": "Italy",
+   "zip": "41043",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Aemilia - Modena",
+   "name": "Aemilia - Modena",
+   "address": "Via Benedetto Marcello 51",
+   "city": "Modena",
+   "state": "Italy",
+   "zip": "41122",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Aemilia - Reggio Emilia",
+   "name": "Aemilia - Reggio Emilia",
+   "address": "Via della Repubblica 19",
+   "city": "Reggio Emilia",
+   "state": "Italy",
+   "zip": "42123",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Cagliari",
+   "name": "Alpha - Cagliari",
+   "address": "Via Nicolò Machiavelli 118",
+   "city": "Cagliari",
+   "state": "Italy",
+   "zip": "09131",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Conegliano",
+   "name": "Alpha - Conegliano",
+   "address": "via Toniolo 12",
+   "city": "Conegliano",
+   "state": "Italy",
+   "zip": "31015",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Genova",
+   "name": "Alpha - Genova",
+   "address": "Via San Bartolomeo degli Armeni 1",
+   "city": "Genova",
+   "state": "Italy",
+   "zip": "16122",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Milano",
+   "name": "Alpha - Milano",
+   "address": "Via Sismondi 43",
+   "city": "Milano",
+   "state": "Italy",
+   "zip": "20133",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Milano",
+   "name": "Alpha - Brescia",
+   "address": "",
+   "city": "Brescia",
+   "state": "Italy",
+   "zip": "",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Muggiò",
+   "name": "Alpha - Muggiò",
+   "address": "Via Cesare Battisti 26",
+   "city": "Muggiò",
+   "state": "Italy",
+   "zip": "20835",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Padova",
+   "name": "Alpha - Padova",
+   "address": "Via dei Colli 29",
+   "city": "Padova",
+   "state": "Italy",
+   "zip": "35143",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Pavia",
+   "name": "Alpha - Pavia",
+   "address": "Via Ponte Vecchio 1",
+   "city": "Pavia",
+   "state": "Italy",
+   "zip": "27100",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Pordenone",
+   "name": "Alpha - Pordenone",
+   "address": "Viale Trieste 2",
+   "city": "Pordenone",
+   "state": "Italy",
+   "zip": "33170",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Ravenna",
+   "name": "Alpha - Ravenna",
+   "address": "Via Flammarion Camille 17",
+   "city": "Ravenna",
+   "state": "Italy",
+   "zip": "48124",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Sestri Levante",
+   "name": "Alpha - Sestri Levante",
+   "address": "Via Santo Stefano 26",
+   "city": "Sestri Levante",
+   "state": "Italy",
+   "zip": "16039",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Torino",
+   "name": "Alpha - Torino",
+   "address": "Via Luigi Galvani 21",
+   "city": "Torino",
+   "state": "Italy",
+   "zip": "10144",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Treviso",
+   "name": "Alpha - Treviso",
+   "address": "",
+   "city": "Treviso",
+   "state": "Italy",
+   "zip": "",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Trieste",
+   "name": "Alpha - Trieste",
+   "address": "Via Gian Rinaldo Carli 1",
+   "city": "Trieste",
+   "state": "Italy",
+   "zip": "34123",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Alpha - Vicenza",
+   "name": "Alpha - Vicenza",
+   "address": "",
+   "city": "Vicenza",
+   "state": "Italy",
+   "zip": "",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Atlas - Alicante",
+   "name": "Atlas - Alicante",
+   "address": "Calle Pintor Lorenzo Casanova 45",
+   "city": "Alicante",
+   "state": "Spain",
+   "zip": "3003",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Almeria",
+   "name": "Atlas - Almeria",
+   "address": "C. Benitagla, 6",
+   "city": "Almeria",
+   "state": "Spain",
+   "zip": "4007",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Barcelona",
+   "name": "Atlas - Barcelona",
+   "address": "Carrer Daoiz i Velarde 28",
+   "city": "Barcelona",
+   "state": "Spain",
+   "zip": "8014",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Bilbao",
+   "name": "Atlas - Bilbao",
+   "address": "C. Islas Canarias, 21",
+   "city": "Bilbao",
+   "state": "Spain",
+   "zip": "48015",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Castellon",
+   "name": "Atlas - Castellon",
+   "address": "Carrer de la Vilavella",
+   "city": "Castellon",
+   "state": "Spain",
+   "zip": "12003",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Cordoba",
+   "name": "Atlas - Cordoba",
+   "address": "C. Sta. Victoria, 5",
+   "city": "Cordoba",
+   "state": "Spain",
+   "zip": "14003",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Girona",
+   "name": "Atlas - Girona",
+   "address": "Carrer de l'Esglesia de Sant Miquel, 18",
+   "city": "Girona",
+   "state": "Spain",
+   "zip": "17003",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Guadalajara",
+   "name": "Atlas - Guadalajara",
+   "address": "C. Lepanto 16",
+   "city": "Guadalajara",
+   "state": "Spain",
+   "zip": "19004",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Hispania",
+   "name": "Atlas - Hispania",
+   "address": "Calle Miguel Fleta 4",
+   "city": "Madrid",
+   "state": "Spain",
+   "zip": "",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Mallorca",
+   "name": "Atlas - Mallorca",
+   "address": "C. Joan Bauza, 35",
+   "city": "Palma de Mallorca",
+   "state": "Spain",
+   "zip": "7007",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Murcia",
+   "name": "Atlas - Murcia",
+   "address": "c/Sofia 3",
+   "city": "Cartagena",
+   "state": "Spain",
+   "zip": "30392",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Ponferrada",
+   "name": "Atlas - Ponferrada",
+   "address": "",
+   "city": "",
+   "state": "Spain",
+   "zip": "",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - San Sebastian",
+   "name": "Atlas - San Sebastian",
+   "address": "Pablo Gorosabel Kalea, 3",
+   "city": "Donostia",
+   "state": "Spain",
+   "zip": "20014",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Sevilla",
+   "name": "Atlas - Sevilla",
+   "address": "",
+   "city": "",
+   "state": "Spain",
+   "zip": "",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Tarragona",
+   "name": "Atlas - Tarragona",
+   "address": "C/ de Reding, 18",
+   "city": "Tarragona",
+   "state": "Spain",
+   "zip": "43001",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Toledo",
+   "name": "Atlas - Toledo",
+   "address": "C. Rio Marches, 17",
+   "city": "Toledo",
+   "state": "Spain",
+   "zip": "45007",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Valencia",
+   "name": "Atlas - Valencia",
+   "address": "C. Marquesa Paterna Campo, 14",
+   "city": "Valencia",
+   "state": "Spain",
+   "zip": "46025",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Vigo",
+   "name": "Atlas - Vigo",
+   "address": "Rua do Areal, 140",
+   "city": "Santiago de Vigo",
+   "state": "Spain",
+   "zip": "36201",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Atlas - Zaragoza",
+   "name": "Atlas - Zaragoza",
+   "address": "Calle navarra 28",
+   "city": "Zaragoza",
+   "state": "Spain",
+   "zip": "",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Boston",
+   "name": "Boston - MA",
+   "address": "249 Lexington Street",
+   "city": "Waltham",
+   "state": "United States",
+   "zip": "02452",
+   "country": "United States"
+ },
+ {
+   "academy": "LS Bristol",
+   "name": "Bristol",
+   "address": "Lawrence Hill, 7",
+   "city": "Bristol",
+   "state": "United Kingdom",
+   "zip": "",
+   "country": "United Kingdom"
+ },
+ {
+   "academy": "LS Bruxelles",
+   "name": "Bruxelles",
+   "address": "Avenue Emmanuel Mounier, 871",
+   "city": "Bruxelles",
+   "state": "Belgium",
+   "zip": "",
+   "country": "Belgium"
+ },
+ {
+   "academy": "LS Bussy",
+   "name": "Bussy-Saint-Georges",
+   "address": "8 rocade de la Croix st Georges",
+   "city": "Bussy",
+   "state": "France",
+   "zip": "77600",
+   "country": "France"
+ },
+ {
+   "academy": "LS Canton",
+   "name": "Canton - OH",
+   "address": "2585 Easton St.",
+   "city": "N. Canton",
+   "state": "United States",
+   "zip": "44721",
+   "country": "United States"
+ },
+ {
+   "academy": "LS Cheltenam",
+   "name": "Cheltenam",
+   "address": "",
+   "city": "",
+   "state": "United Kingdom",
+   "zip": "",
+   "country": "United Kingdom"
+ },
+ {
+   "academy": "LS Coventry",
+   "name": "Coventry",
+   "address": "Sherwood Jones Close",
+   "city": "Coventry",
+   "state": "United Kingdom",
+   "zip": "",
+   "country": "United Kingdom"
+ },
+ {
+   "academy": "LS Finger Lakes - Cortland",
+   "name": "Finger Lakes - Cortland NY",
+   "address": "4292 Fairgrounds Drive",
+   "city": "Cortland",
+   "state": "United States",
+   "zip": "13045",
+   "country": "United States"
+ },
+ {
+   "academy": "LS Finger Lakes - Elmira Heights",
+   "name": "Finger Lakes - Elmira Heights NY",
+   "address": "203 West 13th Street",
+   "city": "Elmira Heights",
+   "state": "United States",
+   "zip": "14903",
+   "country": "United States"
+ },
+ {
+   "academy": "LS Grand Forks",
+   "name": "Grand Forks - ND",
+   "address": "",
+   "city": "Grand Forks",
+   "state": "United States",
+   "zip": "",
+   "country": "United States"
+ },
+ {
+   "academy": "LS Hampshire",
+   "name": "Hampshire",
+   "address": "Fawcett Rd",
+   "city": "Southsea",
+   "state": "United Kingdom",
+   "zip": "PO40DL",
+   "country": "United Kingdom"
+ },
+ {
+   "academy": "LS Hannover",
+   "name": "Hannover",
+   "address": "",
+   "city": "Hannover",
+   "state": "Germany",
+   "zip": "",
+   "country": "Germany"
+ },
+ {
+   "academy": "LS Hawaii",
+   "name": "Hawaii - Honolulu HI",
+   "address": "",
+   "city": "Honolulu",
+   "state": "United States",
+   "zip": "",
+   "country": "United States"
+ },
+ {
+   "academy": "LS Hereford",
+   "name": "Hereford",
+   "address": "",
+   "city": "Hereford",
+   "state": "United Kingdom",
+   "zip": "",
+   "country": "United Kingdom"
+ },
+ {
+   "academy": "LS Ireland",
+   "name": "Ireland - Dublin",
+   "address": "",
+   "city": "Dublin",
+   "state": "Ireland",
+   "zip": "",
+   "country": "Ireland"
+ },
+ {
+   "academy": "LS Kalamazoo",
+   "name": "Kalamazoo - Mattawan MI",
+   "address": "52362 N Main St",
+   "city": "Mattawan",
+   "state": "United States",
+   "zip": "49071",
+   "country": "United States"
+ },
+ {
+   "academy": "LS Len",
+   "name": "León",
+   "address": "Calle Maestro Nicolas 23",
+   "city": "León",
+   "state": "Spain",
+   "zip": "24005",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Liverpool",
+   "name": "Liverpool",
+   "address": "Dundonald Rd",
+   "city": "Liverpool",
+   "state": "United Kingdom",
+   "zip": "L17 0AE",
+   "country": "United Kingdom"
+ },
+ {
+   "academy": "LS Madrid",
+   "name": "Madrid",
+   "address": "Av. de la Reina Victoria, 70",
+   "city": "Madrid",
+   "state": "Spain",
+   "zip": "28003",
+   "country": "Spain"
+ },
+ {
+   "academy": "LS Manchester",
+   "name": "Manchester",
+   "address": "Welkin Rd",
+   "city": "Stockport",
+   "state": "United Kingdom",
+   "zip": "SK6 2BH",
+   "country": "United Kingdom"
+ },
+ {
+   "academy": "LS Midlands",
+   "name": "Birmingham",
+   "address": "Curral Road",
+   "city": "Rowley Regis",
+   "state": "United Kingdom",
+   "zip": "B659AL",
+   "country": "United Kingdom"
+ },
+ {
+   "academy": "LS Montreal",
+   "name": "Montreal",
+   "address": "",
+   "city": "Montreal",
+   "state": "France",
+   "zip": "",
+   "country": "France"
+ },
+ {
+   "academy": "LS Neapolis - Caserta",
+   "name": "Neapolis - Caserta",
+   "address": "Viale Vincenzo Cappiello 18/19",
+   "city": "Caserta",
+   "state": "Italy",
+   "zip": "81100",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Nederland - Amsterdam",
+   "name": "Nederland - Amsterdam",
+   "address": "Palmstraat 34",
+   "city": "Amsterdam",
+   "state": "Netherlands",
+   "zip": "1015",
+   "country": "Netherlands"
+ },
+ {
+   "academy": "LS Nederland - Purmerend",
+   "name": "Nederland - Purmerend",
+   "address": "Loirestraat 13",
+   "city": "Purmerend",
+   "state": "Netherlands",
+   "zip": "1448",
+   "country": "Netherlands"
+ },
+ {
+   "academy": "LS Nederland - Rotterdam",
+   "name": "Nederland - Rotterdam",
+   "address": "Kolkmanstraat 8",
+   "city": "Rotterdam",
+   "state": "Netherlands",
+   "zip": "3039",
+   "country": "Netherlands"
+ },
+ {
+   "academy": "LS Occitanie - Lunel",
+   "name": "Occitanie - Lunel",
+   "address": "101 Chemin des Cabanettes",
+   "city": "Lunel",
+   "state": "France",
+   "zip": "34400",
+   "country": "France"
+ },
+ {
+   "academy": "LS Occitanie - Montpellier",
+   "name": "Occitanie - Montpellier",
+   "address": "495 Av. du Mas d'Argelliers",
+   "city": "Montpellier",
+   "state": "France",
+   "zip": "34070",
+   "country": "France"
+ },
+ {
+   "academy": "LS Occitanie - Nimes",
+   "name": "Occitanie - Nimes",
+   "address": "carre sud",
+   "city": "Nimes",
+   "state": "France",
+   "zip": "30900",
+   "country": "France"
+ },
+ {
+   "academy": "LS Paris - Paris",
+   "name": "Paris - Paris",
+   "address": "5 bis rue du Louvre",
+   "city": "Paris",
+   "state": "France",
+   "zip": "75001",
+   "country": "France"
+ },
+ {
+   "academy": "LS Paris - Vincennes",
+   "name": "Paris - Vincennes",
+   "address": "35 rue Jean Moulin",
+   "city": "Vincennes",
+   "state": "France",
+   "zip": "94300",
+   "country": "France"
+ },
+ {
+   "academy": "LS Philadelphia",
+   "name": "Philadelphia",
+   "address": "200 Stiles Avenue",
+   "city": "New Jersey",
+   "state": "United States",
+   "zip": "08052",
+   "country": "United States"
+ },
+ {
+   "academy": "LS Porta dei Laghi - Busto Arsizio",
+   "name": "Porta dei Laghi - Busto Arsizio",
+   "address": "Via Rossini 115",
+   "city": "Busto Arsizio",
+   "state": "Italy",
+   "zip": "21052",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Porta dei Laghi - Livorno",
+   "name": "Porta dei Laghi - Livorno",
+   "address": "Via Francesco Pera 28",
+   "city": "Livorno",
+   "state": "Italy",
+   "zip": "57122",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Porta dei Laghi - Magenta",
+   "name": "Porta dei Laghi - Magenta",
+   "address": "Via IV Giugno 80",
+   "city": "Magenta",
+   "state": "Italy",
+   "zip": "20013",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Porta dei Laghi - Pisa",
+   "name": "Porta dei Laghi - Pisa",
+   "address": "Via Fiorentina 216",
+   "city": "Pisa",
+   "state": "Italy",
+   "zip": "56121",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Potsdam",
+   "name": "Potsdam",
+   "address": "Stahnsdorfer Str. 76/78",
+   "city": "Potsdam",
+   "state": "Germany",
+   "zip": "14482",
+   "country": "Germany"
+ },
+ {
+   "academy": "LS Reunion - St-Paul",
+   "name": "Réunion - St-Paul",
+   "address": "348 Rue Saint-Louis",
+   "city": "St Paul",
+   "state": "France",
+   "zip": "97460",
+   "country": "France"
+ },
+ {
+   "academy": "LS Roma - Bracciano",
+   "name": "Roma - Bracciano",
+   "address": "Via di Valle Foresta",
+   "city": "Bracciano",
+   "state": "Italy",
+   "zip": "00062",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Roma - Nord",
+   "name": "Roma - Roma Nord",
+   "address": "Viale Somalia 201",
+   "city": "Roma",
+   "state": "Italy",
+   "zip": "00199",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Roma - Sud",
+   "name": "Roma - Roma Sud",
+   "address": "Piazzale dei Santi Pietro e Paolo 15/18",
+   "city": "",
+   "state": "Italy",
+   "zip": "00144",
+   "country": "Italy"
+ },
+ {
+   "academy": "LS Réunion - St-Pierre",
+   "name": "Réunion - St-Pierre",
+   "address": "av Soweto",
+   "city": "Saint Pierre",
+   "state": "France",
+   "zip": "97410",
+   "country": "France"
+ },
+ {
+   "academy": "LS Réunion - Ste-Clotilde",
+   "name": "Réunion - Ste-Clotilde",
+   "address": "1 Chem. des Francisceas",
+   "city": "Saint-Denis",
+   "state": "France",
+   "zip": "97400",
+   "country": "France"
+ },
+ {
+   "academy": "LS San Francisco",
+   "name": "San Francisco - Embarcadero",
+   "address": "",
+   "city": "San Francisco",
+   "state": "United States",
+   "zip": "",
+   "country": "United States"
+ },
+ {
+   "academy": "LS Southern Ontario",
+   "name": "Southern Ontario",
+   "address": "",
+   "city": "Southern Ontario",
+   "state": "Canada",
+   "zip": "",
+   "country": "Canada"
+ },
+ {
+   "academy": "LS St Louis",
+   "name": "St Louis - MO",
+   "address": "2434 Mid Rivers",
+   "city": "St Peters",
+   "state": "United States",
+   "zip": "63376",
+   "country": "United States"
+ },
+ {
+   "academy": "LS Stuttgart",
+   "name": "Stuttgart",
+   "address": "Pfaffenwaldring 11",
+   "city": "Stuttgart",
+   "state": "Germany",
+   "zip": "70569",
+   "country": "Germany"
+ },
+ {
+   "academy": "LS Sweden - Göteborg",
+   "name": "Sweden - Göteborg",
+   "address": "Djurgardsgatan 29",
+   "city": "Göteborg",
+   "state": "Sweden",
+   "zip": "414 62",
+   "country": "Sweden"
+ },
+ {
+   "academy": "LS Sweden - Helsingborg",
+   "name": "Sweden - Helsingborg",
+   "address": "Vasatorpsvagen 1B",
+   "city": "Helsingborg",
+   "state": "Sweden",
+   "zip": "245 57",
+   "country": "Sweden"
+ },
+ {
+   "academy": "LS Sweden - Malmö",
+   "name": "Sweden - Malmö",
+   "address": "Ystadsgatan 53C",
+   "city": "Malmö",
+   "state": "Sweden",
+   "zip": "214 44",
+   "country": "Sweden"
+ },
+ {
+   "academy": "LS Sweden - Stockholm",
+   "name": "Sweden - Stockholm",
+   "address": "Konradsbergsgatan 2B",
+   "city": "Stockholm",
+   "state": "Sweden",
+   "zip": "112 59",
+   "country": "Sweden"
+ },
+ {
+   "academy": "LS Sweden - Vastervik",
+   "name": "Sweden - Vastervik",
+   "address": "Johannesdalsgatan 3",
+   "city": "Vastervik",
+   "state": "Sweden",
+   "zip": "59350",
+   "country": "Sweden"
+ },
+ {
+   "academy": "LS Sweden - Örebro",
+   "name": "Sweden - Örebro",
+   "address": "Fakultetsgatan 1",
+   "city": "Örebro",
+   "state": "Sweden",
+   "zip": "701 82",
+   "country": "Sweden"
+ },
+ {
+   "academy": "LS São Paulo",
+   "name": "São Paulo",
+   "address": "Rua Araujo, 154",
+   "city": "São Paulo",
+   "state": "Brazil",
+   "zip": "01220020",
+   "country": "Brazil"
+ },
+ {
+   "academy": "LS Tidewater",
+   "name": "Tidewater - Virginia Beach VA",
+   "address": "",
+   "city": "Virginia Beach",
+   "state": "United States",
+   "zip": "23451",
+   "country": "United States"
+ },
+ {
+   "academy": "LS Tours",
+   "name": "Tours - Gymnase Alfred de Vigny",
+   "address": "1 rue Gabriel Fauré",
+   "city": "Tours",
+   "state": "France",
+   "zip": "37000",
+   "country": "France"
+ },
+ {
+   "academy": "LS Tours",
+   "name": "Tours - Gymnase Jean Mermoz",
+   "address": "Rue de Beaumont",
+   "city": "Tours",
+   "state": "France",
+   "zip": "37000",
+   "country": "France"
+ },
+ {
+   "academy": "LS Wald",
+   "name": "Wald",
+   "address": "Sankertsweiler Str. 6",
+   "city": "Wald",
+   "state": "Germany",
+   "zip": "88639",
+   "country": "Germany"
+ }
+]

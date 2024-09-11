@@ -389,12 +389,18 @@ class ClanController extends Controller {
         $isInThisAcademy = $academy->athletes->where('id', $user->id)->count();
         if(!$isInThisAcademy){
             $academy->athletes()->attach($user);
+            if($user->academyAthletes()->count() > 1) {
+                $noAcademy = Academy::where('slug', 'no-academy')->first();
+                $noAcademy->athletes()->detach($user->id);
+            }
         }
         if(!$isInThisSchool){
             $school->athletes()->attach($user);
         }
 
         $clan->users()->attach($request->athlete_id);
+
+        $user->roles()->syncWithoutDetaching(Role::where('label', 'athlete')->first()->id);
 
         $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
         return redirect()->route($redirectRoute, $clan)->with('success', 'Athlete added successfully.');

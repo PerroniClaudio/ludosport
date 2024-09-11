@@ -81,6 +81,11 @@
                         selected="{{ $event->type->id }}" 
                         disabled="{{!!$event->is_approved}}" />
 
+                    <x-form.input name="max_participants" label="Max Participants" type="number" required="{{ true }}"
+                        value="{{ $event->max_participants }}" min="{{0}}" 
+                        placeholder="{{ __('events.max_participants_placeholder') }}"
+                        disabled="{{!!$event->is_approved}}" />
+
                     <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms" 
                         disabled="{{!!$event->is_approved}}" />
 
@@ -90,6 +95,7 @@
 
                     <x-form.input name="price" label="Price (include taxes)" type="number"
                         value="{{ number_format($event->price, 2) }}"
+                        min="{{0}}" 
                         required="{{ $event->is_free ? false : true }}" 
                         disabled="{{!!$event->is_approved}}" />
 

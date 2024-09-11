@@ -70,4 +70,5 @@ return [
     'result_stage_registered' => 'Registered',
     'result_stage_pending' => 'Pending',
     'result_stage_confirmed' => 'Confirmed',
+    'max_participants_placeholder' => 'Insert the maximum number of participants',
 ];

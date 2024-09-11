@@ -51,4 +51,23 @@ class Academy extends Model {
     public function personnel() {
         return $this->belongsToMany(User::class, 'academies_personnel', 'academy_id', 'user_id')->where('is_disabled', '0');
     }
+
+    public function rector() {
+        $rectors = $this->personnel()->whereHas('roles', function ($query) {
+            $query->where('name', 'rector');
+        })->get();
+        // Se lo trova tra quelli che hanno l'accademia come principale restituisce quello
+        foreach ($rectors as $r) {
+            if ($r->academies->first()->id == $this->id) {
+                return $r;
+            }
+        }
+        // Altrimenti cerca tra tutto il personale (anche se non ha l'accademia come principale)
+        foreach ($rectors as $r) {
+            if ($r->academies->firstWhere('id', $this->id)) {
+                return $r;
+            }
+        }
+        return null;
+    }
 }

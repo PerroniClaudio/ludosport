@@ -158,11 +158,26 @@ class WeaponFormController extends Controller {
                 'admin_id' => $authUser->id,
             ]);
             // Aggiunge anche la forma da atleta se non ce l'ha già. NON AGGIUNGE IL RUOLO.
-            $weaponForm->users()->syncWithoutDetaching($person->id, [
-                'admin_id' => $authUser->id,
-            ]);
+            $weaponForm->users()->syncWithoutDetaching($person->id);
         }
 
         return redirect()->route('weapon-forms.edit', $weaponForm)->with('success', 'Personnel added successfully');
+    }
+
+    public function addAthletes(Request $request, WeaponForm $weaponForm)
+    {
+        // Può accedere solo l'admin
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        if($authRole !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized');
+        }
+
+        $usersIds = json_decode($request->users);
+        $athletes = User::whereIn('id', $usersIds)->get();
+
+        $weaponForm->users()->syncWithoutDetaching($athletes->pluck('id'));
+
+        return redirect()->route('weapon-forms.edit', $weaponForm)->with('success', 'Athletes added successfully');
     }
 }
