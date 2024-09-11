@@ -28,12 +28,24 @@
                     @else
                         @php
                             $navLang = 'users';
-                            if(request()->routeIs('users.*')) {$navLang = 'users';}
-                            if(request()->routeIs('nations.*')) {$navLang = 'nazioni';}
-                            if(request()->routeIs('academies.*')) {$navLang = 'accademie';}
-                            if(request()->routeIs('schools.*')) {$navLang = 'scuole';}
-                            if(request()->routeIs('clans.*')) {$navLang = 'clan';}
-                            if(request()->routeIs('weapon-forms.*')) {$navLang = 'weapon_forms';}
+                            if (request()->routeIs('users.*')) {
+                                $navLang = 'users';
+                            }
+                            if (request()->routeIs('nations.*')) {
+                                $navLang = 'nazioni';
+                            }
+                            if (request()->routeIs('academies.*')) {
+                                $navLang = 'accademie';
+                            }
+                            if (request()->routeIs('schools.*')) {
+                                $navLang = 'scuole';
+                            }
+                            if (request()->routeIs('clans.*')) {
+                                $navLang = 'clan';
+                            }
+                            if (request()->routeIs('weapon-forms.*')) {
+                                $navLang = 'weapon_forms';
+                            }
                         @endphp
                         <x-nav-link-parent :href="'#'" :active="request()->routeIs('users.*') ||
                             request()->routeIs('nations.*') ||
@@ -54,6 +66,8 @@
                                 <a href="{{ route('clans.index') }}">{{ __('navigation.clan') }}</a>
                                 <span class="separator"></span>
                                 <a href="{{ route('weapon-forms.index') }}">{{ __('navigation.weapon_forms') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('rank-requests.index') }}">{{ __('navigation.rank_requests') }}</a>
                             </x-slot>
                         </x-nav-link-parent>
                         <x-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">

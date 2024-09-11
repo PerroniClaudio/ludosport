@@ -36,4 +36,5 @@ return [
     'weapon_forms' => 'Weapon Forms',
     'website' => 'Website',
     'fees' => 'Fees',
+    'rank_requests' => 'Rank Requests',
 ];
