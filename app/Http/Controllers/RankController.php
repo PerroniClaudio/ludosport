@@ -64,8 +64,19 @@ class RankController extends Controller {
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $reduced = $requests->map(function ($request) {
+            return [
+                'id' => $request->id,
+                'requested_by' => $request->requestedBy->name . ' ' . $request->requestedBy->surname,
+                'rank' => $request->rank->name,
+                'user_to_promote' => $request->userToPromote->name . ' ' . $request->userToPromote->surname,
+                'reason' => $request->reason,
+                'created_at' => $request->created_at->format('d/m/Y'),
+            ];
+        })->toArray();
+
         return view('ranks.requests', [
-            'requests' => $requests,
+            'requests' => $reduced,
         ]);
     }
 
@@ -125,7 +136,7 @@ class RankController extends Controller {
         $request->approved_at = now();
         $request->save();
 
-        return redirect()->route('ranks.requests');
+        return redirect()->route('rank-requests.index');
     }
 
     public function acceptAllRequests() {
@@ -142,7 +153,7 @@ class RankController extends Controller {
         }
 
 
-        return redirect()->route('ranks.requests');
+        return redirect()->route('rank-requests.index');
     }
 
     public function rejectRequest(RankRequest $request) {
@@ -151,7 +162,7 @@ class RankController extends Controller {
         $request->approved_at = now();
         $request->save();
 
-        return redirect()->route('ranks.requests');
+        return redirect()->route('rank-requests.index');
     }
 
     public function deleteRequest(RankRequest $request) {
@@ -159,9 +170,9 @@ class RankController extends Controller {
         if ($request->status === 'pending') {
             $request->delete();
 
-            return redirect()->route('ranks.requests');
+            return redirect()->route('rank-requests.index');
         } else {
-            return redirect()->route('ranks.requests')->with('error', 'Cannot delete a request that has already been approved or rejected.');
+            return redirect()->route('rank-requests.index')->with('error', 'Cannot delete a request that has already been approved or rejected.');
         }
     }
 }
