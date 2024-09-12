@@ -1099,4 +1099,14 @@ class UserController extends Controller {
             'success' => true,
         ]);
     }
+
+    public function roleSelector() {
+        $user = auth()->user();
+        $user = User::find($user->id);
+        $roles = $user->roles()->get();
+
+        return view('role-selector', [
+            'roles' => $roles
+        ]);
+    }
 }

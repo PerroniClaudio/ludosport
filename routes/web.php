@@ -7,82 +7,17 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 
 Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/role-select', [App\Http\Controllers\UserController::class, 'roleSelector'])->middleware(['auth', 'verified'])->name('role-selector');
 
+/** Assets */
 
-Route::get('/role-select', function () {
-
-    $user = auth()->user();
-    $user = User::find($user->id);
-    $roles = $user->roles()->get();
-
-    return view('role-selector', [
-        'roles' => $roles
-    ]);
-})->middleware(['auth', 'verified'])->name('role-selector');
-
-Route::get('/logo', function () {
-
-    $url = Storage::disk('gcs')->temporaryUrl(
-        "logo.png",
-        now()->addMinutes(5)
-    );
-
-    $response = Http::get($url);
-    $image = $response->body();
-    $headers = [
-        'Content-Type' => 'image/png',
-        'Content-Length' => strlen($image),
-    ];
-    return response($image, 200, $headers);
-})->name('logo');
-
-Route::get('/logo-saber', function () {
-
-    $url = Storage::disk('gcs')->temporaryUrl(
-        "/assets/saber.png",
-        now()->addMinutes(5)
-    );
-
-    $response = Http::get($url);
-    $image = $response->body();
-    $headers = [
-        'Content-Type' => 'image/png',
-        'Content-Length' => strlen($image),
-    ];
-    return response($image, 200, $headers);
-})->name('logo-saber');
-
-Route::get('/logo-saber-k', function () {
-
-    $url = Storage::disk('gcs')->temporaryUrl(
-        "/assets/sabe.png",
-        now()->addMinutes(5)
-    );
-
-    $response = Http::get($url);
-    $image = $response->body();
-    $headers = [
-        'Content-Type' => 'image/png',
-        'Content-Length' => strlen($image),
-    ];
-    return response($image, 200, $headers);
-})->name('logo-saber-k');
-
-Route::get('/user/{user}/profile-picture', function (User $user) {
-
-    $url = Storage::disk('gcs')->temporaryUrl(
-        $user->profile_picture,
-        now()->addMinutes(5)
-    );
-
-    $response = Http::get($url);
-    $image = $response->body();
-    $headers = [
-        'Content-Type' => 'image/png',
-        'Content-Length' => strlen($image),
-    ];
-    return response($image, 200, $headers);
-})->name('user.profile-picture-show');
+Route::get('/logo', [App\Http\Controllers\AssetController::class, 'logo'])->name('logo');
+Route::get('/logo-saber', [App\Http\Controllers\AssetController::class, 'logoSaber'])->name('logo-saber');
+Route::get('/logo-saber-k', [App\Http\Controllers\AssetController::class, 'logoSaberK'])->name('logo-saber-k');
+Route::get('/warriors', [App\Http\Controllers\AssetController::class, 'warriors'])->name('warriors');
+Route::get('/spada-home', [App\Http\Controllers\AssetController::class, 'spadaHome'])->name('spada-home');
+Route::get('/bollino', [App\Http\Controllers\AssetController::class, 'bollino'])->name('bollino');
+Route::get('/user/{user}/profile-picture', [App\Http\Controllers\UserController::class, 'propic'])->name('user.profile-picture-show');
 
 
 Route::middleware('auth')->group(function () {
