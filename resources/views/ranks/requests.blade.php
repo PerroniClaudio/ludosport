@@ -141,7 +141,7 @@
                         <div class="p-6 flex flex-col gap-4">
                             <p>{{ __('ranks.requests_accept_text_all') }}</p>
                             <div class="flex justify-end gap-4">
-                                <x-secondary-button x-on:click="$dispatch('close-modal', 'accept-request-modal')">
+                                <x-secondary-button x-on:click="$dispatch('close-modal', 'accept-all-request-modal')">
                                     {{ __('ranks.requests_cancel') }}
                                 </x-secondary-button>
                                 <x-primary-button @click="confirmAcceptAllRequest">
