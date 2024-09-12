@@ -424,6 +424,11 @@ class UserController extends Controller {
         $user->roles = $user->roles->pluck('label')->toArray();
 
         if ($user->profile_picture !== null) {
+            /** 
+             * @disregard Intelephense non rileva il metodo temporaryurl
+             * 
+             * @see https://github.com/spatie/laravel-google-cloud-storage
+             */
             $user->profile_picture = Storage::disk('gcs')->temporaryUrl(
                 $user->profile_picture,
                 now()->addMinutes(5)
@@ -497,6 +502,11 @@ class UserController extends Controller {
 
         $image = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($user) {
             if ($user->profile_picture !== null) {
+                /** 
+                 * @disregard Intelephense non rileva il metodo temporaryurl
+                 * 
+                 * @see https://github.com/spatie/laravel-google-cloud-storage
+                 */
                 $url = Storage::disk('gcs')->temporaryUrl(
                     $user->profile_picture,
                     now()->addMinutes(5)
@@ -598,11 +608,17 @@ class UserController extends Controller {
         if (in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'technician'])) {
             $users = User::query()
                 ->when($request->search, function (Builder $q, $value) {
+                    /** 
+                     * @disregard Intelephense non rileva il metodo whereIn
+                     */
                     return $q->whereIn('id', User::search($value)->keys());
                 })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
         } else if ($authRole == 'instructor') {
             $users = User::query()
                 ->when($request->search, function (Builder $q, $value) {
+                    /** 
+                     * @disregard Intelephense non rileva il metodo whereIn
+                     */
                     return $q->whereIn('users.id', User::search($value)->keys());
                 })->where(function ($query) {
                     $query->whereHas('schools', function ($q) {
@@ -627,6 +643,9 @@ class UserController extends Controller {
 
         $users = User::query()
             ->when($request->search, function (Builder $q, $value) {
+                /** 
+                 * @disregard Intelephense non rileva il metodo whereIn
+                 */
                 return $q->whereIn('id', User::search($value)->keys());
             })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
 
