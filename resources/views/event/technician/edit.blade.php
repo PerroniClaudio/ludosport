@@ -24,19 +24,42 @@
                 <div class="flex flex-col gap-2 w-1/2">
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                         :value="$event->name" placeholder="{{ fake()->company() }}" 
-                        disabled />
-                        {{-- disabled="{{!!$event->is_approved}}" /> --}}
+                        disabled="{{true}}" />
 
                     <x-form.input name="start_date" label="Start Date" type="datetime-local"
                         required="{{ true }}" value="{{ $event->start_date }}"
                         placeholder="{{ fake()->date() }}" 
-                        disabled />
-                        {{-- disabled="{{!!$event->is_approved}}" /> --}}
+                        disabled="{{true}}" />
 
                     <x-form.input name="end_date" label="End Date" type="datetime-local" required="{{ true }}"
                         value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}" 
-                        disabled />
-                        {{-- disabled="{{!!$event->is_approved}}" /> --}}
+                        disabled="{{{true}}}" />
+
+                    @if ($event->is_approved)
+                    
+                        <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
+                            selected="{{ $event->type->id }}" 
+                            disabled="{{true}}" />
+
+                        <x-form.input name="max_participants" label="Max Participants" type="number" required="{{ true }}"
+                            value="{{ $event->max_participants }}" min="{{0}}" 
+                            placeholder="{{ __('events.max_participants_placeholder') }}"
+                            disabled="{{true}}" />
+
+                        <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms" 
+                            disabled="{{true}}" />
+
+                        <x-form.checkbox id="is_free" name="is_free" label="Free Event"
+                            isChecked="{{ $event->is_free }}" 
+                            disabled="{{true}}" />
+
+                        <x-form.input name="price" label="Price (include taxes)" type="number"
+                            value="{{ number_format($event->price, 2) }}"
+                            min="{{0}}" 
+                            required="{{ $event->is_free ? false : true }}" 
+                            disabled="{{true}}" />
+
+                    @endif
 
                 </div>
             </form>
