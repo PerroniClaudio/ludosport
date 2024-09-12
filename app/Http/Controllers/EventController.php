@@ -912,6 +912,7 @@ class EventController extends Controller {
                     'country' => 'Italy',
                 ]),
                 'vat' => '',
+                'sdi' => '',
             ]);
         }
 

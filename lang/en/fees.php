@@ -18,6 +18,7 @@ return [
     'invoice_address' => 'Address',
     'invoice_zip' => 'ZIP Code',
     'invoice_vat' => 'VAT',
+    'invoice_sdi' => 'SDI',
     'invoice_city' => 'City',
     'invoice_country' => 'Country',
     'fees_success_title' => 'Fees purchased successfully',

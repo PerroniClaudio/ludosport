@@ -1040,6 +1040,7 @@ class UserController extends Controller {
                     'country' => $user->nation->name,
                 ],
                 'vat' => '',
+                'sdi' => '',
             ]);
         }
     }
@@ -1057,6 +1058,7 @@ class UserController extends Controller {
             'name' => $request->name,
             'surname' => $request->surname,
             'vat' => $request->vat,
+            'sdi' => $request->sdi,
             'address' => $address,
             'user_id' => Auth()->user()->id
         ]);
