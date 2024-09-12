@@ -36,6 +36,7 @@ class ShopController extends Controller {
                     'country' => 'Italy',
                 ]),
                 'vat' => '',
+                'sdi' => '',
             ]);
         }
 

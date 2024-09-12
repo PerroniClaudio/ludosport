@@ -10,6 +10,7 @@
                 zip: 'Zip',
                 city: 'City',
                 vat: 'VAT',
+                sdi: 'SDI',
                 country: '',
                 shouldShowPayment: true,
                 event_id: '{{ $event->id }}',
@@ -50,6 +51,7 @@
                     body.append('city', this.city)
                     body.append('country', this.country)
                     body.append('vat', this.vat)
+                    body.append('sdi', this.sdi)
             
             
                     fetch(url, {
@@ -164,6 +166,9 @@
                                     </div>
                                     <div class="col-span-4">
                                         <x-form.input-model name="vat" label="{{ __('fees.invoice_vat') }}" />
+                                    </div>
+                                    <div class="col-span-4">
+                                        <x-form.input-model name="sdi" label="{{ __('fees.invoice_sdi') }}" />
                                     </div>
                                 </div>
                             </div>
