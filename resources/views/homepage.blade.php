@@ -9,7 +9,7 @@
                 style="background-image: url('{{ route('spada-home') }}')">
             </div>
         </div>
-        <div id="smallone">
+        <div id="smallone" class="hidden lg:block">
             <div class="flex flex-col items-center justify-center h-full">
                 <img src="{{ url('warriors') }}" alt="">
             </div>
