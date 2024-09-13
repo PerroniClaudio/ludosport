@@ -448,7 +448,7 @@ class SchoolController extends Controller {
     }
 
     public function getAthletesNumberPerYear(School $school) {
-        $athletes = $school->athletes;
+        $athletes = $school->athletes->where('is_disabled', '0');
         $athletes_last_year = 0;
         $athletes_this_year = 0;
 

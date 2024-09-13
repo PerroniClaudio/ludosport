@@ -232,4 +232,25 @@ class NationController extends Controller {
             'backUrl' => route('nations.edit', $nation->id),
         ]);
     }
+
+    public function getNationAthletesNumberPerYear(Nation $nation) {
+        
+        $athletes = User::where('is_disabled', false)->whereHas('roles', function ($q) {
+            $q->where('label', 'athlete');
+        })->whereHas('academyAthletes', function ($q) use ($nation) {
+            $q->where('nation_id', $nation->id);
+        } )->get();
+        $athletes_last_year = 0;
+        $athletes_this_year = 0;
+
+        foreach ($athletes as $athlete) {
+            $athlete->created_at->year == now()->year ? $athletes_this_year++ : $athletes_last_year++;
+        }
+
+        return response()->json([
+            'last_year' => $athletes_last_year,
+            'this_year' => $athletes_this_year,
+        ]);
+    }
+
 }

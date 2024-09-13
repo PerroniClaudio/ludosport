@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "725724017ae62d22dd1370ef6e418ad2",
+    "content-hash": "32d4ffce254749bb8480c38cbc83d5d0",
     "packages": [
         {
             "name": "blade-ui-kit/blade-icons",
@@ -3407,16 +3407,16 @@
         },
         {
             "name": "mallardduck/blade-lucide-icons",
-            "version": "1.21.0",
+            "version": "1.23.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mallardduck/blade-lucide-icons.git",
-                "reference": "c5b19544016464c4d67440ce82011f35b8a8d48c"
+                "reference": "19081819bb527e15eed22f6528b9d059c1a8df8b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mallardduck/blade-lucide-icons/zipball/c5b19544016464c4d67440ce82011f35b8a8d48c",
-                "reference": "c5b19544016464c4d67440ce82011f35b8a8d48c",
+                "url": "https://api.github.com/repos/mallardduck/blade-lucide-icons/zipball/19081819bb527e15eed22f6528b9d059c1a8df8b",
+                "reference": "19081819bb527e15eed22f6528b9d059c1a8df8b",
                 "shasum": ""
             },
             "require": {
@@ -3461,9 +3461,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mallardduck/blade-lucide-icons/issues",
-                "source": "https://github.com/mallardduck/blade-lucide-icons/tree/1.21.0"
+                "source": "https://github.com/mallardduck/blade-lucide-icons/tree/1.23.0"
             },
-            "time": "2024-04-17T15:27:31+00:00"
+            "time": "2024-07-22T15:40:39+00:00"
         },
         {
             "name": "markbaker/complex",
@@ -11931,5 +11931,5 @@
         "php": "^8.2"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.2.0"
 }

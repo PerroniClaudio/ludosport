@@ -1130,4 +1130,136 @@ class UserController extends Controller {
             'roles' => $roles
         ]);
     }
+
+    public function athletesDataForWorld() {
+        $athletes = User::where('is_disabled', false)->whereHas('roles', function ($q) {
+            $q->where('label', 'athlete');
+        })->get();
+        $active_users = 0;
+        $active_users_no_course = 0;
+        $users_course_not_active = 0;
+        $new_users_this_year = 0;
+
+        foreach ($athletes as $key => $athlete) {
+
+            if ($athlete->has_paid_fee) {
+                $active_users++;
+            }
+
+            if (($athlete->has_paid_fee) && ($athlete->clans()->count() == 0)) {
+                $active_users_no_course++;
+            }
+
+            if ((!$athlete->has_paid_fee) && ($athlete->clans()->count() > 0)) {
+                $users_course_not_active++;
+            }
+
+            if ($athlete->created_at->year == now()->year) {
+                $new_users_this_year++;
+            }
+        }
+
+        return response()->json([
+            'active_users' => $active_users,
+            'active_users_no_course' => $active_users_no_course,
+            'users_course_not_active' => $users_course_not_active,
+            'new_users_this_year' => $new_users_this_year,
+        ]);
+    }
+    
+    public function athletesDataWorldList() {
+        
+        $filledNations = Nation::whereHas('academies')->get();
+        
+        $nations = [];
+
+        foreach ($filledNations as $nation) {
+
+            $validAcademies = $nation->academies->where('is_disabled', false);
+
+            $academies = [];
+            $nationUniqueAthletes = collect();
+
+            foreach ($validAcademies as $academy) {
+
+                $athletes = $academy->athletes->where('is_disabled', false);
+                $nationUniqueAthletes = $nationUniqueAthletes->merge($athletes);
+                
+                $schools = [];
+        
+                foreach ($academy->schools->where('is_disabled', false) as $key => $school) {
+
+                    $courses = [];
+
+                    foreach ($school->clan->where('is_disabled', false) as $course) {
+                        $courses[] = [
+                            'id' => $course->id,
+                            'name' => $course->name,
+                            'athletes' => $course->users->where('is_disabled', false)->count(),
+                        ];
+                    }
+
+                    usort($courses, function ($a, $b) {
+                        return $b['athletes'] - $a['athletes'];
+                    });
+        
+                    $schools[] = [
+                        'id' => $school->id,
+                        'name' => $school->name,
+                        'athletes' => $school->athletes->where('is_disabled', false)->count(),
+                        'courses' => $courses,
+                    ];
+                }
+
+                usort($schools, function ($a, $b) {
+                    return $b['athletes'] - $a['athletes'];
+                });
+
+                $academies[] = [
+                    'id' => $academy->id,
+                    'name' => $academy->name,
+                    'athletes' => $athletes->count(),
+                    'schools' => $schools,
+                ];
+            }
+
+            $nationUniqueAthletes = $nationUniqueAthletes->unique('id')->count();
+
+            usort($academies, function ($a, $b) {
+                return $b['athletes'] - $a['athletes'];
+            });
+
+            $nations[] = [
+                'id' => $nation->id,
+                'name' => $nation->name,
+                'athletes' => $nationUniqueAthletes,
+                'academies' => $academies,
+            ];
+
+        }
+
+        usort($nations, function ($a, $b) {
+            return $b['athletes'] - $a['athletes'];
+        });
+        
+        return response()->json($nations);
+        
+    }
+
+    public function getWorldAthletesNumberPerYear() {
+        $athletes = User::where('is_disabled', false)->whereHas('roles', function ($q) {
+            $q->where('label', 'athlete');
+        })->get();
+        $athletes_last_year = 0;
+        $athletes_this_year = 0;
+
+        foreach ($athletes as $athlete) {
+            $athlete->created_at->year == now()->year ? $athletes_this_year++ : $athletes_last_year++;
+        }
+
+        return response()->json([
+            'last_year' => $athletes_last_year,
+            'this_year' => $athletes_this_year,
+        ]);
+    }
 }

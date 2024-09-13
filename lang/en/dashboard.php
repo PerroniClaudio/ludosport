@@ -24,4 +24,10 @@ return [
     'athlete_announcements' => 'Announcements',
     'athlete_no_announcements' => 'No announcements',
     'athlete_announcements_text' => 'You have :count new announcements to read',
+    'rector_athletes_nations_title' => 'Athletes by nations',
+    'rector_nations_with_athletes_char' => 'Nations with most athletes',
+    'rector_athletes_academies_title' => 'Athletes by academies',
+    'rector_academies_with_athletes_char' => 'Academies with most athletes',
+    'rector_athletes_courses_title' => 'Athletes by courses',
+    'rector_courses_with_athletes_char' => 'Courses with most athletes',
 ];
