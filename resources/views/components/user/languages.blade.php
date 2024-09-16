@@ -39,6 +39,9 @@
             addLanguage(language) {
                 this.selectedLanguages.push(language);
             },
+            removeLanguage(language) {
+                this.selectedLanguages = this.selectedLanguages.filter(selectedLanguage => selectedLanguage.id !== language.id);
+            },
             associateLanguages() {
                 const languages = this.selectedLanguages.map(language => language.id);
         
@@ -57,9 +60,6 @@
                         console.log(data)
                         window.location.reload();
                     })
-        
-        
-        
             },
         }">
             <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
@@ -97,7 +97,7 @@
 
             <div class="flex justify-end">
                 <x-primary-button type="button" @click="associateLanguages">
-                    <span>{{ __('users.languages_add') }}</span>
+                    <span>{{ __('users.languages_edit') }}</span>
                 </x-primary-button>
             </div>
         </div>

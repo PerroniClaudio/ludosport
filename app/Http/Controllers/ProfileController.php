@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Language;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,7 @@ class ProfileController extends Controller {
      */
     public function edit(Request $request): View {
         return view('profile.edit', [
+            'languages' => Language::all(),
             'user' => $request->user(),
         ]);
     }
@@ -28,7 +30,7 @@ class ProfileController extends Controller {
 
         $surname = $request->surname;
         $battle_name = $request->battle_name ?? ($request->name . $request->surname . rand(10, 99));
-        
+
         $request->user()->update([
             'surname' => $surname,
             'battle_name' => $battle_name,

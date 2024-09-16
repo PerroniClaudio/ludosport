@@ -41,9 +41,9 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/world-athletes-data', [App\Http\Controllers\UserController::class, 'athletesDataForWorld'])->name('users.world-athletes-data');
     Route::get('/world-athletes-data-list', [App\Http\Controllers\UserController::class, 'athletesDataWorldList'])->name('users.world-athletes-data-list');
     Route::get('/world-athletes-year-data', [App\Http\Controllers\UserController::class, 'getWorldAthletesNumberPerYear'])->name('users.world-athletes-year-data');
-    
 
-    Route::post('/users/{user}/languages', [App\Http\Controllers\UserController::class, 'languages'])->name('users.languages.store');
+
+
     Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('users.store');
     Route::post('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.disable');
@@ -55,6 +55,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/users/set-main-school', [App\Http\Controllers\UserController::class, 'setMainSchool'])->name('users.set-main-school');
     Route::post('/users/set-main-institution', [App\Http\Controllers\UserController::class, 'setMainInstitution'])->name('users.set-main-institution');
 });
+
+Route::post('/users/{user}/languages', [App\Http\Controllers\UserController::class, 'languages'])->name('users.languages.store');
 
 /** Nazioni */
 
@@ -320,7 +322,7 @@ Route::get('/test', function () {
         $q->where('label', 'athlete');
     })->whereHas('academyAthletes', function ($q) use ($nation) {
         $q->where('nation_id', $nation->id);
-    } )->get();
+    })->get();
     return 'test';
     // $user = User::find(87);
     // $user->has_paid_fee = 0;

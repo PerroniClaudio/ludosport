@@ -1010,6 +1010,20 @@ class UserController extends Controller {
 
     public function languages(User $user, Request $request) {
 
+        $role = $user->getRole();
+
+        if ($role === 'athlete') {
+
+            $authUserId = auth()->user()->id;
+
+            if ($authUserId !== $user->id) {
+                return response()->json([
+                    'error' => 'You do not have the required role to access this page!',
+                ]);
+            }
+        }
+
+
         $user->languages()->detach();
 
         $languages = explode(',', $request->languages);
@@ -1166,11 +1180,11 @@ class UserController extends Controller {
             'new_users_this_year' => $new_users_this_year,
         ]);
     }
-    
+
     public function athletesDataWorldList() {
-        
+
         $filledNations = Nation::whereHas('academies')->get();
-        
+
         $nations = [];
 
         foreach ($filledNations as $nation) {
@@ -1184,9 +1198,9 @@ class UserController extends Controller {
 
                 $athletes = $academy->athletes->where('is_disabled', false);
                 $nationUniqueAthletes = $nationUniqueAthletes->merge($athletes);
-                
+
                 $schools = [];
-        
+
                 foreach ($academy->schools->where('is_disabled', false) as $key => $school) {
 
                     $courses = [];
@@ -1202,7 +1216,7 @@ class UserController extends Controller {
                     usort($courses, function ($a, $b) {
                         return $b['athletes'] - $a['athletes'];
                     });
-        
+
                     $schools[] = [
                         'id' => $school->id,
                         'name' => $school->name,
@@ -1235,15 +1249,13 @@ class UserController extends Controller {
                 'athletes' => $nationUniqueAthletes,
                 'academies' => $academies,
             ];
-
         }
 
         usort($nations, function ($a, $b) {
             return $b['athletes'] - $a['athletes'];
         });
-        
+
         return response()->json($nations);
-        
     }
 
     public function getWorldAthletesNumberPerYear() {
