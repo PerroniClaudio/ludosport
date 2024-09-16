@@ -636,6 +636,41 @@ class EventController extends Controller {
 
         return response()->json($events);
     }
+    
+    public function dashboardEvents() {
+        $events = Event::where('is_approved', 1)
+            ->whereHas('personnel', function ($query) {
+                $query->where('user_id', auth()->user()->id);
+            })
+            ->where(function ($query) {
+            $query->whereYear('start_date', date('Y'))
+                ->orWhereYear('end_date', date('Y'));
+            })
+            ->with(['type', 'results', 'instructorResults'])
+            ->get();
+
+    $formatted_events = [];
+
+    foreach ($events as $event) {
+        $formatted_events[] = [
+            'id' => $event->id,
+            'name' => $event->name,
+            'start_date' => $event->start_date,
+            'end_date' => $event->end_date,
+            'type' => $event->type->name,
+            'result_type' => $event->resultType(),
+            'results' => $event->results ? $event->results()->count() : null,
+            'instructor_results' => $event->instructor_results ? $event->instructorResults()->count() : null,
+            'participants' => $event->resultType() == 'enabling' ? $event->instructorResults()->count() : $event->results()->count(),
+        ];
+    }
+
+    usort($formatted_events, function ($a, $b) {
+        return $b['participants'] - $a['participants'];
+    });
+
+        return response()->json($formatted_events);
+    }
 
     public function search(Request $request) {
 

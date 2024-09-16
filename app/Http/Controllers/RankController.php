@@ -175,4 +175,8 @@ class RankController extends Controller {
             return redirect()->route('rank-requests.index')->with('error', 'Cannot delete a request that has already been approved or rejected.');
         }
     }
+
+    public function countPendingRequests() {
+        return RankRequest::where('status', 'pending')->count();
+    }
 }

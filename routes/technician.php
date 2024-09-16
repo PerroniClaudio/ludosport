@@ -51,6 +51,7 @@ Route::prefix('technician')->middleware('auth')->middleware('role:admin,technici
         Route::get('/events/all', [App\Http\Controllers\EventController::class, 'all'])->name('technician.events.all');
         Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('technician.events.search');
         Route::get('events', [App\Http\Controllers\EventController::class, 'index'])->name('technician.events.index');
+        Route::get('dashboard-events', [App\Http\Controllers\EventController::class, 'dashboardEvents'])->name('technician.events.dashboard');
         // Route::get('events/create', [App\Http\Controllers\EventController::class, 'create'])->name('technician.events.create');
         // Route::post('events/create', [App\Http\Controllers\EventController::class, 'store'])->name('technician.events.store');
         Route::get('events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('technician.events.edit');
@@ -64,6 +65,8 @@ Route::prefix('technician')->middleware('auth')->middleware('role:admin,technici
         Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('technician.events.participants.add');
         Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('technician.events.participants.export');
         Route::get('events/{event}/personnel', [App\Http\Controllers\EventController::class, 'personnel'])->name('technician.events.personnel');
+        
+        Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('technician.events.types');
     });
 
     /** Imports */

@@ -6,7 +6,7 @@
     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 text-background-900 dark:text-background-100">
             <h3 class="text-background-800 dark:text-background-200 text-2xl">
-                {{ __('dashboard.rector_athletes_nations_title') }}
+                {{ __('dashboard.athletes_nations_title') }}
             </h3>
             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
             <div class="grid grid-cols-2 gap-4">
@@ -16,7 +16,7 @@
                 <div class="flex flex-col gap-8">
                     <div class="flex flex-col gap-4 grow">
                         <h3 class="text-background-800 dark:text-background-200 text-lg">
-                            {{ __('dashboard.rector_nations_with_athletes_char') }}
+                            {{ __('dashboard.nations_with_athletes_char') }}
                         </h3>
                         <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                         <x-text-input type="text" x-on:input="searchNationByValue(event)" placeholder="Search..."

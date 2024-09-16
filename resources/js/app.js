@@ -11,6 +11,7 @@ import { usernationgraphadmin } from "./usernationgraphadmin.js";
 import { useracademygraphadmin } from "./useracademygraphadmin.js";
 import { userschoolgraphadmin } from "./userschoolgraphadmin.js";
 import { usercoursegraphadmin } from "./usercoursegraphadmin.js";
+import { eventsparticipantsgraph } from "./eventsparticipantsgraph.js";
 import { userschoolgraph } from "./userschoolgraph.js";
 import { usersclangraph } from "./usersclangraph.js";
 import { rankingschart } from "./rankingschart.js";
@@ -29,6 +30,7 @@ document.addEventListener("alpine:init", () => {
     Alpine.data("useracademygraphadmin", useracademygraphadmin);
     Alpine.data("userschoolgraphadmin", userschoolgraphadmin);
     Alpine.data("usercoursegraphadmin", usercoursegraphadmin);
+    Alpine.data("eventsparticipantsgraph", eventsparticipantsgraph);
     Alpine.data("userschoolgraph", userschoolgraph);
     Alpine.data("usersclangraph", usersclangraph);
     Alpine.data("rankingschart", rankingschart);

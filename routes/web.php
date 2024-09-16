@@ -1,10 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Http;
 
 Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/role-select', [App\Http\Controllers\UserController::class, 'roleSelector'])->middleware(['auth', 'verified'])->name('role-selector');
@@ -240,6 +237,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::get('/rank-requests', [App\Http\Controllers\RankController::class, 'requests'])->name('rank-requests.index');
+    Route::get('/pending-rank-requests', [App\Http\Controllers\RankController::class, 'countPendingRequests'])->name('pending-rank-requests.index');
     Route::get('/rank-requests/approve-all', [App\Http\Controllers\RankController::class, 'acceptAllRequests'])->name('rank-requests.approve-all');
 
     Route::get('/rank-requests/{request}/approve', [App\Http\Controllers\RankController::class, 'acceptRequest'])->name('rank-requests.approve');
@@ -315,12 +313,9 @@ Route::group([], function () {
 });
 
 Route::get('/test', function () {
-    $nation = App\Models\Nation::where('name', 'like', '%italy%')->first();
-    return User::where('is_disabled', false)->whereHas('roles', function ($q) {
-        $q->where('label', 'athlete');
-    })->whereHas('academyAthletes', function ($q) use ($nation) {
-        $q->where('nation_id', $nation->id);
-    } )->get();
+    $event = App\Models\Event::where('name', 'E vento fu')->first();
+    return $event->personnel()->where('user_id', 24)->exists() ? "true" : "false";
+
     return 'test';
     // $user = User::find(87);
     // $user->has_paid_fee = 0;
