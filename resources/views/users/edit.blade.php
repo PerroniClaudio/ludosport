@@ -216,7 +216,7 @@
                 @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
                     <x-user.weapon-forms :forms="$user->weaponForms" />
                 @endif
-                @if ($user->hasRole('instructor') || $user->hasRole('technician'))
+                @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
                     <x-user.languages :languages="$user->languages" :user="$user->id" :availableLanguages="collect($languages)" />
                 @endif
             </div>

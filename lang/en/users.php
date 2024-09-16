@@ -79,6 +79,7 @@ return [
     'weapons_forms' => 'Weapon Forms',
     'languages' => 'Languages',
     'languages_add' => 'Add Language',
+    'languages_edit' => 'Edit Languages',
     'available_languages' => 'Available Languages',
     'selected_languages' => 'Selected Languages',
     'novice' => 'Novice',
