@@ -10,7 +10,7 @@
                         <div class="text-4xl text-primary-500 flex items-center gap-2">
                             <span>{{ $user->name }} {{ $user->surname }}</span>
 
-                            @if ($user->is_active)
+                            @if ($user->has_paid_fee)
                                 <x-lucide-verified class="h-6 w-6 text-primary-500" />
                             @endif
                         </div>

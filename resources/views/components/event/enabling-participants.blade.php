@@ -16,7 +16,7 @@
     </div>
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="bg-background-100 p-4 rounded ">
+        <div class="bg-background-100 dark:bg-background-900 p-4 rounded ">
             <div class="flex justify-between gap-2 items-center">
                 <div class="flex-1">
                     <h4 class="text-background-800 dark:text-background-200 text-lg">{{ __('events.available_users') }}
@@ -48,8 +48,10 @@
                 <tbody>
                     <template x-for="(row, index) in paginatedUsers">
                         <tr>
-                            <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="row.name"></td>
-                            <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="row.surname"></td>
+                            <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="row.name">
+                            </td>
+                            <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="row.surname">
+                            </td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm text-right p-1">
                                 <button @click="addParticipant(row.id)">
                                     <x-lucide-plus
@@ -93,7 +95,7 @@
 
 
         </div>
-        <div class="bg-background-100 p-4 rounded ">
+        <div class="bg-background-100 dark:bg-background-900 p-4 rounded ">
 
             <div class="flex justify-between gap-2 items-center">
                 <div class="flex-1">
@@ -124,7 +126,8 @@
                 <tbody>
                     <template x-for="(participant, index) in filteredParticipants">
                         <tr>
-                            <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="participant.name">
+                            <td class="px-1 text-background-500 dark:text-background-300 text-sm"
+                                x-text="participant.name">
                             </td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm"
                                 x-text="participant.surname"></td>

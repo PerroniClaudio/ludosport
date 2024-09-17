@@ -17,10 +17,11 @@
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         @if ((!$event->is_approved && in_array($authRole, ['admin', 'rector'])) || $authRole === 'admin')
-            <div class="bg-background-100 p-4 rounded ">
+            <div class="bg-background-100 dark:bg-background-900 p-4 rounded ">
                 <div class="flex justify-between gap-2 items-center">
                     <div class="flex-1">
-                        <h4 class="text-background-800 dark:text-background-200 text-lg">{{ __('events.available_personnel') }}
+                        <h4 class="text-background-800 dark:text-background-200 text-lg">
+                            {{ __('events.available_personnel') }}
                         </h4>
                     </div>
                     <div>
@@ -49,8 +50,10 @@
                     <tbody>
                         <template x-for="(row, index) in paginatedUsers">
                             <tr>
-                                <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="row.name"></td>
-                                <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="row.surname"></td>
+                                <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="row.name">
+                                </td>
+                                <td class="px-1 text-background-500 dark:text-background-300 text-sm"
+                                    x-text="row.surname"></td>
                                 <td class="px-1 text-background-500 dark:text-background-300 text-sm text-right p-1">
                                     <button @click="addPersonnel(row.id)">
                                         <x-lucide-plus
@@ -71,7 +74,8 @@
                         <button x-on:click="goToPage(1)" class="mr-2" x-bind:disabled="currentPage === 1">
                             <x-lucide-chevron-first class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                         </button>
-                        <button x-on:click="goToPage(currentPage - 1)" class="mr-2" x-bind:disabled="currentPage === 1"
+                        <button x-on:click="goToPage(currentPage - 1)" class="mr-2"
+                            x-bind:disabled="currentPage === 1"
                             :class="{ 'opacity-50 cursor-not-allowed': currentPage === 1 }">
                             <x-lucide-chevron-left class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                         </button>
@@ -95,11 +99,12 @@
 
             </div>
         @endif
-        <div class="bg-background-100 p-4 rounded ">
+        <div class="bg-background-100 dark:bg-background-900 p-4 rounded ">
 
             <div class="flex justify-between gap-2 items-center">
                 <div class="flex-1">
-                    <h4 class="text-background-800 dark:text-background-200 text-lg">{{ __('events.selected_personnel') }}
+                    <h4 class="text-background-800 dark:text-background-200 text-lg">
+                        {{ __('events.selected_personnel') }}
                     </h4>
                 </div>
                 <div>
@@ -128,7 +133,8 @@
                 <tbody>
                     <template x-for="(personnel, index) in filteredPersonnel">
                         <tr>
-                            <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="personnel.name">
+                            <td class="px-1 text-background-500 dark:text-background-300 text-sm"
+                                x-text="personnel.name">
                             </td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm"
                                 x-text="personnel.surname"></td>

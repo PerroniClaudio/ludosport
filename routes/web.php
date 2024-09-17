@@ -23,6 +23,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::put('/profile/{user}/picture', [App\Http\Controllers\UserController::class, 'userUploadPicture'])->name('users.update-pfp');
+
+    Route::post('/invoices/store', [App\Http\Controllers\UserController::class, 'saveInvoice'])->name('users.invoices.store');
 });
 
 /** Users */
