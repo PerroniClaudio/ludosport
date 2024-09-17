@@ -7,7 +7,13 @@
                 </div>
                 <div class="flex-1 flex flex-col gap-2 ml-8">
                     <div class="w-1/2 flex flex-col gap-2">
-                        <div class="text-4xl text-primary-500">{{ $user->name }} {{ $user->surname }}</div>
+                        <div class="text-4xl text-primary-500 flex items-center gap-2">
+                            <span>{{ $user->name }} {{ $user->surname }}</span>
+
+                            @if ($user->is_active)
+                                <x-lucide-verified class="h-6 w-6 text-primary-500" />
+                            @endif
+                        </div>
                         <div class="flex items-center gap-2">
                             <x-lucide-sword class="h-5 w-5 text-background-500 dark:text-background-400" />
                             <span class="text-sm text-background-500 dark:text-background-400">
