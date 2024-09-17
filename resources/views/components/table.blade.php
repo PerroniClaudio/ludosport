@@ -177,7 +177,8 @@
                         x-bind:disabled="page === totalPages()">
                         <x-lucide-chevron-right class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                     </button>
-                    <button type="button" x-on:click="page = totalPages()" class="ml-2" x-bind:disabled="page === totalPages()">
+                    <button type="button" x-on:click="page = totalPages()" class="ml-2"
+                        x-bind:disabled="page === totalPages()">
                         <x-lucide-chevron-last class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                     </button>
                 </div>

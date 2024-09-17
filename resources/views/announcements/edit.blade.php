@@ -33,8 +33,19 @@
                         </div>
                     </div>
 
-                    <x-form.textarea name="content" label="Content" required="{{ true }}"
-                        :value="$announcement->content" placeholder="Write a message..." />
+                    <div class="flex items-top gap-4">
+                        <div class="flex-1">
+                            <x-announcements.nation-select :nations="collect($nations)"
+                                selected="{{ $announcement->nations != '' ? $announcement->nations : '[]' }}" />
+                        </div>
+                        <div class="flex-1">
+                            <x-announcements.academies-select :academies="collect($academies)"
+                                selected="{{ $announcement->academies != '' ? $announcement->academies : '[]' }}" />
+                        </div>
+                    </div>
+
+                    <x-form.textarea name="content" label="Content" required="{{ true }}" :value="$announcement->content"
+                        placeholder="Write a message..." />
 
                     <div class="flex items-end justify-end gap-4">
                         <x-primary-button>

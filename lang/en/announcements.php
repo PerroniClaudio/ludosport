@@ -19,4 +19,10 @@ return [
     'no_announcements' => 'No announcements',
     'no_selected_announcement' => 'No announcement selected',
     'no_selected_announcement_info' => 'Please select an announcement to see its details.',
+    'select_nations' => 'Select Nations',
+    'selected_nations' => 'Selected Nations',
+    'close' => 'Close',
+    'nations' => 'Nations',
+    'academies' => 'Academies',
+    'select_academies' => 'Select Academies',
 ];

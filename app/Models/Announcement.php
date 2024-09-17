@@ -21,6 +21,8 @@ class Announcement extends Model {
         'type',
         'user_id',
         'role_id',
+        'nations',
+        'academies',
         'is_deleted'
     ];
 
