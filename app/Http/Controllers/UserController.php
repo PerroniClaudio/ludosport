@@ -13,7 +13,7 @@ use App\Models\Role;
 use App\Models\School;
 use App\Models\User;
 use Carbon\Carbon;
-use GPBMetadata\Google\Api\Log;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -555,25 +555,47 @@ class UserController extends Controller {
         $currentRoles = $user->roles->pluck('label')->toArray();
         // Recupera i nuovi ruoli dal request
         $newRoles = explode(',', $request->roles);
+
+        // Recupera l'utente che ha fatto la richiesta
+        $authUser = User::find(auth()->user()->id);
+
         // Determina i ruoli da aggiungere e da rimuovere
         $rolesToAdd = array_diff($newRoles, $currentRoles);
         $rolesToRemove = array_diff($currentRoles, $newRoles);
-        // Recupera l'utente che ha fatto la richiesta
-        $authUser = User::find(auth()->user()->id);
-        // Rimuovi i ruoli che non sono più presenti, controllando l'autorizzazione
-        foreach ($rolesToRemove as $roleLabel) {
-            $roleElement = Role::where('label', $roleLabel)->first();
-            if ($roleElement && $authUser->canModifyRole($roleLabel)) {
-                $user->roles()->detach($roleElement->id);
+
+        $shouldLogRolesChange = false;
+
+        // Check if $rolesToAdd has any items
+        if (!empty($rolesToAdd)) {
+            $shouldLogRolesChange = true;
+            foreach ($rolesToAdd as $roleLabel) {
+                $roleElement = Role::where('label', $roleLabel)->first();
+                if ($roleElement && $authUser->canModifyRole($roleLabel)) {
+                    $user->roles()->attach($roleElement->id);
+                }
             }
         }
-        // Aggiungi i nuovi ruoli, controllando l'autorizzazione
-        foreach ($rolesToAdd as $roleLabel) {
-            $roleElement = Role::where('label', $roleLabel)->first();
-            if ($roleElement && $authUser->canModifyRole($roleLabel)) {
-                $user->roles()->attach($roleElement->id);
+
+        // Check if $rolesToRemove has any items
+        if (!empty($rolesToRemove)) {
+            $shouldLogRolesChange = true;
+            foreach ($rolesToRemove as $roleLabel) {
+                $roleElement = Role::where('label', $roleLabel)->first();
+                if ($roleElement && $authUser->canModifyRole($roleLabel)) {
+                    $user->roles()->detach($roleElement->id);
+                }
             }
         }
+
+        if ($shouldLogRolesChange) {
+            Log::channel('role')->info('Roles changed', [
+                'user' => $user->id,
+                'made_by' => $authUser->id,
+                'old_roles' => $currentRoles,
+                'roles' => $newRoles,
+            ]);
+        }
+
 
         $authUserRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authUserRole === 'admin' ? 'users.index' :  $authUserRole . '.users.index';
