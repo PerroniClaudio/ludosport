@@ -12,6 +12,19 @@
                 vat: 'VAT',
                 sdi: 'SDI',
                 country: '',
+                country: '',
+                business_name: '{{ __('fees.insert_business_name') }}',
+                is_business: false,
+                want_invoice: false,
+                shouldShowPayment: false,
+                shouldShowSdi: false,
+                updateSdi: function() {
+                    if ((/^IT/.test(this.vat)) || (this.country.toLowerCase() === 'italy') || (this.country.toLowerCase() === 'italia')) {
+                        this.shouldShowSdi = true
+                    } else {
+                        this.shouldShowSdi = false
+                    }
+                },
                 shouldShowPayment: true,
                 event_id: '{{ $event->id }}',
                 fetchInvoiceData() {
@@ -35,7 +48,10 @@
                             this.zip = address.zip != '' ? address.zip : 'Zip'
                             this.city = address.city != '' ? address.city : 'City'
                             this.country = address.country != '' ? address.country : 'Country'
-            
+                            this.vat = data.vat
+                            this.sdi = data.sdi
+                            this.is_business = data.is_business
+                            this.business_name = data.business_name
             
                         })
                 },
@@ -52,7 +68,9 @@
                     body.append('country', this.country)
                     body.append('vat', this.vat)
                     body.append('sdi', this.sdi)
-            
+                    body.append('is_business', this.is_business)
+                    body.append('business_name', this.business_name)
+                    body.append('want_invoice', this.want_invoice)
             
                     fetch(url, {
                             method: 'POST',
@@ -145,6 +163,27 @@
                                 </div>
 
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+
+                                <div class="block mt-4">
+                                    <label for="want_invoice" class="inline-flex items-center">
+                                        <input id="want_invoice" type="checkbox"
+                                            class="rounded dark:bg-background-900 border-background-300 dark:border-background-700 text-primary-600 shadow-sm focus:ring-primary-500 dark:focus:ring-primary-600 dark:focus:ring-offset-background-800"
+                                            name="want_invoice" x-model="want_invoice">
+                                        <span
+                                            class="ms-2 text-sm text-background-600 dark:text-background-400">{{ __('fees.want_invoice') }}</span>
+                                    </label>
+                                </div>
+
+                                <div class="block mt-4">
+                                    <label for="is_business" class="inline-flex items-center">
+                                        <input id="is_business" type="checkbox"
+                                            class="rounded dark:bg-background-900 border-background-300 dark:border-background-700 text-primary-600 shadow-sm focus:ring-primary-500 dark:focus:ring-primary-600 dark:focus:ring-offset-background-800"
+                                            name="is_business" x-model="is_business">
+                                        <span
+                                            class="ms-2 text-sm text-background-600 dark:text-background-400">{{ __('fees.is_business') }}</span>
+                                    </label>
+                                </div>
+
                                 <div class="grid grid-cols-4 gap-4">
                                     <div class="col-span-2">
                                         <x-form.input-model name="name" label="{{ __('fees.invoice_name') }}" />
@@ -164,10 +203,14 @@
                                     <div class="col-span-2">
                                         <x-form.input-model name="country" label="{{ __('fees.invoice_country') }}" />
                                     </div>
-                                    <div class="col-span-4">
+                                    <div class="col-span-4" x-show="is_business">
+                                        <x-form.input-model name="business_name"
+                                            label="{{ __('fees.business_name') }}" />
+                                    </div>
+                                    <div class="col-span-4" x-show="is_business">
                                         <x-form.input-model name="vat" label="{{ __('fees.invoice_vat') }}" />
                                     </div>
-                                    <div class="col-span-4">
+                                    <div class="col-span-4" x-show="shouldShowSdi">
                                         <x-form.input-model name="sdi" label="{{ __('fees.invoice_sdi') }}" />
                                     </div>
                                 </div>

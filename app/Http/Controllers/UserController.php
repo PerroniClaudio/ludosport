@@ -1077,6 +1077,8 @@ class UserController extends Controller {
                 ],
                 'vat' => '',
                 'sdi' => '',
+                'is_business' => false,
+                'business_name' => '',
             ]);
         }
     }
@@ -1096,6 +1098,9 @@ class UserController extends Controller {
             'vat' => $request->vat,
             'sdi' => $request->sdi,
             'address' => $address,
+            'is_business' => $request->is_business === 'true' ? true : false,
+            'want_invoice' => $request->want_invoice === 'true' ? true : false,
+            'business_name' => $request->business_name,
             'user_id' => Auth()->user()->id
         ]);
 
