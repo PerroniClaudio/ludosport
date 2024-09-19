@@ -21,15 +21,15 @@ class SchoolController extends Controller {
 
         // The dean (and maybe others, ex. manager) should only see his school
         $authRole = User::find(auth()->user()->id)->getRole();
-        if(in_array($authRole, ['dean', 'manager'])) {
+        if (in_array($authRole, ['dean', 'manager'])) {
             $school = auth()->user()->schools->where('is_disabled', '0')->first();
-            if($school){
+            if ($school) {
                 return $this->edit($school);
             }
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
-        if($authRole === 'rector'){
+        if ($authRole === 'rector') {
             $academy = auth()->user()->academies->first();
             $schools = School::with('nation')->where([['academy_id', $academy->id], ['is_disabled', '0']])->orderBy('created_at', 'desc')->get();
         } else {
@@ -53,7 +53,7 @@ class SchoolController extends Controller {
     public function create() {
         //
         $authRole = User::find(auth()->user()->id)->getRole();
-        if(!in_array($authRole, ['admin', 'rector'])){
+        if (!in_array($authRole, ['admin', 'rector'])) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
@@ -85,7 +85,7 @@ class SchoolController extends Controller {
     public function store(Request $request) {
         //
         $authRole = User::find(auth()->user()->id)->getRole();
-        if(!in_array($authRole, ['admin', 'rector'])){
+        if (!in_array($authRole, ['admin', 'rector'])) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
@@ -112,7 +112,7 @@ class SchoolController extends Controller {
 
     public function storeacademy(Request $request) {
         $authRole = User::find(auth()->user()->id)->getRole();
-        if(!in_array($authRole, ['admin', 'rector'])){
+        if (!in_array($authRole, ['admin', 'rector'])) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
@@ -156,14 +156,14 @@ class SchoolController extends Controller {
      */
     public function edit(School $school) {
         // Aggiungere i controlli per poter accedere alla pagina di modifica della scuola 
-        if(!$this->checkPermission($school)){
+        if (!$this->checkPermission($school)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if($school->is_disabled && $authRole !== 'admin'){
+        if ($school->is_disabled && $authRole !== 'admin') {
             return redirect()->route('dashboard')->with('error', 'School disabled.');
         }
 
@@ -225,25 +225,135 @@ class SchoolController extends Controller {
      */
     public function update(Request $request, School $school) {
         //
-        if(!$this->checkPermission($school)){
+        if (!$this->checkPermission($school)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'nationality' => 'required|integer|exists:nations,id',
-            'academy_id' => 'required|integer|exists:academies,id',
-        ]);
+        if ($request->address) {
 
-        $school->update([
-            'name' => $request->name,
-            'nation_id' => $request->nationality,
-            'academy_id' => $request->academy_id,
-        ]);
+            $address = $request->address . " " . $request->city . " "  . $request->zip;
+            $location = $this->getLocation($address);
 
-        $authRole = User::find(auth()->user()->id)->getRole();
-        $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
-        return redirect()->route($redirectRoute, $school)->with('success', 'School updated successfully!');
+
+            if (!$location) {
+                return back()->with('error', 'Invalid address. Please check the address and try again.');
+            }
+
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'nationality' => 'required|integer|exists:nations,id',
+                'academy_id' => 'required|integer|exists:academies,id',
+            ]);
+
+            $school->update([
+                'name' => $request->name,
+                'slug' => Str::slug($request->name),
+                'nation_id' => $request->nationality,
+                'academy_id' => $request->academy_id,
+                'address' => $request->address,
+                'city' => $location['city'],
+                'state' => $location['state'],
+                'zip' => $request->zip,
+                'country' => $location['country'],
+                'coordinates' => json_encode(['lat' => $location['lat'], 'lng' => $location['lng']]),
+            ]);
+
+            $authRole = User::find(auth()->user()->id)->getRole();
+            $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
+            return redirect()->route($redirectRoute, $school)->with('success', 'School updated successfully!');
+        } else {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'nationality' => 'required|integer|exists:nations,id',
+                'academy_id' => 'required|integer|exists:academies,id',
+            ]);
+
+            $school->update([
+                'name' => $request->name,
+                'slug' => Str::slug($request->name),
+                'nation_id' => $request->nationality,
+                'academy_id' => $request->academy_id,
+            ]);
+
+            $authRole = User::find(auth()->user()->id)->getRole();
+            $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
+            return redirect()->route($redirectRoute, $school)->with('success', 'School updated successfully!');
+        }
+    }
+
+    private function getLocation($address) {
+
+        $address = str_replace(" ", "+", $address);
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+        $response = file_get_contents($url);
+        $json = json_decode($response, true);
+
+        if ($json['status'] == 'ZERO_RESULTS') {
+            return null;
+        }
+
+        $addressComponents = $json['results'][0]['address_components'];
+        $city = "";
+        if (isset($addressComponents[2])) {
+            $city = $addressComponents[2]['types'][0] == "route" ? ($addressComponents[3]['long_name'] ?? "") : $addressComponents[2]['long_name'];
+        }
+
+        return [
+            'lat' => $json['results'][0]['geometry']['location']['lat'],
+            'lng' => $json['results'][0]['geometry']['location']['lng'],
+            'city' => $city,
+            'state' => $addressComponents[5]['long_name'] ?? "",
+            'country' => $addressComponents[6]['long_name']  ?? "",
+        ];
+    }
+
+    private function getCoordinates($location) {
+        $location = urlencode($location);
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$location}&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+
+        $response = file_get_contents($url);
+        $data = json_decode($response, true);
+
+        if (isset($data['results'][0]['geometry']['location'])) {
+            $lat = $data['results'][0]['geometry']['location']['lat'];
+            $lng = $data['results'][0]['geometry']['location']['lng'];
+            return array($lat, $lng);
+        }
+        return array(null, null);
+    }
+
+    private function haversine($lat1, $lon1, $lat2, $lon2) {
+        $lat1 = deg2rad($lat1);
+        $lon1 = deg2rad($lon1);
+        $lat2 = deg2rad($lat2);
+        $lon2 = deg2rad($lon2);
+
+        $delta_lat = $lat2 - $lat1;
+        $delta_lon = $lon2 - $lon1;
+
+        $a = pow(sin($delta_lat / 2), 2) + cos($lat1) * cos($lat2) * pow(sin($delta_lon / 2), 2);
+        $c = 2 * asin(sqrt($a));
+        $r = 6371;
+
+        return ($c * $r);
+    }
+
+    private function findNearbySchools($schools, $locationLat, $locationLon, $radius) {
+        $nearbySchools = [];
+        foreach ($schools as $school) {
+
+            if (!$school->coordinates) continue; // Skip Schools without coordinates (e.g. invalid addresses
+
+            $coordinates = json_decode($school->coordinates, true);
+
+            $schoolLat = $coordinates['lat'];
+            $schoolLon = $coordinates['lng'];
+            $distance = $this->haversine($locationLat, $locationLon, $schoolLat, $schoolLon);
+            if ($distance <= $radius) {
+                $nearbySchools[] = $school;
+            }
+        }
+        return $nearbySchools;
     }
 
     /**
@@ -251,7 +361,7 @@ class SchoolController extends Controller {
      */
     public function destroy(School $school) {
         // solo rector e admin possono
-        if(!$this->checkPermission($school, true)){
+        if (!$this->checkPermission($school, true)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
@@ -263,7 +373,7 @@ class SchoolController extends Controller {
 
     public function addClan(School $school, Request $request) {
         //
-        if(!$this->checkPermission($school)){
+        if (!$this->checkPermission($school)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
@@ -279,7 +389,7 @@ class SchoolController extends Controller {
 
     public function addPersonnel(School $school, Request $request) {
         //
-        if(!$this->checkPermission($school)){
+        if (!$this->checkPermission($school)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
@@ -287,7 +397,7 @@ class SchoolController extends Controller {
         $personnel = User::find($request->personnel_id);
         $academy = Academy::find($school->academy_id);
         $isInThisAcademy = $academy->personnel->where('id', $personnel->id)->count();
-        if(!$isInThisAcademy){
+        if (!$isInThisAcademy) {
             $academy->personnel()->attach($personnel);
         }
 
@@ -295,13 +405,13 @@ class SchoolController extends Controller {
 
         $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
-        
+
         return redirect()->route($redirectRoute, $school)->with('success', 'Personnel added successfully!');
     }
-    
+
     public function addAthlete(School $school, Request $request) {
         //
-        if(!$this->checkPermission($school)){
+        if (!$this->checkPermission($school)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
@@ -309,16 +419,16 @@ class SchoolController extends Controller {
         $athlete = User::find($request->athlete_id);
         $academy = Academy::find($school->academy_id);
         $isInThisAcademy = $academy->athletes->where('id', $athlete->id)->count();
-        if(!$isInThisAcademy){
+        if (!$isInThisAcademy) {
             $academy->athletes()->attach($athlete);
-            if($athlete->academyAthletes()->count() > 1) {
+            if ($athlete->academyAthletes()->count() > 1) {
                 $noAcademy = Academy::where('slug', 'no-academy')->first();
                 $noAcademy->athletes()->detach($athlete->id);
             }
         }
-        
+
         $school->athletes()->attach($athlete);
-        
+
         $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
 
@@ -354,7 +464,7 @@ class SchoolController extends Controller {
         $instructorSchools = $authUser->schools->pluck('id')->toArray();
 
         foreach ($schools as $key => $school) {
-            if($authRole === 'instructor' && !in_array($school->id, $instructorSchools)){
+            if ($authRole === 'instructor' && !in_array($school->id, $instructorSchools)) {
                 continue;
             }
             $formatted_schools[] = [
@@ -373,7 +483,7 @@ class SchoolController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if($authRole === 'rector') {
+        if ($authRole === 'rector') {
             $academy = $authUser->academies->first();
             $schools = School::query()->when($request->search, function ($q, $search) {
                 return $q->whereIn('id', School::search($search)->keys());
@@ -568,7 +678,7 @@ class SchoolController extends Controller {
         ]);
     }
 
-    public function checkPermission(School $school, $isStrict = false){
+    public function checkPermission(School $school, $isStrict = false) {
         // admin -> sempre; rector -> solo se la scuola è nella sua accademia; dean e manager -> solo se la scuola è associata a lui; 
         // l'opzione isStrict permette di escludere anche i dean e manager, per funzionalità accessibili solo a rettori e admin
         $authUser = User::find(auth()->user()->id);
@@ -576,25 +686,25 @@ class SchoolController extends Controller {
 
         $authorized = true;
 
-        switch($authRole){
+        switch ($authRole) {
             case 'admin': // sempre autorizzato
                 break;
             case 'rector': // non autorizzato se la scuola non è nella sua accademia
-                if($authUser->academies->first()->id != $school->academy->id){
+                if ($authUser->academies->first()->id != $school->academy->id) {
                     $authorized = false;
                 }
                 break;
             case 'dean':
             case 'manager': // non autorizzato se la scuola non è associata a lui o se strict è true
-                if($authUser->schools->first()->id != $school->id || $isStrict){
+                if ($authUser->schools->first()->id != $school->id || $isStrict) {
                     $authorized = false;
                 }
                 break;
-            default: 
+            default:
                 $authorized = false;
                 break;
         }
 
         return $authorized;
-    } 
+    }
 }

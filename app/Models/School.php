@@ -13,7 +13,13 @@ class School extends Model {
         'name',
         'nation_id',
         'academy_id',
-        'slug'
+        'slug',
+        'address',
+        'city',
+        'state',
+        'zip',
+        'country',
+        'coordinates'
     ];
 
     public function toSearchableArray() {
