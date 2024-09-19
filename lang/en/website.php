@@ -5,6 +5,7 @@ return [
     "hero_title" => "Lightsaber Combat Academy",
     "hero_text" => "Welcome to our website!",
     "hero_cta" => "Join us now",
+    "homepage_join" => "Join the sport side",
     "first_section_title" => "The evolution of the sporting lightsaber and gear by LudoSport",
     "first_section_small" => "A sophisticated sports tool",
     "first_section_description" => "Since 2006, LudoSport Founder Masters promote the use in real life of the most iconic weapons as equipment for sporting combat, artistic performance or pure enjoyment.",

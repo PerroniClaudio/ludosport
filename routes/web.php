@@ -318,8 +318,5 @@ Route::group([], function () {
 });
 
 Route::get('/test', function () {
-
-    $export = new \App\Exports\OrdersExport(\App\Models\Export::find(9));
-
-    return Excel::download($export, 'orders.xlsx');
+    response()->json(['message' => 'test']);
 })->name('test');

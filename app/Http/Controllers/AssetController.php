@@ -69,7 +69,7 @@ class AssetController extends Controller {
     }
 
     public function spadaHome() {
-        $url = $this->retrieveAsset("/assets/spada-home.png");
+        $url = $this->retrieveAsset("/assets/spada-home-2.png");
         $response = Http::get($url);
         $image = $response->body();
         $headers = [
