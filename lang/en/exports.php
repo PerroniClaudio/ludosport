@@ -13,6 +13,7 @@ return [
     'event_style' => 'Export event style points ranking',
     'event_instructor_participants' => 'Export instructor event participants',
     'instructor_event_results' => 'Export instructor event results',
+    'orders' => 'Export orders',
     'download_template' => 'Download Template',
     'submit' => 'Submit',
     'pending' => 'Pending',
@@ -25,6 +26,7 @@ return [
     'user_roles_filter_message' => 'Please select one or more roles to get the users that have those roles.',
     'users_academy_filter_message' => 'Please select an academy to get the users that are enrolled in that academy.',
     'users_school_filter_message' => 'Please select a school to get the users that are enrolled in that school.',
+    'orders_filter_message' => 'Please select a starting date and an ending date to get the orders that were created between those dates.',
     'available_roles' => 'Available Roles',
     'selected_roles' => 'Selected Roles',
     'roles_name' => 'Role Name',
@@ -39,5 +41,5 @@ return [
     'selected_events' => 'Selected Events',
     'failed' => 'Failed',
     'error' => 'Error',
-    ''
+
 ];

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Maatwebsite\Excel\Facades\Excel;
 
 Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/role-select', [App\Http\Controllers\UserController::class, 'roleSelector'])->middleware(['auth', 'verified'])->name('role-selector');
@@ -317,17 +318,8 @@ Route::group([], function () {
 });
 
 Route::get('/test', function () {
-    // $nation = App\Models\Nation::where('name', 'like', '%italy%')->first();
-    // return User::where('is_disabled', false)->whereHas('roles', function ($q) {
-    //     $q->where('label', 'athlete');
-    // })->whereHas('academyAthletes', function ($q) use ($nation) {
-    //     $q->where('nation_id', $nation->id);
-    // })->get();
-    return 'test';
-    // $user = User::find(87);
-    // $user->has_paid_fee = 0;
-    // $user->surname = 'vasonly';
-    // $user->nation_id = 2;
-    // $user->rank_id = 1;
-    // $user->save();
+
+    $export = new \App\Exports\OrdersExport(\App\Models\Export::find(9));
+
+    return Excel::download($export, 'orders.xlsx');
 })->name('test');
