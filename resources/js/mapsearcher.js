@@ -1,5 +1,3 @@
-import { all } from "axios";
-
 export const mapsearcher = (academies) => {
     return {
         map: null,
@@ -15,7 +13,7 @@ export const mapsearcher = (academies) => {
             if (this.search.length < 3) return;
 
             const response = await fetch(
-                `/academies-search?location=${this.search}`
+                `/schools-search?location=${this.search}`
             );
 
             this.results = await response.json();

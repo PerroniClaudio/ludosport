@@ -707,4 +707,68 @@ class SchoolController extends Controller {
 
         return $authorized;
     }
+
+
+    /** Mappa Scuole */
+
+    public function schoolsMap() {
+
+        $schools = School::where('is_disabled', '0')->whereNotNull('coordinates')->with(['nation'])->get();
+        $formatted_schools = [];
+        $allnations = [];
+        $available_nations = [];
+
+        foreach ($schools as $key => $academy) {
+            $formatted_schools[] = [
+                'id' => $academy->id,
+                'nation' => $academy->nation->name,
+                'slug' => $academy->slug,
+                'nation_id' => $academy->nation->id,
+                'name' => $academy->name,
+                'address' => $academy->address,
+                'city' => $academy->city,
+                'state' => $academy->state,
+                'zip' => $academy->zip,
+                'country' => $academy->country,
+                'coordinates' => json_decode($academy->coordinates, true),
+            ];
+
+            if (!in_array($academy->nation->name, $allnations)) {
+                $available_nations[] = [
+                    'value' => $academy->nation->id,
+                    'label' => $academy->nation->name,
+                ];
+
+                $allnations[] = $academy->nation->name;
+            }
+        }
+
+        return view('website.academies-map', [
+            'schools_json' => json_encode($formatted_schools),
+            'nations' => $available_nations,
+        ]);
+    }
+
+    public function searchSchools(Request $request) {
+
+        $location = $request->location;
+        $radius = $request->radius ? $request->radius : 50;
+
+        $coordinates = $this->getCoordinates($location);
+        $locationLat = $coordinates[0];
+        $locationLon = $coordinates[1];
+
+        $schools = Academy::where('is_disabled', '0')->whereNotNull('coordinates')->get();
+        $nearbyAcademies = $this->findNearbySchools($schools, $locationLat, $locationLon, $radius);
+
+        return response()->json($nearbyAcademies);
+    }
+
+    public function detail(School $school) {
+
+        return view('website.academy-profile', [
+            'school' => $school,
+            'athletes' => $school->athletes,
+        ]);
+    }
 }

@@ -39,7 +39,7 @@
                         </x-nav-link>
                     @endif
 
-                    <x-nav-link :href="route('academies-map')" :active="request()->routeIs('academies-map')">
+                    <x-nav-link :href="route('schools-map')" :active="request()->routeIs('schools-map')">
                         {{ __('website.academies_map') }}
                     </x-nav-link>
                     <x-nav-link :href="route('rankings-website')" :active="request()->routeIs('rankings-website')">
@@ -140,16 +140,16 @@
                 {{ __('dashboard.title') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('academies-map')" :active="request()->routeIs('academies-map')">
+            <x-responsive-nav-link :href="route('schools-map')" :active="request()->routeIs('schools-map')">
                 {{ __('website.academies_map') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('academies-map')" :active="request()->routeIs('rankings-website')">
+            <x-responsive-nav-link :href="route('rankings-website')" :active="request()->routeIs('rankings-website')">
                 {{ __('website.rankings') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('academies-map')" :active="request()->routeIs('shop')">
+            <x-responsive-nav-link :href="route('shop')" :active="request()->routeIs('shop')">
                 {{ __('website.shop') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('academies-map')" :active="request()->routeIs('user-search')">
+            <x-responsive-nav-link :href="route('user-search')" :active="request()->routeIs('user-search')">
                 {{ __('website.user_search') }}
             </x-responsive-nav-link>
 

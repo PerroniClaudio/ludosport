@@ -23,10 +23,12 @@ Route::get('/athlete-profile/{id}', function () {
     return view('website.athlete-profile');
 })->name('athlete-profile');
 
-Route::get('/academies-map', [App\Http\Controllers\AcademyController::class, 'academiesMap'])->name('academies-map');
-Route::get('/academies-map/all-location', [App\Http\Controllers\AcademyController::class, 'allWithLocation'])->name('academy-list-location');
-Route::get('/academy-profile/{academy:slug}', [App\Http\Controllers\AcademyController::class, 'detail'])->name('academy-profile');
+/** Academy Map */
+
+Route::get('/academies-map', [App\Http\Controllers\SchoolController::class, 'schoolsMap'])->name('schools-map');
+Route::get('/school-profile/{school:slug}', [App\Http\Controllers\SchoolController::class, 'detail'])->name('school-profile');
 Route::get('/academy-image/{academy}', [App\Http\Controllers\AcademyController::class, 'academyImage'])->name('academy-image');
+Route::middleware('throttle:rate_limit,1')->get('/schools-search', [App\Http\Controllers\SchoolController::class, 'searchSchools'])->name('schools-search');
 
 /** Rankings */
 
@@ -82,5 +84,3 @@ Route::group(['middleware' => ['auth']], function () {
 Route::middleware('throttle:rate_limit,1')->get('/website-users/search', [App\Http\Controllers\UserController::class, 'searchJson'])->name('website-users-search');
 Route::get('/profile-picture/{user}', [App\Http\Controllers\UserController::class, 'propic'])->name('profile-picture');
 Route::get('/website-users/{user:battle_name}', [App\Http\Controllers\UserController::class, 'show'])->name('website-users-show');
-
-Route::middleware('throttle:rate_limit,1')->get('/academies-search', [App\Http\Controllers\AcademyController::class, 'searchAcademies'])->name('academies-search');

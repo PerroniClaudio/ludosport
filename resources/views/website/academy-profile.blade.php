@@ -3,15 +3,16 @@
         <section class="col-span-12 py-12 flex flex-col gap-8">
             <section class="bg-white dark:bg-background-800 flex p-8 rounded">
                 <div class="rounded-full h-24 w-24">
-                    <img src="{{ route('academy-image', $academy->id) }}" alt="avatar" class="rounded-full h-24 w-24" />
+                    <img src="{{ route('academy-image', $school->academy->id) }}" alt="avatar"
+                        class="rounded-full h-24 w-24" />
                 </div>
                 <div class="flex-1 flex flex-col gap-2 ml-8">
                     <div class="w-1/2 flex flex-col gap-2">
-                        <div class="text-4xl text-primary-500">{{ $academy->name }}</div>
+                        <div class="text-4xl text-primary-500">{{ $school->name }}</div>
                         <div class="flex items-center gap-2">
                             <x-lucide-flag class="h-5 w-5 text-background-500 dark:text-background-400" />
                             <span class="text-sm text-background-500 dark:text-background-400">
-                                {{ $academy->nation->name }}
+                                {{ $school->nation->name }}
                             </span>
                         </div>
                     </div>
@@ -44,7 +45,7 @@
                             'columnClasses' => '', // classes to style table th
                             'rowClasses' => '', // classes to style table td
                         ],
-                    ]" :rows="$academy->athletes">
+                    ]" :rows="$school->athletes">
 
                     </x-table>
 
@@ -58,11 +59,11 @@
 
                     <div class="flex items-center gap-2">
                         <x-lucide-map-pin class="w-10 h-10 text-primary-500 dark:text-primary-600" />
-                        <span class="text-background-200 font-4xl">{{ $academy->address }}, {{ $academy->postal_code }}
-                            {{ $academy->city }}, {{ $academy->nation->name }}</span>
+                        <span class="text-background-200 font-4xl">{{ $school->address }}, {{ $school->postal_code }}
+                            {{ $school->city }}, {{ $school->nation->name }}</span>
                     </div>
 
-                    <div x-data="googlemap('{{ $academy->coordinates }}')" x-ref="eventGoogleMapContainer">
+                    <div x-data="googlemap('{{ $school->coordinates }}')" x-ref="eventGoogleMapContainer">
                         <x-maps-google id="eventGoogleMap" style="height: 400px"></x-maps-google>
                     </div>
                 </section>
