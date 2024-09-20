@@ -1185,6 +1185,10 @@ class EventController extends Controller {
 
         foreach ($countries as $key => $country) {
 
+            if ($country->academies->count() == 0) {
+                continue;
+            }
+
             $continent = $country['continent'];
 
             if (!isset($continents[$continent])) {
