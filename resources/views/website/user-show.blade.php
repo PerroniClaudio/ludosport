@@ -25,6 +25,8 @@
                             <span class="text-sm text-background-500 dark:text-background-400">
                                 {{ $user->nation->name }}
                             </span>
+                            <img src="{{ route('nation-flag', $user->nation->id) }}" alt="{{ $user->nation->flag }}"
+                                class="h-2 w-4">
                         </div>
 
                         <div>
@@ -146,7 +148,7 @@
                     <div class="flex flex-col gap-2">
 
                         @foreach ($user->academies as $academy)
-                            <a href="{{ route('academy-profile', $academy->slug) }}"
+                            <a href="#"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>{{ $academy->name }}</span>
@@ -159,7 +161,7 @@
 
                     <div class="flex flex-col gap-2">
                         @foreach ($user->academyAthletes as $academy)
-                            <a href="{{ route('academy-profile', $academy->slug) }}"
+                            <a href="#"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>{{ $academy->name }}</span>
@@ -179,7 +181,7 @@
                     <div class="flex flex-col gap-2">
 
                         @foreach ($user->schools as $school)
-                            <a href="#"
+                            <a href="{{ route('school-profile', $school->slug) }}"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>{{ $school->name }}</span>
@@ -191,11 +193,11 @@
                     <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
 
                     <div class="flex flex-col gap-2">
-                        @foreach ($user->schoolAthletes as $schools)
-                            <a href="#"
+                        @foreach ($user->schoolAthletes as $school)
+                            <a href="{{ route('school-profile', $school->slug) }}"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $schools->name }}</span>
+                                <span>{{ $school->name }}</span>
                             </a>
                         @endforeach
                     </div>

@@ -15,6 +15,7 @@ Route::get('/logo-saber-k', [App\Http\Controllers\AssetController::class, 'logoS
 Route::get('/warriors', [App\Http\Controllers\AssetController::class, 'warriors'])->name('warriors');
 Route::get('/spada-home', [App\Http\Controllers\AssetController::class, 'spadaHome'])->name('spada-home');
 Route::get('/bollino', [App\Http\Controllers\AssetController::class, 'bollino'])->name('bollino');
+Route::get('/nation/{nation}/flag', [App\Http\Controllers\AssetController::class, 'nationFlag'])->name('nation-flag');
 Route::get('/user/{user}/profile-picture', [App\Http\Controllers\UserController::class, 'propic'])->name('user.profile-picture-show');
 
 

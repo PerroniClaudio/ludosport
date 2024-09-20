@@ -14,6 +14,8 @@
                             <span class="text-sm text-background-500 dark:text-background-400">
                                 {{ $school->nation->name }}
                             </span>
+                            <img src="{{ route('nation-flag', $school->nation->id) }}" alt="{{ $school->nation->flag }}"
+                                class="h-2 w-4">
                         </div>
                     </div>
                 </div>
