@@ -57,108 +57,126 @@
                     <h1 class="font-bold tracking-tighter text-4xl pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300"
                         x-text="eventName"></h1>
 
-
-                    <!--
-
-                    <div class="flex flex-col gap-4 px-8 max-h-[80vh] overflow-y-scroll">
-                        <template x-for="athlete in athletesData" :key="athlete.id">
-                            <div class="bg-background-800 rounded dark:text-background-300 p-4">
-                                <div class="flex justify-between gap-1 items-center">
-                                    <div class="grid grid-cols-4 gap-1 items-center">
-                                        <div>
-                                            <h1 class="font-bold dark:text-background-100" x-text="athlete.name"></h1>
-                                        </div>
-                                        <div>
-                                            <h1 class="font-bold dark:text-background-100" x-text="athlete.academy">
-                                            </h1>
-                                        </div>
-                                        <div>
-                                            <h1 class="font-bold dark:text-background-100" x-text="athlete.school"></h1>
-                                        </div>
-                                        <div>
-                                            <h1 class="font-bold dark:text-background-100" x-text="athlete.nation"></h1>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <p class="text-primary-500" x-text="athlete.war_points"></p>
-                                        <p class="text-secondary-500" x-text="athlete.style_points"></p>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </template>
-                    </div>
-
-                    -->
-
                     <div
                         class="mb-5 overflow-x-auto bg-white dark:bg-background-800 rounded-lg shadow overflow-y-auto relative p-2 w-full">
+                        <div>
+                            <p x-text="rows.count"></p>
 
-                        <table
-                            class="border-collapse table-auto w-full whitespace-no-wrap bg-white dark:bg-background-900 table-striped relative rounded">
+                            <div
+                                class="mb-5 overflow-x-auto bg-white dark:bg-background-900 rounded-lg shadow overflow-y-auto relative">
+                                <div class="flex justify-between items-center p-6">
+                                    <div class="flex items-center justify-end w-full">
+                                        <x-text-input type="text" x-on:input="searchByValue($event)"
+                                            placeholder="Search..."
+                                            class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" />
+                                    </div>
+                                </div>
+                                <table
+                                    class="border-collapse table-auto w-full whitespace-no-wrap bg-white dark:bg-background-900 table-striped relative flex-1">
 
-                            <thead>
-                                <th
-                                    class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate rounded">
-                                    <span>{{ __('users.name') }}</span>
-                                </th>
-                                <th
-                                    class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                                    <span>{{ __('users.academy') }}</span>
-                                </th>
-                                <th
-                                    class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                                    <span>{{ __('users.school') }}</span>
-                                </th>
-                                <th
-                                    class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                                    <span>{{ __('academies.nation') }}</span>
-                                </th>
-                                <th
-                                    class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                                    <span>{{ __('website.events_general_points') }}</span>
-                                </th>
+                                    <thead>
+                                        <tr class="text-left">
 
-                            </thead>
 
-                            <tbody>
+                                            <template x-for="(column, index) in columns">
+                                                <th :class="`${column.columnClasses}`"
+                                                    class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 ">
+                                                    <div class="flex justify-between items-center"
+                                                        x-on:click="sort(index)">
+                                                        <p class="font-bold tracking-wider uppercase text-xs truncate"
+                                                            x-text="column.name"></p>
+                                                        <x-lucide-arrow-down-up
+                                                            class="w-4 h-4 text-primary-500 dark:text-primary-400 cursor-pointer hover:opacity-70" />
+                                                    </div>
+                                                </th>
+                                            </template>
 
-                                <template x-for="athlete in athletesData" :key="athlete.id">
-                                    <tr @click="window.location.href = `{{ env('APP_URL') }}/website-users/${athlete.battle_name}`"
-                                        class="cursor-pointer hover:bg-background-100 dark:hover:bg-background-800">
-                                        <td
-                                            class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                            <h1 class="font-bold dark:text-background-100" x-text="athlete.name">
-                                            </h1>
-                                        </td>
-                                        <td
-                                            class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                            <h1 class="font-bold dark:text-background-100 text-xs"
-                                                x-text="athlete.academy">
-                                            </h1>
-                                        </td>
-                                        <td
-                                            class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                            <h1 class="font-bold dark:text-background-100 text-xs"
-                                                x-text="athlete.school"></h1>
-                                        </td>
-                                        <td
-                                            class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                            <h1 class="font-bold dark:text-background-100 text-xs"
-                                                x-text="athlete.nation"></h1>
-                                        </td>
-                                        <td
-                                            class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                            <span class="text-primary-500 mr-1"
-                                                x-text="athlete.war_points"></span>|<span
-                                                class="text-secondary-500 ml-1" x-text="athlete.style_points"></span>
-                                        </td>
-                                    </tr>
-                                </template>
 
-                            </tbody>
+                                        </tr>
+                                    </thead>
 
-                        </table>
+                                    <tbody>
+
+                                        <template x-if="rows.length === 0">
+                                            <tr>
+                                                <td colspan="100%"
+                                                    class="text-center text-background-500 dark:text-background-300 py-10 px-4 text-sm">
+                                                    No records found
+                                                </td>
+                                            </tr>
+                                        </template>
+
+                                        <template x-for="(row, rowIndex) in paginatedRows" :key="'row-' + rowIndex">
+                                            <tr
+                                                class="bg-background-200 dark:bg-background-900 hover:bg-background-50 hover:dark:bg-background-800 cursor-pointer">
+                                                <template x-for="(column, columnIndex) in columns"
+                                                    :key="'column-' + columnIndex">
+                                                    <td :class="`${column.rowClasses}`"
+                                                        class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap cursor-pointer bg-transparent">
+                                                        <div class="flex items-center gap-1">
+                                                            <div x-text="`${row[column.field]}`" class="truncate"></div>
+                                                            <template x-if="column.field === 'name'">
+                                                                <a x-bind:href="'/website-users/' + row.battle_name">
+                                                                    <x-lucide-arrow-right
+                                                                        class="w-4 h-4 text-primary-500 dark:text-primary-400 cursor-pointer hover:opacity-70" />
+                                                                </a>
+                                                            </template>
+                                                            <template x-if="column.field === 'school'">
+
+                                                                <a x-bind:href="'/school-profile/' + row.school_slug"
+                                                                    x-show="row.school_slug != ''">
+                                                                    <x-lucide-arrow-right
+                                                                        class="w-4 h-4 text-primary-500 dark:text-primary-400 cursor-pointer hover:opacity-70" />
+                                                                </a>
+                                                            </template>
+
+
+                                                        </div>
+                                                    </td>
+                                                </template>
+                                            </tr>
+                                        </template>
+
+                                    </tbody>
+
+                                </table>
+
+                                <div class="flex justify-between items-center p-6">
+                                    <div class="flex items-center justify-end w-full">
+
+                                        <div class="flex items-center">
+                                            <button type="button" x-on:click="page = 1" class="mr-2"
+                                                x-bind:disabled="page === 1">
+                                                <x-lucide-chevron-first
+                                                    class="w-4 h-4 text-primary-500 dark:text-primary-400" />
+                                            </button>
+                                            <button type="button" x-on:click="page = page - 1" class="mr-2"
+                                                x-bind:disabled="page === 1"
+                                                :class="{ 'opacity-50 cursor-not-allowed': page === 1 }">
+                                                <x-lucide-chevron-left
+                                                    class="w-4 h-4 text-primary-500 dark:text-primary-400" />
+                                            </button>
+                                            </button>
+                                            <p class="text-sm text-background-500 dark:text-background-300">Page <span
+                                                    x-text="page"></span> of
+                                                <span x-text="totalPages()"></span>
+                                            </p>
+                                            <button type="button" x-on:click="page = page + 1" class="ml-2"
+                                                :class="{ 'opacity-50 cursor-not-allowed': page === totalPages() }"
+                                                x-bind:disabled="page === totalPages()">
+                                                <x-lucide-chevron-right
+                                                    class="w-4 h-4 text-primary-500 dark:text-primary-400" />
+                                            </button>
+                                            <button type="button" x-on:click="page = totalPages()" class="ml-2"
+                                                x-bind:disabled="page === totalPages()">
+                                                <x-lucide-chevron-last
+                                                    class="w-4 h-4 text-primary-500 dark:text-primary-400" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                     </div>
 
