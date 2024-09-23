@@ -39,6 +39,7 @@ class Event extends Model {
         'is_free',
         'price',
         'weapon_form_id',
+        'max_participants',
     ];
 
     public function nation() {
@@ -95,6 +96,17 @@ class Event extends Model {
         }
 
         return $eventTypes;
+    }
+
+    public function isWaitingList(){
+        $isEnabling = $this->resultType() === 'enabling';
+        $participants = 0;
+        if($isEnabling){
+            $participants = $this->instructorResults->count();
+        } else {
+            $participants = $this->results->count();
+        }
+        return $participants >= $this->max_participants;
     }
 
     public function eventMultiplier() {

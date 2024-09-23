@@ -12,7 +12,7 @@ use Illuminate\Support\Env;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Cashier;
 use Illuminate\Support\Facades\DB;
-use Srmklive\PayPal\Services\Paypal as PaypalClient;
+use Srmklive\PayPal\Services\PayPal as PaypalClient;
 
 class FeeController extends Controller {
     /**

@@ -45,6 +45,8 @@ Route::prefix('/shop')->group(function () {
     Route::get('/activate-membership', [App\Http\Controllers\ShopController::class, 'activate'])->middleware('auth')->name('shop-activate-membership');
     Route::get('/invoices/user-data/{user}', [App\Http\Controllers\UserController::class, 'invoiceData'])->middleware('auth')->name('users.invoices.get');
     Route::get('/fees/stripe/checkout', [App\Http\Controllers\FeeController::class, 'userCheckoutStripe'])->middleware('auth')->name('shop.fees.stripe-checkout');
+    Route::post('/invoices/store', [App\Http\Controllers\UserController::class, 'saveInvoice'])->name('shop.invoices.store');
+
 
     Route::get('/fees/success', [App\Http\Controllers\FeeController::class, 'successUser'])->middleware('auth')->name('shop.fees.success');
     Route::get('/fees/cancel', [App\Http\Controllers\FeeController::class, 'cancelUser'])->middleware('auth')->name('shop.fees.cancel');
@@ -64,9 +66,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/shop/event/{event}/stripe/checkout', [App\Http\Controllers\EventController::class, 'userCheckoutStripe'])->middleware('auth')->name('shop.events.stripe-checkout');
     Route::get('/shop/event/success', [App\Http\Controllers\EventController::class, 'successUser'])->middleware('auth')->name('shop.event.success');
     Route::get('/shop/event/cancel', [App\Http\Controllers\EventController::class, 'cancelUser'])->middleware('auth')->name('shop.event.cancel');
+    Route::get('/shop/event/{event}/stripe/preauth', [App\Http\Controllers\EventController::class, 'userPreauthorizeStripe'])->middleware('auth')->name('shop.event.stripe-preauth');
+    // Route::get('/shop/event/stripe/preauth-success', [App\Http\Controllers\EventController::class, 'preauthSuccessUserStripe'])->middleware('auth')->name('shop.event.stripe-preauth-success');
+    Route::get('/shop/event/stripe/preauth-cancel', [App\Http\Controllers\EventController::class, 'preauthCancelUserStripe'])->middleware('auth')->name('shop.event.stripe-preauth-cancel');
 
-    Route::post('/shop/event/{event}/paypal/checkout', [App\Http\Controllers\EventController::class, 'userCheckoutPaypal'])->middleware('auth')->name('shop.events.stripe-checkout');
+    Route::post('/shop/event/{event}/paypal/checkout', [App\Http\Controllers\EventController::class, 'userCheckoutPaypal'])->middleware('auth')->name('shop.events.paypal-checkout');
     Route::get('/shop/event/paypal/success', [App\Http\Controllers\EventController::class, 'successUserPaypal'])->middleware('auth')->name('shop.event.paypal-success');
+    Route::post('/shop/event/{event}/paypal/preauth', [App\Http\Controllers\EventController::class, 'userPreauthorizePaypal'])->middleware('auth')->name('shop.event.paypal-preauth');
+    Route::get('/shop/event/paypal/preauth-success', [App\Http\Controllers\EventController::class, 'preauthSuccessUserPaypal'])->middleware('auth')->name('shop.event.paypal-preauth-success');
+    Route::get('/shop/event/paypal/preauth-cancel', [App\Http\Controllers\EventController::class, 'preauthCancelUserPaypal'])->middleware('auth')->name('shop.event.paypal-preauth-cancel');
     Route::get('/shop/event/paypal/cancel', [App\Http\Controllers\EventController::class, 'cancelUserPaypal'])->middleware('auth')->name('shop.event.paypal-cancel');
 });
 

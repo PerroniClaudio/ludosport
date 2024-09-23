@@ -17,6 +17,8 @@ class Order extends Model {
         'order_number',
         'result',
         'invoice_id',
+        'paypal_order_id',
+        'stripe_payment_intent_id',
     ];
 
     public function user() {

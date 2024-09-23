@@ -1,3 +1,16 @@
+@php
+    $isWaitingList = $event->isWaitingList();
+    $stripeUrl = "";
+    $paypalUrl = "";
+    if ($isWaitingList) {
+        $stripeUrl = route('shop.event.stripe-preauth', ['event' => $event]);
+        $paypalUrl = route('shop.event.paypal-preauth', ['event' => $event]);
+    } else {
+        $stripeUrl = route('shop.events.stripe-checkout', ['event' => $event]);
+        $paypalUrl = route('shop.events.paypal-checkout', ['event' => $event]);
+    }
+@endphp
+
 <x-website-layout>
     <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
         <section class="col-span-12 py-12">
@@ -40,7 +53,7 @@
                         })
                 },
                 saveInvoiceData() {
-                    const url = `/rector/invoices/store`
+                    const url = `/shop/invoices/store`
             
                     const body = new FormData()
             
@@ -69,7 +82,7 @@
                 startStripeCheckout() {
                     this.saveInvoiceData()
             
-                    const url = `/shop/event/${this.event_id}/stripe/checkout`
+                    const url = `{{ $stripeUrl }}`
                     let items = [];
             
                     items.push({
@@ -89,7 +102,7 @@
                 startPaypalCheckout() {
                     this.saveInvoiceData()
             
-                    const url = `/shop/event/${this.event_id}/paypal/checkout`
+                    const url = `{{ $paypalUrl }}`
                     let items = [];
             
                     items.push({
@@ -130,6 +143,11 @@
                                 <div>
                                     <p class="text-background-800 dark:text-background-200">1x
                                         {{ __('website.event_participation_checkout_text') }}</p>
+                                    @if ($isWaitingList)
+                                        <p class="mt-2 text-error-500">
+                                            {{ __('website.event_waiting_list_checkout_text') }}
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
                             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
@@ -188,13 +206,16 @@
                                         <span>PayPal</span>
                                     </div>
                                 </div>
-                                <div x-show="shouldShowPayment" class="mt-4">
-                                    <div class="rounded-full bg-white hover:bg-gray-200 text-black font-bold p-1 text-center cursor-pointer"
-                                        @click="startStripeCheckout">
+                                {{-- Al momento non è ancora implementata la preautorizzazione con stripe --}}
+                                @if(!$isWaitingList) 
+                                    <div x-show="shouldShowPayment" class="mt-4">
+                                        <div class="rounded-full bg-white hover:bg-gray-200 text-black font-bold p-1 text-center cursor-pointer"
+                                            @click="startStripeCheckout">
 
-                                        <span>Stripe</span>
+                                            <span>Stripe</span>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
 
                         </div>

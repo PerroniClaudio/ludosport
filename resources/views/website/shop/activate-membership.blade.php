@@ -85,7 +85,7 @@
                         })
                 },
                 saveInvoiceData() {
-                    const url = `/rector/invoices/store`
+                    const url = `/shop/invoices/store`
             
                     const body = new FormData()
             

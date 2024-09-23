@@ -42,8 +42,16 @@
 
                         @if ($canpurchase)
                             <a href="{{ route('event-purchase', $event->id) }}">
-                                <x-primary-button>{{ __('website.events_list_participate') }}</x-primary-button>
+                                @if($only_waiting_list)
+                                    <x-primary-button>{{ __('website.events_list_waiting_list') }}</x-primary-button>
+                                @else
+                                    <x-primary-button>{{ __('website.events_list_participate') }}</x-primary-button>
+                                @endif    
                             </a>
+                        @elseif ($is_participating)
+                            <p>{{__('website.events_participating')}}</p>
+                        @elseif ($is_in_waiting_list)
+                            <p>{{__('website.events_in_waiting_list')}}</p>
                         @endif
 
                     </div>

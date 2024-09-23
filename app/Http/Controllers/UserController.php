@@ -1038,6 +1038,12 @@ class UserController extends Controller {
     }
 
     public function invoicedata(User $user) {
+        $authUser = User::find(auth()->user()->id);
+        if ($authUser->id != $user->id) {
+            return response()->json([
+                'error' => 'You do not have permission for this data!',
+            ]);
+        }
 
         $last_invoice = $user->invoices()->latest()->first();
 

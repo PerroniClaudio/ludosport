@@ -5,6 +5,7 @@ return [
     'status0' => 'Pending',
     'status1' => 'Processing',
     'status2' => 'Completed',
+    'status3' => 'Preauthorized',
     'status4' => 'Cancelled',
     'stripe' => 'Stripe',
     'paypal' => 'PayPal',

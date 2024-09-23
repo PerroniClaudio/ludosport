@@ -6,7 +6,7 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
     Route::get('/fees', 'App\Http\Controllers\FeeController@index')->name('rector.fees.index');
     Route::get('/fees/purchase', 'App\Http\Controllers\FeeController@create')->name('rector.fees.purchase');
     Route::get('/invoices/user-data/{user}', [App\Http\Controllers\UserController::class, 'invoiceData'])->name('users.invoices.get');
-    Route::post('/invoices/store', [App\Http\Controllers\UserController::class, 'saveInvoice'])->name('users.invoices.store');
+    Route::post('/invoices/store', [App\Http\Controllers\UserController::class, 'saveInvoice'])->name('rector.invoices.store');
 
 
     #Stripe 

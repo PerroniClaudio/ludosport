@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ParticipantsUpdated;
 use App\Exports\EventParticipantsExport;
 use App\Mail\EventRejectionMail;
 use App\Models\Academy;
 use App\Models\Announcement;
 use App\Models\Event;
 use App\Models\EventType;
+use App\Models\EventWaitingList;
 use App\Models\Nation;
 use App\Models\User;
 use App\Models\Order;
@@ -21,7 +23,9 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Cashier\Cashier;
 use Maatwebsite\Excel\Facades\Excel;
-use Srmklive\PayPal\Services\Paypal as PaypalClient;
+use Srmklive\PayPal\Services\PayPal as PaypalClient;
+use Stripe\PaymentIntent;
+use Stripe\Stripe;
 
 class EventController extends Controller {
     /**
@@ -535,9 +539,7 @@ class EventController extends Controller {
 
         $participants = json_decode($request->participants, true);
 
-        Log::info('Participants:', ['participants' => $participants]);
         if (!is_array($participants)) {
-            Log::error('Invalid participants data', ['participants' => $participants]);
             return response()->json(['error' => 'Invalid participants data'], 400);
         }
 
@@ -570,6 +572,9 @@ class EventController extends Controller {
                 ]);
             }
         }
+
+        // Esegui l'evento per aggiornare partecipanti e waiting list (se ci sono posti liberi)
+        event(new ParticipantsUpdated($event->id));
 
         return response()->json(['success' => 'Participants modified successfully!']);
     }
@@ -649,25 +654,25 @@ class EventController extends Controller {
             ->with(['type', 'results', 'instructorResults'])
             ->get();
 
-    $formatted_events = [];
+        $formatted_events = [];
 
-    foreach ($events as $event) {
-        $formatted_events[] = [
-            'id' => $event->id,
-            'name' => $event->name,
-            'start_date' => $event->start_date,
-            'end_date' => $event->end_date,
-            'type' => $event->type->name,
-            'result_type' => $event->resultType(),
-            'results' => $event->results ? $event->results()->count() : null,
-            'instructor_results' => $event->instructor_results ? $event->instructorResults()->count() : null,
-            'participants' => $event->resultType() == 'enabling' ? $event->instructorResults()->count() : $event->results()->count(),
-        ];
-    }
+        foreach ($events as $event) {
+            $formatted_events[] = [
+                'id' => $event->id,
+                'name' => $event->name,
+                'start_date' => $event->start_date,
+                'end_date' => $event->end_date,
+                'type' => $event->type->name,
+                'result_type' => $event->resultType(),
+                'results' => $event->results ? $event->results()->count() : null,
+                'instructor_results' => $event->instructor_results ? $event->instructorResults()->count() : null,
+                'participants' => $event->resultType() == 'enabling' ? $event->instructorResults()->count() : $event->results()->count(),
+            ];
+        }
 
-    usort($formatted_events, function ($a, $b) {
-        return $b['participants'] - $a['participants'];
-    });
+        usort($formatted_events, function ($a, $b) {
+            return $b['participants'] - $a['participants'];
+        });
 
         return response()->json($formatted_events);
     }
@@ -897,31 +902,34 @@ class EventController extends Controller {
         //
 
         $canpurchase = false;
+        $isParticipating = false;
+        $isInWaitingList = false;
+        $onlyWaitingList = $event->isWaitingList();
 
         $user = User::find(auth()->user()->id);
 
         if ($user->has_paid_fee) {
-
-            if ($event->results->count() < 64) {
-
-                $founduser = false;
-
-                foreach ($event->results as $result) {
-                    if ($result->user_id === auth()->user()->id) {
-                        $founduser = true;
-                        break;
-                    }
-                }
-
-                if (!$founduser) {
-                    $canpurchase = true;
-                }
+            // Controlla il tipo di evento
+            if ($event->resultType() === 'enabling') {
+                $isParticipating = $event->instructorResults()->where('user_id', $user->id)->exists();
+                $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
+                $canpurchase = !$isParticipating && !$isInWaitingList;
+                // $canpurchase = !$isParticipating && !$isInWaitingList && $event->instructorResults()->count() < $event->max_participants;
+            } else if ($event->resultType() === 'ranking') {
+                $isParticipating = $event->results()->where('user_id', $user->id)->exists();
+                $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
+                $canpurchase = !$isParticipating && !$isInWaitingList;
+                // $canpurchase = !$isParticipating && !$isInWaitingList && $event->results()->count() < $event->max_participants;
             }
+
         }
 
         return view('website.event-detail', [
             'event' => $event,
-            'canpurchase' => $canpurchase
+            'canpurchase' => $canpurchase,
+            'only_waiting_list' => $onlyWaitingList,
+            'is_participating' => $isParticipating,
+            'is_in_waiting_list' => $isInWaitingList,
         ]);
     }
 
@@ -980,6 +988,9 @@ class EventController extends Controller {
         ]);
     }
 
+    // STRIPE - Acquisto
+
+    // l'utente ha scelto stripe per pagare l'iscrizione all'evento
     public function userCheckoutStripe(Event $event, Request $request) {
         $user = User::find(Auth()->user()->id);
 
@@ -998,6 +1009,183 @@ class EventController extends Controller {
         ]);
     }
 
+    // L'utente ha completato l'acquisto con stripe
+    public function successUser(Request $request) {
+
+        $sessionId = $request->get('session_id');
+
+        if ($sessionId === null) {
+            return;
+        }
+
+        $session = Cashier::stripe()->checkout->sessions->retrieve($sessionId);
+
+        if ($session->payment_status !== 'paid') {
+            return;
+        }
+
+        $orderId = $session['metadata']['order_id'] ?? null;
+        $order = Order::findOrFail($orderId);
+
+        if ($order->status !== 0) {
+        } else {
+
+            $order->update([
+                'status' => 2,
+                'result' => json_encode($session),
+            ]);
+
+            $event = Event::find($order->items->first()->product_code);
+
+            if($event->resultType() === 'enabling') {
+                $event->instructorResults()->create([
+                    'user_id' => $order->user_id,
+                    'weapon_form_id' => $event->weapon_form_id,
+                ]);
+            } else if($event->resultType() === 'ranking') {
+                $event->results()->create([
+                    'user_id' => $order->user_id,
+                    'war_points' => 0,
+                    'style_points' => 0,
+                    'total_points' => 0,
+                ]);
+            }
+
+            return view('website.shop.event-success', [
+                'event' => $event,
+            ]);
+        }
+    }
+
+    // Errore acquisto con stripe
+    public function cancelUser(Request $request) {
+        $sessionId = $request->get('session_id');
+
+        if ($sessionId === null) {
+            return;
+        }
+
+        $session = Cashier::stripe()->checkout->sessions->retrieve($sessionId);
+
+        $orderId = $session['metadata']['order_id'] ?? null;
+        $order = Order::findOrFail($orderId);
+
+        if ($order->status !== 0) {
+        } else {
+            $order->update(['status' => 4, 'result' => json_encode($session)]);
+        }
+
+        return view('website.shop.event-cancel');
+    }
+
+    // STRIPE - Preautorizzazione
+
+    // Per la waiting list
+    // public function userPreauthorizeStripe(Event $event, Request $request) {
+    //     $user = User::find(Auth()->user()->id);
+    
+    //     $order_id = $request->session()->get('order_id');
+    //     $order = Order::findOrFail($order_id);
+        
+    //     $order->update([
+    //         'payment_method' => 'stripe',
+    //     ]);
+        
+    //     // Non sembra esservi un metodo di preautorizzazione, si deve usare quello delle subscriptions probabilmente.
+    //     return view('preauthorize-payment', [
+    //         $request->user()->createSetupIntent()
+    //     ])
+
+    //     return $request->user()->checkoutCharge(($event->price * 100), $event->name, 1, [
+    //         'success_url' => route('shop.event.success') . '?session_id={CHECKOUT_SESSION_ID}',
+    //         'cancel_url' => route('shop.event.cancel')  . '?session_id={CHECKOUT_SESSION_ID}',
+    //         'metadata' => ['order_id' => $order->id],
+    //     ]);
+        
+    //     $paymentIntent = PaymentIntent::create([
+    //         'amount' => $event->price * 100, // L'importo in centesimi
+    //         'currency' => 'eur',
+    //         'capture_method' => 'manual',
+    //         'metadata' => ['order_id' => $order->id],
+    //     ], [
+    //         'api_key' => env('STRIPE_SECRET'),
+    //     ]);
+        
+    //     return response()->json([
+    //         'client_secret' => $paymentIntent->client_secret,
+    //         'success_url' => route('shop.event.stripe-preauth-success') . '?session_id={CHECKOUT_SESSION_ID}',
+    //         'cancel_url' => route('shop.event.stripe-preauth-cancel') . '?session_id={CHECKOUT_SESSION_ID}',
+    //     ]);
+
+    // }
+
+    // Successo preautorizzazione con stripe
+    // public function preauthSuccessUserStripe(Request $request) {
+    //     $user = Auth::user();
+    //     $order_id = $request->session()->get('order_id');
+    //     $order = Order::findOrFail($order_id);
+    
+    //     // Recupera l'ID del PaymentIntent dalla richiesta
+    //     $paymentIntentId = $request->input('payment_intent_id');
+
+    //     $order->update([
+    //         'status' => 3, // Stato 3 = Preauthorized
+    //         'stripe_payment_intent_id' => $paymentIntentId, 
+    //     ]);
+    
+    //     // Salva i dati nella tabella event_waiting_list
+    //     EventWaitingList::create([
+    //         'user_id' => $user->id,
+    //         'event_id' => $order->event_id,
+    //         'order_id' => $order->id,
+    //     ]);
+    
+    //     return response()->json(['success' => true, 'message' => 'Preauthorization successful.']);
+    // }
+
+    // Errore preautorizzazione con stripe
+    // public function preauthCancelUserStripe(Request $request) {
+    //     $sessionId = $request->get('session_id');
+
+    //     if ($sessionId === null) {
+    //         return;
+    //     }
+
+    //     $session = Cashier::stripe()->checkout->sessions->retrieve($sessionId);
+
+    //     $orderId = $session['metadata']['order_id'] ?? null;
+    //     $order = Order::findOrFail($orderId);
+
+    //     if ($order->status !== 0) {
+    //     } else {
+    //         $order->update(['status' => 4, 'result' => json_encode($session)]);
+    //     }
+
+    //     return view('website.shop.event-cancel');
+    // }
+
+    // Finalizzazione acquisto preautorizzato con stripe
+    // public function capturePreauthorizedPaymentStripe(Request $request) {
+    //     $paymentIntentId = $request->input('payment_intent_id');
+        
+    //     try {
+    //         $paymentIntent = \Stripe\PaymentIntent::retrieve($paymentIntentId);
+    //         $paymentIntent->capture();
+    
+    //         // Aggiorna lo stato dell'ordine a "pagato"
+    //         $order = Order::where('payment_intent_id', $paymentIntentId)->first();
+    //         $order->update(['status' => 'paid']);
+    
+    //         return response()->json(['success' => true]);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+
+    // PAYPAL - Acquisto
+
+    // L'utente ha scelto paypal per pagare l'iscrizione all'evento
     public function userCheckoutPaypal(Event $event, Request $request) {
 
         $provider = new PaypalClient;
@@ -1060,66 +1248,7 @@ class EventController extends Controller {
         }
     }
 
-    public function successUser(Request $request) {
-
-        $sessionId = $request->get('session_id');
-
-        if ($sessionId === null) {
-            return;
-        }
-
-        $session = Cashier::stripe()->checkout->sessions->retrieve($sessionId);
-
-        if ($session->payment_status !== 'paid') {
-            return;
-        }
-
-        $orderId = $session['metadata']['order_id'] ?? null;
-        $order = Order::findOrFail($orderId);
-
-        if ($order->status !== 0) {
-        } else {
-
-            $order->update([
-                'status' => 2,
-                'result' => json_encode($session),
-            ]);
-
-            $event = Event::find($order->items->first()->product_code);
-
-            $event->results()->create([
-                'user_id' => $order->user_id,
-                'war_points' => 0,
-                'style_points' => 0,
-                'total_points' => 0,
-            ]);
-
-            return view('website.shop.event-success', [
-                'event' => $event,
-            ]);
-        }
-    }
-
-    public function cancelUser(Request $request) {
-        $sessionId = $request->get('session_id');
-
-        if ($sessionId === null) {
-            return;
-        }
-
-        $session = Cashier::stripe()->checkout->sessions->retrieve($sessionId);
-
-        $orderId = $session['metadata']['order_id'] ?? null;
-        $order = Order::findOrFail($orderId);
-
-        if ($order->status !== 0) {
-        } else {
-            $order->update(['status' => 4, 'result' => json_encode($session)]);
-        }
-
-        return view('website.shop.event-cancel');
-    }
-
+    // L'utente ha completato l'acquisto con paypal
     public function successUserPaypal(Request $request) {
         $orderId = $request->order_id;
 
@@ -1140,12 +1269,19 @@ class EventController extends Controller {
 
             $event = Event::find($order->items->first()->product_code);
 
-            $event->results()->create([
-                'user_id' => $order->user_id,
-                'war_points' => 0,
-                'style_points' => 0,
-                'total_points' => 0,
-            ]);
+            if($event->resultType() === 'enabling') {
+                $event->instructorResults()->create([
+                    'user_id' => $order->user_id,
+                    'weapon_form_id' => $event->weapon_form_id,
+                ]);
+            } else if($event->resultType() === 'ranking') {
+                $event->results()->create([
+                    'user_id' => $order->user_id,
+                    'war_points' => 0,
+                    'style_points' => 0,
+                    'total_points' => 0,
+                ]);
+            }
         }
 
         return view('website.shop.event-success', [
@@ -1153,6 +1289,7 @@ class EventController extends Controller {
         ]);
     }
 
+    // Errore acquisto con paypal
     public function cancelUserPaypal(Request $request) {
         $orderId = $request->order_id;
 
@@ -1160,7 +1297,8 @@ class EventController extends Controller {
         $provider->setApiCredentials(config('paypal'));
         $provider->getAccessToken();
 
-        $result = $provider->capturePaymentOrder($request->token);
+        // Annulla l'ordine PayPal
+        $result = $provider->voidAuthorizedPayment($request->token);
         $order = Order::findOrFail($orderId);
 
         if ($order->status !== 1) {
@@ -1173,6 +1311,195 @@ class EventController extends Controller {
 
         return view('website.shop.event-cancel');
     }
+
+    // PAYPAL - Preautorizzazione
+    
+    // L'utente ha scelto paypal per preautorizzare il pagamento dell'iscrizione all'evento ed entrare in waiting list
+    public function userPreauthorizePaypal(Event $event, Request $request) {
+
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+
+        $order_id = $request->session()->get('order_id');
+        $order = Order::findOrFail($order_id);
+
+        $response = $provider->createOrder([
+            'intent' => 'AUTHORIZE', // Per indicare che va preautorizzato il pagamento
+            'purchase_units' => [
+                [
+                    'amount' => [
+                        'currency_code' => 'EUR',
+                        'value' => $event->price,
+                    ],
+                ],
+            ],
+            'application_context' => [
+                'cancel_url' => route('shop.event.paypal-preauth-cancel') . '?order_id=' . $order->id, // Link della pagina di errore preautorizzazione pagamento (dopo la pagina di paypal)
+                'return_url' => route('shop.event.paypal-preauth-success') . '?order_id=' . $order->id, // Link della pagina di successo preautorizzazione pagamento (dopo la pagina di paypal)
+                'order_id' => $order->id,
+            ],
+        ]);
+
+        if ($response['status'] === 'CREATED' && isset($response['id']) && $response['id'] !== null) {
+            session(['paypal_order_id' => $response['id']]);
+
+            $order->update([
+                'status' => 1,
+                'payment_method' => 'paypal',
+                'total' => number_format($event->price, 2),
+                'result' => json_encode($response),
+                'paypal_order_id' => $response['id'],
+            ]);
+
+            session()->put('product_name', $event->name);
+
+            $link = null;
+            foreach ($response['links'] as $link) {
+                if ($link['rel'] === 'approve') {
+                    $link = $link['href'];
+                    break;
+                }
+            }
+            return response()->json([
+                'success' => true,
+                'url' => $link, // Link della pagina di paypal di preautorizzazione pagamento (il frontend deve reindirizzare l'utente a questa pagina)
+            ]);
+        } else {
+            // Gestisci altri stati come ('COMPLETED', 'APPROVED', 'FAILED') - In questo caso solo 'FAILED'
+            $order->update([
+                'status' => 4,
+                'payment_method' => 'paypal',
+                'total' => number_format($event->price, 2),
+                'result' => 'Error creating order',
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Error creating order',
+                'url' => route('shop.event.paypal-preauth-cancel') . '?order_id=' . $order->id,
+            ]);
+        }
+    }
+    
+    // Successo preautorizzazione con paypal. L'utente ha preautorizzato con successo da paypal il pagamento della quota di iscrizione all'evento ed è stato reindirizzato qui da paypal
+    public function preauthSuccessUserPaypal(Request $request) {
+        $orderId = $request->order_id;
+
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+
+        // Crea la voce in mailing list (id ordine, token)
+        $order = Order::findOrFail($orderId);
+
+        $authorization = $provider->authorizePaymentOrder($request->token);
+
+        Log::info('AUTHORIZATION RESPONSE', $authorization);
+            
+        if($authorization['status'] !== 'COMPLETED') {
+            return response()->json(['success' => false, 'error' => 'Error authorizing payment']);
+        }
+
+        if ($order->status !== 1) {
+            $event = Event::find($order->items->first()->product_code);
+        } else {
+            $order->update([
+                'status' => 3, // Stato 3 = Preauthorized
+            ]);
+
+            $event = Event::find($order->items->first()->product_code);
+
+            // Crea la voce in lista d'attesa
+            EventWaitingList::create([
+                'user_id' => $order->user_id,
+                'event_id' => $event->id,
+                'order_id' => $order->id,
+            ]);
+        }
+
+        return view('website.shop.event-preauth-success', [
+            'event' => $event,
+        ]);
+    }
+    
+    // Errore preautorizzazione con paypal
+    public function preauthCancelUserPaypal(Request $request) {
+        $orderId = $request->order_id;
+
+        $provider = new PaypalClient;
+        $provider->setApiCredentials(config('paypal'));
+        $provider->getAccessToken();
+
+        if($request->token){
+            $result = $provider->voidAuthorizedPayment($request->token);
+        }
+        $order = Order::findOrFail($orderId);
+
+        if ($order->status !== 1) {
+        } else {
+            $order->update([
+                'status' => 4,
+                'result' => json_encode($result),
+            ]);
+        }
+
+        return view('website.shop.event-cancel');
+    }
+
+    // La parte di finalizzazione dell'acquisto preautorizzato con paypal è gestita da un event listener che si attiva quando si libera un posto nell'evento
+    // Finalizzazione acquisto preautorizzato con paypal (quando si libera un posto nell'evento)
+    // public function capturePreauthorizedPaymentPaypal(EventWaitingList $eventWaitingList) {
+    //     $provider = new PaypalClient;
+    //     $provider->setApiCredentials(config('paypal'));
+    //     $provider->getAccessToken();
+
+    //     $paypalOrderId = null;
+
+    //     if($eventWaitingList->order->payment_method === 'paypal' && isset($eventWaitingList->order->paypal_order_id)){
+    //         $paypalOrderId = $eventWaitingList->order->paypal_order_id;
+    //     } else {
+    //         return response()->json(['success' => false, 'message' => 'Not a PayPal order.']);
+    //     }
+        
+    //     $order = Order::where('paypal_order_id', $paypalOrderId)->first();
+
+    //     // $paypalOrderDetails = $provider->showOrderDetails($paypalOrderId);
+    //     $result = $provider->captureAuthorizedPayment(
+    //         $paypalOrderId, // $paypalOrderDetails['id'],
+    //         $order->invoice_id,
+    //         $order->total, // $paypalOrderDetails['purchase_units'][0]['amount']['value'],
+    //         'Finalized payment for LudoSport event "' . $eventWaitingList->event->name . '"',
+    //     );
+    
+    
+    //     if ($result['status'] === 'COMPLETED') {
+    //         $order->update(['status' => 2, 'result' => json_encode($result)]);
+    
+    //         $event = $eventWaitingList->event;
+    
+    //         if($event->resultType() === 'enabling') {
+    //             $event->instructorResults()->create([
+    //                 'user_id' => $order->user_id,
+    //                 'weapon_form_id' => $event->weapon_form_id,
+    //             ]);
+    //         } else if($event->resultType() === 'ranking') {
+    //             $event->results()->create([
+    //                 'user_id' => $order->user_id,
+    //                 'war_points' => 0,
+    //                 'style_points' => 0,
+    //                 'total_points' => 0,
+    //             ]);
+    //         }
+
+    //         $eventWaitingList->delete();
+    
+    //         return response()->json(['success' => true]);
+    //     } else {
+    //         $order->update(['status' => 3, 'result' => json_encode($result)]); // Stato fallito o annullato
+    //         return response()->json(['success' => false, 'message' => 'Payment capture failed.']);
+    //     }
+    // }
 
     public function rankings() {
 
