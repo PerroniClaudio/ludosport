@@ -156,6 +156,11 @@ class EventController extends Controller {
         }
 
         if ($event->thumbnail) {
+            /** 
+             * @disregard Intelephense non rileva il metodo temporaryurl
+             * 
+             * @see https://github.com/spatie/laravel-google-cloud-storage
+             */
             $event->thumbnail = Storage::disk('gcs')->temporaryUrl(
                 $event->thumbnail,
                 now()->addMinutes(5)

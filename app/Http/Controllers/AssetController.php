@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Nation;
+use App\Models\Rank;
+use App\Models\WeaponForm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -99,6 +101,31 @@ class AssetController extends Controller {
             'Content-Type' => 'image/png',
             'Content-Length' => strlen($image),
         ];
+        return response($image, 200, $headers);
+    }
+
+    public function rankImage(Rank $rank) {
+        $url = $this->retrieveAsset("/ranks/{$rank->id}/logo.png");
+        $response = Http::get($url);
+        $image = $response->body();
+        $headers = [
+            'Content-Type' => 'image/png',
+            'Content-Length' => strlen($image),
+        ];
+
+        return response($image, 200, $headers);
+    }
+
+    public function weaponFormImage(WeaponForm $weapon) {
+
+        $url = $this->retrieveAsset($weapon->image);
+        $response = Http::get($url);
+        $image = $response->body();
+        $headers = [
+            'Content-Type' => 'image/webp',
+            'Content-Length' => strlen($image),
+        ];
+
         return response($image, 200, $headers);
     }
 }
