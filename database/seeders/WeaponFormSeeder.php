@@ -13,21 +13,84 @@ class WeaponFormSeeder extends Seeder {
         //
 
         $weaponForms = [
-            ['name' => 'Form 1 Long Saber'],
-            ['name' => 'Form 2 Long Saber'],
-            ['name' => 'Form 3 Long Saber'],
-            ['name' => 'Form 4 Long Saber'],
-            ['name' => 'Form 5 Long Saber'],
-            ['name' => 'Form 3 Dual Sabers'],
-            ['name' => 'Form 4 Dual Sabers'],
-            ['name' => 'Form 5 Dual Sabers'],
-            ['name' => 'Form 3 Saberstaff'],
+            [
+                'name' => 'Form 1',
+                'image' => '/weapon-forms/form_1.webp'
+            ],
+            [
+                'name' => 'Form 2',
+                'image' => '/weapon-forms/form_2.webp'
+            ],
+            [
+                'name' => 'Form Y',
+                'image' => '/weapon-forms/form_y.webp'
+            ],
+            [
+                'name' => 'Form 3 Long Saber',
+                'image' => '/weapon-forms/long_saber/form_3.webp'
+            ],
+            [
+                'name' => 'Form 4 Long Saber',
+                'image' => '/weapon-forms/long_saber/form_4.webp'
+            ],
+            [
+                'name' => 'Form 5 Long Saber',
+                'image' => '/weapon-forms/long_saber/form_5.webp'
+            ],
+            [
+                'name' => 'Form 6 Long Saber',
+                'image' => '/weapon-forms/long_saber/form_6.webp'
+            ],
+            [
+                'name' => 'Form 7 Long Saber',
+                'image' => '/weapon-forms/long_saber/form_7.webp'
+            ],
+            [
+                'name' => 'Form 3 Dual Sabers',
+                'image' => '/weapon-forms/dual_saber/form_3.webp'
+            ],
+            [
+                'name' => 'Form 4 Dual Sabers',
+                'image' => '/weapon-forms/dual_saber/form_4.webp'
+            ],
+            [
+                'name' => 'Form 5 Dual Sabers',
+                'image' => '/weapon-forms/dual_saber/form_5.webp'
+            ],
+            [
+                'name' => 'Form 6 Dual Sabers',
+                'image' => '/weapon-forms/dual_saber/form_6.webp'
+            ],
+            [
+                'name' => 'Form 7 Dual Sabers',
+                'image' => '/weapon-forms/dual_saber/form_7.webp'
+            ],
+            [
+                'name' => 'Form 3 Saberstaff',
+                'image' => '/weapon-forms/saberstaff/form_3.webp'
+            ],
+            [
+                'name' => 'Form 4 Saberstaff',
+                'image' => '/weapon-forms/saberstaff/form_4.webp'
+            ],
+            [
+                'name' => 'Form 5 Saberstaff',
+                'image' => '/weapon-forms/saberstaff/form_5.webp'
+            ],
+            [
+                'name' => 'Form 6 Saberstaff',
+                'image' => '/weapon-forms/saberstaff/form_6.webp'
+            ],
+            [
+                'name' => 'Form 7 Saberstaff',
+                'image' => '/weapon-forms/saberstaff/form_7.webp'
+            ],
         ];
 
         foreach ($weaponForms as $weaponForm) {
             \App\Models\WeaponForm::create([
                 'name' => $weaponForm['name'],
-                'image' => 'https://via.placeholder.com/150',
+                'image' => $weaponForm['image']
             ]);
         }
     }

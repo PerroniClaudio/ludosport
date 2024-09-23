@@ -1,14 +1,19 @@
 <x-website-layout>
     <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
         <section class="col-span-12 py-12 flex flex-col gap-8">
-            <section class="bg-background-800 flex p-8 rounded">
-                <div class="rounded-full h-24 w-24">
+            <section class="bg-background-800 flex lg:p-8 p-4 rounded">
+                <div class="rounded-full h-24 w-24 hidden lg:block">
                     <img src="{{ route('profile-picture', $user->id) }}" alt="avatar" class="rounded-full h-24 w-24" />
                 </div>
-                <div class="flex-1 flex flex-col gap-2 ml-8">
-                    <div class="w-1/2 flex flex-col gap-2">
-                        <div class="text-4xl text-primary-500 flex items-center gap-2">
-                            <span>{{ $user->name }} {{ $user->surname }}</span>
+                <div class="flex-1 flex flex-col gap-2 lg:ml-8">
+                    <div class="lg:w-1/2 flex flex-col gap-2">
+                        <div class="text-primary-500 flex items-center gap-2">
+                            <div class="rounded-full h-12 w-12 lg:hidden block">
+                                <img src="{{ route('profile-picture', $user->id) }}" alt="avatar"
+                                    class="rounded-full h-12 w-12" />
+                            </div>
+
+                            <span class="text-4xl">{{ $user->name }} {{ $user->surname }}</span>
 
                             @if ($user->has_paid_fee)
                                 <x-lucide-verified class="h-6 w-6 text-primary-500" />
@@ -31,37 +36,17 @@
 
                         <div>
                             <div
-                                class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex items-center gap-2">
-                                @switch($user->rank->id)
-                                    @case(1)
-                                        <x-lucide-user class="w-6 h-6 text-background-800 dark:text-background-200" />
-                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
-                                    @break
-
-                                    @case(2)
-                                        <x-lucide-user-check class="w-6 h-6 text-background-800 dark:text-background-200" />
-                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
-                                    @break
-
-                                    @case(3)
-                                        <x-lucide-graduation-cap class="w-6 h-6 text-background-800 dark:text-background-200" />
-                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
-                                    @break
-
-                                    @case(4)
-                                        <x-lucide-shield-check class="w-6 h-6 text-background-800 dark:text-background-200" />
-                                        <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
-                                    @break
-
-                                    @default
-                                @endswitch
+                                class="border border-background-700 text-background-800 dark:text-background-200 rounded-full p-2 cursor-pointer flex items-center gap-2">
+                                <img src="{{ route('rank-image', $user->rank->id) }}" alt="rank"
+                                    class="rounded-full h-8 w-8" />
+                                <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
                             </div>
                         </div>
 
                         @if ($user->instagram != '')
                             <div>
                                 <a href="https://www.instagram.com/{{ $user->instagram }}" target="_blank"
-                                    class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex items-center gap-2">
+                                    class="border border-background-700 text-background-800 dark:text-background-200 rounded-full p-4 cursor-pointer flex items-center gap-2">
                                     <x-lucide-camera class="w-6 h-6 text-background-800 dark:text-background-200" />
                                     <p>{{ $user->instagram }}</p>
                                 </a>
@@ -76,7 +61,7 @@
 
                             @foreach ($roles as $role)
                                 <div x-on:click="selectRole('{{ $role->label }}')"
-                                    class="border border-background-700 rounded-lg p-4 cursor-pointer flex items-center gap-2"
+                                    class="border border-background-700 rounded-full p-4 cursor-pointer flex items-center gap-2"
                                     x-show="selected.includes('{{ $role->label }}')">
 
                                     @switch($role->label)
@@ -115,13 +100,17 @@
                                 </div>
                             @endforeach
 
-                            <input type="hidden" name="roles" x-model="selected">
+
                         </div>
 
                     </div>
                 </div>
 
             </section>
+
+            <div class="lg:w-1/2">
+                <x-user.weapon-forms-show :forms="$user->weaponForms" />
+            </div>
 
             @if ($user->bio != '')
                 <section
@@ -135,7 +124,7 @@
             @endif
 
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid lg:grid-cols-2 gap-4">
 
                 <div
                     class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 text-background-800 dark:text-background-200 ">
