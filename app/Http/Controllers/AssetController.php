@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Nation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -69,7 +70,7 @@ class AssetController extends Controller {
     }
 
     public function spadaHome() {
-        $url = $this->retrieveAsset("/assets/spada-home.png");
+        $url = $this->retrieveAsset("/assets/spada-home-2.png");
         $response = Http::get($url);
         $image = $response->body();
         $headers = [
@@ -81,6 +82,17 @@ class AssetController extends Controller {
 
     public function bollino() {
         $url = $this->retrieveAsset("/assets/bollino.png");
+        $response = Http::get($url);
+        $image = $response->body();
+        $headers = [
+            'Content-Type' => 'image/png',
+            'Content-Length' => strlen($image),
+        ];
+        return response($image, 200, $headers);
+    }
+
+    public function nationFlag(Nation $nation) {
+        $url = $this->retrieveAsset($nation->flag);
         $response = Http::get($url);
         $image = $response->body();
         $headers = [

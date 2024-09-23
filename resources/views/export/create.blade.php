@@ -18,7 +18,7 @@
                             x-model="selectedType" shouldHaveEmptyOption="true" />
                     </div>
 
-                    <div>
+                    <div class="mt-8">
 
                         <div x-show="selectedType == 'users'">
                             <x-exports.users />
@@ -51,6 +51,9 @@
                         </div>
                         <div x-show="selectedType == 'event_style'">
                             <x-exports.events type="event_style" />
+                        </div>
+                        <div x-show="selectedType == 'orders'">
+                            <x-exports.orders />
                         </div>
 
                     </div>

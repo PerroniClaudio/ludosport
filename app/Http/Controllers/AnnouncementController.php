@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Academy;
 use App\Models\Announcement;
 use App\Models\AnnouncementUser;
+use App\Models\Nation;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -35,6 +37,17 @@ class AnnouncementController extends Controller {
         $announcement = new Announcement();
         $types = $announcement->getTypes();
 
+        $academies = Academy::all();
+        $academies = $academies->map(function ($academy) {
+            return [
+                'id' => $academy->id,
+                'name' => $academy->name
+            ];
+        });
+
+
+        $nations = Nation::all();
+
         $roles = Role::all();
         $rolesOptions = [];
         foreach ($roles as $role) {
@@ -54,7 +67,9 @@ class AnnouncementController extends Controller {
 
         return view('announcements.create', [
             'types' => $typesOptions,
-            'roles' => $rolesOptions
+            'roles' => $rolesOptions,
+            'nations' => $nations,
+            'academies' => $academies
         ]);
     }
 
@@ -71,11 +86,25 @@ class AnnouncementController extends Controller {
             'role' => 'integer'
         ]);
 
+        if ($request->selectedNations != null) {
+            $nations = $request->selectedNations;
+        } else {
+            $nations = "[]";
+        }
+
+        if ($request->selectedAcademies != null) {
+            $academies =  $request->selectedAcademies;
+        } else {
+            $academies = "[]";
+        }
+
         $announcement = new Announcement([
             'object' => $request->object,
             'content' => $request->content,
             'type' => $request->type,
-            'role_id' => $request->role
+            'role_id' => $request->role,
+            'nations' => $nations,
+            'academies' => $academies
         ]);
 
         $announcement->save();
@@ -125,11 +154,24 @@ class AnnouncementController extends Controller {
             ];
         }
 
+        $academies = Academy::all();
+        $academies = $academies->map(function ($academy) {
+            return [
+                'id' => $academy->id,
+                'name' => $academy->name
+            ];
+        });
+
+
+        $nations = Nation::all();
+
         return view('announcements.edit', [
             'announcement' => $announcement,
             'types' => $typesOptions,
             'roles' => $rolesOptions,
-            'haveseen' => $userhaveseen
+            'haveseen' => $userhaveseen,
+            'nations' => $nations,
+            'academies' => $academies
         ]);
     }
 
@@ -150,6 +192,21 @@ class AnnouncementController extends Controller {
         $announcement->content = $request->content;
         $announcement->type = $request->type;
         $announcement->role_id = $request->role;
+
+        if ($request->selectedNations != null) {
+            $nations = $request->selectedNations;
+        } else {
+            $nations = "[]";
+        }
+
+        if ($request->selectedAcademies != null) {
+            $academies =  $request->selectedAcademies;
+        } else {
+            $academies = "[]";
+        }
+
+        $announcement->nations = $nations;
+        $announcement->academies = $academies;
 
         $announcement->save();
 
@@ -176,7 +233,26 @@ class AnnouncementController extends Controller {
         $seen_announcements = $user->seenAnnouncements()->get();
         $announcements = Announcement::where('is_deleted', false)->whereIn('role_id', $user->roles->pluck('id'))->where('type', '!=', '4')->orderBy('created_at', 'desc')->get();
 
+        // Verifica se sei della nazione giusta ed accademia giusta per visualizzare l'annuncio
 
+        $announcements = $announcements->filter(function ($announcement) use ($user) {
+            $nations = json_decode($announcement->nations);
+            $academies = json_decode($announcement->academies);
+
+            if ($nations != null) {
+                if (!in_array($user->nation_id, $nations)) {
+                    return false;
+                }
+            }
+
+            if ($academies != null) {
+                if (!in_array($user->academy_id, $academies)) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
 
         $first_announcement = $announcements->first();
 
@@ -211,6 +287,28 @@ class AnnouncementController extends Controller {
         $direct_messages = Announcement::where([['is_deleted', false], ['type', '4'], ['user_id', $user->id]])->orderBy('created_at', 'desc')->get();
         $announcements = $announcements->merge($direct_messages);
 
+        // Verifica se sei della nazione giusta ed accademia giusta per visualizzare l'annuncio
+
+        $announcements = $announcements->filter(function ($announcement) use ($user) {
+            $nations = json_decode($announcement->nations);
+            $academies = json_decode($announcement->academies);
+
+            if ($nations != null) {
+                if (!in_array($user->nation_id, $nations)) {
+                    return false;
+                }
+            }
+
+            if ($academies != null) {
+                if (!in_array($user->academy_id, $academies)) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+
         $first_announcement = $announcements->first();
 
         if ($first_announcement) {
@@ -237,7 +335,7 @@ class AnnouncementController extends Controller {
 
     public function setSeen(Announcement $announcement) {
         $authUser = User::find(auth()->user()->id);
-        $seen_announcements = $authUser ->seenAnnouncements()->get();
+        $seen_announcements = $authUser->seenAnnouncements()->get();
 
         if (!in_array($announcement->id, $seen_announcements->pluck('id')->toArray())) {
             AnnouncementUser::create([

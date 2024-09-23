@@ -6,6 +6,7 @@ use App\Exports\EventsInstructorResultsExport;
 use App\Exports\EventsParticipantsExport;
 use App\Exports\EventsStyleExport;
 use App\Exports\EventsWarExport;
+use App\Exports\OrdersExport;
 use App\Exports\UsersAcademyExport;
 use App\Exports\UsersCourseExport;
 use App\Exports\UsersExport;
@@ -94,6 +95,12 @@ class ExportController extends Controller {
 
         switch ($request->type) {
             case 'users':
+                $filters = [
+                    'start_date' => $request->start_date,
+                    'end_date' => $request->end_date
+                ];
+                break;
+            case 'orders':
                 $filters = [
                     'start_date' => $request->start_date,
                     'end_date' => $request->end_date
@@ -199,6 +206,13 @@ class ExportController extends Controller {
                         $export->file = $file_path;
                         $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
+                    case 'orders':
+                        $log[] = "['Exporting orders']";
+                        $file_path = 'exports/' . $export->id . '/orders.xlsx';
+                        Excel::store(new OrdersExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
 
                     case 'user_roles':
                         $log[] = "['Exporting user roles']";
@@ -274,6 +288,11 @@ class ExportController extends Controller {
     }
 
     public function download(Export $export) {
+        /** 
+         * @disregard Intelephense non rileva il metodo temporaryurl
+         * 
+         * @see https://github.com/spatie/laravel-google-cloud-storage
+         */
         $file = Storage::disk('gcs')->temporaryUrl(
             $export->file,
             now()->addMinutes(5)

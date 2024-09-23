@@ -1,13 +1,7 @@
 <?php
 
-use App\Events\ParticipantsUpdated;
 use App\Http\Controllers\ProfileController;
-use App\Models\EventWaitingList;
-use App\Models\Order;
-use App\Models\User;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
 Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/role-select', [App\Http\Controllers\UserController::class, 'roleSelector'])->middleware(['auth', 'verified'])->name('role-selector');
@@ -20,6 +14,7 @@ Route::get('/logo-saber-k', [App\Http\Controllers\AssetController::class, 'logoS
 Route::get('/warriors', [App\Http\Controllers\AssetController::class, 'warriors'])->name('warriors');
 Route::get('/spada-home', [App\Http\Controllers\AssetController::class, 'spadaHome'])->name('spada-home');
 Route::get('/bollino', [App\Http\Controllers\AssetController::class, 'bollino'])->name('bollino');
+Route::get('/nation/{nation}/flag', [App\Http\Controllers\AssetController::class, 'nationFlag'])->name('nation-flag');
 Route::get('/user/{user}/profile-picture', [App\Http\Controllers\UserController::class, 'propic'])->name('user.profile-picture-show');
 
 
@@ -29,6 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::put('/profile/{user}/picture', [App\Http\Controllers\UserController::class, 'userUploadPicture'])->name('users.update-pfp');
+
+    Route::post('/invoices/store', [App\Http\Controllers\UserController::class, 'saveInvoice'])->name('users.invoices.store');
 });
 
 /** Users */
@@ -321,95 +318,5 @@ Route::group([], function () {
 });
 
 Route::get('/test', function () {
-    // return 'test';
-    // ini_set ('display_errors', 1);
-    // ini_set ('display_startup_errors', 1);
-    // error_reporting (E_ALL);
-    // $provider = new PayPalClient;
-    // $provider->setApiCredentials(config('paypal'));
-    // $accessToken = $provider->getAccessToken();
-
-    // $authorizedOrders = Order::where('status', 3)->get();
-
-    // $details = $provider->showOrderDetails($authorizedOrders[0]->paypal_order_id);
-    // dd($details);
-
-    // $response = $provider->reAuthorizeAuthorizedPayment($details['purchase_units'][0]['payments']['authorizations'][0]['id'], $details['purchase_units'][0]['payments']['authorizations'][0]['amount']['value']);
-
-    // echo json_encode($response);
-    // echo '<br><br>';
-    // dd($response);
-    
-    $provider = new PaypalClient;
-    $provider->setApiCredentials(config('paypal'));
-    $accessToken = $provider->getAccessToken();
-    $waitingListItem = EventWaitingList::find(8);
-    $order = $waitingListItem->order;
-
-    $details = $provider->showOrderDetails($order->paypal_order_id);
-
-    dump($details);
-
-    $createTime = new \DateTime($details['purchase_units'][0]['payments']['authorizations'][0]['create_time']);
-    $expirationTime = new \DateTime($details['purchase_units'][0]['payments']['authorizations'][0]['expiration_time']);
-    $currentTime = new \DateTime();
-
-    $interval = $createTime->diff($currentTime);
-    $daysPassed = $interval->days;
-
-    $result=null;
-
-    // Update della valuta nel provider. altrimenti può dare errore
-    // $paypalConfig = array_merge(config('paypal'), ['currency' => $details['purchase_units'][0]['amount']['currency_code']]);
-    // $provider->setApiCredentials($paypalConfig);
-
-    // Paypal ha un tempo di autorizzazione di 29 giorni.
-    // Inoltre c'è l'honor period che dura 4 giorni dalla data iniziale e 3 giorni dal rinnovo autorizzazione.
-    // Al di fuori dell'honor period non si può fare il capture e si deve prima rinnovare l'autorizzazione. 
-    if( $expirationTime < $currentTime ) {
-        // Scaduto il tempo massimo per l'autorizzazione. non possiamo rinnoverla in autonomia.
-        // Log::error('Authorization expired. ', [
-        //     'order_id' => $order->id,
-        //     'event_id' => $waitingListItem->event->id,
-        //     'event_waiting_list_id' => $waitingListItem->id,
-        // ]);
-        // $order->update(['status' => 4]); // Stato fallito o annullato
-        // $waitingListItem->delete();
-        // continue;
-        echo 'Expired';
-    } else if ( $daysPassed >= 4 ) {
-        // Scaduto l'honor period, ma possiamo rinnovare l'autorizzazione e fare il capture in autonomia.
-        // DA TESTARE PERCHÈ NON HO UNA PREAUTORIZZAZIONE CON HONOR PERIOD SCADUTO
-        // $refreshResult = $provider->reAuthorizeAuthorizedPayment(
-        //     $details['purchase_units'][0]['payments']['authorizations'][0]['id'], 
-        //     $details['purchase_units'][0]['amount']['value']
-        // );
-
-        // if(isset($refreshResult['id']) && !is_null($refreshResult['id'])) {
-        //     // l'id dovrebbe essere quello dato dalla nuova autorizzazione.
-        //     $result = $provider->captureAuthorizedPayment(
-        //         $refreshResult['id'],
-        //         $order->invoice_id ?? '',
-        //         $details['purchase_units'][0]['amount']['value'],
-        //         'Finalized payment for LudoSport event "' . $waitingListItem->event->name . '"',
-        //     );
-        // }
-        echo 'Honor period expired';
-    } else {
-        // Si può fare il capture senza aggiornare la preautorizzazione
-        $result = $provider->captureAuthorizedPayment(
-            $details['purchase_units'][0]['payments']['authorizations'][0]['id'],
-            $order->invoice_id ?? '',
-            $details['purchase_units'][0]['amount']['value'],
-            'Finalized payment for LudoSport event "' . $waitingListItem->event->name . '"',
-        );
-        dump($result);
-    }
-
-    echo '<br>';
-    echo $result["status"] ?? "no status";
-    echo '<br>';
-    echo $result["id"] ?? "no id";
-
-    return 'test';
+    response()->json(['message' => 'test']);
 })->name('test');

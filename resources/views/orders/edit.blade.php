@@ -89,8 +89,16 @@
                                 value="{{ $order->invoice->address->country }}" />
                         </div>
                         <div class="col-span-4">
+                            <x-form.input name="business_name" label="{{ __('fees.business_name') }}"
+                                value="{{ $order->invoice->business_name }}" />
+                        </div>
+                        <div class="col-span-4">
                             <x-form.input name="vat" label="{{ __('fees.invoice_vat') }}"
                                 value="{{ $order->invoice->vat }}" />
+                        </div>
+                        <div class="col-span-4">
+                            <x-form.input name="sdi" label="{{ __('fees.invoice_sdi') }}"
+                                value="{{ $order->invoice->sdi }}" />
                         </div>
                     </div>
                 </form>

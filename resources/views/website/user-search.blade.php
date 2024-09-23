@@ -61,6 +61,8 @@
                                     <div>
                                         <span class="text-xs" x-text="user.nation.name"> </span>
                                     </div>
+                                    <img x-bind:src="'/nation/' + user.nation.id + '/flag'"
+                                        x-bind:alt="user.nation.name" class="h-2 w-4">
                                 </div>
                             </div>
                         </div>

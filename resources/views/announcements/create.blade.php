@@ -28,6 +28,15 @@
                         </div>
                     </div>
 
+                    <div class="flex items-top gap-4">
+                        <div class="flex-1">
+                            <x-announcements.nation-select :nations="collect($nations)" />
+                        </div>
+                        <div class="flex-1">
+                            <x-announcements.academies-select :academies="collect($academies)" />
+                        </div>
+                    </div>
+
                     <x-form.textarea name="content" label="Content" required="{{ true }}"
                         value="{{ old('content') }}" placeholder="Write a message..." />
 

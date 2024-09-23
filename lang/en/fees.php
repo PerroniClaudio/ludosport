@@ -33,4 +33,8 @@ return [
     'associate_fees_message_remaining' => 'Fee balance after the transaction',
     'associate_fees_error' => 'There are no fees available for the selected users, please purchase more.',
     'close' => 'Close',
+    'want_invoice' => 'Check if you want an invoice',
+    'is_business' => 'Check if you are a business',
+    'business_name' => 'Business Name',
+    'insert_business_name' => 'Insert Business Name',
 ];

@@ -641,15 +641,15 @@ class EventController extends Controller {
 
         return response()->json($events);
     }
-    
+
     public function dashboardEvents() {
         $events = Event::where('is_approved', 1)
             ->whereHas('personnel', function ($query) {
                 $query->where('user_id', auth()->user()->id);
             })
             ->where(function ($query) {
-            $query->whereYear('start_date', date('Y'))
-                ->orWhereYear('end_date', date('Y'));
+                $query->whereYear('start_date', date('Y'))
+                    ->orWhereYear('end_date', date('Y'));
             })
             ->with(['type', 'results', 'instructorResults'])
             ->get();
@@ -802,6 +802,7 @@ class EventController extends Controller {
                         'user_battle_name' => $value->user->battle_name,
                         'user_academy' => $value->user->academyAthletes->first() ? $value->user->academyAthletes->first()->name : '',
                         'user_school' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->name : '',
+                        'school_slug' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->slug : '',
                         'nation' => $value->user->nation->name,
                         'total_war_points' => 0,
                         'total_style_points' => 0,
@@ -841,6 +842,7 @@ class EventController extends Controller {
                             'user_name' => $value->user->name . ' ' . $value->user->surname,
                             'user_academy' => $value->user->academyAthletes->first() ? $value->user->academyAthletes->first()->name : '',
                             'user_school' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->name : '',
+                            'school_slug' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->slug : '',
                             'nation' => $value->user->nation->name,
                             'total_war_points' => 0,
                             'total_style_points' => 0,
@@ -877,6 +879,7 @@ class EventController extends Controller {
                     'user_battle_name' => $value->user->battle_name,
                     'user_academy' => $value->user->academyAthletes->first() ? $value->user->academyAthletes->first()->name : '',
                     'user_school' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->name : '',
+                    'school_slug' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->slug : '',
                     'nation' => $value->user->nation->name,
                     'total_war_points' => 0,
                     'total_style_points' => 0,
@@ -1291,6 +1294,10 @@ class EventController extends Controller {
 
     // Errore acquisto con paypal
     public function cancelUserPaypal(Request $request) {
+
+
+        dd($request->all());
+
         $orderId = $request->order_id;
 
         $provider = new PaypalClient;
@@ -1507,6 +1514,10 @@ class EventController extends Controller {
         $continents = [];
 
         foreach ($countries as $key => $country) {
+
+            if ($country->academies->count() == 0) {
+                continue;
+            }
 
             $continent = $country['continent'];
 

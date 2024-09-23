@@ -43,7 +43,7 @@
             <p class="text-background-800 dark:text-background-200 text-justify">{{ __('website.academies_map_text') }}
             </p>
 
-            <div class="flex flex-col gap-4 rounded  min-h-[60vh]  mt-8" x-data="mapsearcher({{ $academies_json }})" x-init="$watch('nationFilter', (value) => fiterByNation(value))">
+            <div class="flex flex-col gap-4 rounded  min-h-[60vh]  mt-8" x-data="mapsearcher({{ $schools_json }})" x-init="$watch('nationFilter', (value) => fiterByNation(value))">
                 <div>
                     <div id="google-map" class="h-[600px] w-full"></div>
                 </div>
@@ -64,14 +64,14 @@
                     </div>
 
                     <div class="flex flex-col gap-2 p-2">
-                        <template x-for="academy in paginatedResults" :key="academy.id">
-                            <a x-bind:href="'{{ env('APP_URL') }}/academy-profile/' + academy.slug">
+                        <template x-for="school in paginatedResults" :key="school.id">
+                            <a x-bind:href="'{{ env('APP_URL') }}/school-profile/' + school.slug">
                                 <div
                                     class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2">
                                     <div class="flex flex-col gap-1">
-                                        <h1 class="font-bold dark:text-background-100" x-text="academy.name"></h1>
-                                        <p x-text="academy.address"></p>
-                                        <p x-text="academy.city"></p>
+                                        <h1 class="font-bold dark:text-background-100" x-text="school.name"></h1>
+                                        <p x-text="school.address"></p>
+                                        <p x-text="school.city"></p>
                                     </div>
                                     <div
                                         class="flex flex-col justify-center align-center cursor-pointer hover:text-primary-500">

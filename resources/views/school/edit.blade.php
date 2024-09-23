@@ -21,6 +21,18 @@
                             :nations="$nations" :academies="$academies" />
                     </div>
 
+                    <h1 class="text-background-800 dark:text-background-200 text-lg">{{ __('academies.address') }}</h1>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                    <div class="flex flex-col gap-2 w-1/2">
+                        <x-form.input name="address" label="Address" type="text" required="{{ true }}"
+                            value="{{ $school->address }}" placeholder="{{ fake()->address() }}" />
+                        <x-form.input name="city" label="City" type="text" required="{{ true }}"
+                            value="{{ $school->city }}" placeholder="{{ fake()->city() }}" />
+                        <x-form.input name="zip" label="Zip" type="text" required="{{ true }}"
+                            value="{{ $school->zip }}" placeholder="{{ fake()->postcode() }}" />
+                    </div>
+
+
                     <div class="fixed bottom-8 right-32">
                         <x-primary-button type="submit">
                             <x-lucide-save class="w-6 h-6 text-white" />
