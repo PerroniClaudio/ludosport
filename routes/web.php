@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/{user}/picture', [App\Http\Controllers\UserController::class, 'userUploadPicture'])->name('users.update-pfp');
 
     Route::post('/invoices/store', [App\Http\Controllers\UserController::class, 'saveInvoice'])->name('users.invoices.store');
+    Route::post('/invoices/update', [App\Http\Controllers\UserController::class, 'updateInvoice'])->name('users.invoices.update');
 });
 
 /** Users */
@@ -318,5 +319,43 @@ Route::group([], function () {
 });
 
 Route::get('/test', function () {
-    response()->json(['message' => 'test']);
+    event(new App\Events\ParticipantsUpdated(19));
+
+    return 'test';
+
+    $order = App\Models\Order::where(['user_id' => 68, 'status' => 0])
+        ->whereHas('items', function ($query) {
+            $query->where(['product_type' => 'event_participation', 'product_code' => 19]);
+        })->first();
+    dump($order);
+    return 'test';
+    $users = [];
+    $count = 0;
+    while ($count < 15) {
+        $Name = 'waiting' . $count;
+        $Surname = 'waiting' . $count;
+        $battleName = 'waiting' . $count;
+        $Email = $Name . '@ludosport.net';
+        $Nation = 2;
+        $Academy = 1;
+        $Password = Illuminate\Support\Facades\Hash::make('password');
+
+        $user = App\Models\User::create([
+            'name' => $Name,
+            'surname' => $Surname,
+            'battle_name' => $battleName,
+            'email' => $Email,
+            'nation_id' => $Nation,
+            'password' => $Password,
+            'academy_id' => $Academy,
+            'subscription_year' => now()->year,
+            'has_paid_fee' => 1
+        ]);
+
+        $user->roles()->attach(7);
+        $user->academyAthletes()->attach($Academy);
+        $users[] = $user;
+        $count++;
+    }
+    response()->json($users);
 })->name('test');

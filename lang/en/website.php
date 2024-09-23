@@ -63,6 +63,7 @@ return [
     'events_list_button' => 'View event',
     'events_list_participate' => 'Join the event',
     'events_list_waiting_list' => 'Join the waiting list',
+    'events_already_ordered' => 'You already have an order for this event.',
     'events_participating' => 'You already joined the event.',
     'events_in_waiting_list' => 'You are on the waiting list for this event.',
     'events_list_no_events' => 'There are no upcoming events.',

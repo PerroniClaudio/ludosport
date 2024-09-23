@@ -17,18 +17,17 @@
             <div x-data="{
                 birthday: '',
                 totalPrice: {{ $event->price }},
-                name: 'Name',
-                surname: 'Surname',
-                address: 'Address',
-                zip: 'Zip',
-                city: 'City',
-                vat: 'VAT',
-                sdi: 'SDI',
-                country: '',
-                country: '',
+                name: '{{$invoice->name ? $invoice->name : 'Name'}}',
+                surname: '{{$invoice->surname ? $invoice->surname : 'Surname'}}',
+                address: '{{(json_decode($invoice->address)->address ?? false) ? json_decode($invoice->address)->address : 'Address'}}',
+                zip: '{{(json_decode($invoice->address)->zip ?? false) ? json_decode($invoice->address)->zip : 'Zip'}}',
+                city: '{{(json_decode($invoice->address)->city ?? false) ? json_decode($invoice->address)->city : 'City'}}',
+                country: '{{(json_decode($invoice->address)->country ?? false) ? json_decode($invoice->address)->country : ''}}',
+                vat: '{{$invoice->vat ? $invoice->vat : 'VAT'}}',
+                sdi: '{{$invoice->sdi ? $invoice->sdi : 'SDI'}}',
                 business_name: '{{ __('fees.insert_business_name') }}',
-                is_business: false,
-                want_invoice: false,
+                is_business: '{{$invoice->is_business ? true : false}}' == 'true' ? true : false,
+                want_invoice: '{{$invoice->want_invoice ? true : false}}' == 'true' ? true : false,
                 shouldShowPayment: false,
                 shouldShowSdi: false,
                 updateSdi: function() {
@@ -40,39 +39,12 @@
                 },
                 shouldShowPayment: true,
                 event_id: '{{ $event->id }}',
-                fetchInvoiceData() {
-                    const url = `/shop/invoices/user-data/{{ Auth()->user()->id }}`
-            
-                    fetch(url, {
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-            
-                            this.name = data.name
-                            this.surname = data.surname
-                            this.country = data.address.country
-            
-                            let address = JSON.parse(data.address)
-            
-                            this.address = address.address != '' ? address.address : 'Address'
-                            this.zip = address.zip != '' ? address.zip : 'Zip'
-                            this.city = address.city != '' ? address.city : 'City'
-                            this.country = address.country != '' ? address.country : 'Country'
-                            this.vat = data.vat
-                            this.sdi = data.sdi
-                            this.is_business = data.is_business
-                            this.business_name = data.business_name
-            
-                        })
-                },
                 saveInvoiceData() {
-                    const url = `/invoices/store`
+                    const url = `/invoices/update`
             
                     const body = new FormData()
             
+                    body.append('invoice_id', {{$invoice->id}})
                     body.append('name', this.name)
                     body.append('surname', this.surname)
                     body.append('address', this.address)
@@ -145,9 +117,6 @@
                         .then(data => {
                             window.location.href = data.url
                         })
-                },
-                init() {
-                    this.fetchInvoiceData()
                 }
             }">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 select-none">

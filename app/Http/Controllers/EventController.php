@@ -944,43 +944,88 @@ class EventController extends Controller {
             return redirect()->route('event-detail', $event->slug)->with('error', __('website.must_pay_fee'));
         }
 
-        $invoice = $user->invoices->first();
-
-        if (!$invoice) {
-            $invoice = $user->invoices()->create([
-                'user_id' => $user->id,
-                'name' => $user->name,
-                'surname' => $user->surname ? $user->surname : '',
-                'address' => json_encode([
-                    'address' => '',
-                    'zip' => '',
-                    'city' => '',
-                    'country' => 'Italy',
-                ]),
-                'vat' => '',
-                'sdi' => '',
-            ]);
+        // Se ha già un ordine in elaborazione, completato o in attesa (status 1, 2, 3) per questo evento, non può acquistare un altro
+        $rejectOrder = Order::where('user_id', $user->id)
+            ->whereIn('status', [1, 2, 3])
+            ->whereHas('items', function ($query) use ($event) {
+                $query->where(['product_type' => 'event_participation', 'product_code' => $event->id]);
+            })->first();
+        if($rejectOrder){
+            return redirect()->route('event-detail', $event->slug)->with('error', __('website.events_already_ordered'));
         }
 
-        $order = Order::create([
-            'user_id' => $user->id,
-            'status' => 0,
-            'total' => $event->price,
-            'payment_method' => '',
-            'order_number' => Str::orderedUuid(),
-            'result' => '{}',
-            'invoice_id' => $invoice->id,
-        ]);
+        // Se l'ordine dell'utente esiste già (è entrato in questa pagina ed è uscito senza terminare) allora recupera quello esistente, altrimenti ne crea un altro
+        $order = Order::where(['user_id' => $user->id, 'status' => 0])
+        ->whereHas('items', function ($query) use ($event) {
+            $query->where(['product_type' => 'event_participation', 'product_code' => $event->id]);
+        })->first();
 
-        $order->items()->create([
-            'product_type' => 'event_participation',
-            'product_name' => $event->name,
-            'product_code' => $event->id,
-            'quantity' => 1,
-            'price' => $event->price,
-            'vat' => 0,
-            'total' => $event->price
-        ]);
+        $invoice = null;
+        
+        if($order){
+            $invoice = $order->invoice;
+            if(!$invoice){
+                $lastInvoice = $user->invoices()->latest()->first();
+                $invoice = $user->invoices()->create([
+                    'user_id' => $user->id,
+                    'name' => $lastInvoice ? ($lastInvoice->name ?: $user->name) : $user->name,
+                    'surname' => $lastInvoice ? ($lastInvoice->surname ?: ($user->surname ?: '')) : ($user->surname ?: ''),
+                    'address' => $lastInvoice ? ($lastInvoice->address ?: json_encode([
+                        'address' => '',
+                        'zip' => '',
+                        'city' => '',
+                        'country' => 'Italy',
+                    ])) : json_encode([
+                        'address' => '',
+                        'zip' => '',
+                        'city' => '',
+                        'country' => 'Italy',
+                    ]),
+                    'vat' => $lastInvoice ? ($lastInvoice->vat ?: '') : '',
+                    'sdi' => $lastInvoice ? ($lastInvoice->sdi ?: '') : '',
+                ]);
+            }
+        } else {
+            $lastInvoice = $user->invoices()->latest()->first();
+                $invoice = $user->invoices()->create([
+                    'user_id' => $user->id,
+                    'name' => $lastInvoice ? ($lastInvoice->name ?: $user->name) : $user->name,
+                    'surname' => $lastInvoice ? ($lastInvoice->surname ?: ($user->surname ?: '')) : ($user->surname ?: ''),
+                    'address' => $lastInvoice ? ($lastInvoice->address ?: json_encode([
+                        'address' => '',
+                        'zip' => '',
+                        'city' => '',
+                        'country' => 'Italy',
+                    ])) : json_encode([
+                        'address' => '',
+                        'zip' => '',
+                        'city' => '',
+                        'country' => 'Italy',
+                    ]),
+                    'vat' => $lastInvoice ? ($lastInvoice->vat ?: '') : '',
+                    'sdi' => $lastInvoice ? ($lastInvoice->sdi ?: '') : '',
+                ]);
+    
+            $order = Order::create([
+                'user_id' => $user->id,
+                'status' => 0,
+                'total' => $event->price,
+                'payment_method' => '',
+                'order_number' => Str::orderedUuid(),
+                'result' => '{}',
+                'invoice_id' => $invoice->id,
+            ]);
+    
+            $order->items()->create([
+                'product_type' => 'event_participation',
+                'product_name' => $event->name,
+                'product_code' => $event->id,
+                'quantity' => 1,
+                'price' => $event->price,
+                'vat' => 0,
+                'total' => $event->price
+            ]);
+        }
 
         session(['order_id' => $order->id]);
 

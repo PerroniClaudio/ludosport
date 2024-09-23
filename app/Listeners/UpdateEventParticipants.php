@@ -127,31 +127,54 @@ class UpdateEventParticipants
                             );
                         }
 
-                        Log::info($result);
-                        exit(); 
-
-                        if ($result['status'] === 'COMPLETED') {
-                            
-                            Log::info('PayPal preauthorized payment capture success. ', [
+                        if($result['error']){
+                            Log::error('PayPal preauthorized payment capture error. ', [
                                 'order_id' => $order->id,
+                                'event_id' => $waitingListItem->event->id,
+                                'event_waiting_list_id' => $waitingListItem->id,
+                                'result' => $result,
                             ]);
+                        }
+
+                        if ($result != null && (isset($result['status']) && ($result['status'] === 'COMPLETED'))
+                        || (isset($result['error']['details'][0]['issue']) && $result['error']['details'][0]['issue'] === 'AUTHORIZATION_ALREADY_CAPTURED')) {
+                            
+                            if((isset($result['error']['details'][0]['issue']) && $result['error']['details'][0]['issue'] === 'AUTHORIZATION_ALREADY_CAPTURED')){
+                                Log::info('Fixing PayPal preauthorized payment already captured. ', [
+                                    'order_id' => $order->id,
+                                    'event_id' => $waitingListItem->event->id,
+                                    'event_waiting_list_id' => $waitingListItem->id,
+                                    'result' => $result,
+                                ]);
+                            } else {
+                                Log::info('PayPal preauthorized payment capture success. ', [
+                                    'order_id' => $order->id,
+                                    'event_id' => $waitingListItem->event->id,
+                                    'event_waiting_list_id' => $waitingListItem->id,
+                                    'result' => $result,
+                                ]);
+                            }
     
                             $order->update(['status' => 2, 'result' => json_encode($result)]);
                     
                             $event = $waitingListItem->event;
                     
                             if($event->resultType() === 'enabling') {
-                                $event->instructorResults()->create([
-                                    'user_id' => $order->user_id,
-                                    'weapon_form_id' => $event->weapon_form_id,
-                                ]);
+                                if ($event->instructorResults()->where('user_id', $order->user_id)->count() === 0) {
+                                    $event->instructorResults()->create([
+                                        'user_id' => $order->user_id,
+                                        'weapon_form_id' => $event->weapon_form_id,
+                                    ]);
+                                }
                             } else if($event->resultType() === 'ranking') {
-                                $event->results()->create([
-                                    'user_id' => $order->user_id,
-                                    'war_points' => 0,
-                                    'style_points' => 0,
-                                    'total_points' => 0,
-                                ]);
+                                if ($event->results()->where('user_id', $order->user_id)->count() === 0) {
+                                    $event->results()->create([
+                                        'user_id' => $order->user_id,
+                                        'war_points' => 0,
+                                        'style_points' => 0,
+                                        'total_points' => 0,
+                                    ]);
+                                }
                             }
                 
                             $waitingListItem->delete();

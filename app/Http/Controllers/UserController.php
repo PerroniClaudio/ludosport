@@ -13,6 +13,7 @@ use App\Models\Role;
 use App\Models\School;
 use App\Models\User;
 use Carbon\Carbon;
+use GPBMetadata\Google\Api\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -1109,6 +1110,47 @@ class UserController extends Controller {
             'business_name' => $request->business_name,
             'user_id' => Auth()->user()->id
         ]);
+
+        $invoice->save();
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    public function updateInvoice(Request $request) {
+
+        $invoice = Invoice::find($request->invoice_id);
+
+        if (!$invoice) {
+            return response()->json([
+                'error' => 'Invoice not found',
+            ]);
+        }
+        if(User::find(Auth()->user()->id)->getRole() != 'admin' 
+            && (Auth()->user()->id != Invoice::find($request->invoice_id)->user_id)){
+            return response()->json([
+                'error' => 'You do not have permission for this data!',
+            ]);
+        }
+
+        $address = json_encode([
+            'address' => $request->address,
+            'zip' => $request->zip,
+            'city' => $request->city,
+            'country' => $request->country,
+        ]);
+
+        $invoice = Invoice::find($request->invoice_id);
+
+        $invoice->name = $request->name;
+        $invoice->surname = $request->surname;
+        $invoice->vat = $request->vat;
+        $invoice->sdi = $request->sdi;
+        $invoice->address = $address;
+        $invoice->is_business = $request->is_business === 'true' ? true : false;
+        $invoice->want_invoice = $request->want_invoice === 'true' ? true : false;
+        $invoice->business_name = $request->business_name;
 
         $invoice->save();
 
