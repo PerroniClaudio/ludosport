@@ -113,9 +113,11 @@
             @if ($event->is_approved)
                 @if ($event->resultType() === 'enabling')
                     <x-event.enabling-participants :event="$event" />
+                    <x-event.waiting-list :waiting_list="$waitingList" />
                     <x-event.enabling-results :event="$event" :results="$enablingResults" />
                 @elseif ($event->resultType() === 'ranking')
                     <x-event.ranking-participants :event="$event" />
+                    <x-event.waiting-list :event="$event" :waiting_list="$waitingList" />
                     <x-event.ranking-results :results="$rankingResults" />
                 @endif
             @endif

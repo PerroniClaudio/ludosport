@@ -191,12 +191,27 @@ class EventController extends Controller {
             $weaponForms = WeaponForm::all();
         }
 
+        $waitingList = [];
+        if($authRole === 'admin') {
+            $waitingList = EventWaitingList::where('event_id', $event->id)->with('order')->with('user')->get();
+
+            foreach ($waitingList as $key => $waiting) {
+                $waitingList[$key]['user_id'] = $waiting->user['id'];
+                $waitingList[$key]['user_email'] = $waiting->user['email'];
+                $waitingList[$key]['order_id'] = $waiting->order ? $waiting->order->id : '';
+                $waitingList[$key]['payment_method'] = $waiting->order ? $waiting->order->payment_method : '';
+                $waitingList[$key]['order_status'] = $waiting->order ? __('orders.status' . $waiting->order->status) : '';
+                
+            }
+        }
+
         $viewPath = $authRole === 'admin' ? 'event.edit' : 'event.' . $authRole . '.edit';
         return view($viewPath, [
             'event' => $event,
             'rankingResults' => $rankingResults,
             'enablingResults' => $enablingResults,
             'weaponForms' => $weaponForms,
+            'waitingList' => $waitingList,
         ]);
     }
 
@@ -949,9 +964,9 @@ class EventController extends Controller {
             return redirect()->route('event-detail', $event->slug)->with('error', __('website.must_pay_fee'));
         }
 
-        // Se ha già un ordine in elaborazione, completato o in attesa (status 1, 2, 3) per questo evento, non può acquistare un altro
+        // Se ha già un ordine in completato o in attesa (status 1, 2, 3) per questo evento, non può acquistare un altro
         $rejectOrder = Order::where('user_id', $user->id)
-            ->whereIn('status', [1, 2, 3])
+            ->whereIn('status', [2, 3])
             ->whereHas('items', function ($query) use ($event) {
                 $query->where(['product_type' => 'event_participation', 'product_code' => $event->id]);
             })->first();
@@ -1453,6 +1468,15 @@ class EventController extends Controller {
         $authorization = $provider->authorizePaymentOrder($request->token);
 
         Log::info('AUTHORIZATION RESPONSE', $authorization);
+
+        // Se l'ordine è già stato autorizzato, non fare nulla
+        if(isset($authorization['error']) && $authorization['error']['details'][0]['issue'] === 'ORDER_ALREADY_AUTHORIZED') {
+            if($order->status === 4) {
+                return redirect()->route('event-detail', Event::find($order->items->first()->product_code)->slug)->with('error', __('Order has been cancelled.'));
+            } else if (!in_array($order->status, [0, 1])){
+                return redirect()->route('event-detail', Event::find($order->items->first()->product_code)->slug)->with('error', __('Order has been already processed.'));
+            }
+        }
             
         if($authorization['status'] !== 'COMPLETED') {
             return response()->json(['success' => false, 'error' => 'Error authorizing payment']);

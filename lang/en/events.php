@@ -41,6 +41,7 @@ return [
     'enabling_participants' => 'Instructor Event Participants',
     'export_enabling_participants' => 'Export Instructor Event Participants',
     'enabling_results' => 'Instructor Event Results',
+    'ranking_results' => 'Ranking Event Results',
     'result_notes' => 'Result Notes',
     'personnel' => 'Personnel',
     'available_personnel' => 'Available Personnel',
@@ -71,4 +72,5 @@ return [
     'result_stage_pending' => 'Pending',
     'result_stage_confirmed' => 'Confirmed',
     'max_participants_placeholder' => 'Insert the maximum number of participants',
+    'waiting_list' => 'Waiting List',
 ];
