@@ -123,4 +123,14 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+
+    'wire_transfer' => [
+        'iban' => env('WIRE_TRANSFER_IBAN', 'IT00X0000000000000000000000'),
+        'bic' => env('WIRE_TRANSFER_BIC', 'XXXXXXXXXXX'),
+        'holder' => env('WIRE_TRANSFER_HOLDER', 'LudoSport International'),
+        'bank' => env('WIRE_TRANSFER_BANK', 'Banca di LudoSport'),
+    ],
+
+
+
 ];

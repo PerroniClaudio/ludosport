@@ -1102,12 +1102,12 @@ class UserController extends Controller {
         $invoice = Invoice::create([
             'name' => $request->name,
             'surname' => $request->surname,
-            'vat' => $request->vat,
-            'sdi' => $request->sdi,
+            'vat' => $request->vat ?? '',
+            'sdi' => $request->sdi ?? '',
             'address' => $address,
             'is_business' => $request->is_business === 'true' ? true : false,
             'want_invoice' => $request->want_invoice === 'true' ? true : false,
-            'business_name' => $request->business_name,
+            'business_name' => $request->business_name ?? '',
             'user_id' => Auth()->user()->id
         ]);
 
@@ -1127,8 +1127,10 @@ class UserController extends Controller {
                 'error' => 'Invoice not found',
             ]);
         }
-        if(User::find(Auth()->user()->id)->getRole() != 'admin' 
-            && (Auth()->user()->id != Invoice::find($request->invoice_id)->user_id)){
+        if (
+            User::find(Auth()->user()->id)->getRole() != 'admin'
+            && (Auth()->user()->id != Invoice::find($request->invoice_id)->user_id)
+        ) {
             return response()->json([
                 'error' => 'You do not have permission for this data!',
             ]);
