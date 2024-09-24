@@ -27,7 +27,8 @@ class UsersExport implements FromArray {
                     return $role->name;
                 })->implode(', '),
                 $user->created_at,
-                $user->updated_at
+                $user->updated_at,
+                $user->how_found_us ?? ""
             ];
         })->toArray();
 
@@ -38,7 +39,8 @@ class UsersExport implements FromArray {
             "Email",
             "Roles",
             "Created At",
-            "Updated At"
+            "Updated At",
+            "How found us"
         ];
 
         return [

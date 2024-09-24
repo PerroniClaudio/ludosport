@@ -35,7 +35,8 @@ class UsersCourseExport implements FromArray {
                         $user->email,
                         $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
-                        $user->updated_at
+                        $user->updated_at,
+                        $user->how_found_us ?? ""
                     ];
                 });
             })->toArray();
@@ -50,7 +51,8 @@ class UsersCourseExport implements FromArray {
                         $user->email,
                         $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
-                        $user->updated_at
+                        $user->updated_at,
+                        $user->how_found_us ?? ""
                     ];
                 });
             })->toArray();
@@ -66,7 +68,8 @@ class UsersCourseExport implements FromArray {
                         $user->email,
                         $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
-                        $user->updated_at
+                        $user->updated_at,
+                        $user->how_found_us ?? ""
                     ];
                 });
             })->toArray();
@@ -81,7 +84,8 @@ class UsersCourseExport implements FromArray {
                         $user->email,
                         $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
-                        $user->updated_at
+                        $user->updated_at,
+                        $user->how_found_us ?? ""
                     ];
                 });
             })->toArray();
@@ -99,7 +103,8 @@ class UsersCourseExport implements FromArray {
                 "Email",
                 "Roles",
                 "Created At",
-                "Updated At"
+                "Updated At",
+                "How found us"
             ],
             $users
         ];

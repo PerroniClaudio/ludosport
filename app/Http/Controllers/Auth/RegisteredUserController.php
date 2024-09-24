@@ -36,6 +36,7 @@ class RegisteredUserController extends Controller {
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'nationality' => ['required', 'string', 'exists:' . Nation::class . ',name'],
             'academy_id' => ['required', 'int', 'exists:' . Academy::class . ',id'],
+            'how_found_us' => ['required', 'string', 'max:255'],
         ]);
 
         $nation = Nation::where('name', $request->nationality)->first();
@@ -48,6 +49,7 @@ class RegisteredUserController extends Controller {
             'password' => Hash::make($request->password),
             'nation_id' => $nation->id,
             'battle_name' => $request->battle_name ?? ($request->name . $request->surname . rand(10, 99)),
+            'how_found_us' => $request->how_found_us,
         ]);
 
         $user->academyAthletes()->attach($academy->id);

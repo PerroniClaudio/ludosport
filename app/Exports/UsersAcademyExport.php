@@ -34,7 +34,8 @@ class UsersAcademyExport implements FromArray {
                         $user->email,
                         $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
-                        $user->updated_at
+                        $user->updated_at,
+                        $user->how_found_us ?? ""
                     ];
                 });
             })->toArray();
@@ -49,13 +50,14 @@ class UsersAcademyExport implements FromArray {
                         $user->email,
                         $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
-                        $user->updated_at
+                        $user->updated_at,
+                        $user->how_found_us ?? ""
                     ];
                 });
             })->toArray();
         } else {
-            $users = Academy::whereIn('id', $academies)->with('users')->get()->flatMap(function ($academy) {
-                return $academy->users->map(function ($user) use ($academy) {
+            $users = Academy::whereIn('id', $academies)->with('athletes')->get()->flatMap(function ($academy) {
+                return $academy->athletes->map(function ($user) use ($academy) {
                     return [
                         $academy->name,
                         $user->unique_code,
@@ -64,7 +66,8 @@ class UsersAcademyExport implements FromArray {
                         $user->email,
                         $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
-                        $user->updated_at
+                        $user->updated_at,
+                        $user->how_found_us ?? ""
                     ];
                 });
             })->toArray();
@@ -79,7 +82,8 @@ class UsersAcademyExport implements FromArray {
                         $user->email,
                         $user->roles->pluck('name')->implode(', '),
                         $user->created_at,
-                        $user->updated_at
+                        $user->updated_at,
+                        $user->how_found_us ?? ""
                     ];
                 });
             })->toArray();
@@ -97,7 +101,8 @@ class UsersAcademyExport implements FromArray {
                 "Email",
                 "Roles",
                 "Created At",
-                "Updated At"
+                "Updated At",
+                "How found us"
             ],
             $users
         ];

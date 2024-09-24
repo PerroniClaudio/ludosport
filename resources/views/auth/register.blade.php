@@ -42,9 +42,27 @@
         <!-- Academy -->
         @php
             $academies = App\Models\Academy::all();
-            @endphp
+            $academies = $academies->sortBy(function ($academy) {
+                return strtolower($academy->name) === 'no academy' ? 0 : 1;
+            })->values();
+        @endphp
         <div class="mt-4">
             <x-form.academy-select :academies="$academies" />
+        </div>
+
+        <!-- How did you met us -->
+        <div class="mt-4">
+            <x-form.select  name="how_found_us" label="{{ __('How did you meet us?') }}" :options="[
+                ['value' => 'facebook', 'label' => 'Facebook'],
+                ['value' => 'instagram', 'label' => 'Instagram'],
+                ['value' => 'twitter', 'label' => 'Twitter'],
+                ['value' => 'youtube', 'label' => 'Youtube'],
+                ['value' => 'website', 'label' => 'Website'],
+                ['value' => 'friend', 'label' => 'Friend'],
+                ['value' => 'event', 'label' => 'Event'],
+                ['value' => 'flyer', 'label' => 'Flyer'],
+                // ['value' => 'other', 'label' => 'Other'],
+            ]" :shouldHaveEmptyOption="true" :required="true"  />
         </div>
 
         <!-- Password -->
