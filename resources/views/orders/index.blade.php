@@ -14,10 +14,14 @@
                     <x-table striped="false" :columns="[
                         [
                             'name' => 'ID',
-                            'field' => 'id',
+                        ],
+                        [
+                            'name' => 'Number',
+                            'field' => 'order_number',
                             'columnClasses' => '', // classes to style table th
                             'rowClasses' => '', // classes to style table td
                         ],
+                    
                         [
                             'name' => 'User',
                             'field' => 'user_fullname',
@@ -58,6 +62,8 @@
                         <x-slot name="tableRows">
                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                 x-text="row.id"></td>
+                            <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap text-xs"
+                                x-text="row.order_number"></td>
                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                 x-text="row.user_fullname"></td>
                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"

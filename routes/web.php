@@ -289,6 +289,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/orders', [App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [App\Http\Controllers\OrderController::class, 'edit'])->name('orders.edit');
     Route::get('/orders/{order}/transaction-result', [App\Http\Controllers\OrderController::class, 'result'])->name('orders.transaction-result');
+
+    Route::post('/orders/{order}/wire', [App\Http\Controllers\OrderController::class, 'approveWireTransfer'])->name('orders.approve-wire');
 });
 
 /** Forme armi */

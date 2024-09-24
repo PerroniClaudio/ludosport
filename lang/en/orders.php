@@ -21,4 +21,8 @@ return [
     'senior_fee' => 'Senior Fee',
     'junior_fee' => 'Junior Fee',
     'event' => 'Event',
+    'wire_transfer' => 'Wire Transfer',
+    'approve_transfer' => 'Approve Transfer',
+    'approve_transfer_text' => 'Approve the wire transfer payment.',
+    'approve_transfer_confirm' => 'Are you sure you want to approve this wire transfer payment?',
 ];

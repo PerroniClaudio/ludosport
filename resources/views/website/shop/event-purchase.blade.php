@@ -1,7 +1,7 @@
 @php
     $isWaitingList = $event->isWaitingList();
-    $stripeUrl = "";
-    $paypalUrl = "";
+    $stripeUrl = '';
+    $paypalUrl = '';
     if ($isWaitingList) {
         $stripeUrl = route('shop.event.stripe-preauth', ['event' => $event]);
         $paypalUrl = route('shop.event.paypal-preauth', ['event' => $event]);
@@ -17,17 +17,17 @@
             <div x-data="{
                 birthday: '',
                 totalPrice: {{ $event->price }},
-                name: '{{$invoice->name ? $invoice->name : 'Name'}}',
-                surname: '{{$invoice->surname ? $invoice->surname : 'Surname'}}',
-                address: '{{(json_decode($invoice->address)->address ?? false) ? json_decode($invoice->address)->address : 'Address'}}',
-                zip: '{{(json_decode($invoice->address)->zip ?? false) ? json_decode($invoice->address)->zip : 'Zip'}}',
-                city: '{{(json_decode($invoice->address)->city ?? false) ? json_decode($invoice->address)->city : 'City'}}',
-                country: '{{(json_decode($invoice->address)->country ?? false) ? json_decode($invoice->address)->country : ''}}',
-                vat: '{{$invoice->vat ? $invoice->vat : 'VAT'}}',
-                sdi: '{{$invoice->sdi ? $invoice->sdi : 'SDI'}}',
+                name: '{{ $invoice->name ? $invoice->name : 'Name' }}',
+                surname: '{{ $invoice->surname ? $invoice->surname : 'Surname' }}',
+                address: '{{ json_decode($invoice->address)->address ?? false ? json_decode($invoice->address)->address : 'Address' }}',
+                zip: '{{ json_decode($invoice->address)->zip ?? false ? json_decode($invoice->address)->zip : 'Zip' }}',
+                city: '{{ json_decode($invoice->address)->city ?? false ? json_decode($invoice->address)->city : 'City' }}',
+                country: '{{ json_decode($invoice->address)->country ?? false ? json_decode($invoice->address)->country : '' }}',
+                vat: '{{ $invoice->vat ? $invoice->vat : 'VAT' }}',
+                sdi: '{{ $invoice->sdi ? $invoice->sdi : 'SDI' }}',
                 business_name: '{{ __('fees.insert_business_name') }}',
-                is_business: '{{$invoice->is_business ? true : false}}' == 'true' ? true : false,
-                want_invoice: '{{$invoice->want_invoice ? true : false}}' == 'true' ? true : false,
+                is_business: '{{ $invoice->is_business ? true : false }}' == 'true' ? true : false,
+                want_invoice: '{{ $invoice->want_invoice ? true : false }}' == 'true' ? true : false,
                 shouldShowPayment: false,
                 shouldShowSdi: false,
                 updateSdi: function() {
@@ -44,7 +44,7 @@
             
                     const body = new FormData()
             
-                    body.append('invoice_id', {{$invoice->id}})
+                    body.append('invoice_id', {{ $invoice->id }})
                     body.append('name', this.name)
                     body.append('surname', this.surname)
                     body.append('address', this.address)
@@ -117,7 +117,26 @@
                         .then(data => {
                             window.location.href = data.url
                         })
-                }
+                },
+                startWireCheckout() {
+                    this.saveInvoiceData()
+            
+                    const url = `/shop/fees/wire-transfer`
+                    let items = [];
+            
+                    items.push({
+                        'name': 'event_participation',
+                        'quantity': 1,
+                    })
+            
+                    const itemsJson = JSON.stringify(items)
+            
+                    const params = new URLSearchParams({
+                        'items': itemsJson
+                    })
+            
+                    window.location.href = `${url}?${params}`
+                },
             }">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 select-none">
                     <div class="grid grid-cols-4 gap-4">
@@ -218,8 +237,15 @@
                                         <span>PayPal</span>
                                     </div>
                                 </div>
+                                <div x-show="shouldShowPayment" class="mt-4">
+                                    <div class="rounded-full bg-gray-300 hover:bg-gray-500 text-black font-bold p-1 text-center cursor-pointer"
+                                        @click="startWireCheckout">
+
+                                        <span>{{ __('website.wire_transfer') }}</span>
+                                    </div>
+                                </div>
                                 {{-- Al momento non è ancora implementata la preautorizzazione con stripe --}}
-                                @if(!$isWaitingList) 
+                                @if (!$isWaitingList)
                                     <div x-show="shouldShowPayment" class="mt-4">
                                         <div class="rounded-full bg-white hover:bg-gray-200 text-black font-bold p-1 text-center cursor-pointer"
                                             @click="startStripeCheckout">

@@ -58,6 +58,12 @@ Route::prefix('/shop')->group(function () {
     Route::post('/fees/paypal/checkout', [App\Http\Controllers\FeeController::class, 'userCheckoutPaypal'])->middleware('auth')->name('shop.fees.paypal-checkout');
     Route::get('/fees/paypal/success', [App\Http\Controllers\FeeController::class, 'successUserPaypal'])->middleware('auth')->name('shop.fees.paypal-success');
     Route::get('/fees/paypal/cancel', [App\Http\Controllers\FeeController::class, 'cancelUserPaypal'])->middleware('auth')->name('shop.fees.paypal-cancel');
+
+    # Wire Transfer
+
+    Route::get('/fees/wire-transfer', [App\Http\Controllers\FeeController::class, 'userCheckoutWireTransfer'])->middleware('auth')->name('shop.fees.wire-transfer');
+
+    Route::get('/wire-transfer/{order}/success', [App\Http\Controllers\OrderController::class, 'successUserWireTransfer'])->middleware('auth')->name('shop.wire-transfer-success');
 });
 
 Route::group(['middleware' => ['auth']], function () {

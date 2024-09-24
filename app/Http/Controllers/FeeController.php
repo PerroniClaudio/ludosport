@@ -221,7 +221,7 @@ class FeeController extends Controller {
         // Crea ordine
 
         $user = User::find(Auth()->user()->id);
-        $invoice = $user->invoices->first();
+        $invoice = $user->invoices()->latest()->first();
 
         $order = Order::create([
             'user_id' => $user->id,
@@ -483,7 +483,7 @@ class FeeController extends Controller {
         // Crea ordine
 
         $user = User::find(Auth()->user()->id);
-        $invoice = $user->invoices->first();
+        $invoice = $user->invoices()->latest()->first();
 
         $order = Order::create([
             'user_id' => $user->id,
@@ -797,5 +797,51 @@ class FeeController extends Controller {
         return view('fees.rector.cancel', [
             'order' => $order,
         ]);
+    }
+
+    //? Wire Transfer.
+
+    public function userCheckoutWireTransfer(Request $request) {
+
+        // Crea ordine
+
+        $user = User::find(Auth()->user()->id);
+        $invoice = $user->invoices()->latest()->first();
+
+        $order = Order::create([
+            'user_id' => $user->id,
+            'status' => 0,
+            'total' => 0,
+            'payment_method' => 'wire_transfer',
+            'order_number' => Str::orderedUuid(),
+            'result' => '{}',
+            'invoice_id' => $invoice->id,
+        ]);
+
+
+        $items = json_decode($request->items);
+        $amount = 0;
+
+        foreach ($items as $item) {
+
+            $price = $item->name == 'senior_fee' ? 50 : 25;
+            $amount += $price;
+
+            $order->items()->create([
+                'product_type' => 'fee',
+                'product_name' => $item->name,
+                'product_code' => $item->name == 'senior_fee' ? 'senior_fee' : 'junior_fee',
+                'quantity' => $item->quantity,
+                'price' => number_format($price * $item->quantity, 2),
+                'vat' => 0,
+                'total' => number_format($price * $item->quantity, 2),
+            ]);
+        }
+
+        $order->update([
+            'total' => $amount,
+        ]);
+
+        return redirect()->route('shop.wire-transfer-success', $order->id);
     }
 }
