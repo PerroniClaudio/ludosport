@@ -217,6 +217,35 @@
                     window.location.href = data.url
                 })
         },
+        startWireCheckout() {
+            this.saveInvoiceData()
+    
+            const url = `/shop/fees/wire-transfer`
+            let items = [];
+    
+    
+            if (this.seniorFees > 0) {
+                items.push({
+                    'name': 'senior_fee',
+                    'quantity': this.seniorFees,
+                })
+            }
+    
+            if (this.juniorFees > 0) {
+                items.push({
+                    'name': 'junior_fee',
+                    'quantity': this.juniorFees,
+                })
+            }
+    
+            const itemsJson = JSON.stringify(items)
+    
+            const params = new URLSearchParams({
+                'items': itemsJson
+            })
+    
+            window.location.href = `${url}?${params}`
+        },
         test() {
             console.log('test')
         },
@@ -371,6 +400,13 @@
                                 @click="startStripeCheckout">
 
                                 <span>Stripe</span>
+                            </div>
+                        </div>
+                        <div x-show="shouldShowPayment" class="mt-4">
+                            <div class="rounded-full bg-gray-300 hover:bg-gray-500 text-black font-bold p-1 text-center cursor-pointer"
+                                @click="startWireCheckout">
+
+                                <span>{{ __('website.wire_transfer') }}</span>
                             </div>
                         </div>
                     </div>
