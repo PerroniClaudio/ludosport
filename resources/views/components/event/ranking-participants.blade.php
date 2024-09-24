@@ -53,10 +53,17 @@
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="row.surname">
                             </td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm text-right p-1">
-                                <button @click="addParticipant(row.id)">
-                                    <x-lucide-plus
-                                        class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
-                                </button>
+                                @if($event->is_free || ($authRole == 'admin'))
+                                    <button @click="addParticipant(row.id)">
+                                        <x-lucide-plus
+                                            class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
+                                    </button>
+                                @else
+                                    <button disabled>
+                                        <x-lucide-ban
+                                            class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     </template>
@@ -132,14 +139,21 @@
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm"
                                 x-text="participant.surname"></td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm text-right p-1">
-                                <button x-show="!hasRankingResult(participant.id)" @click="removeParticipant(participant.id)">
-                                    <x-lucide-minus
-                                        class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
-                                </button>
-                                <button x-show="hasRankingResult(participant.id)" disabled>
-                                    <x-lucide-ban
-                                        class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
-                                </button>
+                                @if($event->is_free || ($authRole == 'admin'))
+                                    <button x-show="!hasRankingResult(participant.id)" @click="removeParticipant(participant.id)">
+                                        <x-lucide-minus
+                                            class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
+                                    </button>
+                                    <button x-show="hasRankingResult(participant.id)" disabled>
+                                        <x-lucide-ban
+                                            class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
+                                    </button>
+                                @else
+                                    <button disabled>
+                                        <x-lucide-ban
+                                            class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     </template>
