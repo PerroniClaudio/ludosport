@@ -71,7 +71,7 @@
         @endif
         <select name="event_type" id="event_type" x-model="selected"
             class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm"
-            x-bind:disabled="{{ $disabled }}">
+            @if($disabled) disabled @endif>
 
             <template x-for="type in eventTypes" :key="type.id">
                 <option x-text="type.name"></option>

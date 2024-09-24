@@ -1,9 +1,9 @@
-@props(['event' => ''])
+@props(['event' => '', 'results' => []])
 @php
     $authRole = auth()->user()->getRole();
     $exportRoute = $authRole === 'admin' ? 'events.participants.export' : $authRole . '.events.participants.export';
 @endphp
-<div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-data="participants({{ $event->id }}, '{{ $authRole }}')">
+<div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-data="participants({{ $event->id }}, '{{ $authRole }}', {{ collect($results) }})">
     <div class="flex justify-between">
         <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.participants') }}</h3>
         <div>
@@ -132,9 +132,13 @@
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm"
                                 x-text="participant.surname"></td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm text-right p-1">
-                                <button @click="removeParticipant(participant.id)">
+                                <button x-show="!hasRankingResult(participant.id)" @click="removeParticipant(participant.id)">
                                     <x-lucide-minus
                                         class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
+                                </button>
+                                <button x-show="hasRankingResult(participant.id)" disabled>
+                                    <x-lucide-ban
+                                        class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
                                 </button>
                             </td>
                         </tr>

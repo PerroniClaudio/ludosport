@@ -64,6 +64,11 @@
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
                 <div class="flex flex-col gap-2 w-1/2">
+                    
+                    <x-form.input name="" label="Academy" type="text" required="{{ true }}"
+                        :value="$event->academy->name" placeholder="" 
+                        disabled="{{ true }}" />
+
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                         :value="$event->name" placeholder="{{ fake()->company() }}" 
                         disabled="{{!!$event->is_approved}}" />
@@ -87,6 +92,10 @@
                         disabled="{{!!$event->is_approved}}" />
 
                     <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms" 
+                        disabled="{{!!$event->is_approved}}" />
+
+                    <x-form.checkbox id="block_subscriptions" name="block_subscriptions" label="Block subscriptions (shop)"
+                        isChecked="{{ $event->block_subscriptions }}" 
                         disabled="{{!!$event->is_approved}}" />
 
                     <x-form.checkbox id="is_free" name="is_free" label="Free Event"
@@ -116,7 +125,7 @@
                     <x-event.waiting-list :waiting_list="$waitingList" />
                     <x-event.enabling-results :event="$event" :results="$enablingResults" />
                 @elseif ($event->resultType() === 'ranking')
-                    <x-event.ranking-participants :event="$event" />
+                    <x-event.ranking-participants :event="$event" :results="$rankingResults" />
                     <x-event.waiting-list :event="$event" :waiting_list="$waitingList" />
                     <x-event.ranking-results :results="$rankingResults" />
                 @endif

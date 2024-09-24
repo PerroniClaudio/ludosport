@@ -48,6 +48,8 @@
                                     <x-primary-button>{{ __('website.events_list_participate') }}</x-primary-button>
                                 @endif    
                             </a>
+                        @elseif ($block_subscriptions)
+                            <p>{{__('website.events_subscriptions_blocked')}}</p>
                         @elseif ($is_participating)
                             <p>{{__('website.events_participating')}}</p>
                         @elseif ($is_in_waiting_list)

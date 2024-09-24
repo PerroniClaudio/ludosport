@@ -77,7 +77,7 @@
                     <x-event.enabling-participants :event="$event" />
                     <x-event.technician.enabling-results :event="$event" :results="$enablingResults" />
                 @elseif ($event->resultType() === 'ranking')
-                    <x-event.ranking-participants :event="$event" />
+                    <x-event.ranking-participants :event="$event" :results="$rankingResults" />
                     <x-event.ranking-results :results="$rankingResults" />
                 @endif
             @endif

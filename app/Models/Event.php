@@ -40,6 +40,7 @@ class Event extends Model {
         'price',
         'weapon_form_id',
         'max_participants',
+        'block_subscriptions',
     ];
 
     public function nation() {

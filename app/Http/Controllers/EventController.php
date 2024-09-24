@@ -276,6 +276,7 @@ class EventController extends Controller {
             'start_date' => 'required',
             'end_date' => 'required',
             'price' => 'min:0',
+            'max_participants' => 'min:0',
         ]);
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
@@ -296,6 +297,8 @@ class EventController extends Controller {
 
         if ($authRole === 'admin') {
 
+            $event->max_participants = $request->max_participants;
+
             $event_type = EventType::where('name', $request->event_type)->first();
             $event->event_type = $event_type->id;
 
@@ -305,6 +308,12 @@ class EventController extends Controller {
             } else {
                 $event->is_free = false;
                 $event->price = $request->price;
+            }
+
+            if ($request->block_subscriptions == 'on') {
+                $event->block_subscriptions = true;
+            } else {
+                $event->block_subscriptions = false;
             }
         }
 
@@ -577,8 +586,9 @@ class EventController extends Controller {
                 ]);
             }
         } else if ($event->resultType() === 'ranking') {
-            // Elimina i partecipanti che non sono più presenti (possibile rischio di perdita di dati, cioè elimiinazione di eventuali risultati già presenti)
-            $event->results()->whereNotIn('user_id', $participants)->delete();
+            // Elimina i partecipanti che non sono più presenti, solo se non hanno risultati > 0 (war_points, style_points)
+            $event->results()->whereNotIn('user_id', $participants)
+                ->where('war_points', '=', "0")->where('style_points', '=', "0")->delete();
 
             foreach ($participants as $participant) {
                 if ($event->results()->where('user_id', $participant)->exists()) {
@@ -936,12 +946,12 @@ class EventController extends Controller {
             if ($event->resultType() === 'enabling') {
                 $isParticipating = $event->instructorResults()->where('user_id', $user->id)->exists();
                 $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
-                $canpurchase = !$isParticipating && !$isInWaitingList;
+                $canpurchase = !$event->block_subscriptions && !$isParticipating && !$isInWaitingList;
                 // $canpurchase = !$isParticipating && !$isInWaitingList && $event->instructorResults()->count() < $event->max_participants;
             } else if ($event->resultType() === 'ranking') {
                 $isParticipating = $event->results()->where('user_id', $user->id)->exists();
                 $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
-                $canpurchase = !$isParticipating && !$isInWaitingList;
+                $canpurchase = !$event->block_subscriptions && !$isParticipating && !$isInWaitingList;
                 // $canpurchase = !$isParticipating && !$isInWaitingList && $event->results()->count() < $event->max_participants;
             }
 
@@ -953,6 +963,7 @@ class EventController extends Controller {
             'only_waiting_list' => $onlyWaitingList,
             'is_participating' => $isParticipating,
             'is_in_waiting_list' => $isInWaitingList,
+            'block_subscriptions' => $event->block_subscriptions,
         ]);
     }
 

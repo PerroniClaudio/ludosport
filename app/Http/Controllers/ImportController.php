@@ -29,6 +29,8 @@ class ImportController extends Controller {
         foreach ($imports as $key => $import) {
             $imports[$key]->type = __('imports.' . $import->type);
             $imports[$key]->status = __('imports.' . $import->status);
+            $imports[$key]->author = $import->user->name . ' ' . ($import->user->surname ?? '');
+            $imports[$key]->created_at_formatted = $import->created_at->format('d/m/Y H:i');
         }
 
         return view('import.index', [
@@ -142,6 +144,7 @@ class ImportController extends Controller {
         foreach ($imports as $import) {
             $import->status = 'processing';
             $import->save();
+            $is_partial = false;
 
             $log = json_decode($import->log);
 
@@ -175,7 +178,13 @@ class ImportController extends Controller {
                         break;
                     case 'event_participants':
                         $log[] = "['Processing event participants']";
-                        Excel::import(new UsersEventImport, $import->file, 'gcs');
+                        $userEventImport = new UsersEventImport($import->user);
+                        Excel::import($userEventImport, $import->file, 'gcs');
+                        $userEventImportLog = $userEventImport->getLogArray();
+                        if(count($userEventImportLog) > 0) {
+                            array_push($log, ...$userEventImportLog);
+                        }
+                        $is_partial = $userEventImport->getIsPartial();
                         $log[] = "['Event participants imported at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
                     case 'event_war':
@@ -199,7 +208,8 @@ class ImportController extends Controller {
                 }
 
                 $import->log = json_encode($log);
-                $import->status = 'completed';
+
+                $import->status = $is_partial ? 'partial' : 'completed';
                 $import->save();
             } catch (\Exception $e) {
                 $log[] = "['Error exporting file']";

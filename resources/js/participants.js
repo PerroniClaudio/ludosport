@@ -1,4 +1,4 @@
-export const participants = (eventid, role) => {
+export const participants = (eventid, role, rankingResults) => {
     return {
         eventid,
         participants: [],
@@ -106,6 +106,11 @@ export const participants = (eventid, role) => {
                 (user) => user.id !== userid
             );
             this.paginateAvailableUsers();
+        },
+        hasRankingResult: function (userid) {
+            // Se non c'è in lista significa che è stato appena aggiunto dalla pagina corrente.
+            let result = rankingResults.find((result) => result.user_id === userid);
+            return result ? (result.style_points > 0) || (result.war_points > 0) : false;
         },
         removeParticipant: async function (userid) {
             console.log("removeParticipant");

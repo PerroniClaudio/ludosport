@@ -12,6 +12,14 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 class UsersEventImport implements ToCollection {
 
     private $event_id = null;
+    private $importingUser = null;
+    private $log = [];
+    private $is_partial = false;
+
+    public function __construct($user)
+    {
+        $this->importingUser = $user;
+    }
 
     /**
      * @param Collection $collection
@@ -28,6 +36,12 @@ class UsersEventImport implements ToCollection {
 
             $user = User::where('email', $row[1])->first();
             $event = Event::find($row[0]);
+            if(!$event->is_free && !User::find($this->importingUser->id)->hasRole('admin')) {
+                $this->log[] = "['Unauthorized to import user to paid event. email: " . $row[1] . " - event ID: " . $row[0] . "']";
+                $this->is_partial = true;
+                continue;
+            }
+
             if ($user && $event) {
                 if($event->resultType() == 'enabling') {
                     $weaponForm = $event->weaponForm();
@@ -51,5 +65,12 @@ class UsersEventImport implements ToCollection {
                 }
             }
         }
+    }
+
+    public function getLogArray() {
+        return $this->log;
+    }
+    public function getIsPartial() {
+        return $this->is_partial;
     }
 }

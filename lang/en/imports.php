@@ -21,6 +21,8 @@ return [
     'finished' => 'Completed',
     'canceled' => 'Canceled',
     'processing' => 'Processing',
+    'partial' => 'Partial',
     'failed' => 'Failed',
     'error' => 'Error',
+    'log' => 'Log',
 ];
