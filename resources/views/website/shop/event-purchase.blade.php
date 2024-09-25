@@ -15,8 +15,8 @@
     <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
         <section class="col-span-12 py-12">
             <div x-data="{
-                invoice_id: {{ $invoice->id }},
                 birthday: '',
+                invoice_id: '{{ $invoice->id }}',
                 totalPrice: {{ $event->price }},
                 name: '{{ $invoice->name ? $invoice->name : '' }}',
                 surname: '{{ $invoice->surname ? $invoice->surname : '' }}',
@@ -24,7 +24,7 @@
                 zip: '{{ json_decode($invoice->address)->zip ?? false ? json_decode($invoice->address)->zip : '' }}',
                 city: '{{ json_decode($invoice->address)->city ?? false ? json_decode($invoice->address)->city : '' }}',
                 country: '{{ json_decode($invoice->address)->country ?? false ? json_decode($invoice->address)->country : '' }}',
-                vat: '{{ $invoice->vat ? ($invoice->vat == 'VAT' ? '' : $invoice->vat) : '' }}',
+                vat: '{{ $invoice->vat ? $invoice->vat : '' }}',
                 sdi: '{{ $invoice->sdi ? $invoice->sdi : '' }}',
                 business_name: '{{ $invoice->business_name ? $invoice->business_name : '' }}',
                 is_business: '{{ $invoice->is_business ? true : false }}' == 'true' ? true : false,
@@ -39,78 +39,148 @@
                     }
                 },
                 shouldShowPayment: true,
-                event_id: '{{ $event->id }}',                
-                startStripeCheckout() {
-                    this.saveInvoiceData()
+                showResSuccessMessage: false,
+                showResErrorMessage: false,
+                successMessage: '',
+                errorMessage: '',
+                event_id: '{{ $event->id }}',
+                async saveInvoiceData(onlyInvoice = false) {
+                    const url = `/invoices/update`
+                    
+                    const body = new FormData()
             
-                    const url = `{{ $stripeUrl }}`
-                    let items = [];
-            
-                    items.push({
-                        'name': 'event_participation',
-                        'quantity': 1,
-                    })
-            
-                    const itemsJson = JSON.stringify(items)
-            
-                    const params = new URLSearchParams({
-                        'items': itemsJson
-                    })
-            
-                    window.location.href = `${url}?${params}`
-            
-                },
-                startPaypalCheckout() {
-                    this.saveInvoiceData()
-            
-                    const url = `{{ $paypalUrl }}`
-                    let items = [];
-            
-                    items.push({
-                        'name': 'event_participation',
-                        'quantity': 1,
-                    })
-            
-            
-                    const itemsJson = JSON.stringify(items)
-            
-                    let fd = new FormData()
-                    fd.append('items', itemsJson)
-            
-                    fetch(url, {
+                    body.append('invoice_id', {{ $invoice->id }})
+                    body.append('name', this.name)
+                    body.append('surname', this.surname)
+                    body.append('address', this.address)
+                    body.append('zip', this.zip)
+                    body.append('city', this.city)
+                    body.append('country', this.country)
+                    body.append('vat', this.vat)
+                    body.append('sdi', this.sdi)
+                    body.append('is_business', this.is_business)
+                    body.append('business_name', this.business_name)
+                    body.append('want_invoice', this.want_invoice)
+
+                    let invoiceResponse = {};
+
+                    await fetch(url, {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
-                            body: fd
+                            body: body
                         })
                         .then(res => res.json())
                         .then(data => {
-                            window.location.href = data.url
+                            console.log(data)
+                            invoiceResponse = {...data}
                         })
+                        .catch(err => {
+                            console.error(err)
+                            invoiceResponse = {
+                                error: 'An error occurred'
+                            }
+                        })
+                        .finally(() => {
+                            if(!onlyInvoice) {
+                                if(!invoiceResponse.success) {
+                                    this.openResMessage(invoiceResponse)
+                                }
+                            } else {
+                                this.openResMessage(invoiceResponse)
+                            }
+                        })
+                    return invoiceResponse.success ? true : false;
                 },
-                startWireCheckout() {
-                    this.saveInvoiceData()
-            
-                    const url = `/shop/fees/wire-transfer`
-                    let items = [];
-            
-                    items.push({
-                        'name': 'event_participation',
-                        'quantity': 1,
-                    })
-            
-                    const itemsJson = JSON.stringify(items)
-            
-                    const params = new URLSearchParams({
-                        'items': itemsJson
-                    })
-            
-                    window.location.href = `${url}?${params}`
+                async startStripeCheckout() {
+                    let ok = await this.saveInvoiceData()
+                    if(ok){
+                        const url = `{{ $stripeUrl }}`
+                        let items = [];
+                
+                        items.push({
+                            'name': 'event_participation',
+                            'quantity': 1,
+                        })
+                
+                        const itemsJson = JSON.stringify(items)
+                
+                        const params = new URLSearchParams({
+                            'items': itemsJson
+                        })
+                
+                        window.location.href = `${url}?${params}`
+                    }
+                },
+                async startPaypalCheckout() {
+                    let ok = await this.saveInvoiceData();
+                    console.log({ok})
+                    if(ok){
+                        const url = `{{ $paypalUrl }}`
+                        let items = [];
+                
+                        items.push({
+                            'name': 'event_participation',
+                            'quantity': 1,
+                        })
+                
+                        const itemsJson = JSON.stringify(items)
+                
+                        let fd = new FormData()
+                        fd.append('items', itemsJson)
+                
+                        fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: fd
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                window.location.href = data.url
+                            })
+                    }
+                },
+                async startWireCheckout() {
+                    let ok = await this.saveInvoiceData()
+                    if(ok){
+                        const url = `/shop/fees/wire-transfer`
+                        let items = [];
+                
+                        items.push({
+                            'name': 'event_participation',
+                            'quantity': 1,
+                        })
+                
+                        const itemsJson = JSON.stringify(items)
+                
+                        const params = new URLSearchParams({
+                            'items': itemsJson
+                        })
+                
+                        window.location.href = `${url}?${params}`
+                    }
+                },
+                openResMessage(res) {
+                    if (res.success) {
+                        this.successMessage = 'Invoice successfully updated'
+                        this.showResSuccessMessage = true;
+                        timer = setTimeout(() => {
+                            this.showResSuccessMessage = false;
+                        }, 3000);
+                    } else {
+                        this.errorMessage = res.error
+                        this.showResErrorMessage = true;
+                        timer = setTimeout(() => {
+                            this.showResErrorMessage = false;
+                        }, 3000);
+                    }
                 },
                 init() {
                     this.updateSdi()
-                },
+                }
             }">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 select-none">
                     <div class="grid grid-cols-4 gap-4">
@@ -121,7 +191,7 @@
                                     {{ $event->name }}</h1>
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                                 <div>
-                                    <p class="text-background-800 dark:text-background-200">1x
+                                    <p class="text-background-800 dark:text-background-200">
                                         {{ __('website.event_participation_checkout_text') }}</p>
                                     @if ($isWaitingList)
                                         <p class="mt-2 text-error-500">
@@ -131,100 +201,100 @@
                                 </div>
                             </div>
                             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                                <form method="POST" action="{{ route('users.invoices.update') }}">
-                                    @csrf
-                                    <div class="flex justify-between items-center">
-                                        <h3 class="text-background-800 dark:text-background-200 text-2xl">
-                                            {{ __('fees.invoice') }}
-                                        </h3>
-                                        <div>
-                                            <x-primary-button type="submit">
-                                                <x-lucide-save class="h-6 w-6 text-white" />
-                                            </x-primary-button>
-                                        </div>
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                        {{ __('fees.invoice') }}
+                                    </h3>
+                                    <div>
+                                        <x-primary-button @click="()=>saveInvoiceData(true)">
+                                            <x-lucide-save class="h-6 w-6 text-white" />
+                                        </x-primary-button>
                                     </div>
+                                </div>
 
-                                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                                    <div class="block mt-4">
-                                        <label for="want_invoice" class="inline-flex items-center">
-                                            <input id="want_invoice" type="checkbox" @change="updateSdi"
-                                                class="rounded dark:bg-background-900 border-background-300 dark:border-background-700 text-primary-600 shadow-sm focus:ring-primary-500 dark:focus:ring-primary-600 dark:focus:ring-offset-background-800"
-                                                name="want_invoice" x-model="want_invoice">
-                                            <span
-                                                class="ms-2 text-sm text-background-600 dark:text-background-400">{{ __('fees.want_invoice') }}</span>
-                                        </label>
+                                <div class="block mt-4">
+                                    <label for="want_invoice" class="inline-flex items-center">
+                                        <input id="want_invoice" type="checkbox"
+                                            class="rounded dark:bg-background-900 border-background-300 dark:border-background-700 text-primary-600 shadow-sm focus:ring-primary-500 dark:focus:ring-primary-600 dark:focus:ring-offset-background-800"
+                                            name="want_invoice" x-model="want_invoice"
+                                            @change="updateSdi">
+                                        <span
+                                            class="ms-2 text-sm text-background-600 dark:text-background-400">{{ __('fees.want_invoice') }}</span>
+                                    </label>
+                                </div>
+
+                                <div class="block mt-4">
+                                    <label for="is_business" class="inline-flex items-center">
+                                        <input id="is_business" type="checkbox"
+                                            class="rounded dark:bg-background-900 border-background-300 dark:border-background-700 text-primary-600 shadow-sm focus:ring-primary-500 dark:focus:ring-primary-600 dark:focus:ring-offset-background-800"
+                                            name="is_business" x-model="is_business">
+                                        <span
+                                            class="ms-2 text-sm text-background-600 dark:text-background-400">{{ __('fees.is_business') }}</span>
+                                    </label>
+                                </div>
+
+                                <div class="grid grid-cols-4 gap-4">
+                                    <div class="col-span-2 hidden">
+                                        <x-form.input-model name="invoice_id" label="{{ __('fees.invoice_id') }}" />
                                     </div>
-
-                                    <div class="block mt-4">
-                                        <label for="is_business" class="inline-flex items-center">
-                                            <input id="is_business" type="checkbox"
-                                                class="rounded dark:bg-background-900 border-background-300 dark:border-background-700 text-primary-600 shadow-sm focus:ring-primary-500 dark:focus:ring-primary-600 dark:focus:ring-offset-background-800"
-                                                name="is_business" x-model="is_business">
-                                            <span
-                                                class="ms-2 text-sm text-background-600 dark:text-background-400">{{ __('fees.is_business') }}</span>
-                                        </label>
+                                    <div class="col-span-2">
+                                        <x-form.input-model name="name" label="{{ __('fees.invoice_name') }}" placeholder="Name" />
                                     </div>
-
-                                    <div class="grid grid-cols-4 gap-4">
-                                        <div class="col-span-4 hidden">
-                                            <x-form.input-model name="invoice_id" label="{{ __('fees.invoice_id') }}" />
-                                        </div>
-                                        <div class="col-span-2">
-                                            <x-form.input-model name="name" label="{{ __('fees.invoice_name') }}" placeholder="Name" />
-                                        </div>
-                                        <div class="col-span-2">
-                                            <x-form.input-model name="surname" label="{{ __('fees.invoice_surname') }}" placeholder="Surname" />
-                                        </div>
-                                        <div class="col-span-3">
-                                            <x-form.input-model name="address" label="{{ __('fees.invoice_address') }}" placeholder="Address" />
-                                        </div>
-                                        <div class="col-span-1">
-                                            <x-form.input-model name="zip" label="{{ __('fees.invoice_zip') }}" placeholder="Zip" />
-                                        </div>
-                                        <div class="col-span-2">
-                                            <x-form.input-model name="city" label="{{ __('fees.invoice_city') }}" placeholder="City" />
-                                        </div>
-                                        <div class="col-span-2">
-                                            {{-- <x-form.input-model name="country" label="{{ __('fees.invoice_country') }}" placeholder="Country" @input="updateSdi" /> --}}
-                                            <x-input-label value="{{ __('fees.invoice_country') }}" />
-                                            <input name="country" type="text" placeholder="Country"
-                                                x-model="country" @input="updateSdi"
-                                                class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
-                                            <x-input-error :messages="$errors->get('country')" class="mt-2" />
-                                        </div>
-                                        <div class="col-span-4" x-show="is_business">
-                                            <x-form.input-model name="business_name"
-                                                label="{{ __('fees.business_name') }}" placeholder="{{ __('fees.insert_business_name') }}" />
-                                        </div>
-                                        <div class="col-span-4" x-show="is_business">
-                                            {{-- <x-form.input-model name="vat" label="{{ __('fees.invoice_vat') }}" placeholder="VAT" /> --}}
-                                            <x-input-label value="{{ __('fees.invoice_vat') }}" />
-                                            <input name="vat" type="text" placeholder="VAT"
-                                                x-model="vat" @input="updateSdi"
-                                                class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
-                                            <x-input-error :messages="$errors->get('vat')" class="mt-2" />
-                                        </div>
-                                        <div class="col-span-4" x-show="shouldShowSdi">
-                                            <x-form.input-model name="sdi" label="{{ __('fees.invoice_sdi') }}" placeholder="SDI" />
-                                        </div>
+                                    <div class="col-span-2">
+                                        <x-form.input-model name="surname" label="{{ __('fees.invoice_surname') }}" placeholder="Surname" />
                                     </div>
-                                </form>
-                                @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
-@if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
+                                    <div class="col-span-3">
+                                        <x-form.input-model name="address" label="{{ __('fees.invoice_address') }}" placeholder="Address" />
+                                    </div>
+                                    <div class="col-span-1">
+                                        <x-form.input-model name="zip" label="{{ __('fees.invoice_zip') }}" placeholder="Zip code" />
+                                    </div>
+                                    <div class="col-span-2">
+                                        <x-form.input-model name="city" label="{{ __('fees.invoice_city') }}" placeholder="City" />
+                                    </div>
+                                    <div class="col-span-2">
+                                        {{-- <x-form.input-model name="country" label="{{ __('fees.invoice_country') }}" placeholder="Country" /> --}}
+                                        <x-input-label value="{{ __('fees.invoice_country') }}" />
+                                        <input name="country" type="text"
+                                            value="country" placeholder="Country"
+                                            x-model="country" @input="updateSdi"
+                                            class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
+                                        <x-input-error :messages="$errors->get('country')" class="mt-2" />
+                                    </div>
+                                    <div class="col-span-4" x-show="is_business">
+                                        <x-form.input-model name="business_name"
+                                            label="{{ __('fees.business_name') }}" aria-placeholder="{{ __('fees.insert_business_name') }}" />
+                                    </div>
+                                    <div class="col-span-4" x-show="is_business">
+                                        {{-- <x-form.input-model name="vat" label="{{ __('fees.invoice_vat') }}" placeholder="VAT" /> --}}
+                                        <x-input-label value="{{ __('fees.invoice_vat') }}" />
+                                        <input name="vat" type="text"
+                                            value="vat" placeholder="VAT"
+                                            x-model="vat" @input="updateSdi"
+                                            class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
+                                        <x-input-error :messages="$errors->get('vat')" class="mt-2" />
+                                    </div>
+                                    <div class="col-span-4" x-show="shouldShowSdi">
+                                        <x-form.input-model name="sdi" label="{{ __('fees.invoice_sdi') }}" placeholder="SDI" />
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div x-show="showResSuccessMessage">
+                                <div x-data="{ show: true }"
+                                    class="fixed bg-success-500 text-white py-2 px-4 rounded-xl bottom-8 left-32 text-sm"
+                                >
+                                    <p x-text="successMessage"></p>
+                                </div>
+                            </div>
+                            <div x-show="showResErrorMessage">
+                                <div x-data="{ show: true }"
+                                    class="fixed bg-error-500 text-white py-2 px-4 rounded-xl bottom-8 left-32 text-sm"
+                                >
+                                    <p x-text="errorMessage"></p>
+                                </div>
                             </div>
                         </div>
                         <div>
@@ -242,13 +312,6 @@
                                         <span>PayPal</span>
                                     </div>
                                 </div>
-                                <div x-show="shouldShowPayment" class="mt-4">
-                                    <div class="rounded-full bg-gray-300 hover:bg-gray-500 text-black font-bold p-1 text-center cursor-pointer"
-                                        @click="startWireCheckout">
-
-                                        <span>{{ __('website.wire_transfer') }}</span>
-                                    </div>
-                                </div>
                                 {{-- Al momento non è ancora implementata la preautorizzazione con stripe --}}
                                 @if (!$isWaitingList)
                                     <div x-show="shouldShowPayment" class="mt-4">
@@ -259,6 +322,14 @@
                                         </div>
                                     </div>
                                 @endif
+                                {{-- Wiretransfer non si utilizza per la waiting list --}}
+                                {{-- <div x-show="shouldShowPayment" class="mt-4">
+                                    <div class="rounded-full bg-gray-300 hover:bg-gray-500 text-black font-bold p-1 text-center cursor-pointer"
+                                        @click="startWireCheckout">
+
+                                        <span>{{ __('website.wire_transfer') }}</span>
+                                    </div>
+                                </div> --}}
                             </div>
 
                         </div>

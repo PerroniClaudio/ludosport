@@ -1120,42 +1120,34 @@ class UserController extends Controller {
 
     public function updateInvoice(Request $request) {
 
-        if($request->want_invoice){
-            if($request->is_business && (!$request->vat || !$request->business_name)) {
-                return back()->with('error', 'Business invoice requires VAT and Business Name!');
+        if($request->want_invoice == 'true'){
+            if($request->is_business == 'true' && (!$request->vat || !$request->business_name)) {
+                return response()->json([
+                    'error' => 'Business invoice requires VAT and Business Name!',
+                ]);
             }
-            Log::info("Passed first check");
             if (((preg_match('/^IT/', $request->vat) || strtolower($request->country) === 'italy' || strtolower($request->country) === 'italia'))
                 && !$request->sdi) {
-                return back()->with('error', 'For Italy is required SDI code!');
+                    return response()->json([
+                        'error' => 'For Italy SDI code is required!',
+                    ]);
             }
-            Log::info("Passed second check");
         }
-        Log::info("before verification");
-        $request->validate([
-            'invoice_id' => 'required|integer',
-            'name' => 'required|string|max:255',
-            'surname' => 'required|string|max:255',
-            'vat' => 'nullable|string|max:50',
-            'sdi' => 'nullable|string|max:50',
-            'address' => 'required|string|max:255',
-            'zip' => 'required|string|max:20',
-            'city' => 'required|string|max:100',
-            'country' => 'required|string|max:100',
-            'business_name' => 'nullable|string|max:255',
-        ]);
 
-        Log::info("Saving invoice");
         $invoice = Invoice::find($request->invoice_id);
 
         if (!$invoice) {
-            return back()->with('error', 'Invoice not found');
+            return response()->json([
+                'error' => 'Invoice not found',
+            ]);
         }
         if (
             User::find(Auth()->user()->id)->getRole() != 'admin'
             && (Auth()->user()->id != Invoice::find($request->invoice_id)->user_id)
         ) {
-            return back()->with('error', 'You do not have permission for this data!');
+            return response()->json([
+                'error' => 'You do not have permission for this data!',
+            ]);
         }
 
         $address = json_encode([
@@ -1172,13 +1164,15 @@ class UserController extends Controller {
         $invoice->vat = $request->vat ? $request->vat : 'VAT';
         $invoice->sdi = $request->sdi;
         $invoice->address = $address;
-        $invoice->is_business = $request->is_business === 'on' ? true : false;
-        $invoice->want_invoice = $request->want_invoice === 'on' ? true : false;
+        $invoice->is_business = $request->is_business === 'true' ? true : false;
+        $invoice->want_invoice = $request->want_invoice === 'true' ? true : false;
         $invoice->business_name = $request->business_name;
 
         $invoice->save();
 
-        return back()->with('success', 'Invoice updated successfully!');
+        return response()->json([
+            'success' => true,
+        ]);
     }
 
     public function setMainInstitution(Request $request) {
