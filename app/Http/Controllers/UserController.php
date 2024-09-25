@@ -1062,7 +1062,7 @@ class UserController extends Controller {
 
     public function invoicedata(User $user) {
         $authUser = User::find(auth()->user()->id);
-        if ($authUser->id != $user->id) {
+        if ($authUser->getRole() == 'athlete' && ($authUser->id != $user->id)) {
             return response()->json([
                 'error' => 'You do not have permission for this data!',
             ]);

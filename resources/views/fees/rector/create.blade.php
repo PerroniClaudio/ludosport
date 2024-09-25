@@ -120,7 +120,7 @@
                 })
         },
         saveInvoiceData() {
-            const url = `/rector/invoices/store`
+            const url = `/invoices/store`
     
             const body = new FormData()
     
