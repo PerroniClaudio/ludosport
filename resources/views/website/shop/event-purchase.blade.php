@@ -15,60 +15,31 @@
     <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
         <section class="col-span-12 py-12">
             <div x-data="{
+                invoice_id: {{ $invoice->id }},
                 birthday: '',
                 totalPrice: {{ $event->price }},
-                name: '{{ $invoice->name ? $invoice->name : 'Name' }}',
-                surname: '{{ $invoice->surname ? $invoice->surname : 'Surname' }}',
-                address: '{{ json_decode($invoice->address)->address ?? false ? json_decode($invoice->address)->address : 'Address' }}',
-                zip: '{{ json_decode($invoice->address)->zip ?? false ? json_decode($invoice->address)->zip : 'Zip' }}',
-                city: '{{ json_decode($invoice->address)->city ?? false ? json_decode($invoice->address)->city : 'City' }}',
+                name: '{{ $invoice->name ? $invoice->name : '' }}',
+                surname: '{{ $invoice->surname ? $invoice->surname : '' }}',
+                address: '{{ json_decode($invoice->address)->address ?? false ? json_decode($invoice->address)->address : '' }}',
+                zip: '{{ json_decode($invoice->address)->zip ?? false ? json_decode($invoice->address)->zip : '' }}',
+                city: '{{ json_decode($invoice->address)->city ?? false ? json_decode($invoice->address)->city : '' }}',
                 country: '{{ json_decode($invoice->address)->country ?? false ? json_decode($invoice->address)->country : '' }}',
-                vat: '{{ $invoice->vat ? $invoice->vat : 'VAT' }}',
-                sdi: '{{ $invoice->sdi ? $invoice->sdi : 'SDI' }}',
-                business_name: '{{ __('fees.insert_business_name') }}',
+                vat: '{{ $invoice->vat ? ($invoice->vat == 'VAT' ? '' : $invoice->vat) : '' }}',
+                sdi: '{{ $invoice->sdi ? $invoice->sdi : '' }}',
+                business_name: '',
                 is_business: '{{ $invoice->is_business ? true : false }}' == 'true' ? true : false,
                 want_invoice: '{{ $invoice->want_invoice ? true : false }}' == 'true' ? true : false,
                 shouldShowPayment: false,
                 shouldShowSdi: false,
                 updateSdi: function() {
-                    if ((/^IT/.test(this.vat)) || (this.country.toLowerCase() === 'italy') || (this.country.toLowerCase() === 'italia')) {
+                    if (this.want_invoice && ((/^IT/.test(this.vat)) || (this.country.toLowerCase() === 'italy') || (this.country.toLowerCase() === 'italia'))) {
                         this.shouldShowSdi = true
                     } else {
                         this.shouldShowSdi = false
                     }
                 },
                 shouldShowPayment: true,
-                event_id: '{{ $event->id }}',
-                saveInvoiceData() {
-                    const url = `/invoices/update`
-            
-                    const body = new FormData()
-            
-                    body.append('invoice_id', {{ $invoice->id }})
-                    body.append('name', this.name)
-                    body.append('surname', this.surname)
-                    body.append('address', this.address)
-                    body.append('zip', this.zip)
-                    body.append('city', this.city)
-                    body.append('country', this.country)
-                    body.append('vat', this.vat)
-                    body.append('sdi', this.sdi)
-                    body.append('is_business', this.is_business)
-                    body.append('business_name', this.business_name)
-                    body.append('want_invoice', this.want_invoice)
-            
-                    fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: body
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            console.log(data)
-                        })
-                },
+                event_id: '{{ $event->id }}',                
                 startStripeCheckout() {
                     this.saveInvoiceData()
             
@@ -137,6 +108,9 @@
             
                     window.location.href = `${url}?${params}`
                 },
+                init() {
+                    this.updateSdi()
+                },
             }">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 select-none">
                     <div class="grid grid-cols-4 gap-4">
@@ -157,69 +131,84 @@
                                 </div>
                             </div>
                             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                                <div class="flex justify-between items-center">
-                                    <h3 class="text-background-800 dark:text-background-200 text-2xl">
-                                        {{ __('fees.invoice') }}
-                                    </h3>
-                                    <div>
-                                        <x-primary-button @click="saveInvoiceData">
-                                            <x-lucide-save class="h-6 w-6 text-white" />
-                                        </x-primary-button>
+                                <form method="POST" action="{{ route('users.invoices.update') }}">
+                                    @csrf
+                                    <div class="flex justify-between items-center">
+                                        <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                            {{ __('fees.invoice') }}
+                                        </h3>
+                                        <div>
+                                            <x-primary-button type="submit">
+                                                <x-lucide-save class="h-6 w-6 text-white" />
+                                            </x-primary-button>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                                <div class="block mt-4">
-                                    <label for="want_invoice" class="inline-flex items-center">
-                                        <input id="want_invoice" type="checkbox"
-                                            class="rounded dark:bg-background-900 border-background-300 dark:border-background-700 text-primary-600 shadow-sm focus:ring-primary-500 dark:focus:ring-primary-600 dark:focus:ring-offset-background-800"
-                                            name="want_invoice" x-model="want_invoice">
-                                        <span
-                                            class="ms-2 text-sm text-background-600 dark:text-background-400">{{ __('fees.want_invoice') }}</span>
-                                    </label>
-                                </div>
+                                    <div class="block mt-4">
+                                        <label for="want_invoice" class="inline-flex items-center">
+                                            <input id="want_invoice" type="checkbox" @change="updateSdi"
+                                                class="rounded dark:bg-background-900 border-background-300 dark:border-background-700 text-primary-600 shadow-sm focus:ring-primary-500 dark:focus:ring-primary-600 dark:focus:ring-offset-background-800"
+                                                name="want_invoice" x-model="want_invoice">
+                                            <span
+                                                class="ms-2 text-sm text-background-600 dark:text-background-400">{{ __('fees.want_invoice') }}</span>
+                                        </label>
+                                    </div>
 
-                                <div class="block mt-4">
-                                    <label for="is_business" class="inline-flex items-center">
-                                        <input id="is_business" type="checkbox"
-                                            class="rounded dark:bg-background-900 border-background-300 dark:border-background-700 text-primary-600 shadow-sm focus:ring-primary-500 dark:focus:ring-primary-600 dark:focus:ring-offset-background-800"
-                                            name="is_business" x-model="is_business">
-                                        <span
-                                            class="ms-2 text-sm text-background-600 dark:text-background-400">{{ __('fees.is_business') }}</span>
-                                    </label>
-                                </div>
+                                    <div class="block mt-4">
+                                        <label for="is_business" class="inline-flex items-center">
+                                            <input id="is_business" type="checkbox"
+                                                class="rounded dark:bg-background-900 border-background-300 dark:border-background-700 text-primary-600 shadow-sm focus:ring-primary-500 dark:focus:ring-primary-600 dark:focus:ring-offset-background-800"
+                                                name="is_business" x-model="is_business">
+                                            <span
+                                                class="ms-2 text-sm text-background-600 dark:text-background-400">{{ __('fees.is_business') }}</span>
+                                        </label>
+                                    </div>
 
-                                <div class="grid grid-cols-4 gap-4">
-                                    <div class="col-span-2">
-                                        <x-form.input-model name="name" label="{{ __('fees.invoice_name') }}" />
+                                    <div class="grid grid-cols-4 gap-4">
+                                        <div class="col-span-4 hidden">
+                                            <x-form.input-model name="invoice_id" label="{{ __('fees.invoice_id') }}" />
+                                        </div>
+                                        <div class="col-span-2">
+                                            <x-form.input-model name="name" label="{{ __('fees.invoice_name') }}" placeholder="Name" />
+                                        </div>
+                                        <div class="col-span-2">
+                                            <x-form.input-model name="surname" label="{{ __('fees.invoice_surname') }}" placeholder="Surname" />
+                                        </div>
+                                        <div class="col-span-3">
+                                            <x-form.input-model name="address" label="{{ __('fees.invoice_address') }}" placeholder="Address" />
+                                        </div>
+                                        <div class="col-span-1">
+                                            <x-form.input-model name="zip" label="{{ __('fees.invoice_zip') }}" placeholder="Zip" />
+                                        </div>
+                                        <div class="col-span-2">
+                                            <x-form.input-model name="city" label="{{ __('fees.invoice_city') }}" placeholder="City" />
+                                        </div>
+                                        <div class="col-span-2">
+                                            {{-- <x-form.input-model name="country" label="{{ __('fees.invoice_country') }}" placeholder="Country" @input="updateSdi" /> --}}
+                                            <x-input-label value="{{ __('fees.invoice_country') }}" />
+                                            <input name="country" type="text" placeholder="Country"
+                                                x-model="country" @input="updateSdi"
+                                                class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
+                                            <x-input-error :messages="$errors->get('country')" class="mt-2" />
+                                        </div>
+                                        <div class="col-span-4" x-show="is_business">
+                                            <x-form.input-model name="business_name"
+                                                label="{{ __('fees.business_name') }}" placeholder="{{ __('fees.insert_business_name') }}" />
+                                        </div>
+                                        <div class="col-span-4" x-show="is_business">
+                                            {{-- <x-form.input-model name="vat" label="{{ __('fees.invoice_vat') }}" placeholder="VAT" /> --}}
+                                            <input name="vat" type="text" placeholder="VAT"
+                                                x-model="vat" @input="updateSdi"
+                                                class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
+                                            <x-input-error :messages="$errors->get('vat')" class="mt-2" />
+                                        </div>
+                                        <div class="col-span-4" x-show="shouldShowSdi">
+                                            <x-form.input-model name="sdi" label="{{ __('fees.invoice_sdi') }}" placeholder="SDI" />
+                                        </div>
                                     </div>
-                                    <div class="col-span-2">
-                                        <x-form.input-model name="surname" label="{{ __('fees.invoice_surname') }}" />
-                                    </div>
-                                    <div class="col-span-3">
-                                        <x-form.input-model name="address" label="{{ __('fees.invoice_address') }}" />
-                                    </div>
-                                    <div class="col-span-1">
-                                        <x-form.input-model name="zip" label="{{ __('fees.invoice_zip') }}" />
-                                    </div>
-                                    <div class="col-span-2">
-                                        <x-form.input-model name="city" label="{{ __('fees.invoice_city') }}" />
-                                    </div>
-                                    <div class="col-span-2">
-                                        <x-form.input-model name="country" label="{{ __('fees.invoice_country') }}" />
-                                    </div>
-                                    <div class="col-span-4" x-show="is_business">
-                                        <x-form.input-model name="business_name"
-                                            label="{{ __('fees.business_name') }}" />
-                                    </div>
-                                    <div class="col-span-4" x-show="is_business">
-                                        <x-form.input-model name="vat" label="{{ __('fees.invoice_vat') }}" />
-                                    </div>
-                                    <div class="col-span-4" x-show="shouldShowSdi">
-                                        <x-form.input-model name="sdi" label="{{ __('fees.invoice_sdi') }}" />
-                                    </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
                         <div>

@@ -1120,20 +1120,40 @@ class UserController extends Controller {
 
     public function updateInvoice(Request $request) {
 
+        if($request->is_business && (!$request->vat || !$request->business_name)) {
+            return back()->with('error', 'Business invoice requires VAT and Business Name!');
+        }
+        if ($request->want_invoice 
+            && ((preg_match('/^IT/', $request->vat) || strtolower($request->country) === 'italy' || strtolower($request->country) === 'italia'))
+            && !$request->sdi) {
+            return back()->with('error', 'For Italy is required SDI code!');
+        }
+
+        $request->validate([
+            'invoice_id' => 'required|integer',
+            'name' => 'required|string|max:255',
+            'surname' => 'required|string|max:255',
+            'vat' => 'nullable|string|max:50|required_if:is_business,true',
+            'sdi' => 'nullable|string|max:50',
+            'address' => 'required|string|max:255',
+            'zip' => 'required|string|max:20',
+            'city' => 'required|string|max:100',
+            'country' => 'required|string|max:100',
+            'is_business' => 'boolean',
+            'want_invoice' => 'boolean',
+            'business_name' => 'nullable|string|max:255|required_if:is_business,true',
+        ]);
+
         $invoice = Invoice::find($request->invoice_id);
 
         if (!$invoice) {
-            return response()->json([
-                'error' => 'Invoice not found',
-            ]);
+            return back()->with('error', 'Invoice not found');
         }
         if (
             User::find(Auth()->user()->id)->getRole() != 'admin'
             && (Auth()->user()->id != Invoice::find($request->invoice_id)->user_id)
         ) {
-            return response()->json([
-                'error' => 'You do not have permission for this data!',
-            ]);
+            return back()->with('error', 'You do not have permission for this data!');
         }
 
         $address = json_encode([
@@ -1147,7 +1167,7 @@ class UserController extends Controller {
 
         $invoice->name = $request->name;
         $invoice->surname = $request->surname;
-        $invoice->vat = $request->vat;
+        $invoice->vat = 'VAT';
         $invoice->sdi = $request->sdi;
         $invoice->address = $address;
         $invoice->is_business = $request->is_business === 'true' ? true : false;
@@ -1156,9 +1176,7 @@ class UserController extends Controller {
 
         $invoice->save();
 
-        return response()->json([
-            'success' => true,
-        ]);
+        return back()->with('success', 'Invoice updated successfully!');
     }
 
     public function setMainInstitution(Request $request) {
