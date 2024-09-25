@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
@@ -322,6 +323,11 @@ Route::group([], function () {
     })->name('healthcheck');
 });
 
-Route::get('/test', function () {
-    return 'test';
+Route::get('/email', function () {
+
+    $order = App\Models\Order::find(227);
+
+    Mail::to('c.perroni@ifortech.com')->send(new App\Mail\FeePaid($order));
+
+    return response(['message' => 'Email sent']);
 })->name('test');
