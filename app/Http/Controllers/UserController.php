@@ -1120,30 +1120,32 @@ class UserController extends Controller {
 
     public function updateInvoice(Request $request) {
 
-        if($request->is_business && (!$request->vat || !$request->business_name)) {
-            return back()->with('error', 'Business invoice requires VAT and Business Name!');
+        if($request->want_invoice){
+            if($request->is_business && (!$request->vat || !$request->business_name)) {
+                return back()->with('error', 'Business invoice requires VAT and Business Name!');
+            }
+            Log::info("Passed first check");
+            if (((preg_match('/^IT/', $request->vat) || strtolower($request->country) === 'italy' || strtolower($request->country) === 'italia'))
+                && !$request->sdi) {
+                return back()->with('error', 'For Italy is required SDI code!');
+            }
+            Log::info("Passed second check");
         }
-        if ($request->want_invoice 
-            && ((preg_match('/^IT/', $request->vat) || strtolower($request->country) === 'italy' || strtolower($request->country) === 'italia'))
-            && !$request->sdi) {
-            return back()->with('error', 'For Italy is required SDI code!');
-        }
-
+        Log::info("before verification");
         $request->validate([
             'invoice_id' => 'required|integer',
             'name' => 'required|string|max:255',
             'surname' => 'required|string|max:255',
-            'vat' => 'nullable|string|max:50|required_if:is_business,true',
+            'vat' => 'nullable|string|max:50',
             'sdi' => 'nullable|string|max:50',
             'address' => 'required|string|max:255',
             'zip' => 'required|string|max:20',
             'city' => 'required|string|max:100',
             'country' => 'required|string|max:100',
-            'is_business' => 'boolean',
-            'want_invoice' => 'boolean',
-            'business_name' => 'nullable|string|max:255|required_if:is_business,true',
+            'business_name' => 'nullable|string|max:255',
         ]);
 
+        Log::info("Saving invoice");
         $invoice = Invoice::find($request->invoice_id);
 
         if (!$invoice) {
@@ -1167,11 +1169,11 @@ class UserController extends Controller {
 
         $invoice->name = $request->name;
         $invoice->surname = $request->surname;
-        $invoice->vat = 'VAT';
+        $invoice->vat = $request->vat ? $request->vat : 'VAT';
         $invoice->sdi = $request->sdi;
         $invoice->address = $address;
-        $invoice->is_business = $request->is_business === 'true' ? true : false;
-        $invoice->want_invoice = $request->want_invoice === 'true' ? true : false;
+        $invoice->is_business = $request->is_business === 'on' ? true : false;
+        $invoice->want_invoice = $request->want_invoice === 'on' ? true : false;
         $invoice->business_name = $request->business_name;
 
         $invoice->save();

@@ -26,7 +26,7 @@
                 country: '{{ json_decode($invoice->address)->country ?? false ? json_decode($invoice->address)->country : '' }}',
                 vat: '{{ $invoice->vat ? ($invoice->vat == 'VAT' ? '' : $invoice->vat) : '' }}',
                 sdi: '{{ $invoice->sdi ? $invoice->sdi : '' }}',
-                business_name: '',
+                business_name: '{{ $invoice->business_name ? $invoice->business_name : '' }}',
                 is_business: '{{ $invoice->is_business ? true : false }}' == 'true' ? true : false,
                 want_invoice: '{{ $invoice->want_invoice ? true : false }}' == 'true' ? true : false,
                 shouldShowPayment: false,
@@ -199,6 +199,7 @@
                                         </div>
                                         <div class="col-span-4" x-show="is_business">
                                             {{-- <x-form.input-model name="vat" label="{{ __('fees.invoice_vat') }}" placeholder="VAT" /> --}}
+                                            <x-input-label value="{{ __('fees.invoice_vat') }}" />
                                             <input name="vat" type="text" placeholder="VAT"
                                                 x-model="vat" @input="updateSdi"
                                                 class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
@@ -209,6 +210,21 @@
                                         </div>
                                     </div>
                                 </form>
+                                @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+@if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
                             </div>
                         </div>
                         <div>
