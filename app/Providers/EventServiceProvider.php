@@ -3,11 +3,13 @@
 namespace App\Providers;
 
 use App\Events\BulkFeePaid;
+use App\Events\EventPaid;
 use App\Events\FeePaid;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 use App\Events\ParticipantsUpdated;
 use App\Listeners\SendBulkFeePaidEmail;
+use App\Listeners\SendEventPaidEmail;
 use App\Listeners\UpdateEventParticipants;
 use App\Listeners\SendFeePaidEmail;
 
@@ -26,6 +28,9 @@ class EventServiceProvider extends ServiceProvider {
         ],
         BulkFeePaid::class => [
             SendBulkFeePaidEmail::class,
+        ],
+        EventPaid::class => [
+            SendEventPaidEmail::class,
         ],
     ];
 

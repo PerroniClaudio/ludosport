@@ -31,4 +31,18 @@ return [
     'bulk_fee_email_fee_validity_title' => 'Fee validity',
     'bulk_fee_email_fee_validity_text' => 'Your fees are valid until :date. We will send you a reminder before they expire.',
     'bulk_fee_email_fee_purchased_items' => 'Purchased items',
+
+    /** Event Participation */
+
+    'event_participation_email_title' => 'Hello :name,',
+    'event_participation_email_introduction' => 'Thanks for signing up to the event :event. Your event participation has been confirmed successfully!',
+    'event_participation_email_order_details' => 'Order details',
+    'event_participation_email_order_number' => 'Order number',
+    'event_participation_email_order_date' => 'Order date',
+    'event_participation_email_total' => 'Total',
+    'event_participation_email_payment_method' => 'Payment method',
+    'event_participation_email_event_details' => 'Event details',
+    'event_participation_email_event_name' => 'Event name',
+    'event_participation_email_event_date' => 'Event date',
+    'event_participation_email_event_location' => 'Event location',
 ];
