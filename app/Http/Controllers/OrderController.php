@@ -146,6 +146,8 @@ class OrderController extends Controller {
                         'unique_id' => Str::orderedUuid(),
                     ]);
                 }
+
+                event(new \App\Events\BulkFeePaid($order));
             } else {
 
                 // O è una Fee singola o è un biglietto per un evento
@@ -169,6 +171,8 @@ class OrderController extends Controller {
                     $order->user->update([
                         'has_paid_fee' => 1,
                     ]);
+
+                    event(new \App\Events\FeePaid($order));
                 } else if ($item->product_type == 'event_participation') {
                     $event = Event::find($item->product_code);
 

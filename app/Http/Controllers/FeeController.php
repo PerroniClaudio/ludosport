@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\FeePaid;
 use App\Models\Academy;
 use App\Models\Fee;
 use App\Models\Order;
@@ -357,6 +358,8 @@ class FeeController extends Controller {
                     ]);
                 }
             }
+
+            event(new \App\Events\BulkFeePaid($order));
         }
 
 
@@ -408,6 +411,8 @@ class FeeController extends Controller {
             $user->update([
                 'has_paid_fee' => 1,
             ]);
+
+            event(new FeePaid($order));
         }
 
         return view('website.shop.fees-success', [
@@ -471,7 +476,6 @@ class FeeController extends Controller {
         $price = Cashier::stripe()->prices->retrieve($priceId);
         return $price->unit_amount;
     }
-
 
     //? Checkout with Paypal.
 
@@ -697,6 +701,8 @@ class FeeController extends Controller {
             $user->update([
                 'has_paid_fee' => 1,
             ]);
+
+            event(new FeePaid($order));
         }
 
         return view('website.shop.fees-success', [
@@ -766,6 +772,8 @@ class FeeController extends Controller {
                     ]);
                 }
             }
+
+            event(new \App\Events\BulkFeePaid($order));
         }
 
         return view('fees.rector.success', [

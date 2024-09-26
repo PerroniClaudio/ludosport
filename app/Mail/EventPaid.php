@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Event;
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,13 +11,13 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class FeePaid extends Mailable {
+class EventPaid extends Mailable {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(public Order $order) {
+    public function __construct(public Order $order, public Event $event) {
         //
     }
 
@@ -25,7 +26,7 @@ class FeePaid extends Mailable {
      */
     public function envelope(): Envelope {
         return new Envelope(
-            subject: 'Welcome on board - Your fee has been paid',
+            subject: 'Event Paid',
         );
     }
 
@@ -34,7 +35,7 @@ class FeePaid extends Mailable {
      */
     public function content(): Content {
         return new Content(
-            markdown: 'emails.fee-paid',
+            markdown: 'emails.event-paid',
         );
     }
 

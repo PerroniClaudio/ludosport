@@ -11,7 +11,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class FeePaid {
+class BulkFeePaid {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
@@ -20,7 +20,6 @@ class FeePaid {
     public function __construct(public Order $order) {
         //
     }
-
 
     /**
      * Get the channels the event should broadcast on.

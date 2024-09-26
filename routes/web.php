@@ -325,9 +325,9 @@ Route::group([], function () {
 
 Route::get('/email', function () {
 
-    $order = App\Models\Order::find(227);
+    $order = App\Models\Order::find(8);
 
-    Mail::to('c.perroni@ifortech.com')->send(new App\Mail\FeePaid($order));
+    Mail::to('c.perroni@ifortech.com')->send(new App\Mail\FeesBulkPaidMail($order));
 
     return response(['message' => 'Email sent']);
 })->name('test');
