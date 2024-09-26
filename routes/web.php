@@ -327,7 +327,7 @@ Route::get('/email', function () {
 
     $order = App\Models\Order::find(227);
 
-    Mail::to('c.perroni@ifortech.com')->send(new App\Mail\FeePaid($order));
+    Mail::to('c.perroni@ifortech.com')->send(new App\Mail\FeePaidMail($order));
 
     return response(['message' => 'Email sent']);
 })->name('test');
