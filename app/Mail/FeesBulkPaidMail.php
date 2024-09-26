@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class FeePaidMail extends Mailable {
+class FeesBulkPaidMail extends Mailable {
     use Queueable, SerializesModels;
 
     /**
@@ -25,7 +25,7 @@ class FeePaidMail extends Mailable {
      */
     public function envelope(): Envelope {
         return new Envelope(
-            subject: 'Welcome on board - Your fee has been paid - Order ' . $this->order->order_number,
+            subject: 'Thank you for your purchase - Your fees have been paid - Order ' . $this->order->order_number,
         );
     }
 
@@ -34,7 +34,7 @@ class FeePaidMail extends Mailable {
      */
     public function content(): Content {
         return new Content(
-            markdown: 'emails.fee-paid',
+            markdown: 'emails.fee-paid-bulk',
         );
     }
 

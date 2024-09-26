@@ -358,6 +358,8 @@ class FeeController extends Controller {
                     ]);
                 }
             }
+
+            event(new \App\Events\BulkFeePaid($order));
         }
 
 
@@ -770,6 +772,8 @@ class FeeController extends Controller {
                     ]);
                 }
             }
+
+            event(new \App\Events\BulkFeePaid($order));
         }
 
         return view('fees.rector.success', [
