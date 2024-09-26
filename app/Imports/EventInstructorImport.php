@@ -12,8 +12,15 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 class EventInstructorImport implements ToCollection {
 
     private $event = null;
+    private $importingUser = null;
+    private $log = [];
+    private $is_partial = false;
 
-
+    public function __construct($user)
+    {
+        $this->importingUser = $user;
+    }
+    
     /**
      * @param Collection $collection
      */
@@ -34,8 +41,6 @@ class EventInstructorImport implements ToCollection {
         // ID evento - email utente - ID forma d'arma - risultato - note
         // Il risultato può essere 'passed', 'review', 'failed'
         // Lo stage non fa parte del documento e si lascia quello di default
-
-        $userPosition = 1;
 
         $firstRow = true;
         foreach ($collection as $row) {
@@ -63,6 +68,20 @@ class EventInstructorImport implements ToCollection {
             $participation = EventInstructorResult::where('event_id', $this->event->id)->where('user_id', $user->id)->first();
             
             if (!$participation) {
+                $this->is_partial = true;
+                $this->log[] = "Error: User not registered for this event. User: " . $user->email . " - Event ID: " . $row[0];
+                continue;
+            }
+
+            if($participation->stage == 'confirmed') {
+                $this->is_partial = true;
+                $this->log[] = "Error: Result already confirmed. User: " . $user->email . " - Event ID: " . $row[0];
+                continue;
+            }
+
+            if($participation->stage == 'confirmed') {
+                $this->is_partial = true;
+                $this->log[] = "Error: Result already confirmed. User: " . $user->email . " - Event ID: " . $row[0];
                 continue;
             }
             
@@ -73,8 +92,10 @@ class EventInstructorImport implements ToCollection {
 
             $eventWeaponForm = $this->event->weaponForm;
 
+            $participationWeaponForm = $weaponForm ?? ($eventWeaponForm ?? null);
+
             if (in_array($participation->stage, ['registered', 'pending'])) {
-                $participation->weapon_form_id = $weaponForm->id ?? ($eventWeaponForm->id ?? null);
+                $participation->weapon_form_id = $participationWeaponForm->id ?? null;
                 $participation->result = $result;
                 $participation->notes = $notes;
 
@@ -85,17 +106,22 @@ class EventInstructorImport implements ToCollection {
                     $participation->stage = 'pending';
 
                     // Se il risultato è 'passed' o 'review' si dà comunque la forma da atleta. Per quella da istruttore decidono gli admin.
-                    if (in_array($result, ['passed', 'review']) && !$weaponForm->users()->where('user_id', $user->id)->exists()) {
+                    if (in_array($result, ['passed', 'review']) && ($participationWeaponForm && !$participationWeaponForm->users()->where('user_id', $user->id)->exists())) {
                         // Il ruolo da atleta non va aggiunto se non c'è già
-                        $weaponForm->users()->attach($user->id);
+                        $participationWeaponForm->users()->attach($user->id);
                     }
                 }
 
                 $participation->save();
             }
             
-
-            $userPosition++;
         }
+    }
+
+    public function getLogArray() {
+        return $this->log;
+    }
+    public function getIsPartial() {
+        return $this->is_partial;
     }
 }

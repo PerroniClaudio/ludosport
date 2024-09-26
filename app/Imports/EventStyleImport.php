@@ -11,7 +11,14 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 class EventStyleImport implements ToCollection {
 
     private $event = null;
+    private $importingUser = null;
+    private $log = [];
+    private $is_partial = false;
 
+    public function __construct($user)
+    {
+        $this->importingUser = $user;
+    }
 
     /**
      * @param Collection $collection
@@ -20,7 +27,51 @@ class EventStyleImport implements ToCollection {
         //
 
         $usersCount = count($collection);
-        $userPosition = 1;
+
+        // Check if the number of participants in the file matches the number of participants in the event
+        if(($usersCount - 1) != EventResult::where('event_id', $collection[1][0])->count()) {
+            $this->log[] = "['Number of participants in the file does not match the number of participants in the event. event ID: " . $collection[1][0] . "']";
+            throw new \Exception('Number of participants in the file does not match the number of participants in the event.');
+            return;
+        }
+        
+        // Check if all rows belong to the same event and to real participants
+        $this->event = Event::find($collection[1][0]);
+        $eventParticipantsIds = EventResult::where('event_id', $collection[1][0])->pluck('user_id');
+        $eventParticipantEmails = User::whereIn('id', $eventParticipantsIds)->pluck('email')->toArray();
+        $eventId = $collection[1][0];
+        $invalidEventIds = $collection->filter(function($row, $index) use ($eventId, $eventParticipantEmails) {
+            if ($index == 0) {
+                return false;
+            }
+            return ($row[0] != $eventId || (!in_array($row[1], $eventParticipantEmails)));
+        });
+        if ($invalidEventIds->isNotEmpty()) {
+            $this->log[] = "['Error: Event ID mismatch. All rows must belong to the same event (event id).']";
+            throw new \Exception('Error: Event ID mismatch. All rows must belong to the same event (event id).');
+            return;
+        }
+
+        // Check if all rows have a position value
+        $invalidPositions = $collection->filter(function($row, $index) {
+            if ($index == 0) {
+                return false;
+            }
+            return empty($row[2]);
+        });
+        if ($invalidPositions->isNotEmpty()) {
+            $this->log[] = "['Error: One or more rows have missing position values.']";
+            throw new \Exception('Error: One or more rows have missing position values.');
+            return;
+        }
+
+        // Given that the data are correct, we should clear the previous style points and calculate the new ones
+        EventResult::where('event_id', $this->event->id)->update([
+            'style_points' => 0,
+            'bonus_style_points' => 0,
+            'total_style_points' => 0,
+        ]);
+
 
         $firstRow = true;
         foreach ($collection as $row) {
@@ -28,6 +79,8 @@ class EventStyleImport implements ToCollection {
                 $firstRow = false;
                 continue;
             }
+
+            $userPosition = $row[2];
 
             if ($this->event == null) {
                 $this->event = Event::find($row[0]);
@@ -74,5 +127,12 @@ class EventStyleImport implements ToCollection {
 
             $userPosition++;
         }
+    }
+
+    public function getLogArray() {
+        return $this->log;
+    }
+    public function getIsPartial() {
+        return $this->is_partial;
     }
 }

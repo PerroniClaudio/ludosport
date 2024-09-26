@@ -24,7 +24,7 @@
                 zip: '{{ json_decode($invoice->address)->zip ?? false ? json_decode($invoice->address)->zip : '' }}',
                 city: '{{ json_decode($invoice->address)->city ?? false ? json_decode($invoice->address)->city : '' }}',
                 country: '{{ json_decode($invoice->address)->country ?? false ? json_decode($invoice->address)->country : '' }}',
-                vat: '{{ $invoice->vat ? $invoice->vat : '' }}',
+                vat: '{{ $invoice->vat ? ($invoice->vat == 'VAT' ? '' : $invoice->vat ) : '' }}',
                 sdi: '{{ $invoice->sdi ? $invoice->sdi : '' }}',
                 business_name: '{{ $invoice->business_name ? $invoice->business_name : '' }}',
                 is_business: '{{ $invoice->is_business ? true : false }}' == 'true' ? true : false,
@@ -265,7 +265,7 @@
                                     </div>
                                     <div class="col-span-4" x-show="is_business">
                                         <x-form.input-model name="business_name"
-                                            label="{{ __('fees.business_name') }}" aria-placeholder="{{ __('fees.insert_business_name') }}" />
+                                            label="{{ __('fees.business_name') }}" placeholder="{{ __('fees.insert_business_name') }}" />
                                     </div>
                                     <div class="col-span-4" x-show="is_business">
                                         {{-- <x-form.input-model name="vat" label="{{ __('fees.invoice_vat') }}" placeholder="VAT" /> --}}
@@ -283,17 +283,18 @@
                             </div>
                         
                             <div x-show="showResSuccessMessage">
-                                <div x-data="{ show: true }"
-                                    class="fixed bg-success-500 text-white py-2 px-4 rounded-xl bottom-8 left-32 text-sm"
-                                >
+                                <div class="fixed bg-success-500 text-white py-2 px-4 rounded-xl bottom-8 left-32 text-sm">
                                     <p x-text="successMessage"></p>
                                 </div>
                             </div>
                             <div x-show="showResErrorMessage">
-                                <div x-data="{ show: true }"
-                                    class="fixed bg-error-500 text-white py-2 px-4 rounded-xl bottom-8 left-32 text-sm"
-                                >
+                                <div class="fixed bg-error-500 text-white py-2 px-4 rounded-xl bottom-8 left-32 text-sm">
                                     <p x-text="errorMessage"></p>
+                                </div>
+                            </div>
+                            <div x-show="false">
+                                <div class="fixed bg-background-100 dark:bg-background-500  py-3 px-4 bottom-8 left-32 text-sm">
+                                    {{-- serve solo a coprire i div dei messaggi durante il caricamento. soluzione temporanea. --}}
                                 </div>
                             </div>
                         </div>

@@ -11,6 +11,7 @@ use App\Imports\UsersCourseImport;
 use App\Imports\UsersEventImport;
 use App\Imports\UsersImport;
 use App\Imports\UsersSchoolImport;
+use App\Models\Event;
 use App\Models\Import;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -56,10 +57,30 @@ class ImportController extends Controller {
             ];
         }
 
+        $instructorEvents = Event::all()->filter(function ($event) {
+            return $event->resultType() == 'enabling';
+        })->map(function ($event) {
+            return [
+                'value' => $event->id,
+                'label' => $event->name
+            ];
+        });
+
+        $rankingEvents = Event::all()->filter(function ($event) {
+            return $event->resultType() == 'ranking';
+        })->map(function ($event) {
+            return [
+                'value' => $event->id,
+                'label' => $event->name
+            ];
+        });
+
         $authRole = User::find(auth()->user()->id)->getRole();
         $viewPath = $authRole == 'admin' ? 'import.create' : 'import.' . $authRole . '.create';
         return view($viewPath, [
-            'types' => $typesSelect
+            'types' => $typesSelect,
+            'instructorEvents' => $instructorEvents,
+            'rankingEvents' => $rankingEvents
         ]);
     }
 
@@ -133,9 +154,10 @@ class ImportController extends Controller {
     public function template(Request $request) {
 
         $type = $request->type;
+        $eventId = $request->event_id;
 
         $name = $type . time() . '.xlsx';
-        return Excel::download(new TemplateExport($type), $name);
+        return Excel::download(new TemplateExport($type, $eventId), $name);
     }
 
     public function resolvePendingImports() {
@@ -155,25 +177,49 @@ class ImportController extends Controller {
                 switch ($import->type) {
                     case 'new_users':
                         $log[] = "['Processing new users']";
-                        Excel::import(new UsersImport, $import->file, 'gcs');
+                        $usersImport = new UsersImport($import->user);
+                        Excel::import($usersImport, $import->file, 'gcs');
+                        $usersImportLog = $usersImport->getLogArray();
+                        if(count($usersImportLog) > 0) {
+                            array_push($log, ...$usersImportLog);
+                        }
+                        $is_partial = $usersImport->getIsPartial();
                         $log[] = "['Users imported at " . now()->format('Y-m-d H:i:s') . "']";
 
                         break;
                     case 'users_course':
                         $log[] = "['Processing users course']";
-                        Excel::import(new UsersCourseImport, $import->file, 'gcs');
+                        $usersCourseImport = new UsersCourseImport($import->user);
+                        Excel::import($usersCourseImport, $import->file, 'gcs');
+                        $usersCourseImportLog = $usersCourseImport->getLogArray();
+                        if(count($usersCourseImportLog) > 0) {
+                            array_push($log, ...$usersCourseImportLog);
+                        }
+                        $is_partial = $usersCourseImport->getIsPartial();
                         $log[] = "['Users course imported at " . now()->format('Y-m-d H:i:s') . "']";
 
                         break;
                     case 'users_academy':
                         $log[] = "['Processing users academy']";
-                        Excel::import(new UsersAcademyImport, $import->file, 'gcs');
+                        $usersAcademyImport = new UsersAcademyImport($import->user);
+                        Excel::import($usersAcademyImport, $import->file, 'gcs');
+                        $usersAcademyImportLog = $usersAcademyImport->getLogArray();
+                        if(count($usersAcademyImportLog) > 0) {
+                            array_push($log, ...$usersAcademyImportLog);
+                        }
+                        $is_partial = $usersAcademyImport->getIsPartial();
                         $log[] = "['Users academy imported at " . now()->format('Y-m-d H:i:s') . "']";
 
                         break;
                     case 'users_school':
                         $log[] = "['Processing users school']";
-                        Excel::import(new UsersSchoolImport, $import->file, 'gcs');
+                        $usersSchoolImport = new UsersSchoolImport($import->user);
+                        Excel::import($usersSchoolImport, $import->file, 'gcs');
+                        $usersSchoolImportLog = $usersSchoolImport->getLogArray();
+                        if(count($usersSchoolImportLog) > 0) {
+                            array_push($log, ...$usersSchoolImportLog);
+                        }
+                        $is_partial = $usersSchoolImport->getIsPartial();
                         $log[] = "['Users school imported at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
                     case 'event_participants':
@@ -189,17 +235,35 @@ class ImportController extends Controller {
                         break;
                     case 'event_war':
                         $log[] = "['Processing event war']";
-                        Excel::import(new EventWarImport, $import->file, 'gcs');
+                        $EventWarImport = new EventWarImport($import->user);
+                        Excel::import($EventWarImport, $import->file, 'gcs');
+                        $EventWarImportLog = $EventWarImport->getLogArray();
+                        if(count($EventWarImportLog) > 0) {
+                            array_push($log, ...$EventWarImportLog);
+                        }
+                        $is_partial = $EventWarImport->getIsPartial();
                         $log[] = "['Event war imported at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
                     case 'event_style':
                         $log[] = "['Processing event style']";
-                        Excel::import(new EventStyleImport, $import->file, 'gcs');
+                        $eventStyleImport = new EventStyleImport($import->user);
+                        Excel::import($eventStyleImport, $import->file, 'gcs');
+                        $eventStyleImportLog = $eventStyleImport->getLogArray();
+                        if(count($eventStyleImportLog) > 0) {
+                            array_push($log, ...$eventStyleImportLog);
+                        }
+                        $is_partial = $eventStyleImport->getIsPartial();
                         $log[] = "['Event style imported at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
                     case 'event_instructor_results':
                         $log[] = "['Processing event instructor']";
-                        Excel::import(new EventInstructorImport, $import->file, 'gcs');
+                        $eventInstructorImport = new EventInstructorImport($import->user);
+                        Excel::import($eventInstructorImport, $import->file, 'gcs');
+                        $eventInstructorImportLog = $eventInstructorImport->getLogArray();
+                        if(count($eventInstructorImportLog) > 0) {
+                            array_push($log, ...$eventInstructorImportLog);
+                        }
+                        $is_partial = $eventInstructorImport->getIsPartial();
                         $log[] = "['Event instructor imported at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
 

@@ -14,19 +14,34 @@
                     <form method="POST" action="{{ route('imports.store') }}" enctype="multipart/form-data"
                         x-data="{
                             selectedType: null,
+                            selectedEvent: null,
                             hasSubmittedFile: false,
                             downloadTemplate: function() {
                                 if (this.selectedType != null) {
-                                    window.location.href = '/imports/template?type=' + this.selectedType;
+                                    window.location.href = '/imports/template?type=' + this.selectedType + (this.selectedEvent ? ('&event_id=' + this.selectedEvent) : '');
                                 }
+                            },
+                            init() {
+                                this.$watch('selectedType', value => {
+                                    this.selectedEvent = null;
+                                });
                             }
                         }">
                         @csrf
                         <div class="flex flex-col gap-2 w-1/2">
                             <x-form.select name="type" label="Type" required="{{ true }}"
                                 :options="$types" x-model="selectedType" shouldHaveEmptyOption="true" />
+                            
+                            <template x-if="selectedType == 'event_instructor_results'">
+                                <x-form.select name="selectedEvent" label="Event" required="{{ false }}"
+                                    :options="$instructorEvents" x-model="selectedEvent" shouldHaveEmptyOption="true" />
+                            </template>
+                            <template x-if="['event_war', 'event_style'].includes(selectedType)">
+                                <x-form.select name="selectedEvent" label="Event" required="{{ false }}"
+                                    :options="$rankingEvents" x-model="selectedEvent" shouldHaveEmptyOption="true" />
+                            </template>
 
-                            <a x-show="selectedType != null" class="w-full" x-on:click="downloadTemplate()">
+                            <a x-show="selectedType != null && (!['event_war', 'event_style', 'event_instructor_results'].includes(selectedType) || (selectedEvent != null))" class="w-full" x-on:click="downloadTemplate()">
                                 <x-primary-button type="button" class="w-full">
                                     {{ __('imports.download_template') }}
                                 </x-primary-button>

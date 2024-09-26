@@ -67,7 +67,7 @@
                             <template x-if="(row.user_id == {{ Auth::id() }}) || ('{{ $authRole }}' == 'admin')">
                                     <x-primary-button  @click="openLogsModal(row.id, row.log); $dispatch('open-modal', 'import-log-modal')">
                                         {{-- <span>{{ __('imports.log') }}</span> --}}
-                                        <x-lucide-logs class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                                        <x-lucide-logs class="w-5 h-5 cursor-pointer" />
                                     </x-primary-button>
                             </template>
                         </x-slot>
