@@ -8,6 +8,19 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
+            @if (auth()->user()->has_paid_fee)
+                @if (auth()->user()->isFeeExpiring())
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg mb-8">
+                        <div class="p-6 text-background-900 dark:text-background-100">
+                            <div class="text-red-500 flex items-center gap-1">
+                                <x-lucide-circle-alert class="h-6 w-6" />
+                                {{ __('users.fee_about_expire_text') }}
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endif
+
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-background-900 dark:text-background-100">
