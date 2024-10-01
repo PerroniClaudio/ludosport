@@ -8,17 +8,10 @@ RUN apk add --no-cache \
     redis \
     meilisearch \
     prometheus \
-    grafana \
-    libzip-dev \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    zip \
-    unzip
+    grafana
 
 # Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install pdo pdo_mysql pcntl bcmath gd zip 
+RUN docker-php-ext-install pdo pdo_mysql pcntl bcmath gd zlib exif
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
