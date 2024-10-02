@@ -18,9 +18,9 @@ class UserSeeder extends Seeder {
             ->count(64)
             ->create()
             ->each(function ($user) {
-                $user->schoolAthletes()->attach(1);
-                $user->academyAthletes()->attach(1);
-                $user->roles()->attach(7);
+                $user->schoolAthletes()->syncWithoutDetaching(1);
+                $user->academyAthletes()->syncWithoutDetaching(1);
+                $user->roles()->syncWithoutDetaching(7);
             });
     }
 }

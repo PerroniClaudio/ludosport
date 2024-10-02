@@ -42,7 +42,7 @@ class EventController extends Controller {
             case 'rector':
             case 'dean':
             case 'manager':
-                $events = Event::where('academy_id', $authUser->academies->first())->get();
+                $events = Event::where('academy_id', $authUser->primaryAcademy())->get();
                 break;
             case 'technician':
                 $events = Event::whereHas('personnel', function ($query) use ($authUser) {
@@ -148,11 +148,11 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
+        $primaryAcademy = $authUser->primaryAcademy();
         // Questa parte si può spostare in una funzione tipo checkPermission
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato. dean e manager interni all'accademia e tecnici possono aggiungere partecipanti. 
         if (!($authRole === 'admin' ||
-            ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
-            (in_array($authRole, ['dean', 'manager']) && $event->academy_id === $authUser->academies->first()->id) ||
+            (in_array($authRole, ['rector', 'dean', 'manager']) && isset($event->academy_id) && ($event->academy_id === ($primaryAcademy ? $primaryAcademy->id : null))) ||
             ($event->personnel()->where('user_id', $authUser->id)->exists()))) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
@@ -221,7 +221,7 @@ class EventController extends Controller {
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
         if (!($authRole === 'admin' ||
-            ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
+            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->primaryAcademy()->id : null))) ||
             $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
@@ -239,7 +239,7 @@ class EventController extends Controller {
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
         if (!($authRole === 'admin' ||
-            ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
+            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->primaryAcademy()->id : null))) ||
             $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
@@ -281,7 +281,7 @@ class EventController extends Controller {
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
         if (!($authRole === 'admin' ||
-            ($authRole === 'rector' && $event->academy_id === $authUser->academies->first()->id) ||
+            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->primaryAcademy()->id : null))) ||
             $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
@@ -399,7 +399,8 @@ class EventController extends Controller {
 
         header('Content-Type: application/json');
 
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
         switch ($authRole) {
             case 'admin':
@@ -411,15 +412,16 @@ class EventController extends Controller {
             case 'rector':
             case 'dean':
             case 'manager':
-                $events = Event::where('academy_id', User::find(auth()->user()->id)->academies->first()->id)
+                $primaryAcademy = $authUser->primaryAcademy();
+                $events = Event::where('academy_id', ($primaryAcademy ? $primaryAcademy->id : null))
                     ->where('start_date', '>=', $request->start)
                     ->where('end_date', '<=', $request->end)
                     ->with('user')
                     ->get();
                 break;
             case 'technician':
-                $events = Event::whereHas('personnel', function ($query) {
-                    $query->where('user_id', auth()->user()->id);
+                $events = Event::whereHas('personnel', function ($query) use ($authUser) {
+                    $query->where('user_id', $authUser->id);
                 })->where('start_date', '>=', $request->start)
                     ->where('end_date', '<=', $request->end)
                     ->with('user')
@@ -534,13 +536,13 @@ class EventController extends Controller {
         foreach ($personnel as $person) {
             // Aggiunge la persona all'accademia se non è già presente
             if (!$event->academy->personnel()->where('user_id', $person)->exists()) {
-                $event->academy->personnel()->attach($person);
+                $event->academy->personnel()->syncWithoutDetaching($person);
             }
             // Aggiunge la persona all'evento se non è già presente
             if ($event->personnel()->where('user_id', $person)->exists()) {
                 continue;
             }
-            $event->personnel()->attach($person);
+            $event->personnel()->syncWithoutDetaching($person);
         }
 
 
@@ -631,11 +633,11 @@ class EventController extends Controller {
         if ($result->weaponForm && $result->result === 'passed') {
             // Aggiunge la forma da atleta all'utente se non ce l'ha già. NON DEVE AGGIUNGERE IL RUOLO. 
             if (!$result->weaponForm->users()->where('user_id', $result->user->id)->exists()) {
-                $result->weaponForm->users()->attach($result->user->id);
+                $result->weaponForm->users()->syncWithoutDetaching($result->user->id);
             }
             // Aggiunge la forma da istruttore all'utente se non ce l'ha già
             if (!$result->weaponForm->personnel()->where('user_id', $result->user->id)->exists()) {
-                $result->weaponForm->personnel()->attach($result->user->id, [
+                $result->weaponForm->personnel()->syncWithoutDetaching($result->user->id, [
                     'event_id' => $event->id,
                     'admin_id' => $authUser->id,
                 ]);
@@ -825,14 +827,17 @@ class EventController extends Controller {
             foreach ($event_result as $key => $value) {
 
                 if (!isset($results[$value->user_id])) {
+
+                    $primaryAcademyAthlete = $value->user->primaryAcademyAthlete();
+
                     $results[$value->user_id] = [
                         'user_id' => $value->user_id,
                         'user_name' => $value->user->name . ' ' . $value->user->surname,
                         'user_battle_name' => $value->user->battle_name,
                         'user_battle_name' => $value->user->battle_name,
-                        'user_academy' => $value->user->academyAthletes->first() ? $value->user->academyAthletes->first()->name : '',
-                        'user_school' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->name : '',
-                        'school_slug' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->slug : '',
+                        'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
+                        'user_school' => $value->user->primarySchoolAthlete()->name ?? '',
+                        'school_slug' => $value->user->primarySchoolAthlete()->slug ?? '',
                         'nation' => $value->user->nation->name,
                         'total_war_points' => 0,
                         'total_style_points' => 0,
@@ -867,12 +872,15 @@ class EventController extends Controller {
                 if ($value->user->nation_id == $request['nation_id']) {
 
                     if (!isset($results[$value->user_id])) {
+
+                        $primaryAcademyAthlete = $value->user->primaryAcademyAthlete();
+
                         $results[$value->user_id] = [
                             'user_id' => $value->user_id,
                             'user_name' => $value->user->name . ' ' . $value->user->surname,
-                            'user_academy' => $value->user->academyAthletes->first() ? $value->user->academyAthletes->first()->name : '',
-                            'user_school' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->name : '',
-                            'school_slug' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->slug : '',
+                            'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
+                            'user_school' => $value->user->primarySchoolAthlete()->name ?? '',
+                            'school_slug' => $value->user->primarySchoolAthlete()->slug ?? '',
                             'nation' => $value->user->nation->name,
                             'total_war_points' => 0,
                             'total_style_points' => 0,
@@ -902,14 +910,17 @@ class EventController extends Controller {
         $event_results = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
 
         foreach ($event_results as $key => $value) {
+
+            $primaryAcademyAthlete = $value->user->primaryAcademyAthlete();
+
             if (!isset($results[$value->user_id])) {
                 $results[$value->user_id] = [
                     'user_id' => $value->user_id,
                     'user_name' => $value->user->name . ' ' . $value->user->surname,
                     'user_battle_name' => $value->user->battle_name,
-                    'user_academy' => $value->user->academyAthletes->first() ? $value->user->academyAthletes->first()->name : '',
-                    'user_school' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->name : '',
-                    'school_slug' => $value->user->schoolAthletes->first() ? $value->user->schoolAthletes->first()->slug : '',
+                    'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
+                    'user_school' => $value->user->primarySchoolAthlete()->name ?? '',
+                    'school_slug' => $value->user->primarySchoolAthlete()->slug ?? '',
                     'nation' => $value->user->nation->name,
                     'total_war_points' => 0,
                     'total_style_points' => 0,

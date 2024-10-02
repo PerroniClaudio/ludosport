@@ -247,10 +247,18 @@
                                 <span>{{ $academy->name }}</span>
                             </a>
                         @endforeach --}}
+                        @php
+                            $mainAcademyPersonnel = $user->primaryAcademy();
+                        @endphp
                         @foreach ($user->academies as $academy)
                             <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $academy->name }}</span>
+                                <span>
+                                    {{ $academy->name }}
+                                    @if (($mainAcademyPersonnel->id ?? null) == $academy->id)
+                                        ({{ __('users.main_academy') }})
+                                    @endif
+                                </span>
                             </div>
                         @endforeach
 
@@ -266,10 +274,18 @@
                                 <span>{{ $academy->name }}</span>
                             </a>
                         @endforeach --}}
+                        @php
+                            $mainAcademyAthlete = $user->primaryAcademyAthlete();
+                        @endphp
                         @foreach ($user->academyAthletes as $academy)
                             <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $academy->name }}</span>
+                                <span>
+                                    {{ $academy->name }}
+                                    @if (($mainAcademyAthlete->id ?? null) == $academy->id)
+                                        ({{ __('users.main_academy') }})
+                                    @endif
+                                </span>
                             </div>
                         @endforeach
                     </div>
@@ -292,10 +308,18 @@
                                 <span>{{ $school->name }}</span>
                             </a>
                         @endforeach --}}
+                        @php
+                            $mainSchoolPersonnel = $user->primarySchool();
+                        @endphp
                         @foreach ($user->schools as $school)
                             <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $school->name }}</span>
+                                <span>
+                                    {{ $school->name }}
+                                    @if (($mainSchoolPersonnel->id ?? null) == $school->id)
+                                        ({{ __('users.main_school') }})
+                                    @endif
+                                </span>
                             </div>
                         @endforeach
 
@@ -311,10 +335,18 @@
                                 <span>{{ $schools->name }}</span>
                             </a>
                         @endforeach --}}
+                        @php
+                            $mainSchoolAthlete = $user->primarySchoolAthlete();
+                        @endphp
                         @foreach ($user->schoolAthletes as $schools)
                             <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $schools->name }}</span>
+                                <span>
+                                    {{ $schools->name }}
+                                    @if (($mainSchoolAthlete->id ?? null) == $schools->id)
+                                        ({{ __('users.main_school') }})
+                                    @endif
+                                </span>
                             </div>
                         @endforeach
                     </div>

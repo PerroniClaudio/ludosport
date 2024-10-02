@@ -127,76 +127,82 @@ class OrderController extends Controller {
 
         if ($order->status !== 0) {
             return redirect()->route('orders.edit', $order->id)->with('error', 'Order already approved');
-        } else {
+        }
 
-            // Capire cosa c'è dentro l'ordine
+        // Definire l'id dell'accademia da attribuire
 
-            if (count($order->items) > 1) {
+        $personnelAcademy = $order->user->primaryAcademy();
+        $athleteAcademy = $order->user->primaryAcademyAthlete();
 
-                // Sono fee multiple
+        $academyId = $personnelAcademy ? $personnelAcademy->id : ($athleteAcademy ? $athleteAcademy->id : 1);
 
-                foreach ($order->items as $item) {
-                    Fee::create([
-                        'user_id' => $order->user_id,
-                        'academy_id' => $order->user->academies()->first()->id,
-                        'type' => $item->product_name == 'senior_fee' ? 1 : 2,
-                        'start_date' => now(),
-                        'end_date' => now()->addYear(),
-                        'auto_renew' => 0,
-                        'unique_id' => Str::orderedUuid(),
-                    ]);
-                }
+        // Capire cosa c'è dentro l'ordine
 
-                event(new \App\Events\BulkFeePaid($order));
-            } else {
+        if (count($order->items) > 1) {
 
-                // O è una Fee singola o è un biglietto per un evento
+            // Sono fee multiple
 
-                $item = $order->items()->first();
-
-                if ($item->product_type == 'fee') {
-                    $academy = $order->user->academies()->first() ? $order->user->academies()->first()->id : 1;
-
-                    Fee::create([
-                        'user_id' => $order->user_id,
-                        'academy_id' => $academy ? $academy : 1,
-                        'type' => $item->product_name == 'senior_fee' ? 1 : 2,
-                        'start_date' => now(),
-                        'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
-                        'auto_renew' => 1,
-                        'used' => 1,
-                        'unique_id' => Str::orderedUuid(),
-                    ]);
-
-                    $order->user->update([
-                        'has_paid_fee' => 1,
-                    ]);
-
-                    event(new \App\Events\FeePaid($order));
-                } else if ($item->product_type == 'event_participation') {
-                    $event = Event::find($item->product_code);
-
-                    if ($event->resultType() === 'enabling') {
-                        $event->instructorResults()->create([
-                            'user_id' => $order->user_id,
-                            'weapon_form_id' => $event->weapon_form_id,
-                        ]);
-                    } else if ($event->resultType() === 'ranking') {
-                        $event->results()->create([
-                            'user_id' => $order->user_id,
-                            'war_points' => 0,
-                            'style_points' => 0,
-                            'total_points' => 0,
-                        ]);
-                    }
-                }
+            foreach ($order->items as $item) {
+                Fee::create([
+                    'user_id' => $order->user_id,
+                    'academy_id' => $academyId,
+                    'type' => $item->product_name == 'senior_fee' ? 1 : 2,
+                    'start_date' => now(),
+                    'end_date' => now()->addYear(),
+                    'auto_renew' => 0,
+                    'unique_id' => Str::orderedUuid(),
+                ]);
             }
 
-            $order->update([
-                'status' => 2
-            ]);
+            event(new \App\Events\BulkFeePaid($order));
+        } else {
 
-            return redirect()->route('orders.edit', $order->id)->with('success', 'Order approved successfully');
+            // O è una Fee singola o è un biglietto per un evento
+
+            $item = $order->items()->first();
+
+            if ($item->product_type == 'fee') {;
+
+                Fee::create([
+                    'user_id' => $order->user_id,
+                    'academy_id' => $academyId,
+                    'type' => $item->product_name == 'senior_fee' ? 1 : 2,
+                    'start_date' => now(),
+                    'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
+                    'auto_renew' => 1,
+                    'used' => 1,
+                    'unique_id' => Str::orderedUuid(),
+                ]);
+
+                $order->user->update([
+                    'has_paid_fee' => 1,
+                ]);
+
+                event(new \App\Events\FeePaid($order));
+            } else if ($item->product_type == 'event_participation') {
+                $event = Event::find($item->product_code);
+
+                if ($event->resultType() === 'enabling') {
+                    $event->instructorResults()->create([
+                        'user_id' => $order->user_id,
+                        'weapon_form_id' => $event->weapon_form_id,
+                    ]);
+                } else if ($event->resultType() === 'ranking') {
+                    $event->results()->create([
+                        'user_id' => $order->user_id,
+                        'war_points' => 0,
+                        'style_points' => 0,
+                        'total_points' => 0,
+                    ]);
+                }
+            }
         }
+
+        $order->update([
+            'status' => 2
+        ]);
+
+        return redirect()->route('orders.edit', $order->id)->with('success', 'Order approved successfully');
+        
     }
 }

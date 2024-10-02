@@ -213,8 +213,8 @@ class NationController extends Controller {
 
         foreach ($filteredUsers as $user) {
 
-            $user->academy = $user->academyAthletes->first();
-            $user->school = $user->schoolAthletes->first();
+            $user->academy = $user->primaryAcademyAthlete();
+            $user->school = $user->primarySchoolAthlete();
             if ($user->academy) {
                 $user->nation = $user->academy->nation->name;
             } else {

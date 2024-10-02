@@ -10,10 +10,10 @@
 
             <div class="flex flex-col gap-4">
 
-                @if (Auth()->user()->schools()->first())
-                    <x-dashboard.user-school-numbers schoolId="{{ Auth()->user()->schools()->first()->id }}" />
+                @if (Auth()->user()->primarySchool())
+                    <x-dashboard.user-school-numbers schoolId="{{ Auth()->user()->primarySchool()->id }}" />
 
-                    <x-dashboard.user-clan-graph schoolId="{{ Auth()->user()->schools()->first()->id }}" />
+                    <x-dashboard.user-clan-graph schoolId="{{ Auth()->user()->primarySchool()->id }}" />
                 @else
                     <div>
                         Nessuna scuola associata

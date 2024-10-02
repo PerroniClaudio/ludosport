@@ -20,9 +20,10 @@ class SchoolController extends Controller {
         //
 
         // The dean (and maybe others, ex. manager) should only see his school
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
         if (in_array($authRole, ['dean', 'manager'])) {
-            $school = auth()->user()->schools->where('is_disabled', '0')->first();
+            $school = $authUser->primarySchool();
             if ($school) {
                 return $this->edit($school);
             }
@@ -30,8 +31,10 @@ class SchoolController extends Controller {
         }
 
         if ($authRole === 'rector') {
-            $academy = auth()->user()->academies->first();
-            $schools = School::with('nation')->where([['academy_id', $academy->id], ['is_disabled', '0']])->orderBy('created_at', 'desc')->get();
+            $academy = $authUser->primaryAcademy();
+            $schools = $academy
+                ? School::with('nation')->where([['academy_id', $academy->id], ['is_disabled', '0']])->orderBy('created_at', 'desc')->get()
+                : collect([]);
         } else {
             $schools = School::with('nation')->where('is_disabled', '0')->orderBy('created_at', 'desc')->get();
         }
@@ -368,6 +371,15 @@ class SchoolController extends Controller {
         $school->is_disabled = true;
         $school->save();
 
+        // Prende tutti gli atleti che hanno la scuola come principale
+        $athletes = $school->athletes->where('pivot.is_primary', 1);
+        // Cerca se ci sono altre scuole a cui è associato e se non ci sono, lo disassocia
+        // Se ci sono ne imposta una come principale (se è all'interno della stessa accademia è meglio)
+        
+        // Prende tutto il personale che ha la scuola come principale
+        // Cerca se ci sono altre scuole a cui è associato e se non ci sono, lo disassocia
+        // Se ci sono ne imposta una come principale (se è all'interno della stessa accademia è meglio)
+
         return redirect()->route('schools.index')->with('success', 'School disabled successfully!');
     }
 
@@ -398,10 +410,15 @@ class SchoolController extends Controller {
         $academy = Academy::find($school->academy_id);
         $isInThisAcademy = $academy->personnel->where('id', $personnel->id)->count();
         if (!$isInThisAcademy) {
-            $academy->personnel()->attach($personnel);
+            $academy->personnel()->syncWithoutDetaching($personnel->id);
         }
 
-        $school->personnel()->attach($personnel);
+        $school->personnel()->syncWithoutDetaching($personnel->id);
+
+        // Se il personale non ha la scuola principale, la assegna
+        if(!$personnel->primarySchool()){
+            $personnel->setPrimarySchool($school->id);
+        }
 
         $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
@@ -420,14 +437,19 @@ class SchoolController extends Controller {
         $academy = Academy::find($school->academy_id);
         $isInThisAcademy = $academy->athletes->where('id', $athlete->id)->count();
         if (!$isInThisAcademy) {
-            $academy->athletes()->attach($athlete);
+            $academy->athletes()->syncWithoutDetaching($athlete->id);
             if ($athlete->academyAthletes()->count() > 1) {
                 $noAcademy = Academy::where('slug', 'no-academy')->first();
                 $noAcademy->athletes()->detach($athlete->id);
             }
         }
 
-        $school->athletes()->attach($athlete);
+        $school->athletes()->syncWithoutDetaching($athlete->id);
+
+        // Se l'atleta non ha la scuola principale, la assegna
+        if(!$athlete->primarySchoolAthlete()){
+            $athlete->setPrimarySchoolAthlete($school->id);
+        }
 
         $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
@@ -484,10 +506,12 @@ class SchoolController extends Controller {
         $authRole = $authUser->getRole();
 
         if ($authRole === 'rector') {
-            $academy = $authUser->academies->first();
-            $schools = School::query()->when($request->search, function ($q, $search) {
-                return $q->whereIn('id', School::search($search)->keys());
-            })->where([['is_disabled', '0'], ['academy_id', $academy->id]])->with(['academy'])->get();
+            $academy = $authUser->primaryAcademy();
+            $schools = $academy 
+                ? School::query()->when($request->search, function ($q, $search) {
+                    return $q->whereIn('id', School::search($search)->keys());
+                })->where([['is_disabled', '0'], ['academy_id', $academy->id]])->with(['academy'])->get()
+                : collect([]);
         } else {
             $schools = School::query()->when($request->search, function ($q, $search) {
                 return $q->whereIn('id', School::search($search)->keys());
@@ -655,8 +679,8 @@ class SchoolController extends Controller {
 
         foreach ($filteredUsers as $user) {
 
-            $user->academy = $user->academyAthletes->first();
-            $user->school = $user->schoolAthletes->first();
+            $user->academy = $user->primaryAcademyAthlete();
+            $user->school = $user->primarySchoolAthlete();
             if ($user->academy) {
                 $user->nation = $user->academy->nation->name;
             } else {
@@ -690,13 +714,14 @@ class SchoolController extends Controller {
             case 'admin': // sempre autorizzato
                 break;
             case 'rector': // non autorizzato se la scuola non è nella sua accademia
-                if ($authUser->academies->first()->id != $school->academy->id) {
+                $primaryAcademy = $authUser->primaryAcademy();
+                if (!$primaryAcademy || ($primaryAcademy->id != $school->academy->id)) {
                     $authorized = false;
                 }
                 break;
             case 'dean':
             case 'manager': // non autorizzato se la scuola non è associata a lui o se strict è true
-                if ($authUser->schools->first()->id != $school->id || $isStrict) {
+                if (($authUser->primarySchool()->id ?? null) != $school->id || $isStrict) {
                     $authorized = false;
                 }
                 break;

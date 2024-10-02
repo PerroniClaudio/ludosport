@@ -23,6 +23,7 @@ class UsersAcademyImport implements ToCollection {
      */
     public function collection(Collection $collection) {
 
+        $noAcademy = Academy::where('slug', 'no-academy')->first();
 
         $firstRow = true;
         foreach ($collection as $row) {
@@ -49,9 +50,17 @@ class UsersAcademyImport implements ToCollection {
 
                 $user->academyAthletes()->syncWithoutDetaching([$academy->id]);
                 
-                $noAcademy = Academy::where('slug', 'no-academy')->first();
                 if ($user->academyAthletes()->whereNot('academy_id', $noAcademy->id)->count() > 0) {
                     $noAcademy->athletes()->detach($user->id);
+                }
+
+                // Se l'atleta non ha l'accademia principale, la assegna
+                if(!$user->primaryAcademyAthlete()){
+                    $schoolAcademy = null;
+                    if($user->primarySchoolAthlete()){
+                        $schoolAcademy = $user->primarySchoolAthlete()->academy;
+                    }
+                    $user->setPrimaryAcademy($schoolAcademy ? $schoolAcademy->id : $academy->id);
                 }
                 
             } catch (\Exception $e) {

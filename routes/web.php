@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use GPBMetadata\Google\Protobuf\Api;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
@@ -45,8 +46,9 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/world-athletes-data', [App\Http\Controllers\UserController::class, 'athletesDataForWorld'])->name('users.world-athletes-data');
     Route::get('/world-athletes-data-list', [App\Http\Controllers\UserController::class, 'athletesDataWorldList'])->name('users.world-athletes-data-list');
     Route::get('/world-athletes-year-data', [App\Http\Controllers\UserController::class, 'getWorldAthletesNumberPerYear'])->name('users.world-athletes-year-data');
-
-
+    
+    // Prima del post '/users/{user}' perche' altrimenti non funziona
+    Route::post('/users/set-main-institution', [App\Http\Controllers\UserController::class, 'setMainInstitution'])->name('users.set-main-institution');
 
     Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('users.store');
     Route::post('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
@@ -54,10 +56,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('nation.academies.index');
     Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
     Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('users.picture.update');
-
-    Route::post('/users/set-main-academy', [App\Http\Controllers\UserController::class, 'setMainAcademy'])->name('users.set-main-academy');
-    Route::post('/users/set-main-school', [App\Http\Controllers\UserController::class, 'setMainSchool'])->name('users.set-main-school');
-    Route::post('/users/set-main-institution', [App\Http\Controllers\UserController::class, 'setMainInstitution'])->name('users.set-main-institution');
+    
 });
 
 Route::post('/users/{user}/languages', [App\Http\Controllers\UserController::class, 'languages'])->name('users.languages.store');
@@ -330,4 +329,69 @@ Route::get('/email', function () {
     Mail::to('c.perroni@ifortech.com')->send(new App\Mail\FeesBulkPaidMail($order));
 
     return response(['message' => 'Email sent']);
+})->name('test');
+
+Route::get('/test', function () {
+    ini_set ('display_errors', 1);
+    ini_set ('display_startup_errors', 1);
+    error_reporting (E_ALL);
+    
+    return "test";
+    // // Personale
+    // $roles = ['admin', 'rector', 'dean', 'manager', 'instructor', 'technician'];
+    // $users = App\Models\User::whereHas('roles', function ($query) use ($roles) {
+    //     $query->whereIn('name', $roles);
+    // })->get();
+
+    // echo "PERSONNEL<br><br>";
+
+    // foreach ($users as $user) {
+    //     $mainAcademy = $user->academies()->where('is_disabled', false)->first();
+    //     if (isset($mainAcademy)) {
+    //         $user->setPrimaryAcademy($mainAcademy->id);
+    //         dump("Set academy-personnel: " . $user->id . ' ' . $user->name . ' ' . $user->role . ' - ' . $user->primaryAcademy()->id . ' - ' . $user->primaryAcademy()->name . '<br>');
+    //     } else {
+    //         echo 'No main academy for user ' . $user->id . '<br>';
+    //     }
+
+    //     $mainSchool = $user->schools()->where('is_disabled', false)->first();
+    //     if (isset($mainSchool)) {
+    //         $user->setPrimarySchool($mainSchool->id);
+    //         dump("Set school-personnel: " . $user->id . ' ' . $user->name . ' ' . $user->role . ' - ' . $mainSchool->id . ' - ' . $mainSchool->name . '<br>');
+    //     } else {
+    //         echo 'No main school personnel for user ' . $user->id . '<br>';
+    //     }
+    // }
+
+    // echo "<br><br>ATHLETES<br><br>";
+
+    // // Atleti
+    // $roles = ['athlete'];
+    // $users = App\Models\User::whereHas('roles', function ($query) use ($roles) {
+    //     $query->whereIn('name', $roles); 
+    // })->get();
+    
+    // foreach ($users as $user) {
+    //     $mainAcademy = $user->academyAthletes()->where('is_disabled', false)->first();
+    //     if (isset($mainAcademy)) {
+    //         $user->setPrimaryAcademyAthlete($mainAcademy->id);
+    //         dump("Set academy-athlete: " . $user->id . ' ' . $user->name . ' ' . $user->role . ' - ' . $user->primaryAcademyAthlete()->id . ' - ' . $user->primaryAcademyAthlete()->name . '<br>');
+    //     } else {
+    //         echo 'No main academy athlete for user ' . $user->id . '<br>';
+    //     }
+
+    //     $mainSchool = $user->schoolAthletes()->where('is_disabled', false)->first();
+    //     echo $mainSchool ? "user id: " . $user->id . " - school id: " . $mainSchool->id : 'No school';
+    //     echo '<br>';
+    //     if(isset($mainSchool)) {
+    //         $user->setPrimarySchoolAthlete($mainSchool->id);
+    //         echo "Set school-athlete: " . $user->id . " - school id: " . ($user->primarySchoolAthlete()->id ?? 'NO IDDDD') . '<br>';
+    //     }
+    //     if (isset($mainSchool)) {
+    //         $user->setPrimarySchoolAthlete($mainSchool->id);
+    //         dump("Set school-athlete: " . $user->id . ' ' . $user->name . ' ' . $user->role . ' - ' . $mainSchool->id . ' - ' . $mainSchool->name . '<br>');
+    //     } else {
+    //         echo 'No main school athlete for user ' . $user->id . '<br>';
+    //     }
+    // }
 })->name('test');

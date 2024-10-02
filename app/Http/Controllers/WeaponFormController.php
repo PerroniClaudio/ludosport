@@ -132,7 +132,7 @@ class WeaponFormController extends Controller {
     //     $users = json_decode($request->users);
 
     //     foreach ($users as $key => $value) {
-    //         $weaponForm->users()->attach($value);
+    //         $weaponForm->users()->syncWithoutDetaching($value);
     //     }
 
     //     return redirect()->route('weapon-forms.edit', $weaponForm)->with('success', 'Personnel added successfully');

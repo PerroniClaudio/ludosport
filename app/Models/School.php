@@ -36,11 +36,11 @@ class School extends Model {
     }
 
     public function athletes() {
-        return $this->belongsToMany(User::class, 'schools_athletes', 'school_id', 'user_id')->where('is_disabled', '0');
+        return $this->belongsToMany(User::class, 'schools_athletes', 'school_id', 'user_id')->where('is_disabled', '0')->withPivot('is_primary');
     }
 
     public function personnel() {
-        return $this->belongsToMany(User::class, 'schools_personnel', 'school_id', 'user_id')->where('is_disabled', '0');
+        return $this->belongsToMany(User::class, 'schools_personnel', 'school_id', 'user_id')->where('is_disabled', '0')->withPivot('is_primary');
     }
 
     public function academy() {
@@ -57,7 +57,7 @@ class School extends Model {
         })->get();
         // Se lo trova tra quelli che hanno la scuola come principale restituisce quello
         foreach ($deans as $r) {
-            if ($r->schools->first()->id == $this->id) {
+            if (($r->primarySchool()->id ?? null) == $this->id) {
                 return $r;
             }
         }

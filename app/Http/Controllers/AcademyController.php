@@ -20,9 +20,10 @@ class AcademyController extends Controller {
      */
     public function index() {
         //
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
         if (in_array($authRole, ['rector'])) {
-            $academy = auth()->user()->academies->where('is_disabled', '0')->first();
+            $academy = $authUser->primaryAcademy();
             if ($academy) {
                 return $this->edit($academy);
             }
@@ -164,8 +165,8 @@ class AcademyController extends Controller {
         }
 
         foreach ($associated_athletes as $athlete) {
-            if ($athlete->schoolAthletes->first()) {
-                $athlete->school = $athlete->schoolAthletes->first()->name;
+            if ($athlete->primarySchoolAthlete()) {
+                $athlete->school = $athlete->primarySchoolAthlete()->name;
             } else {
                 $athlete->school = 'Not assigned';
             }
@@ -282,7 +283,12 @@ class AcademyController extends Controller {
         $authRole = $authUser->getRole();
         $personnel = User::find($request->personnel_id);
 
-        $academy->personnel()->attach($personnel);
+        $academy->personnel()->syncWithoutDetaching($personnel->id);
+
+        // Se il personale non ha l'accademia principale, la assegna
+        if(!$personnel->primaryAcademy()){
+            $personnel->setPrimaryAcademy($academy->id);
+        }
 
         $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
         return redirect()->route($redirectRoute, $academy)->with('success', 'Personnel added successfully!');
@@ -293,10 +299,18 @@ class AcademyController extends Controller {
         $authRole = $authUser->getRole();
         $athlete = User::find($request->athlete_id);
 
-        $academy->athletes()->attach($athlete);
+        $academy->athletes()->syncWithoutDetaching($athlete->id);
         if($athlete->academyAthletes()->count() > 1) {
             $noAcademy = Academy::where('slug', 'no-academy')->first();
             $noAcademy->athletes()->detach($athlete->id);
+        }
+        // Se l'atleta non ha l'accademia principale, la assegna
+        if(!$athlete->primaryAcademyAthlete()){
+            $schoolAcademy = null;
+            if($athlete->primarySchoolAthlete()){
+                $schoolAcademy = $athlete->primarySchoolAthlete()->academy;
+            }
+            $athlete->setPrimaryAcademy($schoolAcademy ? $schoolAcademy->id : $academy->id);
         }
 
         $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
@@ -638,8 +652,8 @@ class AcademyController extends Controller {
 
         foreach ($filteredUsers as $user) {
 
-            $user->academy = $user->academyAthletes->first();
-            $user->school = $user->schoolAthletes->first();
+            $user->academy = $user->primaryAcademyAthlete();
+            $user->school = $user->primarySchoolAthlete();
             if ($user->academy) {
                 $user->nation = $user->academy->nation->name;
             } else {
@@ -674,7 +688,7 @@ class AcademyController extends Controller {
                 $authorized = true;
                 break;
             case 'rector': // non autorizzato se non è la sua accademia
-                if (!$isStrict && $authUser->academies->first()->id == $academy->id) {
+                if (!$isStrict && ($authUser->primaryAcademy() != null) && $authUser->primaryAcademy()->id == $academy->id) {
                     $authorized = true;
                 }
                 break;

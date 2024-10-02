@@ -1,6 +1,6 @@
 @props([
-    'selectedSchoolId' => auth()->user()->schools->first()->id ?? '0',
-    'selectedSchool' => auth()->user()->schools->first()->name ?? 'Select a school',
+    'selectedSchoolId' => auth()->user()->primarySchool()->id ?? '0',
+    'selectedSchool' => auth()->user()->primarySchool()->name ?? 'Select a school',
 ])
 
 
@@ -12,7 +12,7 @@
     currentPage: 1,
     totalPages: 1,
     getavailableSchools: function() {
-        data = [{{ auth()->user()->schools->first() }}];
+        data = [{{ auth()->user()->primarySchool() }}];
         this.availableSchools = data;
         this.paginatedSchools = this.availableSchools.slice(0, 5);
         this.totalPages = Math.ceil(this.availableSchools.length / 5);

@@ -10,7 +10,7 @@
 
             <div class="flex flex-col gap-4">
 
-                <x-dashboard.user-academy-numbers academyId="{{ Auth()->user()->academies()->first()->id }}" />
+                <x-dashboard.user-academy-numbers academyId="{{ Auth()->user()->primaryAcademy()->id }}" />
 
                 <!-- Paga in bulk le fee degli utenti non attivi -->
 
@@ -33,7 +33,7 @@
 
                 <!-- Grafico a torta per vedere la divisione di utenti tra le school + Confronto tra iscritti anno precedente e iscritti anno corrente  -->
 
-                <x-dashboard.user-school-graph academyId="{{ Auth()->user()->academies()->first()->id }}" />
+                <x-dashboard.user-school-graph academyId="{{ Auth()->user()->primaryAcademy()->id }}" />
 
                 <!-- Richieste di promozione a Preside delle school -->
                 <!-- Richiesta di promozione a cavaliere -->

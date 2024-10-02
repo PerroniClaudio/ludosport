@@ -45,11 +45,11 @@ class Academy extends Model {
     }
 
     public function athletes() {
-        return $this->belongsToMany(User::class, 'academies_athletes', 'academy_id', 'user_id')->where('is_disabled', '0');
+        return $this->belongsToMany(User::class, 'academies_athletes', 'academy_id', 'user_id')->where('is_disabled', '0')->withPivot('is_primary');
     }
 
     public function personnel() {
-        return $this->belongsToMany(User::class, 'academies_personnel', 'academy_id', 'user_id')->where('is_disabled', '0');
+        return $this->belongsToMany(User::class, 'academies_personnel', 'academy_id', 'user_id')->where('is_disabled', '0')->withPivot('is_primary');
     }
 
     public function rector() {
@@ -58,7 +58,8 @@ class Academy extends Model {
         })->get();
         // Se lo trova tra quelli che hanno l'accademia come principale restituisce quello
         foreach ($rectors as $r) {
-            if ($r->academies->first()->id == $this->id) {
+            $primaryAcademy = $r->primaryAcademy();
+            if ($primaryAcademy && ($primaryAcademy->id == $this->id)) {
                 return $r;
             }
         }

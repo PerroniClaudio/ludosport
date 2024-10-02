@@ -278,16 +278,16 @@
                     <div class="flex justify-between">
                         <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
 
-                        {{-- <x-primary-button :disabled="$user->academies()->count() < 2"
+                        <x-primary-button :disabled="$user->academies()->count() < 2"
                             x-on:click.prevent="setInstitutionType('academy'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
                             <span>{{ __('users.set_main_personnel_academy') }}</span>
-                        </x-primary-button> --}}
+                        </x-primary-button>
 
                     </div>
 
                     <div class="flex flex-col gap-2">
                         @php
-                            $mainAcademyPersonnel = $user->academies->first();
+                            $mainAcademyPersonnel = $user->primaryAcademy();
                         @endphp
                         @foreach ($user->academies as $academy)
                             <a href="{{ route('academies.edit', $academy->id) }}"
@@ -295,7 +295,7 @@
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $academy->name }}
-                                    @if ($mainAcademyPersonnel->id == $academy->id)
+                                    @if (($mainAcademyPersonnel->id ?? null) == $academy->id)
                                         ({{ __('users.main_academy') }})
                                     @endif
                                 </span>
@@ -308,15 +308,15 @@
 
                     <div class="flex justify-between">
                         <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
-                        {{-- <x-primary-button :disabled="$user->academyAthletes()->count() < 2"
+                        <x-primary-button :disabled="$user->academyAthletes()->count() < 2"
                             x-on:click.prevent="setInstitutionType('academy'), setRoleType('athlete'), $dispatch('open-modal', 'set-main-institution-modal')">
                             <span>{{ __('users.set_main_athletes_academy') }}</span>
-                        </x-primary-button> --}}
+                        </x-primary-button>
                     </div>
 
                     <div class="flex flex-col gap-2">
                         @php
-                            $mainAcademyAthlete = $user->academyAthletes->first();
+                            $mainAcademyAthlete = $user->primaryAcademyAthlete();
                         @endphp
                         @foreach ($user->academyAthletes as $academy)
                             <a href="{{ route('academies.edit', $academy->id) }}"
@@ -324,7 +324,7 @@
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $academy->name }}
-                                    @if ($mainAcademyAthlete->id == $academy->id)
+                                    @if (($mainAcademyAthlete->id ?? null) == $academy->id)
                                         ({{ __('users.main_academy') }})
                                     @endif
                                 </span>
@@ -341,15 +341,15 @@
 
                     <div class="flex justify-between">
                         <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
-                        {{-- <x-primary-button :disabled="$user->schools()->count() < 2"
+                        <x-primary-button :disabled="$user->schools()->count() < 2"
                             x-on:click.prevent="setInstitutionType('school'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
-                            <span>{{ __('users.set_main_athletes_academy') }}</span>
-                        </x-primary-button> --}}
+                            <span>{{ __('users.set_main_personnel_school') }}</span>
+                        </x-primary-button>
                     </div>
 
                     <div class="flex flex-col gap-2">
                         @php
-                            $mainSchoolPersonnel = $user->schools->first();
+                            $mainSchoolPersonnel = $user->primarySchool();
                         @endphp
                         @foreach ($user->schools as $school)
                             <a href="{{ route('schools.edit', $school->id) }}"
@@ -357,7 +357,7 @@
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $school->name }}
-                                    @if ($mainSchoolPersonnel->id == $school->id)
+                                    @if (($mainSchoolPersonnel->id ?? null) == $school->id)
                                         ({{ __('users.main_school') }})
                                     @endif
                                 </span>
@@ -370,15 +370,15 @@
 
                     <div class="flex justify-between">
                         <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
-                        {{-- <x-primary-button :disabled="$user->schoolAthletes()->count() < 2"
+                        <x-primary-button :disabled="$user->schoolAthletes()->count() < 2"
                             x-on:click.prevent="setInstitutionType('school'), setRoleType('athlete'), $dispatch('open-modal', 'set-main-institution-modal')">
-                            <span>{{ __('users.set_main_athletes_academy') }}</span>
-                        </x-primary-button> --}}
+                            <span>{{ __('users.set_main_athletes_school') }}</span>
+                        </x-primary-button>
                     </div>
 
                     <div class="flex flex-col gap-2">
                         @php
-                            $mainSchoolAthlete = $user->schoolAthletes->first();
+                            $mainSchoolAthlete = $user->primarySchoolAthlete();
                         @endphp
                         @foreach ($user->schoolAthletes as $schools)
                             <a href="{{ route('schools.edit', $schools->id) }}"
@@ -386,7 +386,7 @@
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $schools->name }}
-                                    @if ($mainSchoolAthlete->id == $schools->id)
+                                    @if (($mainSchoolAthlete->id ?? null) == $schools->id)
                                         ({{ __('users.main_school') }})
                                     @endif
                                 </span>
@@ -397,8 +397,8 @@
 
                 {{-- Modal con form dinamico per modifica accademia/scuola principale --}}
                 <x-modal name="set-main-institution-modal" :show="$errors->get('name') || $errors->get('go_to_edit')" focusable>
-                    <form method="post" action="{{ route('users.set-main-institution') }}"
-                        class="p-6 flex flex-col gap-4" x-ref="form">
+                    <form method="POST" action="{{ route('users.set-main-institution') }}"
+                        class="p-6 flex flex-col gap-4" x-ref="edituserform" enctype="multipart/form-data">
                         @csrf
 
                         <div>
@@ -430,55 +430,63 @@
                         <input type="hidden" name="role_type" :value="roleType">
                         <input type="hidden" name="user_id" value="{{ $user->id }}">
 
-
-                        <div x-show="institutionType == 'academy' && roleType == 'personnel'">
+                        <template x-if="institutionType == 'academy' && roleType == 'personnel'">
                             @php
                                 $academiesPersonnelOptions = $user->academies->map(function ($academy) {
                                     return ['value' => $academy->id, 'label' => $academy->name];
                                 });
                                 $selectedAcademy = [
-                                    'value' => $user->academies->first()->id ?? null,
-                                    'label' => $user->academies->first()->name ?? null,
+                                    'value' => $user->primaryAcademy()->id ?? null,
+                                    'label' => $user->primaryAcademy()->name ?? null,
                                 ];
                             @endphp
                             <x-form.select name="academy_id" label="{{ __('academies.academy') }}" :options="$academiesPersonnelOptions"
                                 x-model="selectedAcademy" />
-                        </div>
+                        </template>
 
-                        <div x-show="institutionType == 'academy' && roleType == 'athlete'">
+                        <template x-if="institutionType == 'academy' && roleType == 'athlete'">
                             @php
                                 $academiesAthleteOptions = $user->academyAthletes->map(function ($academy) {
                                     return ['value' => $academy->id, 'label' => $academy->name];
                                 });
-                                // $selectedAcademy = ['value' => $user->academyAthletes->first()->id, 'label' => $user->academyAthletes->first()->name];
+                                $selectedAcademy = [
+                                    'value' => $user->primaryAcademyAthlete()->id ?? null, 
+                                    'label' => $user->primaryAcademyAthlete()->name ?? null
+                                ];
                             @endphp
                             <x-form.select name="academy_id" label="{{ __('academies.academy') }}"
                                 :options="$academiesAthleteOptions" />
-                        </div>
+                        </template>
 
-                        <div x-show="institutionType == 'school' && roleType == 'personnel'">
+                        <template x-if="institutionType == 'school' && roleType == 'personnel'">
                             @php
                                 $schoolsPersonnelOptions = $user->schools->map(function ($school) {
                                     return ['value' => $school->id, 'label' => $school->name];
                                 });
-                                // $selectedSchool = ['value' => $user->schools->first()->id, 'label' => $user->schools->first()->name];
+                                $selectedSchool = [
+                                    'value' => $user->primarySchool()->id ?? null, 
+                                    'label' => $user->primarySchool()->name ?? null
+                                ];
                             @endphp
                             <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsPersonnelOptions" />
-                        </div>
+                        </template>
 
-                        <div x-show="institutionType == 'school' && roleType == 'athlete'">
+                        <template x-if="institutionType == 'school' && roleType == 'athlete'">
                             @php
                                 $schoolsAthleteOptions = $user->schoolAthletes->map(function ($school) {
                                     return ['value' => $school->id, 'label' => $school->name];
                                 });
-                                // $selectedSchool = ['value' => $user->schoolAthletes->first()->id, 'label' => $user->schoolAthletes->first()->name];
+                                $selectedSchool = [
+                                    'value' => $user->primarySchoolAthlete()->id ?? null, 
+                                    'label' => $user->primarySchoolAthlete()->name ?? null
+                                ];
                             @endphp
                             <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsAthleteOptions" />
-                        </div>
+                        </template>
 
 
                         <div class="flex justify-end">
-                            <x-primary-button x-on:click.prevent="$refs.form.submit()">
+                            <x-primary-button x-on:click.prevent="$refs.edituserform.submit()">
                                 <span>{{ __('users.confirm') }}</span>
                             </x-primary-button>
                         </div>

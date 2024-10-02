@@ -22,6 +22,7 @@ return [
     'dean_role' => 'Deans',
     'manager_role' => 'Managers',
     'technician_role' => 'Tecnici',
+    'tecnici_role' => 'Tecnici',
     'instructor_role' => 'Instructors',
     'admin_role' => 'Administrators',
     'roles' => 'Roles',

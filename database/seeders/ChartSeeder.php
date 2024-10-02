@@ -34,9 +34,9 @@ class ChartSeeder extends Seeder {
             ->count(64)
             ->create()
             ->each(function ($user) {
-                $user->schoolAthletes()->attach(rand(1, 10));
-                $user->academyAthletes()->attach(rand(1, 10));
-                $user->roles()->attach(7);
+                $user->schoolAthletes()->syncWithoutDetaching(rand(1, 10));
+                $user->academyAthletes()->syncWithoutDetaching(rand(1, 10));
+                $user->roles()->syncWithoutDetaching(7);
             });
 
         */

@@ -248,14 +248,14 @@
                             </a>
                         @endforeach --}}
                         @php
-                            $mainAcademy = $user->academies->first();
+                            $mainAcademy = $user->primaryAcademy();
                         @endphp
                         @foreach ($user->academies as $academy)
                             <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $academy->name }}
-                                    @if ($mainAcademy->id == $academy->id)
+                                    @if (($mainAcademy->id ?? null) == $academy->id)
                                         ({{ __('users.main_academy') }})
                                     @endif
                                 </span>
@@ -275,14 +275,14 @@
                             </a>
                         @endforeach --}}
                         @php
-                            $mainAcademyAthlete = $user->academyAthletes->first();
+                            $mainAcademyAthlete = $user->primaryAcademyAthlete();
                         @endphp
                         @foreach ($user->academyAthletes as $academy)
                             <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $academy->name }}
-                                    @if ($mainAcademyAthlete->id == $academy->id)
+                                    @if (($mainAcademyAthlete->id ?? null ) == $academy->id)
                                         ({{ __('users.main_academy') }})
                                     @endif
                                 </span>
@@ -309,14 +309,14 @@
                             </a>
                         @endforeach --}}
                         @php
-                            $mainSchool = $user->schools->first();
+                            $mainSchool = $user->primarySchool();
                         @endphp
                         @foreach ($user->schools as $school)
                             <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $school->name }}
-                                    @if ($mainSchool->id == $school->id)
+                                    @if (($mainSchool->id ?? null) == $school->id)
                                         ({{ __('users.main_school') }})
                                     @endif
                                 </span>
@@ -336,14 +336,14 @@
                             </a>
                         @endforeach --}}
                         @php
-                            $mainSchoolAthlete = $user->schoolAthletes->first();
+                            $mainSchoolAthlete = $user->primarySchoolAthlete();
                         @endphp
                         @foreach ($user->schoolAthletes as $schools)
                             <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $schools->name }}
-                                    @if ($mainSchoolAthlete->id == $schools->id)
+                                    @if (($mainSchoolAthlete->id ?? null) == $schools->id)
                                         ({{ __('users.main_school') }})
                                     @endif
                                 </span>

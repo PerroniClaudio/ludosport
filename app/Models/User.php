@@ -110,20 +110,88 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->belongsTo(Nation::class);
     }
 
+    // Restutuisce le accademie in cui fa parte del personale
     public function academies() {
-        return $this->belongsToMany(Academy::class, 'academies_personnel', 'user_id', 'academy_id');
+        return $this->belongsToMany(Academy::class, 'academies_personnel', 'user_id', 'academy_id')->withPivot('is_primary');
     }
 
+    // Restituisce l'accademia principale (per il personale)
+    public function primaryAcademy()
+    {   
+        return $this->academies()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
+    }
+
+    // Imposta accademia primaria (per il personale)
+    public function setPrimaryAcademy($academyId)
+    {
+        // Rimuove l'attuale accademia principale del personale e imposta la nuova
+        if($this->primaryAcademy()) {
+            $this->academies()->updateExistingPivot($this->primaryAcademy()->id, ['is_primary' => false]);
+        }
+        $this->academies()->updateExistingPivot($academyId, ['is_primary' => true]);
+    }
+
+    // Restituisce le accademie in cui fa parte degli atleti
     public function academyAthletes() {
-        return $this->belongsToMany(Academy::class, 'academies_athletes', 'user_id', 'academy_id');
+        return $this->belongsToMany(Academy::class, 'academies_athletes', 'user_id', 'academy_id')->withPivot('is_primary');
     }
 
+    // Restituisce l'accademia principale (per gli atleti)
+    public function primaryAcademyAthlete()
+    {
+        return $this->academyAthletes()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
+    }
+
+    // Imposta accademia primaria (per gli atleti)
+    public function setPrimaryAcademyAthlete($academyId)
+    {
+        // Rimuove l'attuale accademia principale dell'atleta e imposta la nuova
+        if($this->primaryAcademyAthlete()) {
+            $this->academyAthletes()->updateExistingPivot($this->primaryAcademyAthlete()->id, ['is_primary' => false]);
+        }
+        $this->academyAthletes()->updateExistingPivot($academyId, ['is_primary' => true]);
+    }
+
+    // Restituisce le scuole in cui fa parte del personale
     public function schools() {
-        return $this->belongsToMany(School::class, 'schools_personnel', 'user_id', 'school_id');
+        return $this->belongsToMany(School::class, 'schools_personnel', 'user_id', 'school_id')->withPivot('is_primary');
     }
 
+    // Restituisce la scuola principale (per il personale)
+    public function primarySchool()
+    {
+        return $this->schools()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
+    }
+
+    // Imposta scuola primaria (per il personale)
+    public function setPrimarySchool($schoolId)
+    {
+        // Rimuove l'attuale scuola principale del personale e imposta la nuova
+        if($this->primarySchool()) {
+            $this->schools()->updateExistingPivot($this->primarySchool()->id, ['is_primary' => false]);
+        }
+        $this->schools()->updateExistingPivot($schoolId, ['is_primary' => true]);
+    }
+
+    // Restituisce le scuole in cui fa parte degli atleti
     public function schoolAthletes() {
-        return $this->belongsToMany(School::class, 'schools_athletes', 'user_id', 'school_id');
+        return $this->belongsToMany(School::class, 'schools_athletes', 'user_id', 'school_id')->withPivot('is_primary');
+    }
+
+    // Restituisce la scuola principale (per gli atleti)
+    public function primarySchoolAthlete()
+    {
+        return $this->schoolAthletes()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
+    }
+
+    // Imposta scuola primaria (per gli atleti)
+    public function setPrimarySchoolAthlete($schoolId)
+    {
+        // Rimuove l'attuale scuola principale dell'atleta e imposta la nuova
+        if($this->primarySchoolAthlete()) {
+            $this->schoolAthletes()->updateExistingPivot($this->primarySchoolAthlete()->id, ['is_primary' => false]);
+        }
+        $this->schoolAthletes()->updateExistingPivot($schoolId, ['is_primary' => true]);
     }
 
     public function clans() {

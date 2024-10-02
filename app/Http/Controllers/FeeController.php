@@ -13,6 +13,7 @@ use Illuminate\Support\Env;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Cashier;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Srmklive\PayPal\Services\PayPal as PaypalClient;
 
 class FeeController extends Controller {
@@ -23,20 +24,20 @@ class FeeController extends Controller {
         //
 
         $user = User::find(Auth()->user()->id);
-        $academy_id = $user->academies()->first()->id;
+        $academy_id = $user->primaryAcademy()->id ?? null;
 
 
         $senior_fees = Fee::where('academy_id', $academy_id)->where([
             ['type', '=',  1],
             ['used', '=', 0],
             ['end_date', '>', now()->format('Y-m-d')],
-            ['academy_id', '=', $user->academies()->first()->id],
+            ['academy_id', '=', $academy_id],
         ])->count();
         $junior_fees = Fee::where('academy_id', $academy_id)->where([
             ['type', '=',  2],
             ['used', '=', 0],
             ['end_date', '>', now()->format('Y-m-d')],
-            ['academy_id', '=', $user->academies()->first()->id],
+            ['academy_id', '=', $academy_id],
         ])->count();
         $athletes_no_fees = Academy::find($academy_id)->athletes()->where('has_paid_fee', 0)->get();
 
@@ -65,7 +66,11 @@ class FeeController extends Controller {
         //
 
         $user = User::find(Auth()->user()->id);
-        $academy = $user->academies()->first()->id;
+        $academy = $user->primaryAcademy()->id ?? null;
+
+        if (!$academy) {
+            return redirect()->route('fees.index')->with('error', 'Main academy academy not found');
+        }
 
         return view('fees.rector.create', [
             'academy' => $academy,
@@ -110,20 +115,20 @@ class FeeController extends Controller {
     public function extimateFeeConsumption(Request $request) {
 
         $user = User::find(Auth()->user()->id);
-        $academy_id = $user->academies()->first()->id;
+        $academy_id = $user->primaryAcademy()->id ?? null;
 
 
         $senior_fees = Fee::where('academy_id', $academy_id)->where([
             ['type', '=',  1],
             ['used', '=', 0],
             ['end_date', '>', now()->format('Y-m-d')],
-            ['academy_id', '=', $user->academies()->first()->id],
+            ['academy_id', '=', $academy_id],
         ])->count();
         $junior_fees = Fee::where('academy_id', $academy_id)->where([
             ['type', '=',  2],
             ['used', '=', 0],
             ['end_date', '>', now()->format('Y-m-d')],
-            ['academy_id', '=', $user->academies()->first()->id],
+            ['academy_id', '=', $academy_id],
         ])->count();
         $senior_fees_consumed = 0;
         $junior_fees_consumed = 0;
@@ -180,7 +185,7 @@ class FeeController extends Controller {
                 ['type', '=',  $type],
                 ['used', '=', 0],
                 ['end_date', '>', now()->format('Y-m-d')],
-                ['academy_id', '=', $authuser->academies()->first()->id],
+                ['academy_id', '=', $authuser->primaryAcademy()->id ?? 1],
             ])->first();
 
 
@@ -319,7 +324,7 @@ class FeeController extends Controller {
 
 
     /**
-     * Payment success.
+     * Payment success. - Personnel (rector)
      */
 
     public function success(Request $request) {
@@ -345,11 +350,15 @@ class FeeController extends Controller {
             $user = User::find($order->user_id);
 
             foreach ($order->items as $item) {
+                $primaryAcademy = $user->primaryAcademy();
+                if(!$primaryAcademy) {
+                    Log::error('Primary academy not found. Check for fees created for this order. - Order ID: ' . $order->id . ' - Item ID: ' . $item->id);
+                } 
 
                 for ($i = 0; $i < $item->quantity; $i++) {
                     Fee::create([
                         'user_id' => $order->user_id,
-                        'academy_id' => $order->user->academies()->first()->id,
+                        'academy_id' => $order->user->primaryAcademy()->id ?? 1,
                         'type' => $item->product_name == 'senior_fee' ? 1 : 2,
                         'start_date' => now(),
                         'end_date' => now()->addYear(),
@@ -392,13 +401,14 @@ class FeeController extends Controller {
 
             //! Cosa succede se l'utente non è in una accademia?
 
-            $academy = $order->user->academies()->first() ? $order->user->academies()->first()->id : 1;
+            $academy = $order->user->primaryAcademyAthlete();
+            $academyId = $academy->id ?? 1;
 
             foreach ($order->items as $item) {
 
                 Fee::create([
                     'user_id' => $order->user_id,
-                    'academy_id' => $academy ? $academy : 1,
+                    'academy_id' => $academyId,
                     'type' => $item->product_name == 'senior_fee' ? 1 : 2,
                     'start_date' => now(),
                     'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
@@ -682,13 +692,14 @@ class FeeController extends Controller {
 
             //! Cosa succede se l'utente non è in una accademia?
 
-            $academy = $order->user->academies()->first() ? $order->user->academies()->first()->id : 1;
+            $academy = $order->user->primaryAcademyAthlete();
+            $academyId = $academy->id ?? 1;
 
             foreach ($order->items as $item) {
 
                 Fee::create([
                     'user_id' => $order->user_id,
-                    'academy_id' => $academy ? $academy : 1,
+                    'academy_id' => $academyId,
                     'type' => $item->product_name == 'senior_fee' ? 1 : 2,
                     'start_date' => now(),
                     'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
@@ -763,7 +774,7 @@ class FeeController extends Controller {
                 for ($i = 0; $i < $item->quantity; $i++) {
                     Fee::create([
                         'user_id' => $order->user_id,
-                        'academy_id' => $order->user->academies()->first()->id,
+                        'academy_id' => $order->user->primaryAcademy()->id ?? 1,
                         'type' => $item->product_name == 'senior_fee' ? 1 : 2,
                         'start_date' => now(),
                         'end_date' => now()->addYear(),

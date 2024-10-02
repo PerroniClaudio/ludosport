@@ -6,12 +6,12 @@
 <div x-data="{
     selectedSchoolId: '{{ $selectedSchoolId }}',
     selectedSchool: '{{ $selectedSchool }}',
-    availableSchools: {{ auth()->user()->academies->first()->schools ?? [] }},
+    availableSchools: {{ auth()->user()->primaryAcademy()->schools ?? [] }},
     paginatedSchools: [],
     currentPage: 1,
     totalPages: 1,
     getavailableSchools: function() {
-        data = {{ auth()->user()->academies->first()->schools ?? [] }}; 
+        data = {{ auth()->user()->primaryAcademy()->schools ?? [] }}; 
         this.availableSchools = data;
         this.paginatedSchools = this.availableSchools.slice(0, 5);
         this.totalPages = Math.ceil(this.availableSchools.length / 5);   

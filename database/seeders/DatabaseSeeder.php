@@ -8,6 +8,7 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -16,16 +17,8 @@ class DatabaseSeeder extends Seeder {
      * Seed the application's database.
      */
     public function run(): void {
-        // User::factory(10)->create();
 
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
-        // \App\Models\Academy::factory(10)->create();
-        //\App\Models\School::factory(10)->create();
-        //\App\Models\Event::factory(50)->create();
+        // Roles ---------------------------------------------------------------------------------
 
         $roles = [
             [
@@ -69,8 +62,22 @@ class DatabaseSeeder extends Seeder {
             \App\Models\Role::factory()->create($role);
         }
 
+        // Rank ---------------------------------------------------------------------------------
 
+        $ranks = [
+            'Novice',
+            'Initiate',
+            'Academic',
+            'Chevalier',
+        ];
 
+        foreach ($ranks as $rank) {
+            \App\Models\Rank::create([
+                'name' => $rank,
+            ]);
+        }
+
+        // Event Types ---------------------------------------------------------------------------------
 
         $event_types = [
             [
@@ -94,19 +101,139 @@ class DatabaseSeeder extends Seeder {
             \App\Models\EventType::create($event_type);
         }
 
+        // Weapon forms ---------------------------------------------------------------------------------
+
+        $weaponForms = [
+            [
+                'name' => 'Form 1',
+                'image' => '/weapon-forms/form_1.webp'
+            ],
+            [
+                'name' => 'Form 2',
+                'image' => '/weapon-forms/form_2.webp'
+            ],
+            [
+                'name' => 'Form Y',
+                'image' => '/weapon-forms/form_y.webp'
+            ],
+            [
+                'name' => 'Form 3 Long Saber',
+                'image' => '/weapon-forms/long_saber/form_3.webp'
+            ],
+            [
+                'name' => 'Form 4 Long Saber',
+                'image' => '/weapon-forms/long_saber/form_4.webp'
+            ],
+            [
+                'name' => 'Form 5 Long Saber',
+                'image' => '/weapon-forms/long_saber/form_5.webp'
+            ],
+            [
+                'name' => 'Form 6 Long Saber',
+                'image' => '/weapon-forms/long_saber/form_6.webp'
+            ],
+            [
+                'name' => 'Form 7 Long Saber',
+                'image' => '/weapon-forms/long_saber/form_7.webp'
+            ],
+            [
+                'name' => 'Form 3 Dual Sabers',
+                'image' => '/weapon-forms/dual_saber/form_3.webp'
+            ],
+            [
+                'name' => 'Form 4 Dual Sabers',
+                'image' => '/weapon-forms/dual_saber/form_4.webp'
+            ],
+            [
+                'name' => 'Form 5 Dual Sabers',
+                'image' => '/weapon-forms/dual_saber/form_5.webp'
+            ],
+            [
+                'name' => 'Form 6 Dual Sabers',
+                'image' => '/weapon-forms/dual_saber/form_6.webp'
+            ],
+            [
+                'name' => 'Form 7 Dual Sabers',
+                'image' => '/weapon-forms/dual_saber/form_7.webp'
+            ],
+            [
+                'name' => 'Form 3 Saberstaff',
+                'image' => '/weapon-forms/saberstaff/form_3.webp'
+            ],
+            [
+                'name' => 'Form 4 Saberstaff',
+                'image' => '/weapon-forms/saberstaff/form_4.webp'
+            ],
+            [
+                'name' => 'Form 5 Saberstaff',
+                'image' => '/weapon-forms/saberstaff/form_5.webp'
+            ],
+            [
+                'name' => 'Form 6 Saberstaff',
+                'image' => '/weapon-forms/saberstaff/form_6.webp'
+            ],
+            [
+                'name' => 'Form 7 Saberstaff',
+                'image' => '/weapon-forms/saberstaff/form_7.webp'
+            ],
+        ];
+
+        foreach ($weaponForms as $weaponForm) {
+            \App\Models\WeaponForm::create([
+                'name' => $weaponForm['name'],
+                'image' => $weaponForm['image']
+            ]);
+        }
+
+        // Languages ---------------------------------------------------------------------------------
+
+        $languages = [
+            ['name' => 'English', 'code' => 'en'],
+            ['name' => 'Spanish', 'code' => 'es'],
+            ['name' => 'French', 'code' => 'fr'],
+            ['name' => 'German', 'code' => 'de'],
+            ['name' => 'Italian', 'code' => 'it'],
+            ['name' => 'Portuguese', 'code' => 'pt'],
+            ['name' => 'Russian', 'code' => 'ru'],
+            ['name' => 'Japanese', 'code' => 'ja'],
+            ['name' => 'Chinese', 'code' => 'zh'],
+            ['name' => 'Korean', 'code' => 'ko'],
+            ['name' => 'Arabic', 'code' => 'ar'],
+            ['name' => 'Hindi', 'code' => 'hi']
+        ];
+
+        foreach ($languages as $language) {
+            \App\Models\Language::create([
+                'name' => $language['name'],
+                'code' => $language['code'],
+            ]);
+        }
+
+        // Nations ---------------------------------------------------------------------------------
+
         $this->populateCountries();
+
+        // Academies ---------------------------------------------------------------------------------
+
         $this->populateAcademies();
 
+        // Users ---------------------------------------------------------------------------------
 
         $user = User::factory()->create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
+            'password' => Hash::make('LudoSport@2024'),
         ]);
 
         $adminRole = \App\Models\Role::where('name', 'admin')->first();
-        $user->roles()->attach($adminRole);
+        $user->roles()->syncWithoutDetaching($adminRole->id);
     }
 
+    // ________________________________________________________________________________________________
+    // ________________________________________________________________________________________________
+    // Functions 
+
+    // Countries / Nations ---------------------------------------------------------------------------------
     private function populateCountries() {
 
         $countries = [
@@ -392,6 +519,8 @@ class DatabaseSeeder extends Seeder {
         }
     }
 
+    // Academies ---------------------------------------------------------------------------------
+
     private function populateAcademies () {
 
         if(!Academy::where('slug', 'no-academy')->exists()) {
@@ -447,6 +576,8 @@ class DatabaseSeeder extends Seeder {
         }
 
     }
+
+    // Get Location ---------------------------------------------------------------------------------
     
     private function getLocation($address) {
 

@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class UserController extends Controller {
@@ -57,8 +58,8 @@ class UserController extends Controller {
                 }
 
                 if ($role->label === 'athlete') {
-                    $user->academy = $user->academyAthletes->first();
-                    $user->school = $user->schoolAthletes->first();
+                    $user->academy = $user->primaryAcademyAthlete();
+                    $user->school = $user->primarySchoolAthlete();
                     if ($user->academy) {
                         $user->nation = $user->academy->nation->name;
                     } else {
@@ -101,13 +102,14 @@ class UserController extends Controller {
                 $academies = Academy::where('is_disabled', false)->get();
                 break;
             case 'rector':
-                $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->academies->first()->id)->get();
+                $primaryAcademy = $authUser->primaryAcademy();
+                $academies = $primaryAcademy ? collect([$primaryAcademy]) : collect([]);
                 break;
             case 'dean':
-                $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->schools->first()->academy->id)->get();
+                $academies = Academy::where('is_disabled', false)->where('id', ($authUser->primarySchool()->academy->id ?? null))->get();
                 break;
             case 'manager':
-                $academies = Academy::where('is_disabled', false)->where('id', auth()->user()->schools->first()->academy->id)->get();
+                $academies = Academy::where('is_disabled', false)->where('id', ($authUser->primarySchool()->academy->id ?? null))->get();
                 break;
             default:
                 return back()->with('error', 'You do not have the required role to access this page!');
@@ -156,7 +158,7 @@ class UserController extends Controller {
             $roleElement = Role::where('label', $role)->first();
 
             if ($roleElement) {
-                $user->roles()->attach($roleElement->id);
+                $user->roles()->syncWithoutDetaching($roleElement->id);
             }
         }
 
@@ -164,9 +166,9 @@ class UserController extends Controller {
             $academy = Academy::find($request->academy_id);
 
             if ($user->hasRole('athlete')) {
-                $academy->athletes()->attach($user->id);
+                $academy->athletes()->syncWithoutDetaching($user->id);
             } else {
-                $academy->personnel()->attach($user->id);
+                $academy->personnel()->syncWithoutDetaching($user->id);
             }
         }
 
@@ -174,7 +176,7 @@ class UserController extends Controller {
 
         foreach ($user->allowedRoles() as $role) {
             if (in_array($role, ['rector', 'dean', 'instructor', 'manager'])) {
-                $academy->personnel()->attach($user->id);
+                $academy->personnel()->syncWithoutDetaching($user->id);
                 break;
             }
         }
@@ -222,8 +224,8 @@ class UserController extends Controller {
         if ($request->type == "athlete") {
 
             $role = Role::where('label', 'athlete')->first();
-            $user->roles()->attach($role->id);
-            $academy->athletes()->attach($user->id);
+            $user->roles()->syncWithoutDetaching($role->id);
+            $academy->athletes()->syncWithoutDetaching($user->id);
         } else {
 
             $roles = explode(',', $request->roles);
@@ -234,10 +236,10 @@ class UserController extends Controller {
                 }
                 $roleElement = Role::where('label', $role)->first();
                 if ($roleElement) {
-                    $user->roles()->attach($roleElement->id);
+                    $user->roles()->syncWithoutDetaching($roleElement->id);
                 }
             }
-            $academy->personnel()->attach($user->id);
+            $academy->personnel()->syncWithoutDetaching($user->id);
         }
 
 
@@ -289,9 +291,9 @@ class UserController extends Controller {
         if ($request->type == "athlete") {
 
             $role = Role::where('label', 'athlete')->first();
-            $user->roles()->attach($role->id);
-            $academy->athletes()->attach($user->id);
-            $school->athletes()->attach($user->id);
+            $user->roles()->syncWithoutDetaching($role->id);
+            $academy->athletes()->syncWithoutDetaching($user->id);
+            $school->athletes()->syncWithoutDetaching($user->id);
         } else {
 
             $roles = explode(',', $request->roles);
@@ -302,11 +304,11 @@ class UserController extends Controller {
                 }
                 $roleElement = Role::where('label', $role)->first();
                 if ($roleElement) {
-                    $user->roles()->attach($roleElement->id);
+                    $user->roles()->syncWithoutDetaching($roleElement->id);
                 }
             }
-            $academy->personnel()->attach($user->id);
-            $school->personnel()->attach($user->id);
+            $academy->personnel()->syncWithoutDetaching($user->id);
+            $school->personnel()->syncWithoutDetaching($user->id);
         }
 
 
@@ -359,10 +361,10 @@ class UserController extends Controller {
         if ($request->type == "athlete") {
 
             $role = Role::where('label', 'athlete')->first();
-            $user->roles()->attach($role->id);
-            $academy->athletes()->attach($user->id);
-            $school->athletes()->attach($user->id);
-            $clan->users()->attach($user->id);
+            $user->roles()->syncWithoutDetaching($role->id);
+            $academy->athletes()->syncWithoutDetaching($user->id);
+            $school->athletes()->syncWithoutDetaching($user->id);
+            $clan->users()->syncWithoutDetaching($user->id);
         } else {
 
             $roles = explode(',', $request->roles);
@@ -373,12 +375,12 @@ class UserController extends Controller {
                 }
                 $roleElement = Role::where('label', $role)->first();
                 if ($roleElement) {
-                    $user->roles()->attach($roleElement->id);
+                    $user->roles()->syncWithoutDetaching($roleElement->id);
                 }
             }
-            $academy->personnel()->attach($user->id);
-            $school->personnel()->attach($user->id);
-            $clan->personnel()->attach($user->id);
+            $academy->personnel()->syncWithoutDetaching($user->id);
+            $school->personnel()->syncWithoutDetaching($user->id);
+            $clan->personnel()->syncWithoutDetaching($user->id);
         }
 
         if ($request->go_to_edit === 'on') {
@@ -572,7 +574,7 @@ class UserController extends Controller {
             foreach ($rolesToAdd as $roleLabel) {
                 $roleElement = Role::where('label', $roleLabel)->first();
                 if ($roleElement && $authUser->canModifyRole($roleLabel)) {
-                    $user->roles()->attach($roleElement->id);
+                    $user->roles()->syncWithoutDetaching($roleElement->id);
                 }
             }
         }
@@ -676,8 +678,8 @@ class UserController extends Controller {
     }
 
     public function filter() {
-
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
         switch ($authRole) {
             case 'admin':
@@ -692,13 +694,13 @@ class UserController extends Controller {
                 //     break;
                 // case 'dean':
                 // case 'manager':
-                //     $academies = collect([auth()->user()->schools->first()->academy]);
+                //     $academies = collect((auth()->user()->primarySchool()->academy ?? null) ? [auth()->user()->primarySchool()->academy] : []);
                 //     break;
                 // case 'technician':
                 //     $academies = Academy::where('is_disabled', false)->with('nation')->get();
                 //     break;
             case 'instructor':
-                $academies = collect([auth()->user()->academies->first()]);
+                $academies = collect([$authUser->primaryAcademy()]);
                 break;
             default:
                 return back()->with('error', 'You do not have the required role to access this page!');
@@ -711,8 +713,8 @@ class UserController extends Controller {
     }
 
     public function filterResult(Request $request) {
-
-        $authUserRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authUserRole = $authUser->getRole();
 
         $users = [];
 
@@ -777,7 +779,7 @@ class UserController extends Controller {
         $shouldCheckForCreationDateTo = $request->to != null;
 
         // Serve solo per l'istruttore. elenco delle scuole in cui ha un corso.
-        $authSchools = auth()->user()->schools->pluck('id')->toArray();
+        $authSchools = $authUser->schools->pluck('id')->toArray();
 
         $filteredUsers = [];
 
@@ -819,8 +821,8 @@ class UserController extends Controller {
 
         foreach ($filteredUsers as $user) {
 
-            $user->academy = $user->academyAthletes->first();
-            $user->school = $user->schoolAthletes->first();
+            $user->academy = $user->primaryAcademyAthlete();
+            $user->school = $user->primarySchoolAthlete();
             if ($user->academy) {
                 $user->nation = $user->academy->nation->name;
             } else {
@@ -833,8 +835,7 @@ class UserController extends Controller {
             })->toArray());
         }
 
-        $authRole = User::find(auth()->user()->id)->getRole();
-        $viewPath = $authRole === 'admin' ? 'users.filter-result' :  'users.' . $authRole . '.filter-result';
+        $viewPath = $authUserRole === 'admin' ? 'users.filter-result' :  'users.' . $authUserRole . '.filter-result';
         return view($viewPath, [
             'users' => $filteredUsers,
         ]);
@@ -1052,7 +1053,7 @@ class UserController extends Controller {
         $languages = explode(',', $request->languages);
 
         foreach ($languages as $language) {
-            $user->languages()->attach($language);
+            $user->languages()->syncWithoutDetaching($language);
         }
 
         return response()->json([
@@ -1174,10 +1175,14 @@ class UserController extends Controller {
             'success' => true,
         ]);
     }
+    
+    public function testUserTest() {
+        return response()->json("hi there");
+    }
 
     public function setMainInstitution(Request $request) {
 
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'institution_type' => 'required|string|in:academy,school',
             'role_type' => 'required|string|in:personnel,athlete',
             'user_id' => 'required|integer',
@@ -1185,45 +1190,41 @@ class UserController extends Controller {
             'school_id' => 'integer',
         ]);
 
+        if ($validator->fails()) {
+            return back()->with('error', $validator->errors()->first());
+        }
+
         $user = User::find($request->user_id);
 
         if ($request->institution_type == 'academy') {
             $academy = Academy::find($request->academy_id);
             if (!$academy) {
-                return response()->json([
-                    'error' => 'Academy not found',
-                ]);
+                return back()->with('error', 'Academy not found!');
             }
             if ($request->role_type == 'personnel') {
                 // Logica per modificare l'ordine delle accademie - personale
-
+                $user->setPrimaryAcademy($academy->id);
             } else {
-                // $academy->athletes()->attach($user->id);
                 // Logica per modificare l'ordine delle accademie - atleti
-
+                $user->setPrimaryAcademyAthlete($academy->id);
             }
         }
 
         if ($request->institution_type == 'school') {
             $school = School::find($request->school_id);
             if (!$school) {
-                return response()->json([
-                    'error' => 'School not found',
-                ]);
+                return back()->with('error', 'School not found!');
             }
             if ($request->role_type == 'personnel') {
                 // Logica per modificare l'ordine delle scuole - personale
-
+                $user->setPrimarySchool($school->id);
             } else {
-                // $school->athletes()->attach($user->id);
                 // Logica per modificare l'ordine delle scuole - atleti
-
+                $user->setPrimarySchoolAthlete($school->id);
             }
         }
 
-        return response()->json([
-            'success' => true,
-        ]);
+        return back()->with('success', 'Main ' . $request->institution_type . ' as ' . $request->role_type . ' set successfully!');
     }
 
     public function roleSelector() {

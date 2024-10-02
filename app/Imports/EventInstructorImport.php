@@ -108,7 +108,7 @@ class EventInstructorImport implements ToCollection {
                     // Se il risultato è 'passed' o 'review' si dà comunque la forma da atleta. Per quella da istruttore decidono gli admin.
                     if (in_array($result, ['passed', 'review']) && ($participationWeaponForm && !$participationWeaponForm->users()->where('user_id', $user->id)->exists())) {
                         // Il ruolo da atleta non va aggiunto se non c'è già
-                        $participationWeaponForm->users()->attach($user->id);
+                        $participationWeaponForm->users()->syncWithoutDetaching($user->id);
                     }
                 }
 

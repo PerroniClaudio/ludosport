@@ -63,8 +63,13 @@ class UsersImport implements ToCollection {
                     $this->is_partial = true;
                     continue;
                 }
-                $user->roles()->attach(7);
-                $user->academyAthletes()->attach($academy ? $academy->id : $noAcademy->id);
+                $user->roles()->syncWithoutDetaching(7);
+                $user->academyAthletes()->syncWithoutDetaching($academy ? $academy->id : $noAcademy->id);
+
+                if(!$user->primaryAcademyAthlete()) {
+                    $user->setPrimaryAcademyAthlete($academy ? $academy->id : $noAcademy->id);
+                }
+                
             } catch (\Exception $e) {
                 $this->log[] = "['Error: User email: " . $row[2] . " - Error message: " . $e->getMessage() . "']";
                 $this->is_partial = true;

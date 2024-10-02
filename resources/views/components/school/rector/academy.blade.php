@@ -1,14 +1,14 @@
 @props([
-    'nationality' => auth()->user()->academies->first()->nation_id ?? '',
-    'selectedAcademyId' => auth()->user()->academies->first()->id ??'',
-    'selectedAcademy' => auth()->user()->academies->first()->name ??'',
-    'nations' => [auth()->user()->academies->first()->nation],
-    'academies' => [auth()->user()->academies->first()],
+    'nationality' => auth()->user()->primaryAcademy()->nation_id ?? '',
+    'selectedAcademyId' => auth()->user()->primaryAcademy()->id ??'',
+    'selectedAcademy' => auth()->user()->primaryAcademy()->name ??'',
+    'nations' => [auth()->user()->primaryAcademy()->nation],
+    'academies' => [auth()->user()->primaryAcademy()],
 ])
 @php
     $authRole = auth()->user()->getRole();
     $addToRoute = $authRole === 'admin' ? '' : '/' . $authRole;
-    $academy = auth()->user()->academies->first();
+    $academy = auth()->user()->primaryAcademy();
     $nation = $academy->nation;
 @endphp
 <div x-data="{

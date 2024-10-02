@@ -56,6 +56,19 @@ class UsersSchoolImport implements ToCollection {
                 if ($user->academyAthletes()->whereNot('academy_id', $noAcademy->id)->count() > 0) {
                     $noAcademy->athletes()->detach($user->id);
                 }
+
+                // Se l'atleta non ha l'accademia principale, la assegna
+                if(!$user->primaryAcademyAthlete()){
+                    $schoolAcademy = null;
+                    if($user->primarySchoolAthlete()){
+                        $schoolAcademy = $user->primarySchoolAthlete()->academy;
+                    } 
+                    $user->setPrimaryAcademy($schoolAcademy ? $schoolAcademy->id : $school->academy->id);
+                }
+                // Se l'atleta non ha la scuola principale, la assegna
+                if(!$user->primarySchoolAthlete()){
+                    $user->setPrimarySchoolAthlete($school->id);
+                }
                 
             } catch (\Exception $e) {
                 $this->log[] = "['Error: User email: " . $row[0] . " - School ID: " . $row[1] . " - Error message: " . $e->getMessage() . "']";

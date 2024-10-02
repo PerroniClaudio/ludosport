@@ -52,8 +52,8 @@ class RegisteredUserController extends Controller {
             'how_found_us' => $request->how_found_us,
         ]);
 
-        $user->academyAthletes()->attach($academy->id);
-        $user->roles()->attach(7);
+        $user->academyAthletes()->syncWithoutDetaching($academy->id);
+        $user->roles()->syncWithoutDetaching(7);
 
         Announcement::create([
             'object' => 'New user registered',

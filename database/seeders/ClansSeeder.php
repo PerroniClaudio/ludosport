@@ -33,13 +33,13 @@ class ClansSeeder extends Seeder {
                     $query->where('name', 'athlete');
                 })->inRandomOrder()->limit(10)->get();
 
-                $clan->users()->attach($users);
+                $clan->users()->syncWithoutDetaching($users->id);
 
                 $instructor = User::whereHas('roles', function ($query) {
                     $query->where('name', 'instructor');
                 })->inRandomOrder()->first();
 
-                $clan->personnel()->attach($instructor);
+                $clan->personnel()->syncWithoutDetaching($instructor->id);
             }
         }
     }
