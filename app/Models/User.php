@@ -10,6 +10,7 @@ use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 use App\Models\Invoice as Invoice;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmail {
@@ -208,6 +209,10 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function seenAnnouncements() {
         return $this->belongsToMany(Announcement::class, 'announcement_users', 'user_id', 'announcement_id');
+    }
+
+    public function fees() {
+        return $this->hasMany(Fee::class);
     }
 
     public function imports() {
@@ -538,5 +543,16 @@ class User extends Authenticatable implements MustVerifyEmail {
             default:
                 return collect([]);
         }
+    }
+
+    public function isFeeExpiring() {
+        $fee = $this->fees()->orderBy('created_at', 'desc')->first();
+        if (!$fee) {
+            return false;
+        }
+        $now = now();
+        $expirationDate = Carbon::parse($fee->end_date);
+        return true;
+        return $now->diffInDays($expirationDate) < 30;
     }
 }

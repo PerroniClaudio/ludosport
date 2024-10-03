@@ -94,4 +94,5 @@ return [
     'set_main_personnel_school' => 'Set main school as personnel',
     'set_main_athletes_school' => 'Set main school as athlete',
     'confirm' => 'Confirm',
+    'fee_about_expire_text' => 'Your fee is about to expire. Please renew it.',
 ];

@@ -128,4 +128,15 @@ class AssetController extends Controller {
 
         return response($image, 200, $headers);
     }
+
+    public function favicon() {
+        $url = $this->retrieveAsset('/assets/favicon.ico');
+        $response = Http::get($url);
+        $image = $response->body();
+        $headers = [
+            'Content-Type' => 'image/x-icon',
+            'Content-Length' => strlen($image),
+        ];
+        return response($image, 200, $headers);
+    }
 }
