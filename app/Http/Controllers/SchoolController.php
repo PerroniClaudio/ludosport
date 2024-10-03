@@ -368,17 +368,54 @@ class SchoolController extends Controller {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
+        if ($school->athletes->count() > 0) {
+            return back()->with('error', 'Cannot delete school with associated athletes.');
+        }
+
         $school->is_disabled = true;
         $school->save();
 
-        // Prende tutti gli atleti che hanno la scuola come principale
-        $athletes = $school->athletes->where('pivot.is_primary', 1);
-        // Cerca se ci sono altre scuole a cui è associato e se non ci sono, lo disassocia
-        // Se ci sono ne imposta una come principale (se è all'interno della stessa accademia è meglio)
+        // // Prende tutti gli atleti che hanno la scuola come principale
+        // $athletes = $school->athletes->where('pivot.is_primary', 1);
         
-        // Prende tutto il personale che ha la scuola come principale
-        // Cerca se ci sono altre scuole a cui è associato e se non ci sono, lo disassocia
-        // Se ci sono ne imposta una come principale (se è all'interno della stessa accademia è meglio)
+        // if($athletes->count() > 0){
+        //     foreach ($athletes as $athlete) {
+        //         // Lo disassocia dalla scuola
+        //         $athlete->schoolAthletes()->detach($school->id);
+                
+        //         // Cerca se ci sono altre scuole a cui è associato e 
+        //         if($athlete->schoolAthletes()->whereNot('school_id', $school->id)->count() > 0){
+        //             // Se ci sono ne imposta una come principale (se è all'interno della stessa accademia è meglio)
+        //             $primaryAcademy = $athlete->primaryAcademyAthlete();
+        //             if($primaryAcademy && ($primaryAcademy->schools->whereIn('id', $athlete->schoolAthletes->pluck('id')) > 0)){
+        //                 $athlete->setPrimarySchoolAthlete($primaryAcademy->schools->whereIn('id', $athlete->schoolAthletes)->first()->id);
+        //             } else {
+        //                 $athlete->setPrimarySchoolAthlete($athlete->schoolAthletes->first()->id);
+        //             }
+        //         }    
+        //     }
+        // }
+
+        // // Prende tutto il personale che ha la scuola come principale
+        // $personnel = $school->personnel->where('pivot.is_primary', 1);
+
+        // if($personnel->count() > 0){
+        //     foreach ($personnel as $person) {
+        //         // Lo disassocia dalla scuola
+        //         $person->schools()->detach($school->id);
+                
+        //         // Cerca se ci sono altre scuole a cui è associato e 
+        //         if($person->schools()->whereNot('school_id', $school->id)->count() > 0){
+        //             // Se ci sono ne imposta una come principale (se è all'interno della stessa accademia è meglio)
+        //             $primaryAcademy = $person->primaryAcademy();
+        //             if($primaryAcademy && ($primaryAcademy->schools->whereIn('id', $person->schools->pluck('id')) > 0)){
+        //                 $person->setPrimarySchool($primaryAcademy->schools->whereIn('id', $person->schools)->first()->id);
+        //             } else {
+        //                 $person->setPrimarySchool($person->schools->first()->id);
+        //             }
+        //         }    
+        //     }
+        // }
 
         return redirect()->route('schools.index')->with('success', 'School disabled successfully!');
     }

@@ -256,9 +256,45 @@ class AcademyController extends Controller {
         if ($academy->athletes->count() > 0) {
             return back()->with('error', 'Cannot delete academy with associated athletes.');
         }
+        if ($academy->personnel->count() > 0) {
+            return back()->with('error', 'Cannot delete academy with associated personnel.');
+        }
 
         $academy->is_disabled = true;
         $academy->save();
+
+        // Questa parte serve solo se si toglie il blocco all'eliminazione se ci sono atleti associati
+        // // Prende gli atleti dell'accademia
+        // $athletes = $academy->athletes;
+
+        // foreach ($athletes as $athlete) {
+        //     // Disassocia l'atleta dall'accademia
+        //     $athlete->academyAthletes()->detach($academy->id);
+        //     // Se ne ha un'altra la imposta come principale, altrimenti imposta no-academy come principale
+        //     if ($athlete->academyAthletes()->count() > 0) {
+        //         $athlete->setPrimaryAcademyAthlete($athlete->academyAthletes->first()->id);
+        //     } else {
+        //         $noAcademy = Academy::where('slug', 'no-academy')->first();
+        //         $athlete->academyAthletes()->syncWithoutDetaching($noAcademy->id);
+        //         $athlete->setPrimaryAcademyAthlete($noAcademy->id);
+        //     }
+        // }
+
+        // // Prende il personale dell'accademia
+        // $personnel = $academy->personnel;
+
+        // foreach ($personnel as $person) {
+        //     // Disassocia il personale dall'accademia
+        //     $person->academies()->detach($academy->id);
+        //     // Se ne ha un'altra la imposta come principale, altrimenti imposta no-academy come principale
+        //     if ($person->academies()->count() > 0) {
+        //         $person->setPrimaryAcademy($person->academies->first()->id);
+        //     } else {
+        //         $noAcademy = Academy::where('slug', 'no-academy')->first();
+        //         $person->academies()->syncWithoutDetaching($noAcademy->id);
+        //         $person->setPrimaryAcademy($noAcademy->id);
+        //     }
+        // }
 
         return redirect()->route('academies.index')->with('success', 'Academy disabled successfully!');
     }

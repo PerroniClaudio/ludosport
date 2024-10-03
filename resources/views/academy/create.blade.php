@@ -15,7 +15,7 @@
                     @csrf
                     <div class="flex flex-col gap-2 w-1/2">
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                            value="{{ old('name') }}" placeholder="{{ fake()->company() }}" />
+                            value="{!! old('name') !!}" placeholder="{{ fake()->company() }}" />
                         <x-form.nationality-select selectedvalue="{{ old('nationality') }}" />
                     </div>
 

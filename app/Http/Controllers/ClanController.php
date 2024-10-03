@@ -350,7 +350,7 @@ class ClanController extends Controller {
         }
 
         if($clan->users->count() > 0){
-            return back()->with('error', 'Cannot delete course with athletes.');
+            return back()->with('error', 'Cannot delete course with associated athletes.');
         }
 
         $clan->is_disabled = true;
