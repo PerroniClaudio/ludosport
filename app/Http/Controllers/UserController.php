@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CreatedUserEmail;
 use App\Models\Academy;
 use App\Models\Announcement;
 use App\Models\Clan;
@@ -19,6 +20,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -179,6 +181,9 @@ class UserController extends Controller {
             }
         }
 
+        Mail::to($user->email)
+            ->send(new CreatedUserEmail($user));
+
         $redirectRoute = $authRole === 'admin' ? 'users.edit' :  $authRole . '.users.edit';
         return redirect()->route($redirectRoute, $user)->with('success', 'User created successfully!');
     }
@@ -239,6 +244,10 @@ class UserController extends Controller {
             }
             $academy->personnel()->attach($user->id);
         }
+
+
+        Mail::to($user->email)
+            ->send(new CreatedUserEmail($user));
 
 
         if ($request->go_to_edit === 'on') {
@@ -308,6 +317,10 @@ class UserController extends Controller {
             $academy->personnel()->attach($user->id);
             $school->personnel()->attach($user->id);
         }
+
+
+        Mail::to($user->email)
+            ->send(new CreatedUserEmail($user));
 
 
         if ($request->go_to_edit === 'on') {
@@ -380,6 +393,10 @@ class UserController extends Controller {
             $school->personnel()->attach($user->id);
             $clan->personnel()->attach($user->id);
         }
+
+
+        Mail::to($user->email)
+            ->send(new CreatedUserEmail($user));
 
         if ($request->go_to_edit === 'on') {
             $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
@@ -1120,17 +1137,18 @@ class UserController extends Controller {
 
     public function updateInvoice(Request $request) {
 
-        if($request->want_invoice == 'true'){
-            if($request->is_business == 'true' && (!$request->vat || !$request->business_name)) {
+        if ($request->want_invoice == 'true') {
+            if ($request->is_business == 'true' && (!$request->vat || !$request->business_name)) {
                 return response()->json([
                     'error' => 'Business invoice requires VAT and Business Name!',
                 ]);
             }
             if (((preg_match('/^IT/', $request->vat) || strtolower($request->country) === 'italy' || strtolower($request->country) === 'italia'))
-                && !$request->sdi) {
-                    return response()->json([
-                        'error' => 'For Italy SDI code is required!',
-                    ]);
+                && !$request->sdi
+            ) {
+                return response()->json([
+                    'error' => 'For Italy SDI code is required!',
+                ]);
             }
         }
 

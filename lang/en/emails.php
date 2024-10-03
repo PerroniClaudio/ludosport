@@ -45,4 +45,10 @@ return [
     'event_participation_email_event_name' => 'Event name',
     'event_participation_email_event_date' => 'Event date',
     'event_participation_email_event_location' => 'Event location',
+
+    /** User creation */
+    'created_user_email_title' => 'Hello :name,',
+    'created_user_email_introduction' => 'Your account has been created successfully! You can now set up your password to proceed further.',
+    'created_user_setup_password' => 'Set up your password',
+
 ];
