@@ -107,7 +107,8 @@ class Event extends Model {
         } else {
             $participants = $this->results->count();
         }
-        return $participants >= $this->max_participants;
+        // Se max_participants è null o 0 allora non c'è limite di partecipanti, quindi nemmeno la waiting list
+        return (!!$this->max_participants && ($participants >= $this->max_participants));
     }
 
     public function eventMultiplier() {

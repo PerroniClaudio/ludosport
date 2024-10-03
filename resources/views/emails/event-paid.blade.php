@@ -14,7 +14,7 @@
 ## {{ __('emails.event_participation_email_event_details') }}
 
 -   **{{ __('emails.event_participation_email_event_name')  }}**: {{ $event->name }}
--   **{{ __('emails.event_participation_email_event_date')  }}**: {{ $event->start_date->format('d/m/Y H:i') }}
+-   **{{ __('emails.event_participation_email_event_date')  }}**: {{ \Carbon\Carbon::parse($event->start_date)->format('d/m/Y H:i') }}
 -   **{{ __('emails.event_participation_email_event_location')  }}**: {{ $event->postal_code }}, {{ $event->address }}, {{ $event->city }}
 
 {{ __('emails.fee_email_regards') }}

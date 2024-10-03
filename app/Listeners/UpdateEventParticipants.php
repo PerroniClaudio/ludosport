@@ -29,6 +29,8 @@ class UpdateEventParticipants
     {
         $event = Event::find($triggeredEvent->eventId);
 
+        // Check if the event has free spots
+        // max_participants è nullable, se è null non ci sono limiti, quindi non c'è nemmeno la lista d'attesa. Quindi non ci sono controlli aggiuntivi da inserire qui
         $hasFreeSpots = false;
         if($event->resultType() === 'enabling'){
             $hasFreeSpots = $event->instructorResults()->count() < $event->max_participants;
@@ -127,7 +129,7 @@ class UpdateEventParticipants
                             );
                         }
 
-                        if($result['error']){
+                        if(isset($result['error'])){
                             Log::error('PayPal preauthorized payment capture error. ', [
                                 'order_id' => $order->id,
                                 'event_id' => $waitingListItem->event->id,

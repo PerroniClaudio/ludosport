@@ -337,6 +337,17 @@ Route::get('/test', function () {
     ini_set ('display_startup_errors', 1);
     error_reporting (E_ALL);
     
+    $event = App\Models\Event::find(1);
+
+    dump([
+        'Participants-emabling' => $event->instructorResults->count(),
+        'Participants-ranking' => $event->results->count(),
+        'Max participants' => $event->max_participants,
+        'Is enabling' => $event->resultType() === 'enabling',
+        'Is waiting list' => $event->isWaitingList(),
+        '0 >= null' => 0 >= null,
+    ]);
+
     return "test";
     // // Personale
     // $roles = ['admin', 'rector', 'dean', 'manager', 'instructor', 'technician'];

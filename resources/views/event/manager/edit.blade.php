@@ -47,12 +47,16 @@
                             selected="{{ $event->type->id }}" 
                             disabled="{{true}}" />
 
-                        <x-form.input name="max_participants" label="Max Participants" type="number" required="{{ true }}"
+                        <x-form.input name="max_participants" label="Max Participants (0 means unlimited)" type="number" required="{{ true }}"
                             value="{{ $event->max_participants }}" min="{{0}}" 
                             placeholder="{{ __('events.max_participants_placeholder') }}"
                             disabled="{{true}}" />
 
                         <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms" 
+                            disabled="{{true}}" />
+
+                        <x-form.checkbox id="block_subscriptions" name="block_subscriptions" label="Block subscriptions (shop)"
+                            isChecked="{{ $event->block_subscriptions }}" 
                             disabled="{{true}}" />
 
                         <x-form.checkbox id="is_free" name="is_free" label="Free Event"

@@ -270,25 +270,36 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        $request->validate([
-            'name' => 'required',
-            'event_type' => 'string',
-            'start_date' => 'required',
-            'end_date' => 'required',
-            'price' => 'min:0',
-            'max_participants' => 'min:0',
-        ]);
+        if (!$event->is_approved){
+            $request->validate([
+                'name' => 'required',
+                'event_type' => 'string',
+                'start_date' => 'required',
+                'end_date' => 'required',
+                'price' => 'min:0',
+            ]);
+        }
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
         if (!($authRole === 'admin' ||
             ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->primaryAcademy()->id : null))) ||
             $event->user_id === $authUser->id)) {
-            return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
+                return back()->with('error', 'You are not authorized to edit this event');
         }
 
-        // Da quando è approvato non si può modificare
+        // Da quando è approvato non si può modificare. Ad eccezione di block_subscriptions, modificabile solo dall'admin
         if ($event->is_approved) {
-            return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
+            if ($authRole !== 'admin') {
+                return back()->with('error', 'You are not authorized to edit this event');
+            }
+            $newValue = $request->block_subscriptions == 'on' ? true : false;
+            if ($event->block_subscriptions != $newValue) {
+                $event->block_subscriptions = $newValue;
+                $event->save();
+                return back()->with('success', 'Block subscriptions saved successfully');
+            }
+            
+            return back()->with('error', 'After approval, you can only modify "block subscriptions" value');
         }
 
         $event->name = $request->name;
@@ -297,7 +308,7 @@ class EventController extends Controller {
 
         if ($authRole === 'admin') {
 
-            $event->max_participants = $request->max_participants;
+            $event->max_participants = $request->max_participants ?? null;
 
             $event_type = EventType::where('name', $request->event_type)->first();
             $event->event_type = $event_type->id;
@@ -310,11 +321,7 @@ class EventController extends Controller {
                 $event->price = $request->price;
             }
 
-            if ($request->block_subscriptions == 'on') {
-                $event->block_subscriptions = true;
-            } else {
-                $event->block_subscriptions = false;
-            }
+            $event->block_subscriptions = $request->block_subscriptions == 'on' ? true : false;
         }
 
         if (isset($request->weapon_form_id)) {
@@ -958,12 +965,10 @@ class EventController extends Controller {
                 $isParticipating = $event->instructorResults()->where('user_id', $user->id)->exists();
                 $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
                 $canpurchase = !$event->block_subscriptions && !$isParticipating && !$isInWaitingList;
-                // $canpurchase = !$isParticipating && !$isInWaitingList && $event->instructorResults()->count() < $event->max_participants;
             } else if ($event->resultType() === 'ranking') {
                 $isParticipating = $event->results()->where('user_id', $user->id)->exists();
                 $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
                 $canpurchase = !$event->block_subscriptions && !$isParticipating && !$isInWaitingList;
-                // $canpurchase = !$isParticipating && !$isInWaitingList && $event->results()->count() < $event->max_participants;
             }
         }
 
@@ -1385,9 +1390,6 @@ class EventController extends Controller {
     // Errore acquisto con paypal
     public function cancelUserPaypal(Request $request) {
 
-
-        dd($request->all());
-
         $orderId = $request->order_id;
 
         $provider = new PaypalClient;
@@ -1437,6 +1439,8 @@ class EventController extends Controller {
                 'order_id' => $order->id,
             ],
         ]);
+
+        Log::info($response);
 
         if ($response['status'] === 'CREATED' && isset($response['id']) && $response['id'] !== null) {
             session(['paypal_order_id' => $response['id']]);

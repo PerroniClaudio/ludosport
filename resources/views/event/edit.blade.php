@@ -55,11 +55,11 @@
                 @csrf
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.info') }}</h3>
-                    @if(!$event->is_approved)
+                    {{-- @if(!$event->is_approved) --}}
                         <x-primary-button type="sumbit">
                             <x-lucide-save class="w-5 h-5 text-white" />
                         </x-primary-button>
-                    @endif
+                    {{-- @endif --}}
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
@@ -86,7 +86,7 @@
                         selected="{{ $event->type->id }}" 
                         disabled="{{!!$event->is_approved}}" />
 
-                    <x-form.input name="max_participants" label="Max Participants" type="number" required="{{ true }}"
+                    <x-form.input name="max_participants" label="Max Participants (0 means unlimited)" type="number" required="{{ true }}"
                         value="{{ $event->max_participants }}" min="{{0}}" 
                         placeholder="{{ __('events.max_participants_placeholder') }}"
                         disabled="{{!!$event->is_approved}}" />
@@ -96,7 +96,7 @@
 
                     <x-form.checkbox id="block_subscriptions" name="block_subscriptions" label="Block subscriptions (shop)"
                         isChecked="{{ $event->block_subscriptions }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                        disabled="{{false}}" />
 
                     <x-form.checkbox id="is_free" name="is_free" label="Free Event"
                         isChecked="{{ $event->is_free }}" 
