@@ -144,7 +144,7 @@ class UserController extends Controller {
             'email' => $request->email,
             'password' => bcrypt(Str::random(10)),
             'subscription_year' => $request->year,
-            'academy_id' => $request->academy_id ?? 0,
+            'academy_id' => $request->academy_id ?? 1,
             'nation_id' => $nation->id,
             // 'unique_code' => $unique_code,
         ]);
@@ -162,21 +162,22 @@ class UserController extends Controller {
             }
         }
 
-        if ($request->academy_id) {
-            $academy = Academy::find($request->academy_id);
+        $academy = Academy::find($request->academy_id ?? 1);
 
-            if ($user->hasRole('athlete')) {
-                $academy->athletes()->syncWithoutDetaching($user->id);
-            } else {
-                $academy->personnel()->syncWithoutDetaching($user->id);
-            }
+        if ($user->hasRole('athlete')) {
+            $academy->athletes()->syncWithoutDetaching($user->id);
+            $user->setPrimaryAcademyAthlete($academy->id);
+        } else {
+            $academy->personnel()->syncWithoutDetaching($user->id);
+            $user->setPrimaryAcademy($academy->id);
         }
 
-
-
         foreach ($user->allowedRoles() as $role) {
-            if (in_array($role, ['rector', 'dean', 'instructor', 'manager'])) {
+            if (in_array($role, ['rector', 'dean', 'instructor', 'manager', 'technician'])) {
                 $academy->personnel()->syncWithoutDetaching($user->id);
+                if(!$user->primaryAcademy()) {
+                    $user->setPrimaryAcademy($academy->id);
+                }
                 break;
             }
         }
@@ -226,6 +227,7 @@ class UserController extends Controller {
             $role = Role::where('label', 'athlete')->first();
             $user->roles()->syncWithoutDetaching($role->id);
             $academy->athletes()->syncWithoutDetaching($user->id);
+            $user->setPrimaryAcademyAthlete($academy->id);
         } else {
 
             $roles = explode(',', $request->roles);
@@ -240,6 +242,7 @@ class UserController extends Controller {
                 }
             }
             $academy->personnel()->syncWithoutDetaching($user->id);
+            $user->setPrimaryAcademy($academy->id);
         }
 
 
@@ -294,6 +297,8 @@ class UserController extends Controller {
             $user->roles()->syncWithoutDetaching($role->id);
             $academy->athletes()->syncWithoutDetaching($user->id);
             $school->athletes()->syncWithoutDetaching($user->id);
+            $user->setPrimaryAcademyAthlete($academy->id);
+            $user->setPrimarySchoolAthlete($school->id);
         } else {
 
             $roles = explode(',', $request->roles);
@@ -309,6 +314,8 @@ class UserController extends Controller {
             }
             $academy->personnel()->syncWithoutDetaching($user->id);
             $school->personnel()->syncWithoutDetaching($user->id);
+            $user->setPrimaryAcademy($academy->id);
+            $user->setPrimarySchool($school->id);
         }
 
 
@@ -365,6 +372,8 @@ class UserController extends Controller {
             $academy->athletes()->syncWithoutDetaching($user->id);
             $school->athletes()->syncWithoutDetaching($user->id);
             $clan->users()->syncWithoutDetaching($user->id);
+            $user->setPrimaryAcademyAthlete($academy->id);
+            $user->setPrimarySchoolAthlete($school->id);
         } else {
 
             $roles = explode(',', $request->roles);
@@ -381,6 +390,8 @@ class UserController extends Controller {
             $academy->personnel()->syncWithoutDetaching($user->id);
             $school->personnel()->syncWithoutDetaching($user->id);
             $clan->personnel()->syncWithoutDetaching($user->id);
+            $user->setPrimaryAcademy($academy->id);
+            $user->setPrimarySchool($school->id);
         }
 
         if ($request->go_to_edit === 'on') {

@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder {
             [
                 'name' => 'technician',
                 'prefix' => 'technician',
-                'label' => 'tecnici',
+                'label' => 'technician',
             ],
             [
                 'name' => 'instructor',

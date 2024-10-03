@@ -38,7 +38,7 @@
                                 {{ __('users.provenance') }}</h3>
                             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                            <x-form.nationality-select selectedvalue="{{ old('nationality') }}" />
+                            <x-form.nationality-select selectedvalue="{{ old('nationality') }}" required="{{true}}" />
                             <x-form.academy-select :academies="$academies" />
                         </div>
 

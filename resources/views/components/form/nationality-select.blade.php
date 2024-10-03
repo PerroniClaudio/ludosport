@@ -1,4 +1,7 @@
-@props(['selectedvalue' => ''])
+@props([
+    'selectedvalue' => '',
+    'required' => false,
+])
 
 @php
     $countries = [
@@ -290,6 +293,6 @@
 
 <div>
     <x-form.select name="nationality" label="{{ __('users.nationality') }}" :options="$default" :optgroups="$continents"
-        value="{{ $selectedvalue }}" />
+        value="{{ $selectedvalue }}" required="{{ $required }}" />
     <x-input-error :messages="$errors->get('nationality')" class="mt-2" />
 </div>
