@@ -26,7 +26,7 @@
 
                     <div class="hidden lg:flex flex-col gap-2">
 
-                        <div class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer"
+                        <div class="bg-primary-500 text-white rounded dark:bg-background-800 dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer"
                             data-id="0" @click="getGeneralRankings()">
 
                             <span>{{ __('General rank') }}</span>

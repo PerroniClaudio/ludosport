@@ -324,7 +324,7 @@ class EventController extends Controller {
             $event->block_subscriptions = $request->block_subscriptions == 'on' ? true : false;
         }
 
-        if (isset($request->weapon_form_id)) {
+        if (isset($request->weapon_form_id) && $request->weapon_form_id != 0) {
             $event->weapon_form_id = $request->weapon_form_id;
         }
 
