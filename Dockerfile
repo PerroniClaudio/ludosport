@@ -1,14 +1,11 @@
-# Use PHP 8.3 FPM Alpine as the base image
+# Usa PHP 8.3 FPM Alpine come immagine base
 FROM php:8.3-fpm-alpine
 
-# Install system dependencies
+# Installa dipendenze di sistema
 RUN apk add --no-cache \
     nginx \
     supervisor \
     redis \
-    meilisearch \
-    prometheus \
-    grafana \
     libzip-dev \
     libpng-dev \
     libjpeg-turbo-dev \
@@ -16,32 +13,32 @@ RUN apk add --no-cache \
     zip \
     unzip
 
-# Install PHP extensions
+# Installa estensioni PHP
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install pdo pdo_mysql pcntl bcmath gd zip 
 
-# Install Composer
+# Installa Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Set working directory
+# Imposta la directory di lavoro
 WORKDIR /var/www/html
 
-# Copy Laravel application files
+# Copia i file dell'applicazione Laravel
 COPY . .
 
-# Install Laravel dependencies
+# Installa le dipendenze di Laravel
 RUN composer install --no-interaction --no-dev --prefer-dist
 
-# Copy configuration files
+# Copia i file di configurazione
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Set permissions
+# Imposta i permessi
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Expose ports
-EXPOSE 80 9000 6379 7700 9090 3000
+# Espone le porte
+EXPOSE 80 9000 6379
 
-# Start services using Supervisor
+# Avvia i servizi usando Supervisor
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
