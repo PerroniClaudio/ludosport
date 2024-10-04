@@ -21,7 +21,7 @@
 
     <div class="flex flex-col gap-2">
         <template x-for="(row, index) in paginatedData">
-            <div class="bg-background-900 p-2 flex items-center gap-2 rounded">
+            <div class="bg-background-100 dark:bg-background-900 p-2 flex items-center gap-2 rounded">
                 <div class="flex-col items-center justify-center">
                     <x-lucide-swords class="w-6 h-6 text-primary-500" />
                 </div>
@@ -42,7 +42,7 @@
         </template>
 
         <div x-show="paginatedData.length === 0"
-            class="text-background-500 dark:text-background-300 bg-background-900 p-2 flex items-center gap-2 rounded">
+            class="text-background-500 dark:text-background-300 bg-background-100 dark:bg-background-900 p-2 flex items-center gap-2 rounded">
             {{ __('charts.chart_no_data') }}
         </div>
 

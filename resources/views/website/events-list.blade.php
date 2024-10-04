@@ -39,7 +39,7 @@
                         start_date: '{{ $event->start_date }}',
                         end_date: '{{ $event->end_date }}',
                     }"
-                        class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-col justify-between gap-2">
+                        class="bg-white text-background-800 dark:bg-background-800 rounded dark:text-background-300 p-4 flex flex-col justify-between gap-2">
                         <p class="text-2xl font-semibold group-hover:text-primary-500">
                             {{ $event->name }}
                         </p>

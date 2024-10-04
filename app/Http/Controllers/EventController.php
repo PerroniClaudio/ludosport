@@ -573,7 +573,16 @@ class EventController extends Controller {
     }
 
     public function selectParticipants(Request $request) {
+        $authRole = User::find(auth()->user()->id)->getRole();
         $event = Event::find($request->event_id);
+
+        if(!$event){
+            return response()->json(['error' => 'Event not found'], 404);
+        }
+
+        if ($authRole != 'admin' && !$event->is_free) {
+            return response()->json(['error' => 'You are not authorized to add participants to this event']);
+        }
 
         $participants = json_decode($request->participants, true);
 
@@ -956,6 +965,7 @@ class EventController extends Controller {
         $isParticipating = false;
         $isInWaitingList = false;
         $onlyWaitingList = $event->isWaitingList();
+        $isActuallyFree = $event->is_free || $event->price == 0;
 
         $user = User::find(auth()->user()->id);
 
@@ -964,11 +974,11 @@ class EventController extends Controller {
             if ($event->resultType() === 'enabling') {
                 $isParticipating = $event->instructorResults()->where('user_id', $user->id)->exists();
                 $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
-                $canpurchase = !$event->block_subscriptions && !$isParticipating && !$isInWaitingList;
+                $canpurchase = !$isActuallyFree && !$event->block_subscriptions && !$isParticipating && !$isInWaitingList;
             } else if ($event->resultType() === 'ranking') {
                 $isParticipating = $event->results()->where('user_id', $user->id)->exists();
                 $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
-                $canpurchase = !$event->block_subscriptions && !$isParticipating && !$isInWaitingList;
+                $canpurchase = !$isActuallyFree && !$event->block_subscriptions && !$isParticipating && !$isInWaitingList;
             }
         }
 
@@ -988,6 +998,11 @@ class EventController extends Controller {
 
         if ($user->has_paid_fee === 0) {
             return redirect()->route('event-detail', $event->slug)->with('error', __('website.must_pay_fee'));
+        }
+
+        // Se l'evento è gratuito deve rivolgersi alla scuola per l'iscrizione
+        if ($event->is_free || $event->price == 0) {
+            return redirect()->route('event-detail', $event->slug)->with('error', __('website.event_free'));
         }
 
         // Se ha già un ordine in completato o in attesa (status 1, 2, 3) per questo evento, non può acquistare un altro

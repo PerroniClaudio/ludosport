@@ -23,7 +23,7 @@
                             <div class="flex flex-col gap-2">
                                 <template x-for="(event, index) in pending_events">
                                     <a x-bind:href="event.url" target="_blank"
-                                        class="flex flex-col gap-1 p-2 rounded-md hover:bg-background-900 group">
+                                        class="flex flex-col gap-1 p-2 rounded-md  hover:bg-background-100 dark:hover:bg-background-900 group">
                                         <p x-text="event.title" class="font-semibold group-hover:text-primary-500 m-0">
                                         </p>
                                         <div class="flex items-center gap-1">
@@ -62,7 +62,7 @@
                             <div class="flex flex-col gap-2">
                                 <template x-for="(event, index) in approved_events">
                                     <a x-bind:href="event.url" target="_blank"
-                                        class="flex flex-col gap-1 p-2 rounded-md hover:bg-background-900 group">
+                                        class="flex flex-col gap-1 p-2 rounded-md hover:bg-background-100 dark:hover:bg-background-900 group">
                                         <p x-text="event.title" class="font-semibold group-hover:text-primary-500"></p>
                                         <div class="flex items-center gap-1">
                                             <x-lucide-calendar-days class="w-4 h-4 text-primary-500" />

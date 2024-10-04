@@ -18,7 +18,7 @@
                 </section>
 
                 <section class="grid grid-cols-2 gap-4 my-8">
-                    <div class="flex flex-col gap-2 bg-background-700 rounded-lg p-8">
+                    <div class="flex flex-col gap-2 bg-background-100 dark:bg-background-700 rounded-lg p-8">
 
                         <h2 class="font-semibold text-2xl text-background-800 dark:text-background-200 leading-tight">
                             {{ __('events.info') }}</h2>
@@ -26,7 +26,7 @@
 
                         <div class="flex items-center gap-2">
                             <x-lucide-map-pin class="w-10 h-10 text-primary-500 dark:text-primary-600" />
-                            <span class="text-background-200 font-4xl">{{ $event->address }}, {{ $event->postal_code }}
+                            <span class="text-background-800 dark:text-background-200 font-4xl">{{ $event->address }}, {{ $event->postal_code }}
                                 {{ $event->city }}, {{ $event->nation->name }}</span>
                         </div>
                         <div class="flex items-center gap-2">
@@ -39,10 +39,10 @@
 
                             <x-lucide-calendar-days class="w-10 h-10 text-primary-500 dark:text-primary-600" />
                             <div class="flex flex-col gap-1">
-                                <span class="text-background-200">{{ __('events.start_date') }}:
+                                <span class="text-background-800 dark:text-background-200">{{ __('events.start_date') }}:
                                     {{ $start_date->format('d/m/Y H:i') }}
                                 </span>
-                                <span class="text-background-200">{{ __('events.end_date') }}:
+                                <span class="text-background-800 dark:text-background-200">{{ __('events.end_date') }}:
                                     {{ $end_date->format('d/m/Y H:i') }}
                                 </span>
                             </div>
