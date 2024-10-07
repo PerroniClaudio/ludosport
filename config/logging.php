@@ -132,6 +132,24 @@ return [
             'path' => storage_path('logs/role.log'),
             'level' => 'debug',
         ],
+        
+        'clan' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/clan.log'),
+            'level' => 'debug',
+        ],
+
+        'school' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/school.log'),
+            'level' => 'debug',
+        ],
+
+        'academy' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/academy.log'),
+            'level' => 'debug',
+        ],
 
     ],
 

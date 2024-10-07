@@ -23,7 +23,12 @@ class ImportController extends Controller {
      */
     public function index() {
         // new_users,users_course,users_academy,users_school,event_participants,event_war,event_style
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
+        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
+        }
 
         $imports = Import::whereIn('type', Import::getAvailableImportsByRole($authRole))->with('user')->orderBy('created_at', 'desc')->get();
 
@@ -44,7 +49,12 @@ class ImportController extends Controller {
      */
     public function create() {
         //
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
+        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
+        }
 
         // $types = $import->getImportTypes();
         $types = Import::getAvailableImportsByRole($authRole);

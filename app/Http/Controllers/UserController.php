@@ -30,10 +30,15 @@ class UserController extends Controller {
     public function index() {
         // Qui si dovrebbero filtrare gli utenti visualizzabili in base al ruolo dell'utente loggato.
         // Es. tutti vedono tutto tranne gli istruttori che sono limitati alle scuole in cui hanno un corso
-        $authUserRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authUserRole = $authUser->getRole();
 
         if (!in_array($authUserRole, ['admin', 'rector', 'dean', 'manager', 'technician', 'instructor'])) {
             return redirect()->route("dashboard")->with('error', 'You do not have the required role to access this page!');
+        }
+
+        if(!$authUser->validatePrimaryInstitutionPersonnel()) {
+            return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
         }
 
         $roles = Role::all();
@@ -97,6 +102,10 @@ class UserController extends Controller {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
+        if(!$authUser->validatePrimaryInstitutionPersonnel()) {
+            return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
+        }
+
         $roles = $authUser->getEditableRoles();
 
         switch ($authRole) {
@@ -105,7 +114,7 @@ class UserController extends Controller {
                 break;
             case 'rector':
                 $primaryAcademy = $authUser->primaryAcademy();
-                $academies = $primaryAcademy ? collect([$primaryAcademy]) : collect([]);
+                $academies = collect([$primaryAcademy]);
                 break;
             case 'dean':
                 $academies = Academy::where('is_disabled', false)->where('id', ($authUser->primarySchool()->academy->id ?? null))->get();
@@ -1233,9 +1242,17 @@ class UserController extends Controller {
             if ($request->role_type == 'personnel') {
                 // Logica per modificare l'ordine delle accademie - personale
                 $user->setPrimaryAcademy($academy->id);
+
+                if($academy->id != 1 && ($user->academies()->count() > 1) && ($user->academies->where('id', 1)->count() > 0)) {
+                    $user->academies()->detach(1);
+                }
             } else {
                 // Logica per modificare l'ordine delle accademie - atleti
                 $user->setPrimaryAcademyAthlete($academy->id);
+
+                if($academy->id != 1 && ($user->academyAthletes()->count() > 1) && ($user->academyAthletes->where('id', 1)->count() > 0)) {
+                    $user->academyAthletes()->detach(1);
+                }
             }
         }
 
@@ -1395,4 +1412,6 @@ class UserController extends Controller {
             'this_year' => $athletes_this_year,
         ]);
     }
+
+    
 }

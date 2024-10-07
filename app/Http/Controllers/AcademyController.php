@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class AcademyController extends Controller {
@@ -24,7 +25,7 @@ class AcademyController extends Controller {
         $authRole = $authUser->getRole();
         if (in_array($authRole, ['rector'])) {
             $academy = $authUser->primaryAcademy();
-            if ($academy) {
+            if ($authUser->validatePrimaryInstitutionPersonnel()) {
                 return $this->edit($academy);
             }
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
@@ -245,6 +246,7 @@ class AcademyController extends Controller {
      */
     public function destroy(Academy $academy) {
         //
+        $authUser = User::find(auth()->user()->id);
 
         if (User::find(auth()->user()->id)->getRole() !== 'admin') {
             return redirect()->route('academies.index')->with('error', 'You are not authorized to perform this action.');
@@ -253,12 +255,36 @@ class AcademyController extends Controller {
         if ($academy->schools->count() > 0) {
             return back()->with('error', 'Cannot delete academy with associated schools.');
         }
-        if ($academy->athletes->count() > 0) {
-            return back()->with('error', 'Cannot delete academy with associated athletes.');
+
+        $athletes = $academy->athletes->pluck('id')->toArray();
+        $personnel = $academy->personnel->pluck('id')->toArray();
+
+        $primaryAthletes = $academy->athletes()->wherePivot('is_primary', 1)->get();
+        $primaryPersonnel = $academy->personnel()->wherePivot('is_primary', 1)->get();
+
+        foreach ($primaryAthletes as $athlete) {
+            $athlete->academyAthletes()->syncWithoutDetaching(1);
+            $athlete->setPrimaryAcademyAthlete(1);
         }
-        if ($academy->personnel->count() > 0) {
-            return back()->with('error', 'Cannot delete academy with associated personnel.');
+
+        foreach ($primaryPersonnel as $person) {
+            $person->academies()->syncWithoutDetaching(1);
+            $person->setPrimaryAcademy(1);
         }
+
+        $academy->athletes()->detach();
+        $academy->personnel()->detach();
+        $academy->is_disabled = true;
+        $academy->save();
+
+        Log::channel('academy')->info('Disabled academy', [
+            'made_by' => $authUser->id,
+            'academy' => $academy->id,
+            'athletes_ids' => $athletes,
+            'personnel_ids' => $personnel,
+            'primary_athletes' => $primaryAthletes->pluck('id')->toArray(),
+            'primary_personnel' => $primaryPersonnel->pluck('id')->toArray(),
+        ]);
 
         $academy->is_disabled = true;
         $academy->save();

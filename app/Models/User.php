@@ -555,4 +555,53 @@ class User extends Authenticatable implements MustVerifyEmail {
         return true;
         return $now->diffInDays($expirationDate) < 30;
     }
+
+    public function validatePrimaryInstitutionPersonnel(){
+        $user = User::find(auth()->user()->id);
+        $role = $user->getRole();
+        $primary = null;
+        switch ($role) {
+            case 'admin':
+                return true;
+                break;
+            case 'rector':
+                $primary = $user->primaryAcademy();
+                if(!$primary || $primary->id == 1){
+                    return false;
+                }
+                return true;
+                break;
+            case 'dean':
+                $primary = $user->primarySchool();
+                if(!$primary){
+                    return false;
+                }
+                return true;
+                break;
+            case 'manager':
+                $primary = $user->primarySchool();
+                if(!$primary){
+                    return false;
+                }
+                return true;
+                break;
+            case 'instructor':
+                $primary = $user->clans()->count() > 0;
+                if(!$primary){
+                    return false;
+                }
+                return true;
+                break;
+            case 'technician':
+                $primary = $user->primaryAcademy();
+                if(!$primary || $primary->id == 1){
+                    return false;
+                }
+                return true;
+                break;
+            default:
+                return false;
+                break;
+        }
+    }
 }

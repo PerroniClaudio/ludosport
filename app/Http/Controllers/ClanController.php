@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ClanController extends Controller {
@@ -19,16 +20,17 @@ class ClanController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
+        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
+
         switch($authRole){
             case 'admin':
                 $clans = Clan::orderBy('created_at', 'desc')->where('is_disabled', '0')->with(['school'])->get();
                 break;
             case 'rector':
-                if($authUser->primaryAcademy() != null){
-                    $clans = Clan::where('is_disabled', '0')->whereIn('school_id', $authUser->primaryAcademy()->schools->pluck('id'))->with(['school'])->get();
-                } else {
-                    $clans = [];
-                }
+                $primaryAcademy = $authUser->primaryAcademy();
+                $clans = Clan::where('is_disabled', '0')->whereIn('school_id', $primaryAcademy->schools->pluck('id'))->with(['school'])->get();
                 break;
             case 'dean':
             case 'manager':
@@ -349,12 +351,24 @@ class ClanController extends Controller {
             return redirect()->route('dashboard')->with('error', 'Not authorized to access this page.');
         }
 
-        if($clan->users->count() > 0){
-            return back()->with('error', 'Cannot delete course with associated athletes.');
-        }
-
+        // if($clan->users->count() > 0){
+        //     return back()->with('error', 'Cannot delete course with associated athletes.');
+        // }
+        
+        $athletes = $clan->users()->pluck('user_id')->toArray();
+        $personnel = $clan->personnel()->pluck('user_id')->toArray();
+        
+        $clan->users()->detach();
+        $clan->personnel()->detach();
         $clan->is_disabled = true;
         $clan->save();
+        
+        Log::channel('clan')->info('Disabled clan', [
+            'made_by' => $authUser->id,
+            'clan' => $clan->id,
+            'athletes_ids' => $athletes,
+            'personnel_ids' => $personnel,
+        ]);
 
         $redirectRoute = $authRole === 'admin' ? 'clans.index' : $authRole . '.clans.index';
         return redirect()->route($redirectRoute)->with('success', 'Course disabled successfully.');

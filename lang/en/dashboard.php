@@ -46,4 +46,7 @@ return [
     'rector_academies_with_athletes_char' => 'Academies with most athletes',
     'rector_athletes_courses_title' => 'Athletes by courses',
     'rector_courses_with_athletes_char' => 'Courses with most athletes',
+    'rector_no_academy' => 'You don\'t have a valid main academy. Ask your administrator to set it up.',
+    'manager_no_school' => 'You don\'t have a main school yet. Ask your administrator to set it up.',
+    'dean_no_school' => 'You don\'t have a main school yet. Ask your administrator to set it up.',
 ];

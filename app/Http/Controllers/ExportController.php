@@ -25,7 +25,12 @@ class ExportController extends Controller {
      */
     public function index() {
         //
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
+        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
+        }
 
         $exports = Export::whereIn('type', Export::getAvailableExportsByRole($authRole))->with('user')->orderBy('created_at', 'desc')->get();
 
@@ -51,7 +56,12 @@ class ExportController extends Controller {
      */
     public function create() {
         //
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
+        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
+        }
 
         $export = new Export();
         $types = $export->getAvailableExportsByRole($authRole);

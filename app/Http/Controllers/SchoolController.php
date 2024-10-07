@@ -10,6 +10,7 @@ use App\Models\School;
 use App\Models\User;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class SchoolController extends Controller {
@@ -31,10 +32,14 @@ class SchoolController extends Controller {
         }
 
         if ($authRole === 'rector') {
-            $academy = $authUser->primaryAcademy();
-            $schools = $academy
-                ? School::with('nation')->where([['academy_id', $academy->id], ['is_disabled', '0']])->orderBy('created_at', 'desc')->get()
-                : collect([]);
+            $primaryAcademy = $authUser->primaryAcademy();
+
+            if (!$authUser->validatePrimaryInstitutionPersonnel() ) {
+                return redirect()->route('dashboard')->with('error', 'Not authorized.');
+            }
+
+            $schools = School::with('nation')->where([['academy_id', $primaryAcademy->id], ['is_disabled', '0']])->orderBy('created_at', 'desc')->get();
+
         } else {
             $schools = School::with('nation')->where('is_disabled', '0')->orderBy('created_at', 'desc')->get();
         }
@@ -363,61 +368,44 @@ class SchoolController extends Controller {
      * Remove the specified resource from storage.
      */
     public function destroy(School $school) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
         // solo rector e admin possono
         if (!$this->checkPermission($school, true)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
-        if ($school->athletes->count() > 0) {
-            return back()->with('error', 'Cannot delete school with associated athletes.');
+        // if ($school->athletes->count() > 0) {
+        //     return back()->with('error', 'Cannot delete school with associated athletes.');
+        // }
+
+        // Non si può eliminare se ha corsi attivi (in questo caso clan ha già il filtro "is_disabled")
+        if ($school->clan->count() > 0) {
+            return back()->with('error', 'Cannot delete school with associated courses.');
         }
 
+        $athletes = $school->athletes->pluck('id')->toArray();
+        $personnel = $school->personnel->pluck('id')->toArray();
+        
+        $primaryPersonnel = $school->personnel->filter(function ($person) use ($school) {
+            return $person->primarySchool() && $person->primarySchool()->id == $school->id;
+        })->pluck('id')->toArray();
+
+        $school->athletes()->detach();
+        $school->personnel()->detach();
         $school->is_disabled = true;
         $school->save();
 
-        // // Prende tutti gli atleti che hanno la scuola come principale
-        // $athletes = $school->athletes->where('pivot.is_primary', 1);
-        
-        // if($athletes->count() > 0){
-        //     foreach ($athletes as $athlete) {
-        //         // Lo disassocia dalla scuola
-        //         $athlete->schoolAthletes()->detach($school->id);
-                
-        //         // Cerca se ci sono altre scuole a cui è associato e 
-        //         if($athlete->schoolAthletes()->whereNot('school_id', $school->id)->count() > 0){
-        //             // Se ci sono ne imposta una come principale (se è all'interno della stessa accademia è meglio)
-        //             $primaryAcademy = $athlete->primaryAcademyAthlete();
-        //             if($primaryAcademy && ($primaryAcademy->schools->whereIn('id', $athlete->schoolAthletes->pluck('id')) > 0)){
-        //                 $athlete->setPrimarySchoolAthlete($primaryAcademy->schools->whereIn('id', $athlete->schoolAthletes)->first()->id);
-        //             } else {
-        //                 $athlete->setPrimarySchoolAthlete($athlete->schoolAthletes->first()->id);
-        //             }
-        //         }    
-        //     }
-        // }
+        Log::channel('school')->info('Disabled school', [
+            'made_by' => $authUser->id,
+            'school' => $school->id,
+            'athletes_ids' => $athletes,
+            'personnel_ids' => $personnel,
+            'primary_personnel_ids' => $primaryPersonnel,
+        ]);
 
-        // // Prende tutto il personale che ha la scuola come principale
-        // $personnel = $school->personnel->where('pivot.is_primary', 1);
-
-        // if($personnel->count() > 0){
-        //     foreach ($personnel as $person) {
-        //         // Lo disassocia dalla scuola
-        //         $person->schools()->detach($school->id);
-                
-        //         // Cerca se ci sono altre scuole a cui è associato e 
-        //         if($person->schools()->whereNot('school_id', $school->id)->count() > 0){
-        //             // Se ci sono ne imposta una come principale (se è all'interno della stessa accademia è meglio)
-        //             $primaryAcademy = $person->primaryAcademy();
-        //             if($primaryAcademy && ($primaryAcademy->schools->whereIn('id', $person->schools->pluck('id')) > 0)){
-        //                 $person->setPrimarySchool($primaryAcademy->schools->whereIn('id', $person->schools)->first()->id);
-        //             } else {
-        //                 $person->setPrimarySchool($person->schools->first()->id);
-        //             }
-        //         }    
-        //     }
-        // }
-
-        return redirect()->route('schools.index')->with('success', 'School disabled successfully!');
+        return redirect()->route(($authRole == 'admin' ? '' : $authRole) . 'schools.index')->with('success', 'School disabled successfully!');
     }
 
     public function addClan(School $school, Request $request) {

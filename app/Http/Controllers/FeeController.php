@@ -26,6 +26,9 @@ class FeeController extends Controller {
         $user = User::find(Auth()->user()->id);
         $academy_id = $user->primaryAcademy()->id ?? null;
 
+        if (!$user->validatePrimaryInstitutionPersonnel()) {
+            return redirect()->route('dashboard')->with('error', 'Main academy not found');
+        }
 
         $senior_fees = Fee::where('academy_id', $academy_id)->where([
             ['type', '=',  1],

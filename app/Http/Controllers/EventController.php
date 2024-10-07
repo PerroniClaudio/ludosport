@@ -38,6 +38,10 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
+        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to view this page');
+        }
+
         switch ($authRole) {
             case 'rector':
             case 'dean':
@@ -79,6 +83,10 @@ class EventController extends Controller {
 
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
+
+        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to view this page');
+        }
 
         if ($authRole === 'admin') {
             $academies = Academy::all();
