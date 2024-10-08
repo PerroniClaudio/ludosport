@@ -10,8 +10,7 @@ services:
       - APP_KEY=${APP_KEY}
       - REDIS_HOST=redis
       - MEILISEARCH_HOST=http://meilisearch:7700
-    volumes:
-      - .:/var/www/html
+
     networks:
       - app-network
     depends_on:
