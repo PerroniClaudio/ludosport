@@ -10,7 +10,7 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
 
   #Stripe 
 
-  Route::get('/fees/stripe/checkout', [App\Http\Controllers\FeeController::class, 'checkoutStripe'])->name('fees.checkout');
+  Route::get('/fees/stripe/checkout', [App\Http\Controllers\FeeController::class, 'checkoutStripe'])->name('fees.stripe.checkout');
   Route::get('/fees/success', [App\Http\Controllers\FeeController::class, 'success'])->name('fees.success');
   Route::get('/fees/cancel', [App\Http\Controllers\FeeController::class, 'cancel'])->name('fees.cancel');
 
@@ -181,7 +181,7 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
 
     Route::post('/exports', [App\Http\Controllers\ExportController::class, 'store'])->name('rector.exports.store');
     Route::post('/exports/{export}', [App\Http\Controllers\ExportController::class, 'update'])->name('rector.exports.update');
-    Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('rector.exports.download');
+    // Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('rector.exports.download');
   });
 
 

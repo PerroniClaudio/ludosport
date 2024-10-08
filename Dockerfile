@@ -1,44 +1,47 @@
-# Usa PHP 8.3 FPM Alpine come immagine base
-FROM php:8.3-fpm-alpine
+# Usa l'immagine ufficiale di PHP 8.3 con FPM
+FROM php:8.3-fpm
 
-# Installa dipendenze di sistema
-RUN apk add --no-cache \
-    nginx \
-    supervisor \
-    redis \
-    libzip-dev \
+# Installa le dipendenze necessarie
+RUN apt-get update && apt-get install -y \
     libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
     zip \
-    unzip
+    unzip \
+    git \
+    curl
 
-# Installa estensioni PHP
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install pdo pdo_mysql pcntl bcmath gd zip 
+# Configura e installa le estensioni PHP necessarie
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql gd pcntl bcmath zip
 
 # Installa Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Imposta la directory di lavoro
 WORKDIR /var/www/html
 
-# Copia i file dell'applicazione Laravel
+# Copia i file dell'applicazione
 COPY . .
 
-# Installa le dipendenze di Laravel
-RUN composer install --no-interaction --no-dev --prefer-dist
+# Installa le dipendenze del progetto
+RUN composer install --no-dev --optimize-autoloader
 
-# Copia i file di configurazione
-COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Genera la chiave dell'applicazione
+RUN php artisan key:generate
 
-# Imposta i permessi
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Ottimizza la configurazione per la produzione
+RUN php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
 
-# Espone le porte
-EXPOSE 80 9000 6379
+# Imposta i permessi corretti
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage
 
-# Avvia i servizi usando Supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Esponi la porta 9000 per FPM
+EXPOSE 9000
+
+# Avvia PHP-FPM
+CMD ["php-fpm"]

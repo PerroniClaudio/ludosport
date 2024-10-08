@@ -29,21 +29,21 @@ Route::prefix('technician')->middleware('auth')->middleware('role:admin,technici
     Route::group([], function () {
         Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('technician.academies.all');
         Route::get('/academies/search', [App\Http\Controllers\AcademyController::class, 'search'])->name('technician.academies.search');
-            });
-    
+    });
+
     /** Scuole */
 
     Route::group([], function () {
         Route::get('/schools/all', [App\Http\Controllers\SchoolController::class, 'all'])->name('technician.schools.all');
-            });
+    });
 
 
     /** Clan */
-    
+
     Route::group([], function () {
         Route::get('/courses/all', [App\Http\Controllers\ClanController::class, 'all'])->name('technician.clans.all');
         Route::get('/courses/search', [App\Http\Controllers\ClanController::class, 'search'])->name('technician.clans.search');
-      });
+    });
 
     /** Events */
 
@@ -59,13 +59,13 @@ Route::prefix('technician')->middleware('auth')->middleware('role:admin,technici
         // Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('technician.events.save.location');
         // Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('technician.events.update.thumbnail');
         Route::post('events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('technician.events.update');
-    
+
         Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('technician.events.participants');
         Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('technician.events.available');
         Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('technician.events.participants.add');
         Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('technician.events.participants.export');
         Route::get('events/{event}/personnel', [App\Http\Controllers\EventController::class, 'personnel'])->name('technician.events.personnel');
-        
+
         Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('technician.events.types');
     });
 
@@ -93,7 +93,7 @@ Route::prefix('technician')->middleware('auth')->middleware('role:admin,technici
 
         Route::post('/exports', [App\Http\Controllers\ExportController::class, 'store'])->name('technician.exports.store');
         Route::post('/exports/{export}', [App\Http\Controllers\ExportController::class, 'update'])->name('technician.exports.update');
-        Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('technician.exports.download');
+        // Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('technician.exports.download');
     });
 
     Route::get('announcements', [App\Http\Controllers\AnnouncementController::class, 'ownRoles'])->name('technician.announcements.index');

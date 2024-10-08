@@ -45,7 +45,7 @@ Route::prefix('/website-rankings')->group(function () {
 Route::prefix('/shop')->group(function () {
     Route::get('/', [App\Http\Controllers\ShopController::class, 'shop'])->name('shop');
     Route::get('/activate-membership', [App\Http\Controllers\ShopController::class, 'activate'])->middleware('auth')->name('shop-activate-membership');
-    Route::get('/invoices/user-data/{user}', [App\Http\Controllers\UserController::class, 'invoiceData'])->middleware('auth')->name('users.invoices.get');
+    Route::get('/invoices/user-data/{user}', [App\Http\Controllers\UserController::class, 'invoiceData'])->middleware('auth')->name('shop.users.invoices.get');
     Route::get('/fees/stripe/checkout', [App\Http\Controllers\FeeController::class, 'userCheckoutStripe'])->middleware('auth')->name('shop.fees.stripe-checkout');
 
     Route::get('/fees/success', [App\Http\Controllers\FeeController::class, 'successUser'])->middleware('auth')->name('shop.fees.success');
