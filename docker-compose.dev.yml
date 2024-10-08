@@ -41,6 +41,8 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+    ports:
+      - "6379:6379"
 
   # Servizio Meilisearch
   meilisearch:
