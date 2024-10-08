@@ -10,7 +10,10 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     git \
-    curl
+    curl \
+    supervisor \
+    nodejs \
+    npm
 
 # Configura e installa le estensioni PHP necessarie
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -28,6 +31,11 @@ WORKDIR /var/www/html
 # Copia i file dell'applicazione
 COPY . .
 
+# Esegui npm build
+RUN npm install -g pnpm
+RUN pnpm i
+RUN pnpm build
+
 # Installa le dipendenze del progetto
 # Nota: questo passo potrebbe fallire se non hai un composer.json valido nella directory del progetto
 RUN composer install --no-dev --optimize-autoloader || true
@@ -43,6 +51,9 @@ RUN php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
 
+# Copia la configurazione di supervisord
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 # Imposta i permessi corretti
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage
@@ -50,5 +61,5 @@ RUN chown -R www-data:www-data /var/www/html \
 # Esponi la porta 9000 per FPM
 EXPOSE 9000
 
-# Avvia PHP-FPM
-CMD ["php-fpm"]
+# Avvia supervisord
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
