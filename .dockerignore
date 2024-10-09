@@ -1,0 +1,7 @@
+/vendor
+/node_modules
+/.fleet
+/.idea
+/.vscode
+.DS_Store
+**/.DS_Store
