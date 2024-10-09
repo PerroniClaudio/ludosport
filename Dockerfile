@@ -1,6 +1,8 @@
 # Usa l'immagine ufficiale di PHP 8.3 con FPM
 FROM php:8.3-fpm
 
+ENV HOST 0.0.0.0
+
 # Installa le dipendenze necessarie
 RUN apt-get update && apt-get install -y \
     libpng-dev \
@@ -27,6 +29,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Imposta la directory di lavoro
 WORKDIR /var/www/html
+
+
 
 # Copia i file dell'applicazione
 COPY . .
