@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: laravel_app
     restart: unless-stopped
     environment:
       - APP_ENV=production
