@@ -73,7 +73,6 @@ services:
       - "--web.console.templates=/usr/share/prometheus/consoles"
     networks:
       - app-network
-
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -86,7 +85,6 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     networks:
       - app-network
-
 networks:
   app-network:
     driver: bridge
