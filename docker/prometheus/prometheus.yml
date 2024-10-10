@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["prometheus:9090"]
+
+  - job_name: "laravel_app"
+    static_configs:
+      - targets: ["app:9000"] # Porta FPM di default
+
+  - job_name: "nginx"
+    static_configs:
+      - targets: ["nginx:80"]
+
+  - job_name: "redis"
+    static_configs:
+      - targets: ["redis:6379"]
+
+  - job_name: "meilisearch"
+    static_configs:
+      - targets: ["meilisearch:7700"]

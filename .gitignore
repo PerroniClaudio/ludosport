@@ -22,3 +22,5 @@ yarn-error.log
 dump.rdb
 /data.ms
 dump.rdb
+**/.DS_Store
+/ssl

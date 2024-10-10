@@ -28,13 +28,16 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Imposta la directory di lavoro
 WORKDIR /var/www/html
 
+
+
 # Copia i file dell'applicazione
 COPY . .
 
 # Esegui npm build
-# RUN npm install -g pnpm
-# RUN pnpm i
-# RUN pnpm build
+RUN npm install -g pnpm
+RUN pnpm i
+RUN pnpm build
+
 # Installa le dipendenze del progetto
 # Nota: questo passo potrebbe fallire se non hai un composer.json valido nella directory del progetto
 RUN composer install --no-dev --optimize-autoloader || true
@@ -52,6 +55,7 @@ RUN php artisan config:cache \
 
 # Copia la configurazione di supervisord
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 # Imposta i permessi corretti
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage
