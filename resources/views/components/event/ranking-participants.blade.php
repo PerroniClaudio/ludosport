@@ -23,8 +23,12 @@
                     </h4>
                 </div>
                 <div>
-                    <x-text-input type="text" x-on:input="searchAvailableUsers(event);" placeholder="Search..."
-                        class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" />
+                    <input x-model="searchAvailablesValue" x-on:input="searchAvailableUsers(event);"
+                        type="text" placeholder="Search..."
+                        class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'
+                    >
+                    {{-- <x-text-input type="text" x-on:input="searchAvailableUsers(event);" placeholder="Search..."
+                        class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" /> --}}
                 </div>
             </div>
 
@@ -53,11 +57,20 @@
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="row.surname">
                             </td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm text-right p-1">
-                                @if($event->is_free || ($authRole == 'admin'))
-                                    <button @click="addParticipant(row.id)">
-                                        <x-lucide-plus
-                                            class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
-                                    </button>
+                                {{-- Il tecnico non può modificare i partecipanti in nessun caso. Solo gli admin possono modificare i partecipanti di eventi a pagamento, e solo entro il mimite massimo. --}}
+                                @if($authRole != 'technician' && ($event->is_free || ($authRole == 'admin')))
+                                    <template x-if="({{$event->max_participants > 0 ? $event->max_participants : 0}} > (participants.length + {{$event->waitingList->count()}}))">
+                                        <button @click="addParticipant(row.id)">
+                                            <x-lucide-plus
+                                                class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
+                                        </button>
+                                    </template>
+                                    <template x-if="!({{$event->max_participants > 0 ? $event->max_participants : 0}} > (participants.length + {{$event->waitingList->count()}}))">
+                                        <button disabled>
+                                            <x-lucide-ban
+                                                class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
+                                        </button>
+                                    </template>
                                 @else
                                     <button disabled>
                                         <x-lucide-ban
@@ -110,8 +123,12 @@
                     </h4>
                 </div>
                 <div>
-                    <x-text-input type="text" x-on:input="searchParticipants(event);" placeholder="Search..."
-                        class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" />
+                    <input x-model="searchParticipantsValue" x-on:input="searchParticipants($event);"
+                        type="text" placeholder="Search..."
+                        class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'
+                    >
+                    {{-- <x-text-input type="text" x-on:input="searchParticipants(event);" placeholder="Search..."
+                        class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" /> --}}
                 </div>
             </div>
             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
@@ -139,7 +156,8 @@
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm"
                                 x-text="participant.surname"></td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm text-right p-1">
-                                @if($event->is_free || ($authRole == 'admin'))
+                                {{-- Il tecnico non può modificare i partecipanti in nessun caso. Solo gli admin possono modificare i partecipanti di eventi a pagamento. --}}
+                                @if($authRole != 'technician' && ($event->is_free || ($authRole == 'admin')))
                                     <button x-show="!hasRankingResult(participant.id)" @click="removeParticipant(participant.id)">
                                         <x-lucide-minus
                                             class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />

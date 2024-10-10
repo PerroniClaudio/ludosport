@@ -99,10 +99,17 @@ class ImportController extends Controller {
      */
     public function store(Request $request) {
         //
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
         $request->validate([
             'type' => 'required|in:new_users,users_course,users_academy,users_school,event_participants,event_war,event_style,event_instructor_results',
         ]);
+
+        if($authRole == 'technician' && ($request->type == 'event_participants')){
+            $redirectRoute = $authRole == 'admin' ? 'imports.create' : $authRole . '.imports.create';
+            return redirect()->route($redirectRoute)->with('error', 'Unauthorized');
+        }
 
         $import = Import::create([
             'file' => '',
@@ -118,8 +125,6 @@ class ImportController extends Controller {
         $file_name = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
         $path = "imports/{$import->id}/{$file_name}";
         $storeFile = $file->storeAs("imports/{$import->id}/", $file_name, "gcs");
-
-        $authRole = User::find(auth()->user()->id)->getRole();
 
         if ($storeFile) {
             $import->file = $path;

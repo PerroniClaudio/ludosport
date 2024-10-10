@@ -8,6 +8,8 @@ export const eventpersonnel = (eventid, role) => {
         currentPage: 1,
         pageSize: 10,
         totalPages: 0,
+        searchAvailablesValue: '',
+        searchPersonnelValue: '',
         getAvailableUsers: async function () {
             console.log("getAvailableUsers");
 
@@ -104,7 +106,12 @@ export const eventpersonnel = (eventid, role) => {
             this.availableUsers = this.availableUsers.filter(
                 (user) => user.id !== userid
             );
+
+            this.searchAvailablesValue = '';
             this.paginateAvailableUsers();
+            // Aggiorna la lista dei partecipanti filtrata
+            this.searchPersonnelValue = '';
+            this.searchPersonnel({target: {value: ''}});
         },
         removePersonnel: async function (userid) {
             console.log("removePersonnel");
@@ -135,7 +142,11 @@ export const eventpersonnel = (eventid, role) => {
             });
 
             this.availableUsers.push(user);
+            this.searchAvailablesValue = '';
             this.paginateAvailableUsers();
+            // Aggiorna la lista dei partecipanti filtrata
+            this.searchPersonnelValue = '';
+            this.searchPersonnel({target: {value: ''}});
         },
         savePersonnel: async function () {
             console.log("savePersonnel");

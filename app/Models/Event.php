@@ -41,6 +41,8 @@ class Event extends Model {
         'weapon_form_id',
         'max_participants',
         'block_subscriptions',
+        'waiting_list_close_date',
+        'internal_shop',
     ];
 
     public function nation() {
@@ -61,6 +63,10 @@ class Event extends Model {
     
     public function instructorResults() {
         return $this->hasMany(EventInstructorResult::class);
+    }
+
+    public function waitingList() {
+        return $this->hasMany(EventWaitingList::class);
     }
 
     public function user() {

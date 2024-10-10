@@ -82,6 +82,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/shop/event/paypal/preauth-success', [App\Http\Controllers\EventController::class, 'preauthSuccessUserPaypal'])->middleware('auth')->name('shop.event.paypal-preauth-success');
     Route::get('/shop/event/paypal/preauth-cancel', [App\Http\Controllers\EventController::class, 'preauthCancelUserPaypal'])->middleware('auth')->name('shop.event.paypal-preauth-cancel');
     Route::get('/shop/event/paypal/cancel', [App\Http\Controllers\EventController::class, 'cancelUserPaypal'])->middleware('auth')->name('shop.event.paypal-cancel');
+    
+    Route::post('/shop/event/{event}/waiting-list/checkout', [App\Http\Controllers\EventController::class, 'userCheckoutWaitingList'])->middleware('auth')->name('shop.events.waiting-list-checkout');
+    Route::get('/shop/event/waiting-list/success', [App\Http\Controllers\EventController::class, 'successUserWaitingList'])->middleware('auth')->name('shop.events.waiting-list-success');
+    Route::get('/shop/event/waiting-list/cancel', [App\Http\Controllers\EventController::class, 'cancelUserWaitingList'])->middleware('auth')->name('shop.events.waiting-list-cancel');
+
+    Route::post('/shop/event/{event}/free/checkout', [App\Http\Controllers\EventController::class, 'userCheckoutFree'])->middleware('auth')->name('shop.events.free-checkout');
+    Route::get('/shop/event/free/success', [App\Http\Controllers\EventController::class, 'successUserFree'])->middleware('auth')->name('shop.events.free-success');
+    Route::get('/shop/event/free/cancel', [App\Http\Controllers\EventController::class, 'cancelUserFree'])->middleware('auth')->name('shop.events.free-cancel');
+    
 });
 
 Route::group(['middleware' => ['auth']], function () {

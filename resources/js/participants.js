@@ -8,6 +8,8 @@ export const participants = (eventid, role, rankingResults) => {
         currentPage: 1,
         pageSize: 10,
         totalPages: 0,
+        searchAvailablesValue: '',
+        searchParticipantsValue: '',
         getAvailableUsers: async function () {
             console.log("getAvailableUsers");
 
@@ -105,7 +107,11 @@ export const participants = (eventid, role, rankingResults) => {
             this.availableUsers = this.availableUsers.filter(
                 (user) => user.id !== userid
             );
+            this.searchAvailablesValue = '';
             this.paginateAvailableUsers();
+            // Aggiorna la lista dei partecipanti filtrata
+            this.searchParticipantsValue = '';
+            this.searchParticipants({target: {value: ''}});
         },
         hasRankingResult: function (userid) {
             // Se non c'è in lista significa che è stato appena aggiunto dalla pagina corrente.
@@ -140,7 +146,11 @@ export const participants = (eventid, role, rankingResults) => {
             });
 
             this.availableUsers.push(user);
+            this.searchAvailablesValue = '';
             this.paginateAvailableUsers();
+            // Aggiorna la lista dei partecipanti filtrata
+            this.searchParticipantsValue = '';
+            this.searchParticipants({target: {value: ''}});
         },
         saveParticipants: async function () {
             console.log("saveParticipants");

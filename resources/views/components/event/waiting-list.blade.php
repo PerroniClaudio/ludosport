@@ -22,23 +22,35 @@
             'rowClasses' => '', // classes to style table td
         ],
         [
-            'name' => 'Order ID',
-            'field' => 'order_id',
+            'name' => 'Status',
+            'field' => 'status',
             'columnClasses' => '', // classes to style table th
             'rowClasses' => '', // classes to style table td
         ],
         [
-            'name' => 'Payment Method',
-            'field' => 'payment_method',
+            'name' => 'Payment deadline',
+            'field' => 'payment_deadline',
             'columnClasses' => '', // classes to style table th
             'rowClasses' => '', // classes to style table td
         ],
-        [
-            'name' => 'Order Status',
-            'field' => 'order_status',
-            'columnClasses' => '', // classes to style table th
-            'rowClasses' => '', // classes to style table td
-        ],
+        // [
+        //     'name' => 'Order ID',
+        //     'field' => 'order_id',
+        //     'columnClasses' => '', // classes to style table th
+        //     'rowClasses' => '', // classes to style table td
+        // ],
+        // [
+        //     'name' => 'Payment Method',
+        //     'field' => 'payment_method',
+        //     'columnClasses' => '', // classes to style table th
+        //     'rowClasses' => '', // classes to style table td
+        // ],
+        // [
+        //     'name' => 'Order Status',
+        //     'field' => 'order_status',
+        //     'columnClasses' => '', // classes to style table th
+        //     'rowClasses' => '', // classes to style table td
+        // ],
         
     ]" :rows="$waiting_list">
 

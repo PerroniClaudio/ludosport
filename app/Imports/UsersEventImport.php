@@ -45,6 +45,11 @@ class UsersEventImport implements ToCollection {
             if ($user && $event) {
                 if($event->resultType() == 'enabling') {
                     $weaponForm = $event->weaponForm();
+                    if($event->max_participants > 0 && (($event->instructorResults()->count() + $event->waitingList->count()) >= $event->max_participants)){
+                        $this->log[] = "['Event is full. Cannot add participant. email: " . $row[1] . " - event ID: " . $row[0] . "']";
+                        $this->is_partial = true;
+                        continue;
+                    }
                     if (!EventInstructorResult::where('event_id', $row[0])->where('user_id', $user->id)->exists()) {
                         $eventInstructorResult = EventInstructorResult::create([
                             'event_id' => $row[0],
@@ -53,6 +58,11 @@ class UsersEventImport implements ToCollection {
                         ]);
                     }
                 } else if ($event->resultType() == 'ranking') {
+                    if($event->max_participants > 0 && (($event->results()->count() + $event->waitingList->count()) >= $event->max_participants)){
+                        $this->log[] = "['Event is full. Cannot add participant. email: " . $row[1] . " - event ID: " . $row[0] . "']";
+                        $this->is_partial = true;
+                        continue;
+                    }
                     if(!EventResult::where('event_id', $row[0])->where('user_id', $user->id)->exists()) {
                         $eventResult = EventResult::create([
                             'event_id' => $row[0],

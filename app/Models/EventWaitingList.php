@@ -16,6 +16,8 @@ class EventWaitingList extends Model
         'order_id',
         'payment_intent_id',
         'paypal_order_id',
+        'payment_deadline',
+        'is_waiting_payment',
     ];
 
     public function user()

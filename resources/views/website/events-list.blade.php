@@ -11,7 +11,7 @@
 
             <div class="w-full flex items-end" x-data="{
                 nationFilter: '{{ $nationFilter }}'
-            }" x-init="$watch('nationFilter', (value) => window.location.href = `{{ env('APP_URL') }}/events-list?nation=${value}`)">
+            }" x-init="$watch('nationFilter', (value) => window.location.href = `{{ env('APP_URL') }}events-list?nation=${value}`)">
                 <div class="flex-1">
                     <x-form.select name="country" label="{{ __('website.academies_map_nations') }}" x-model="nationFilter"
                         shouldHaveEmptyOption="false" :optgroups="$continents" />
@@ -27,7 +27,7 @@
 
                 @if ($events->isEmpty())
                     <div
-                        class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-col justify-between gap-2">
+                        class="bg-white dark:bg-background-800 rounded dark:text-background-300 p-4 flex flex-col justify-between gap-2">
                         <p class="text-2xl font-semibold group-hover:text-primary-500">
                             {{ __('website.events_list_no_events') }}
                         </p>

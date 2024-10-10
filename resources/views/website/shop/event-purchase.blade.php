@@ -1,14 +1,22 @@
 @php
     $isWaitingList = $event->isWaitingList();
-    $stripeUrl = '';
-    $paypalUrl = '';
-    if ($isWaitingList) {
-        $stripeUrl = route('shop.event.stripe-preauth', ['event' => $event]);
-        $paypalUrl = route('shop.event.paypal-preauth', ['event' => $event]);
-    } else {
-        $stripeUrl = route('shop.events.stripe-checkout', ['event' => $event]);
-        $paypalUrl = route('shop.events.paypal-checkout', ['event' => $event]);
-    }
+    $isFreeCheckout = $event->is_free || $event->price == 0;
+    $freeUrl = route('shop.events.free-checkout', ['event' => $event]);
+    $stripeUrl = route('shop.events.stripe-checkout', ['event' => $event]);
+    $paypalUrl = route('shop.events.paypal-checkout', ['event' => $event]);
+    $waitingListUrl = route('shop.events.waiting-list-checkout', ['event' => $event]);
+
+    // Questo risale alla preautorizzazione. Adesso nnon è più utilizzato
+    // $stripeUrl = '';
+    // $paypalUrl = '';
+    // if ($isWaitingList) {
+    //     $paypalUrl = route('shop.event.paypal-preauth', ['event' => $event]);
+    //     $stripeUrl = route('shop.event.stripe-preauth', ['event' => $event]);
+    // } else {
+    //     $stripeUrl = route('shop.events.stripe-checkout', ['event' => $event]);
+    //     $paypalUrl = route('shop.events.paypal-checkout', ['event' => $event]);
+    // }
+    
 @endphp
 
 <x-website-layout>
@@ -143,6 +151,66 @@
                             })
                     }
                 },
+                async startWaitingListCheckout() {
+                    let ok = await this.saveInvoiceData();
+                    console.log({ok})
+                    if(ok){
+                        const url = `{{ $waitingListUrl }}`
+                        let items = [];
+                
+                        items.push({
+                            'name': 'event_participation',
+                            'quantity': 1,
+                        })
+                
+                        const itemsJson = JSON.stringify(items)
+                
+                        let fd = new FormData()
+                        fd.append('items', itemsJson)
+                
+                        fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: fd
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                window.location.href = data.url
+                            })
+                    }
+                },
+                async startFreeCheckout() {
+                    let ok = await this.saveInvoiceData();
+                    console.log({ok})
+                    if(ok){
+                        const url = `{{ $freeUrl }}`
+                        let items = [];
+                
+                        items.push({
+                            'name': 'event_participation',
+                            'quantity': 1,
+                        })
+                
+                        const itemsJson = JSON.stringify(items)
+                
+                        let fd = new FormData()
+                        fd.append('items', itemsJson)
+                
+                        fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: fd
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                window.location.href = data.url
+                            })
+                    }
+                },
                 async startWireCheckout() {
                     let ok = await this.saveInvoiceData()
                     if(ok){
@@ -163,6 +231,7 @@
                         window.location.href = `${url}?${params}`
                     }
                 },
+                
                 openResMessage(res) {
                     if (res.success) {
                         this.successMessage = 'Invoice successfully updated'
@@ -191,11 +260,13 @@
                                     {{ $event->name }}</h1>
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                                 <div>
-                                    <p class="text-background-800 dark:text-background-200">
-                                        {{ __('website.event_participation_checkout_text') }}</p>
                                     @if ($isWaitingList)
                                         <p class="mt-2 text-error-500">
                                             {{ __('website.event_waiting_list_checkout_text') }}
+                                        </p>
+                                    @else
+                                        <p class="text-background-800 dark:text-background-200">
+                                            {{ __('website.event_participation_checkout_text') }}
                                         </p>
                                     @endif
                                 </div>
@@ -307,30 +378,43 @@
                                 <p class="text-background-800 dark:text-background-200 text-lg"
                                     x-text="'€ ' + totalPrice.toFixed(2)"></p>
 
-                                <div x-show="shouldShowPayment" class="mt-4">
-                                    <div @click="startPaypalCheckout"
-                                        class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer">
-                                        <span>PayPal</span>
-                                    </div>
-                                </div>
-                                {{-- Al momento non è ancora implementata la preautorizzazione con stripe --}}
-                                @if (!$isWaitingList)
+                                @if ($isWaitingList)
                                     <div x-show="shouldShowPayment" class="mt-4">
-                                        <div class="rounded-full bg-white hover:bg-gray-200 text-black font-bold p-1 text-center cursor-pointer"
+                                        <div @click="startWaitingListCheckout"
+                                            class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer">
+                                            <span>Join the waiting list</span>
+                                        </div>
+                                    </div>
+                                @elseif ($isFreeCheckout)
+                                    <div x-show="shouldShowPayment" class="mt-4">
+                                        <div @click="startFreeCheckout"
+                                            class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer">
+                                            <span>Book now</span>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div x-show="shouldShowPayment" class="mt-4">
+                                        <div @click="startPaypalCheckout"
+                                            class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer">
+                                            <span>PayPal</span>
+                                        </div>
+                                    </div>
+                                    <div x-show="shouldShowPayment" class="mt-4">
+                                        <div class="rounded-full bg-gray-200 dark:bg-white hover:bg-gray-400 dark:hover:bg-gray-200 text-black font-bold p-1 text-center cursor-pointer"
                                             @click="startStripeCheckout">
 
                                             <span>Stripe</span>
                                         </div>
                                     </div>
+                                    {{-- Wiretransfer non è implementato per gli eventi (usa la route delle fees e crea un ordine nuovo ogni volta --}}
+                                    {{-- <div x-show="shouldShowPayment" class="mt-4">
+                                        <div class="rounded-full bg-gray-300 hover:bg-gray-500 text-black font-bold p-1 text-center cursor-pointer"
+                                            @click="startWireCheckout">
+    
+                                            <span>{{ __('website.wire_transfer') }}</span>
+                                        </div>
+                                    </div> --}}
                                 @endif
-                                {{-- Wiretransfer non si utilizza per la waiting list --}}
-                                {{-- <div x-show="shouldShowPayment" class="mt-4">
-                                    <div class="rounded-full bg-gray-300 hover:bg-gray-500 text-black font-bold p-1 text-center cursor-pointer"
-                                        @click="startWireCheckout">
-
-                                        <span>{{ __('website.wire_transfer') }}</span>
-                                    </div>
-                                </div> --}}
                             </div>
 
                         </div>

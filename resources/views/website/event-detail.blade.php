@@ -42,19 +42,24 @@
 
                         @if ($canpurchase)
                             <a href="{{ route('event-purchase', $event->id) }}">
-                                @if($only_waiting_list)
-                                    <x-primary-button>{{ __('website.events_list_waiting_list') }}</x-primary-button>
-                                @else
-                                    <x-primary-button>{{ __('website.events_list_participate') }}</x-primary-button>
-                                @endif    
+                                <x-primary-button>
+                                    @if($is_waiting_payment)
+                                        {{ __('website.events_waiting_payment') }}
+                                    @elseif($only_waiting_list)
+                                        {{ __('website.events_list_waiting_list') }}
+                                    @else
+                                        {{ __('website.events_list_participate') }}
+                                    @endif    
+                                </x-primary-button>
                             </a>
                         @elseif (!Auth()->user()->has_paid_fee)
                             <p>{{__('website.events_pay_fee_before')}}</p>
                         @elseif ($is_participating)
                             <p>{{__('website.events_participating')}}</p>
                         @elseif ($is_in_waiting_list)
+                            {{-- Qui si può aggiungere il bottone per mandarlo al completamento del pagamento se ha il flag is_waiting_payment --}}
                             <p>{{__('website.events_in_waiting_list')}}</p>
-                        @elseif ($block_subscriptions || $event->is_free || $event->price == 0)
+                        @elseif ($block_subscriptions || !$event->internal_shop)
                             <p>{{__('website.events_subscriptions_blocked')}}</p>
                         @endif
 

@@ -25,8 +25,12 @@
                         </h4>
                     </div>
                     <div>
-                        <x-text-input type="text" x-on:input="searchAvailableUsers(event);" placeholder="Search..."
-                            class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" />
+                        <input x-model="searchAvailablesValue" x-on:input="searchAvailableUsers($event);"
+                            type="text" placeholder="Search..."
+                            class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'
+                        >
+                        {{-- <x-text-input type="text" x-on:input="searchAvailableUsers(event);" placeholder="Search..."
+                            class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" /> --}}
                     </div>
                 </div>
 
@@ -108,8 +112,12 @@
                     </h4>
                 </div>
                 <div>
-                    <x-text-input type="text" x-on:input="searchPersonnel(event);" placeholder="Search..."
-                        class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" />
+                    <input x-model="searchPersonnelValue" x-on:input="searchPersonnel($event);"
+                        type="text" placeholder="Search..."
+                        class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'
+                    >
+                    {{-- <x-text-input type="text" x-on:input="searchPersonnel(event);" placeholder="Search..."
+                        class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" /> --}}
                 </div>
             </div>
             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>

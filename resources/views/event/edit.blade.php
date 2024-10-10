@@ -86,17 +86,17 @@
                         selected="{{ $event->type->id }}" 
                         disabled="{{!!$event->is_approved}}" />
 
+                    <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms" 
+                        disabled="{{!!$event->is_approved}}" />
+
                     <x-form.input name="max_participants" label="Max Participants (0 means unlimited)" type="number" required="{{ true }}"
                         value="{{ $event->max_participants }}" min="{{0}}" 
                         placeholder="{{ __('events.max_participants_placeholder') }}"
                         disabled="{{!!$event->is_approved}}" />
 
-                    <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms" 
+                    <x-form.checkbox id="internal_shop" name="internal_shop" label="Internal Shop"
+                        isChecked="{{ $event->internal_shop }}" 
                         disabled="{{!!$event->is_approved}}" />
-
-                    <x-form.checkbox id="block_subscriptions" name="block_subscriptions" label="Block subscriptions (shop)"
-                        isChecked="{{ $event->block_subscriptions }}" 
-                        disabled="{{false}}" />
 
                     <x-form.checkbox id="is_free" name="is_free" label="Free Event"
                         isChecked="{{ $event->is_free }}" 
@@ -107,6 +107,16 @@
                         min="{{0}}" 
                         required="{{ $event->is_free ? false : true }}" 
                         disabled="{{!!$event->is_approved}}" />
+                        
+                    <x-form.checkbox id="block_subscriptions" name="block_subscriptions" label="Block subscriptions (shop)"
+                        isChecked="{{ $event->block_subscriptions }}" 
+                        disabled="{{false}}" />
+
+                    <x-form.input name="waiting_list_close_date" label="Waiting list closing date" type="datetime-local"
+                        value="{{ $event->waiting_list_close_date }}"
+                        placeholder="{{ fake()->date() }}" 
+                        disabled="{{!!$event->is_approved}}" />
+
 
                 </div>
             </form>
