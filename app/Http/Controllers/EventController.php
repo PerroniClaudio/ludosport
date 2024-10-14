@@ -38,7 +38,7 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to view this page');
         }
 
@@ -84,7 +84,7 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to view this page');
         }
 
@@ -221,6 +221,7 @@ class EventController extends Controller {
         }
 
         $viewPath = $authRole === 'admin' ? 'event.edit' : 'event.' . $authRole . '.edit';
+
         return view($viewPath, [
             'event' => $event,
             'rankingResults' => $rankingResults,
@@ -241,7 +242,9 @@ class EventController extends Controller {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
-        $event->description = $request->description;
+
+
+        $event->description = html_entity_decode($request->description);
         $event->save();
 
         $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
@@ -285,7 +288,7 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if (!$event->is_approved){
+        if (!$event->is_approved) {
             $request->validate([
                 'name' => 'required',
                 'event_type' => 'string',
@@ -299,7 +302,7 @@ class EventController extends Controller {
         if (!($authRole === 'admin' ||
             ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->primaryAcademy()->id : null))) ||
             $event->user_id === $authUser->id)) {
-                return back()->with('error', 'You are not authorized to edit this event');
+            return back()->with('error', 'You are not authorized to edit this event');
         }
 
         // Da quando è approvato non si può modificare. Ad eccezione di block_subscriptions, modificabile solo dall'admin
@@ -313,7 +316,7 @@ class EventController extends Controller {
                 $event->save();
                 return back()->with('success', 'Block subscriptions saved successfully');
             }
-            
+
             return back()->with('error', 'After approval, you can only modify "block subscriptions" value');
         }
 
@@ -593,7 +596,7 @@ class EventController extends Controller {
         $authRole = User::find(auth()->user()->id)->getRole();
         $event = Event::find($request->event_id);
 
-        if(!$event){
+        if (!$event) {
             return response()->json(['error' => 'Event not found'], 404);
         }
         // Il tecnico non può modificare i partecipanti in nessun caso. Solo gli admin possono modificare i partecipanti di eventi a pagamento.

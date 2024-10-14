@@ -277,6 +277,10 @@ hr {
     @apply border-b border-background-100 dark:border-background-700 my-2;
 }
 
+.tiptap a {
+    @apply text-primary-500 dark:text-primary-400 underline;
+}
+
 /* FullCalendar */
 
 :root {

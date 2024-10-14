@@ -26,7 +26,7 @@ export const googlemap = (location) => {
         init() {
             fetchLocation(this.location).then((data) => {
                 data.address_components.forEach((element) => {
-                    console.log(element);
+                    // console.log(element);
 
                     if (element.types.includes("route")) {
                         this.address = element.long_name + ", " + this.address;
@@ -71,7 +71,7 @@ export const googlemap = (location) => {
                     }
                 });
 
-                console.log(data.geometry.location);
+                // console.log(data.geometry.location);
 
                 this.map = new google.maps.Map(
                     document.getElementById("eventGoogleMap"),
