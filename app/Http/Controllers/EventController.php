@@ -366,13 +366,6 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        $request->validate([
-            'name' => 'required',
-            'event_type' => 'string',
-            'start_date' => 'required',
-            'end_date' => 'required',
-            'price' => 'min:0',
-        ]);
 
         // Se un evento è approvato non può essere modificato a eccezione di block subscriptions da parte degli admin
 
@@ -422,6 +415,13 @@ class EventController extends Controller {
                 ]);
             }
         } else {
+            $request->validate([
+                'name' => 'required',
+                'event_type' => 'string',
+                'start_date' => 'required',
+                'end_date' => 'required',
+                'price' => 'min:0',
+            ]);
 
 
 
