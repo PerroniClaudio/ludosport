@@ -197,6 +197,12 @@
 
 /* TipTapEditor */
 
+.tiptap {
+    padding: 0.5rem 1rem;
+    margin: 1rem 0;
+    border: 1px solid var(--background-700);
+}
+
 .editor-button {
     @apply inline-flex 
         items-center 
@@ -392,3 +398,5 @@ hr {
 .expand {
     flex: 1 1 100%;
 }
+
+/* Flash */

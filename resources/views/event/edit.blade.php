@@ -7,7 +7,35 @@
         </div>
     </x-slot>
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4" x-data="{
+            handleSubmit: async function(e) {
+                e.preventDefault()
+                const editorRequest = await saveContent();
+                const mapRequest = await saveMapContent();
+        
+                const form = document.getElementById('eventForm');
+                const formData = new FormData(form);
+        
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+        
+                const json = await response.json();
+        
+                if (json.error) {
+                    FlashMessage.displayError(json.message, 2000)
+                } else {
+                    FlashMessage.displayCustomMessage(json.message, 2000)
+                }
+        
+        
+        
+            }
+        }">
 
             @if (!$event->is_approved)
                 @if ($event->nation_id != 0)
@@ -50,15 +78,18 @@
                 @endif
             @endif
 
-            <form method="POST" action={{ route('events.update', $event->id) }}
+            <form id="eventForm" method="POST" action={{ route('events.update', $event->id) }}
+                @submit.prevent="handleSubmit"
                 class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 @csrf
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.info') }}</h3>
                     {{-- @if (!$event->is_approved) --}}
-                    <x-primary-button type="sumbit">
-                        <x-lucide-save class="w-5 h-5 text-white" />
-                    </x-primary-button>
+                    <div class="fixed bottom-8 right-32 z-[9999]">
+                        <x-primary-button type="submit">
+                            <x-lucide-save class="w-6 h-6 text-white" />
+                        </x-primary-button>
+                    </div>
                     {{-- @endif --}}
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
@@ -129,4 +160,5 @@
 
         </div>
     </div>
+
 </x-app-layout>

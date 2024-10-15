@@ -105,7 +105,7 @@ class EventController extends Controller {
      */
     public function store(Request $request) {
         $authUser = User::find(auth()->user()->id);
-        $authRole = $authUser->getRole();     
+        $authRole = $authUser->getRole();
 
         $request->validate([
             'name' => 'required',
@@ -115,7 +115,7 @@ class EventController extends Controller {
 
         // Non hanno chiesto un valore di default per la data di chiusura della waiting list
         // $waitingCloseDate = Carbon::parse($request->start_date)->subDays(30)->isBefore(now()) ? null : Carbon::parse($request->start_date)->subDays(30);
-        
+
         // Se l'utente è admin si imposta il pagamento interno di default. Altrimenti è sempre esterno.
         $internalShop = $authRole == "admin" ? true : false;
 
@@ -242,13 +242,16 @@ class EventController extends Controller {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
 
-
-
         $event->description = html_entity_decode($request->description);
         $event->save();
 
         $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
-        return redirect()->route($redirectRoute, $event->id);
+
+        if ($request->shouldJson) {
+            return response()->json(['success' => 'Description saved successfully']);
+        }
+
+        return redirect()->route($redirectRoute, $event->id)->with('success', 'Description saved successfully');
     }
 
     public function saveLocation(Request $request, Event $event) {
@@ -277,13 +280,17 @@ class EventController extends Controller {
 
         $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
 
+        if ($request->shouldJson) {
+            return response()->json(['success' => 'Location saved successfully']);
+        }
+
         return redirect()->route($redirectRoute, $event->id)->with('success', 'Location saved successfully');
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Event $event) {
+    public function nada(Request $request, Event $event) {
         //
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
@@ -323,9 +330,9 @@ class EventController extends Controller {
         $event->name = $request->name;
         $event->start_date = $request->start_date;
         $event->end_date = $request->end_date;
-        
+
         if ($authRole === 'admin') {
-            
+
             $event->max_participants = $request->max_participants ?? null;
 
             $event_type = EventType::where('name', $request->event_type)->first();
@@ -353,6 +360,128 @@ class EventController extends Controller {
         $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
         return redirect()->route($redirectRoute, $event->id)->with('success', 'Event saved successfully');
     }
+
+    public function update(Request $request, Event $event) {
+
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
+        $request->validate([
+            'name' => 'required',
+            'event_type' => 'string',
+            'start_date' => 'required',
+            'end_date' => 'required',
+            'price' => 'min:0',
+        ]);
+
+        // Se un evento è approvato non può essere modificato a eccezione di block subscriptions da parte degli admin
+
+        if ($event->is_approved) {
+
+            if ($authRole !== 'admin') {
+                return response()->json([
+                    'error' => true,
+                    'message' => 'You are not authorized to edit this event'
+                ]);
+            }
+
+            $newValue = $request->block_subscriptions == 'on' ? true : false;
+
+            if ($event->block_subscriptions != $newValue) {
+                $event->block_subscriptions = $newValue;
+                $event->save();
+
+                return response()->json([
+                    'error' => false,
+                    'message' => 'Block subscriptions saved successfully'
+                ]);
+            }
+
+            if ($request->hasAny(['name', 'event_type', 'start_date', 'end_date', 'price'])) {
+                if (
+                    $request->name !== $event->name ||
+                    $request->event_type !== $event->event_type ||
+                    $request->start_date !== $event->start_date ||
+                    $request->end_date !== $event->end_date ||
+                    $request->price !== $event->price
+                ) {
+                    return response()->json([
+                        'error' => true,
+                        'message' => 'After approval, you can only modify "block subscriptions" value'
+                    ]);
+                } else {
+                    return response()->json([
+                        'error' => false,
+                        'message' => 'Event saved successfully'
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'error' => false,
+                    'message' => 'Event saved successfully'
+                ]);
+            }
+        } else {
+
+
+
+            if (!$this->checkEditPermission($authRole, $event, $authUser)) {
+                return response()->json([
+                    'error' => true,
+                    'message' => 'You are not authorized to edit this event'
+                ]);
+            }
+
+            $event->name = $request->name;
+            $event->start_date = $request->start_date;
+            $event->end_date = $request->end_date;
+
+            if (isset($request->weapon_form_id) && $request->weapon_form_id != 0) {
+                $event->weapon_form_id = $request->weapon_form_id;
+            }
+
+            // Dati modificabli solo da admin 
+
+            if ($authRole === 'admin') {
+
+                $event->max_participants = $request->max_participants ?? null;
+
+                $event_type = EventType::where('name', $request->event_type)->first();
+                $event->event_type = $event_type->id;
+
+                if ($request->is_free == 'on') {
+                    $event->is_free = true;
+                    $event->price = 0;
+                } else {
+                    $event->is_free = false;
+                    $event->price = $request->price;
+                }
+
+                $event->block_subscriptions = $request->block_subscriptions == 'on' ? true : false;
+                $event->waiting_list_close_date = $request->waiting_list_close_date ?? null;
+                $event->internal_shop = $request->internal_shop == 'on' ? true : false;
+            }
+
+            $event->save();
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Event saved successfully'
+            ]);
+        }
+    }
+
+    public function checkEditPermission($authRole, $event, $authUser) {
+        if (!($authRole === 'admin' ||
+            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->primaryAcademy()->id : null))) ||
+            $event->user_id === $authUser->id)) {
+            return false;
+        }
+
+        return true;
+    }
+
+
 
     /**
      * Remove the specified resource from storage.
@@ -615,7 +744,7 @@ class EventController extends Controller {
             $event->instructorResults()->whereNotIn('user_id', $participants)->whereNotIn('stage', ['confirmed'])->delete();
 
             $isParticipantsExeeding = $event->max_participants > 0 && (count($participants) > $event->max_participants);
-            
+
             foreach ($participants as $participant) {
                 if ($event->instructorResults()->where('user_id', $participant)->exists()) {
                     continue;
@@ -644,7 +773,7 @@ class EventController extends Controller {
                     continue;
                 }
                 // Se richiede di aggiungere un partecipante ma si supera il limite, restituisce errore
-                if($isParticipantsExeeding){
+                if ($isParticipantsExeeding) {
                     return response()->json(['error' => 'The number of participants exceeds the limit. Participants can only be removed.'], 400);
                 }
                 // Altrimenti lo aggiunge
@@ -1038,12 +1167,12 @@ class EventController extends Controller {
         if ($user->has_paid_fee === 0) {
             return redirect()->route('event-detail', $event->slug)->with('error', __('website.must_pay_fee'));
         }
-        
+
         // Se l'evento è esterno deve rivolgersi alla scuola per l'iscrizione
-        if(!$event->internal_shop){
+        if (!$event->internal_shop) {
             return redirect()->route('event-detail', $event->slug)->with('error', __('website.event_external'));
         }
-        
+
         // Se ha già un ordine completato non può acquistare un altro 
         $rejectOrder = Order::where('user_id', $user->id)
             ->whereIn('status', [2]) // preautorizzato (3) non si usa più
@@ -1064,7 +1193,7 @@ class EventController extends Controller {
         $waitingListItemToPay = EventWaitingList::where(['user_id' => $user->id, 'event_id' => $event->id, 'is_waiting_payment' => true])->first();
 
         // Se le iscrizioni sono bloccate, non può acquistare e non è in waiting list in attesa di pagare non può acquistare 
-        if($event->block_subscriptions && !$waitingListItemToPay){
+        if ($event->block_subscriptions && !$waitingListItemToPay) {
             return redirect()->route('event-detail', $event->slug)->with('error', __('website.event_block_subscriptions'));
         }
 
@@ -1166,12 +1295,12 @@ class EventController extends Controller {
     // }
 
     // Checkout evento interno gratuito
-    public function userCheckoutFree(Event $event, Request $request){
+    public function userCheckoutFree(Event $event, Request $request) {
         $authUser = User::find(auth()->user()->id);
         $order_id = $request->session()->get('order_id');
         $order = Order::findOrFail($order_id);
 
-        if(!$order){
+        if (!$order) {
             Log::error('Free checkout failed - Order not found - User ID: ' . $authUser->id . ' - Event ID: ' . $event->id . ' - Order ID: ' . $order_id);
             return response()->json([
                 'success' => false,
@@ -1181,7 +1310,7 @@ class EventController extends Controller {
         }
 
         // Se l'evento non è gratuito non si può procedere
-        if(!$event->is_free && $event->price != 0){
+        if (!$event->is_free && $event->price != 0) {
             Log::error('Free checkout failed - Event is not free - User ID: ' . $authUser->id . ' - Event ID: ' . $event->id . ' - Order ID: ' . $order_id);
             return response()->json([
                 'success' => false,
@@ -1250,19 +1379,19 @@ class EventController extends Controller {
     // Checkout waiting list
     public function userCheckoutWaitingList(Event $event, Request $request) {
         // Deve aggiungere l'utente alla waiting list se non c'è già.
-            //  - Poi quando viene selezionato dalla waiting list, nel record in waiting list si imposta lo stato in deve pagare
-            //  - In questa fase, se ci sono errori di pagamento possono essere creati altri ordini, quindi non colleghiamo l'ordine alla waiting list
-            //  - per vedere se prendere altri dalla waiting list si devono contare i partecipanti + quelli in waiting list con lo stato deve pagare
-            //  - Poi serve la pagina in cui quelli nello stato deve pagare possono pagare. Usiamo sempre purchase.
-            //  - Quando hanno pagato, lo stato passa a completed e vengono aggiunti ai partecipanti
-            //  - Si aggiunge l'eliminazione dalla waiting list se si è pagato, non se si è cancellato l'ordine (perchè potrebbero essere errori di pagamento)
-            //  - Quando il tempo per pagare scade (job che controlla giornalmente), si elimina dalla waiting list, si avvisa l'utente e si controlla se ci sono altri posti liberi e persone in waiting list (evento già esistente da triggerare) 
+        //  - Poi quando viene selezionato dalla waiting list, nel record in waiting list si imposta lo stato in deve pagare
+        //  - In questa fase, se ci sono errori di pagamento possono essere creati altri ordini, quindi non colleghiamo l'ordine alla waiting list
+        //  - per vedere se prendere altri dalla waiting list si devono contare i partecipanti + quelli in waiting list con lo stato deve pagare
+        //  - Poi serve la pagina in cui quelli nello stato deve pagare possono pagare. Usiamo sempre purchase.
+        //  - Quando hanno pagato, lo stato passa a completed e vengono aggiunti ai partecipanti
+        //  - Si aggiunge l'eliminazione dalla waiting list se si è pagato, non se si è cancellato l'ordine (perchè potrebbero essere errori di pagamento)
+        //  - Quando il tempo per pagare scade (job che controlla giornalmente), si elimina dalla waiting list, si avvisa l'utente e si controlla se ci sono altri posti liberi e persone in waiting list (evento già esistente da triggerare) 
 
         $order_id = $request->session()->get('order_id');
         $order = Order::findOrFail($order_id);
 
         // Questo errore non dovrebbe mai verificarsi
-        if(!$order){
+        if (!$order) {
             return response()->json([
                 'success' => false,
                 'error' => 'Order not found',
@@ -1270,7 +1399,7 @@ class EventController extends Controller {
             ]);
         }
 
-        if(!EventWaitingList::where('event_id', $event->id)->where('user_id', $order->user_id)->exists()){
+        if (!EventWaitingList::where('event_id', $event->id)->where('user_id', $order->user_id)->exists()) {
             // Crea la voce in lista d'attesa
             EventWaitingList::create([
                 'user_id' => $order->user_id,
@@ -1286,8 +1415,6 @@ class EventController extends Controller {
             'success' => true,
             'url' => $link, // Link della pagina di successo waiting list
         ]);
-
-        
     }
 
     // Successo waiting list
@@ -1310,7 +1437,7 @@ class EventController extends Controller {
         ]);
 
         // Vedere se la view è giusta
-        return view('website.shop.event-waiting-list-cancel'); 
+        return view('website.shop.event-waiting-list-cancel');
     }
 
     // STRIPE - Acquisto
@@ -1491,8 +1618,8 @@ class EventController extends Controller {
 
         if ($order->status !== 1) {
             // se l'ordine è già stato completato, assicurarsi di eliminare l'utente dalla waiting list
-            if($order->status === 2){
-                if(isset($event->id)){
+            if ($order->status === 2) {
+                if (isset($event->id)) {
                     EventWaitingList::where(['event_id' => $event->id, 'user_id' => $order->user_id])->delete();
                 }
             }
@@ -1517,7 +1644,7 @@ class EventController extends Controller {
             }
 
             // Elimina eventuali record in waiting list
-            if(isset($event->id)){
+            if (isset($event->id)) {
                 EventWaitingList::where(['event_id' => $event->id, 'user_id' => $order->user_id])->delete();
             }
 
