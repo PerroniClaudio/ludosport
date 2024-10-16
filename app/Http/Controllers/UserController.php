@@ -1063,9 +1063,11 @@ class UserController extends Controller {
             }
         }
 
+
         $view = 'dashboard.athlete.index';
         return view($view, [
             'announcements' => $not_seen,
+
         ]);
     }
 

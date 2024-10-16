@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
 
             @if (auth()->user()->has_paid_fee)
                 @if (auth()->user()->isFeeExpiring())
@@ -47,6 +47,61 @@
                             </x-primary-button>
                         </a>
                     </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-background-900 dark:text-background-100">
+                    <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                        {{ __('dashboard.athlete_upcoming_events') }}
+                    </h3>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+
+                    @unless (count(collect(auth()->user()->eventResults())) == 0)
+                        @foreach (auth()->user()->eventResults()->get() as $eventSubscription)
+                            @if (\Carbon\Carbon::parse($eventSubscription->event->start_date)->isFuture())
+                                <div x-data="{
+                                    start_date: '{{ $eventSubscription->event->start_date }}',
+                                    end_date: '{{ $eventSubscription->event->end_date }}',
+                                }"
+                                    class="bg-white text-background-800 dark:bg-background-900 rounded dark:text-background-300 p-4 flex flex-col justify-between gap-2">
+                                    <p class="text-lg font-semibold group-hover:text-primary-500">
+                                        {{ $eventSubscription->event->name }}
+                                    </p>
+                                    <div class="flex items-center gap-1">
+                                        <x-lucide-calendar-days class="w-4 h-4 text-primary-500" />
+                                        <div class="flex flex-row gap-2">
+                                            <p x-text="new Date(start_date).toLocaleDateString('it-IT', {
+                                            hour: 'numeric', 
+                                            minute: 'numeric' 
+                                        })"
+                                                class="text-xs"></p>
+                                            <span class="text-xs"> - </span>
+                                            <p x-text="new Date(end_date).toLocaleDateString('it-IT', {
+                                            hour: 'numeric', 
+                                            minute: 'numeric' 
+                                        })"
+                                                class="text-xs"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <x-lucide-map-pin class="w-4 h-4 text-primary-500" />
+                                        <span class="text-sm font-semibold group-hover:text-primary-500">
+                                            {{ $eventSubscription->event->address }} ,
+                                            {{ $eventSubscription->event->postal_code }} ,
+                                            {{ $eventSubscription->event->city }}
+                                        </span>
+                                    </div>
+
+                                    <a href="{{ route('event-detail', $eventSubscription->event->slug) }}">
+                                        <x-primary-button>
+                                            {{ __('website.events_list_button') }}
+                                        </x-primary-button>
+                                    </a>
+                                </div>
+                            @endif
+                        @endforeach
+                    @endunless
                 </div>
             </div>
 
