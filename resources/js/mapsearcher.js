@@ -31,6 +31,10 @@ export const mapsearcher = (academies) => {
                     marker: marker,
                 });
             });
+
+            if (this.results[0] && this.results[0].id) {
+                this.zoomToMarker(this.results[0].id);
+            }
         },
         zoomToMarker: function (id) {
             let marker = this.markers.find((m) => m.id === id);

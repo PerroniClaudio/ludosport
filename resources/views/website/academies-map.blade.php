@@ -58,7 +58,7 @@
                         <input type="text" placeholder="City/Zip Code" id="search"
                             class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm"
                             x-model="search" @input="searchChanged">
-                        <button class="bg-primary-500 text-white rounded p-2">
+                        <button class="bg-primary-500 text-white rounded p-2" @click="searchChanged">
                             <x-lucide-search class="w-6 h-6" />
                         </button>
                     </div>
