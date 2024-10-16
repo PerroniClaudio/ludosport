@@ -27,4 +27,5 @@ return [
     'quick_create_school' => 'Quick Create School',
     'go_to_edit_school' => 'Go to Edit School',
     'school_name' => 'School Name',
+    'logo' => 'Logo',
 ];

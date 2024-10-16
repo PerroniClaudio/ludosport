@@ -107,6 +107,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/academies/{academy}/athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('academies.athlete.store');
 
     Route::get('/academies/{academy}/users-search', [App\Http\Controllers\AcademyController::class, 'searchUsers'])->name('academies.users-search');
+    Route::put('/academies/{academy}/picture', [App\Http\Controllers\AcademyController::class, 'picture'])->name('academies.picture.update');
 });
 
 /** Scuole */

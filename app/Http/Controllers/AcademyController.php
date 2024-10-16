@@ -768,6 +768,29 @@ class AcademyController extends Controller {
         ]);
     }
 
+    public function picture(Academy $academy, Request $request) {
+        if ($request->file('academylogo') != null) {
+            $file = $request->file('academylogo');
+
+            $file_extension = $file->getClientOriginalExtension();
+            $file_name = time() . '_logo.' . $file_extension;
+            $path = "/academies/" . $academy->id . "/" . $file_name;
+            $storeFile = $file->storeAs("/academies/" . $academy->id . "/", $file_name, "gcs");
+
+            if ($storeFile) {
+
+                $academy->picture = $path;
+                $academy->save();
+
+                return redirect()->route('academies.edit', $academy->id)->with('success', 'Academy picture uploaded successfully!');
+            } else {
+                ddd($storeFile);
+            }
+        } else {
+            return redirect()->route('academies.edit', $academy->id)->with('error', 'Error uploading Academy picture!');
+        }
+    }
+
     public function academyImage(Academy $academy) {
 
         $cacheKey = 'academy-img-' . $academy->id;
@@ -775,7 +798,7 @@ class AcademyController extends Controller {
         $image = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($academy) {
 
             $url = Storage::disk('gcs')->temporaryUrl(
-                '/academies/' . $academy->id . '/image.png',
+                $academy->picture,
                 now()->addMinutes(5)
             );
             $response = Http::get($url);
