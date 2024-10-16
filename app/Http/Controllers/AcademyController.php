@@ -179,9 +179,7 @@ class AcademyController extends Controller {
         $roles = Role::all();
         $editable_roles = $authUser->getEditableRoles();
 
-        $viewPath = $authRole === 'admin' ? 'academy.edit' : 'academy.' . $authRole . '.edit';
-
-        return view($viewPath, [
+        return view('academy.edit', [
             'academy' => $academy,
             'nations' => $countries,
             'schools' => $schools,
