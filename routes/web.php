@@ -34,6 +34,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/invoices/update', [App\Http\Controllers\UserController::class, 'updateInvoice'])->name('users.invoices.update');
 });
 
+/** Eliminati */
+
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+    Route::get('/deleted-elements', [App\Http\Controllers\DeletedElementController::class, 'index'])->name('deleted-elements.index');
+    Route::post('/deleted-elements', [App\Http\Controllers\DeletedElementController::class, 'restore'])->name('deleted-elements.restore');
+});
+
 /** Users */
 
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
@@ -302,6 +309,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/weapon-forms/{weaponForm}/athletes', [App\Http\Controllers\WeaponFormController::class, 'addAthletes'])->name('weapon-forms.athletes.store');
     Route::post('/weapon-forms/{weaponForm}', [App\Http\Controllers\WeaponFormController::class, 'update'])->name('weapon-forms.update');
 });
+
 
 
 /** Script */
