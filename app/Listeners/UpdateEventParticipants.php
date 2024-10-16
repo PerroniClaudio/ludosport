@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Events\EventMustPay;
 use App\Events\EventPaid;
 use App\Events\ParticipantsUpdated;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -51,7 +52,6 @@ class UpdateEventParticipants
 
                 // Check if payment is required
                 if($event->is_free || $event->price == 0) {
-
                     
                     if($event->resultType() === 'enabling') {
                         $event->instructorResults()->create([
@@ -129,7 +129,7 @@ class UpdateEventParticipants
                     $waitingListItem->delete();
 
                     // Inviare comunicazione all'utente
-                    event(new EventPaid($order, $event));
+                    event(new EventPaid($order, $event, true));
 
                 } else {
                     // Imposta in modo che possa pagare
@@ -138,7 +138,7 @@ class UpdateEventParticipants
                     $waitingListItem->save();
                     
                     // Inviare comunicazione all'utente
-
+                    event(new EventMustPay($waitingListItem));
                 }
 
                 

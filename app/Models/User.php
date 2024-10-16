@@ -83,7 +83,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                 $user->email = strtolower($user->email);
             }
 
-            if ($user->battle_name) {
+            if (!$user->battle_name) {
                 $user->battle_name = $user->name . $user->surname . rand(10, 99);
             }
 

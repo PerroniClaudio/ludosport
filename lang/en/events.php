@@ -2,6 +2,10 @@
 
 return [
     'title' => 'Events',
+    'event' => 'Event',
+    'ranking_event' => 'Ranking Event',
+    'enabling_event' => 'Instructor Event',
+    'event_participation' => 'Event Participation',
     'type' => 'Type',
     'pending' => 'Pending',
     'approved' => 'Approved',

@@ -66,7 +66,9 @@ class OrderController extends Controller {
 
         foreach ($order->items as $key => $item) {
             $order->items[$key]->total = '€ ' . number_format($item->total, 2);
-            $order->items[$key]->product_name = __('orders.' . $item->product_name);
+            $order->items[$key]->product_name = $item->product_type ==  'event_participation'
+                ? __('events.event_participation') . ' - ' . $item->product_name
+                : __('orders.' . $item->product_name);
         }
 
         return view('orders.edit', [

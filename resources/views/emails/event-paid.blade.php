@@ -2,7 +2,11 @@
 
 # {{ __('emails.event_participation_email_title', ['name' => $order->user->name]) }}
 
-{{ __('emails.event_participation_email_introduction') }}
+@if($fromWaitingList)
+  {{ __('emails.event_participation_from_waiting_list_email_introduction', ['event' => $event->name]) }}
+@else
+  {{ __('emails.event_participation_email_introduction', ['event' => $event->name]) }}
+@endif
 
 ## {{ __('emails.event_participation_email_order_details') }}
 
@@ -14,7 +18,7 @@
 ## {{ __('emails.event_participation_email_event_details') }}
 
 -   **{{ __('emails.event_participation_email_event_name')  }}**: {{ $event->name }}
--   **{{ __('emails.event_participation_email_event_date')  }}**: {{ \Carbon\Carbon::parse($event->start_date)->format('d/m/Y H:i') }}
+-   **{{ __('emails.event_participation_email_event_date')  }}**: {{ $event->start_date->format('d/m/Y H:i') }}
 -   **{{ __('emails.event_participation_email_event_location')  }}**: {{ $event->postal_code }}, {{ $event->address }}, {{ $event->city }}
 
 {{ __('emails.fee_email_regards') }}

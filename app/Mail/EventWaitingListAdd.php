@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Models\Event;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -11,13 +12,13 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class EventPaid extends Mailable {
+class EventWaitingListAdd extends Mailable {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(public Order $order, public Event $event, public ?bool $fromWaitingList = false) {
+    public function __construct(public User $user, public Event $event) {
         //
     }
 
@@ -26,7 +27,7 @@ class EventPaid extends Mailable {
      */
     public function envelope(): Envelope {
         return new Envelope(
-            subject: $this->fromWaitingList ? 'Event participation confirmed' : 'Event Paid',
+            subject: 'Waiting list joined',
         );
     }
 
@@ -35,7 +36,7 @@ class EventPaid extends Mailable {
      */
     public function content(): Content {
         return new Content(
-            markdown: 'emails.event-paid',
+            markdown: 'emails.event-waiting-list-add',
         );
     }
 

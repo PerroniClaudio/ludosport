@@ -49,9 +49,14 @@ class CheckWaitingListJob implements ShouldQueue
 
         // Rimuove dalla waiting list e manda mail di notifica
         foreach ($waitingListExpired as $waitingListRecord) {
+
+            $user = $waitingListRecord->user;
+            $event = $waitingListRecord->event;
+
             $waitingListRecord->delete();
             
             // Invia email di notifica
+            event(new \App\Events\EventWaitingListRemove($user, $event));
 
             // Aggiunge l'evento alla lista di quelli per i quali si deve controllare se prendere altri dalla waiting list
             if (!in_array($event->id, $eventsToTrigger)) {

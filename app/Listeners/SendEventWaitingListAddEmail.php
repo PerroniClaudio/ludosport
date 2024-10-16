@@ -3,11 +3,12 @@
 namespace App\Listeners;
 
 use App\Events\EventPaid;
+use App\Events\EventWaitingListAdd;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
 
-class SendEventPaidEmail {
+class SendEventWaitingListAddEmail {
     /**
      * Create the event listener.
      */
@@ -18,12 +19,12 @@ class SendEventPaidEmail {
     /**
      * Handle the event.
      */
-    public function handle(EventPaid $event): void {
+    public function handle(EventWaitingListAdd $event): void {
         //
-        $order = $event->order;
-        $event = $event->event;
-        $fromWaitingList = $event->fromWaitingList;
 
-        Mail::to($order->user->email)->send(new \App\Mail\EventPaid($order, $event, $fromWaitingList));
+        $user = $event->listItem->user;
+        $event = $event->listItem->event;
+
+        Mail::to($user->email)->send(new \App\Mail\EventWaitingListAdd($user, $event));
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\EventPaid;
+use App\Events\EventWaitingListAdd;
 use App\Events\ParticipantsUpdated;
 use App\Exports\EventParticipantsExport;
 use App\Mail\EventRejectionMail;
@@ -216,7 +217,7 @@ class EventController extends Controller {
                 $waitingList[$key]['user_id'] = $waiting->user['id'];
                 $waitingList[$key]['user_email'] = $waiting->user['email'];
                 $waitingList[$key]['status'] = $waiting->is_waiting_payment ? 'Has to pay' : 'Waiting';
-                $waitingList[$key]['payment_deadline'] = $waiting->payment_deadline ? Carbon::parse($waiting->payment_deadline)->format('d/m/Y H:i') : '';
+                $waitingList[$key]['payment_deadline'] = optional($waiting->payment_deadline)->format('d/m/Y H:i') ?? '';
             }
         }
 
@@ -1250,7 +1251,7 @@ class EventController extends Controller {
             //  - Poi quando viene selezionato dalla waiting list, nel record in waiting list si imposta lo stato in deve pagare
             //  - In questa fase, se ci sono errori di pagamento possono essere creati altri ordini, quindi non colleghiamo l'ordine alla waiting list
             //  - per vedere se prendere altri dalla waiting list si devono contare i partecipanti + quelli in waiting list con lo stato deve pagare
-            //  - Poi serve la pagina in cui quelli nello stato deve pagare possono pagare. Usiamo sempre purchase.
+            //  - Quelli nello stato deve pagare usano la stessa pagina di acquisto.
             //  - Quando hanno pagato, lo stato passa a completed e vengono aggiunti ai partecipanti
             //  - Si aggiunge l'eliminazione dalla waiting list se si è pagato, non se si è cancellato l'ordine (perchè potrebbero essere errori di pagamento)
             //  - Quando il tempo per pagare scade (job che controlla giornalmente), si elimina dalla waiting list, si avvisa l'utente e si controlla se ci sono altri posti liberi e persone in waiting list (evento già esistente da triggerare) 
@@ -1267,12 +1268,16 @@ class EventController extends Controller {
             ]);
         }
 
-        if(!EventWaitingList::where('event_id', $event->id)->where('user_id', $order->user_id)->exists()){
+        $listItem = EventWaitingList::where('user_id', $order->user_id)->where('event_id', $event->id)->first();
+
+        if(!$listItem){
             // Crea la voce in lista d'attesa
-            EventWaitingList::create([
+            $listItem = EventWaitingList::create([
                 'user_id' => $order->user_id,
                 'event_id' => $event->id,
             ]);
+
+            event(new EventWaitingListAdd($listItem));
         }
 
         session()->put('product_name', $event->name);
