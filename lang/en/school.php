@@ -6,6 +6,11 @@ return [
     'new' => 'New School',
     'create' => 'Create School',
     'info' => 'School Information',
+    'location' => 'Location',
+    'results' => 'Results',
+    'verify_location' => 'Verify Location',
+    'save_location' => 'Save Location',
+    'location_explanation' => 'The location needs to be verified in order to be displayed on the map. If the address is correct it will get automatically updated.',
     'personnel' => 'Personnel',
     'associate_personnel' => 'Associate Personnel',
     'athletes' => 'Athletes',
@@ -26,4 +31,7 @@ return [
     'quick_create_clan' => 'Quick Create Course',
     'clan_name' => 'Course Name',
     'go_to_edit_clan' => 'Go to Edit Course',
+    'address_route' => 'Address',
+    'address_street_number' => 'Street number',
+    'address_locality' => 'City/Locality'
 ];
