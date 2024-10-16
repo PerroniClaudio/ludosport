@@ -18,7 +18,8 @@ class Academy extends Model {
         'state',
         'zip',
         'country',
-        'coordinates'
+        'coordinates',
+        'picture'
     ];
 
     public function toSearchableArray() {

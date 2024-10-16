@@ -37,4 +37,5 @@ return [
     'website' => 'Website',
     'fees' => 'Fees',
     'rank_requests' => 'Rank Requests',
+    'deleted_elements' => 'Deleted Elements',
 ];

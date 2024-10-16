@@ -131,7 +131,7 @@ class AcademyController extends Controller {
         if (!$this->checkPermission($academy)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
-        
+
         $nations = Nation::all();
 
         foreach ($nations as $nation) {
@@ -179,9 +179,7 @@ class AcademyController extends Controller {
         $roles = Role::all();
         $editable_roles = $authUser->getEditableRoles();
 
-        $viewPath = $authRole === 'admin' ? 'academy.edit' : 'academy.' . $authRole . '.edit';
-
-        return view($viewPath, [
+        return view('academy.edit', [
             'academy' => $academy,
             'nations' => $countries,
             'schools' => $schools,
@@ -238,7 +236,7 @@ class AcademyController extends Controller {
             ]);
         }
 
-        return redirect()->route('academies.index', $academy)->with('success', 'Academy updated successfully!');
+        return redirect()->route('academies.edit', $academy->id)->with('success', 'Academy updated successfully!');
     }
 
     /**
@@ -348,7 +346,7 @@ class AcademyController extends Controller {
         $academy->personnel()->syncWithoutDetaching($personnel->id);
 
         // Se il personale non ha l'accademia principale, la assegna
-        if(!$personnel->primaryAcademy()){
+        if (!$personnel->primaryAcademy()) {
             $personnel->setPrimaryAcademy($academy->id);
         }
 
@@ -362,14 +360,14 @@ class AcademyController extends Controller {
         $athlete = User::find($request->athlete_id);
 
         $academy->athletes()->syncWithoutDetaching($athlete->id);
-        if($athlete->academyAthletes()->count() > 1) {
+        if ($athlete->academyAthletes()->count() > 1) {
             $noAcademy = Academy::where('slug', 'no-academy')->first();
             $noAcademy->athletes()->detach($athlete->id);
         }
         // Se l'atleta non ha l'accademia principale, la assegna
-        if(!$athlete->primaryAcademyAthlete()){
+        if (!$athlete->primaryAcademyAthlete()) {
             $schoolAcademy = null;
-            if($athlete->primarySchoolAthlete()){
+            if ($athlete->primarySchoolAthlete()) {
                 $schoolAcademy = $athlete->primarySchoolAthlete()->academy;
             }
             $athlete->setPrimaryAcademy($schoolAcademy ? $schoolAcademy->id : $academy->id);
@@ -449,7 +447,7 @@ class AcademyController extends Controller {
 
         $addressComponents = $json['results'][0]['address_components'];
         $city = "";
-        if(isset($addressComponents[2])){
+        if (isset($addressComponents[2])) {
             $city = $addressComponents[2]['types'][0] == "route" ? ($addressComponents[3]['long_name'] ?? "") : $addressComponents[2]['long_name'];
         }
 
@@ -770,6 +768,29 @@ class AcademyController extends Controller {
         ]);
     }
 
+    public function picture(Academy $academy, Request $request) {
+        if ($request->file('academylogo') != null) {
+            $file = $request->file('academylogo');
+
+            $file_extension = $file->getClientOriginalExtension();
+            $file_name = time() . '_logo.' . $file_extension;
+            $path = "/academies/" . $academy->id . "/" . $file_name;
+            $storeFile = $file->storeAs("/academies/" . $academy->id . "/", $file_name, "gcs");
+
+            if ($storeFile) {
+
+                $academy->picture = $path;
+                $academy->save();
+
+                return redirect()->route('academies.edit', $academy->id)->with('success', 'Academy picture uploaded successfully!');
+            } else {
+                ddd($storeFile);
+            }
+        } else {
+            return redirect()->route('academies.edit', $academy->id)->with('error', 'Error uploading Academy picture!');
+        }
+    }
+
     public function academyImage(Academy $academy) {
 
         $cacheKey = 'academy-img-' . $academy->id;
@@ -777,7 +798,7 @@ class AcademyController extends Controller {
         $image = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($academy) {
 
             $url = Storage::disk('gcs')->temporaryUrl(
-                '/academies/' . $academy->id . '/image.png',
+                $academy->picture,
                 now()->addMinutes(5)
             );
             $response = Http::get($url);

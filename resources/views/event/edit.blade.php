@@ -7,7 +7,35 @@
         </div>
     </x-slot>
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4" x-data="{
+            handleSubmit: async function(e) {
+                e.preventDefault()
+                const editorRequest = await saveContent();
+                const mapRequest = await saveMapContent();
+        
+                const form = document.getElementById('eventForm');
+                const formData = new FormData(form);
+        
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+        
+                const json = await response.json();
+        
+                if (json.error) {
+                    FlashMessage.displayError(json.message, 2000)
+                } else {
+                    FlashMessage.displayCustomMessage(json.message, 2000)
+                }
+        
+        
+        
+            }
+        }">
 
             @if (!$event->is_approved)
                 @if ($event->nation_id != 0)
@@ -50,73 +78,60 @@
                 @endif
             @endif
 
-            <form method="POST" action={{ route('events.update', $event->id) }}
+            <form id="eventForm" method="POST" action={{ route('events.update', $event->id) }}
+                @submit.prevent="handleSubmit"
                 class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 @csrf
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.info') }}</h3>
-                    {{-- @if(!$event->is_approved) --}}
-                        <x-primary-button type="sumbit">
-                            <x-lucide-save class="w-5 h-5 text-white" />
+                    {{-- @if (!$event->is_approved) --}}
+                    <div class="fixed bottom-8 right-32 z-[9999]">
+                        <x-primary-button type="submit">
+                            <x-lucide-save class="w-6 h-6 text-white" />
                         </x-primary-button>
+                    </div>
                     {{-- @endif --}}
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
                 <div class="flex flex-col gap-2 w-1/2">
-                    
+
                     <x-form.input name="" label="Academy" type="text" required="{{ true }}"
-                        :value="$event->academy->name" placeholder="" 
-                        disabled="{{ true }}" />
+                        :value="$event->academy->name" placeholder="" disabled="{{ true }}" />
 
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                        :value="$event->name" placeholder="{{ fake()->company() }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                        :value="$event->name" placeholder="{{ fake()->company() }}"
+                        disabled="{{ !!$event->is_approved }}" />
 
                     <x-form.input name="start_date" label="Start Date" type="datetime-local"
                         required="{{ true }}" value="{{ $event->start_date }}"
-                        placeholder="{{ fake()->date() }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                        placeholder="{{ fake()->date() }}" disabled="{{ !!$event->is_approved }}" />
 
                     <x-form.input name="end_date" label="End Date" type="datetime-local" required="{{ true }}"
-                        value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                        value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}"
+                        disabled="{{ !!$event->is_approved }}" />
 
                     <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
-                        selected="{{ $event->type->id }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                        selected="{{ $event->type->id }}" disabled="{{ !!$event->is_approved }}" />
 
-                    <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms" 
-                        disabled="{{!!$event->is_approved}}" />
+                    <x-form.input name="max_participants" label="Max Participants (0 means unlimited)" type="number"
+                        required="{{ true }}" value="{{ $event->max_participants }}"
+                        min="{{ 0 }}" placeholder="{{ __('events.max_participants_placeholder') }}"
+                        disabled="{{ !!$event->is_approved }}" />
 
-                    <x-form.input name="max_participants" label="Max Participants (0 means unlimited)" type="number" required="{{ true }}"
-                        value="{{ $event->max_participants }}" min="{{0}}" 
-                        placeholder="{{ __('events.max_participants_placeholder') }}"
-                        disabled="{{!!$event->is_approved}}" />
+                    <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms"
+                        disabled="{{ !!$event->is_approved }}" />
 
-                    <x-form.checkbox id="internal_shop" name="internal_shop" label="Internal Shop"
-                        isChecked="{{ $event->internal_shop }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                    <x-form.checkbox id="block_subscriptions" name="block_subscriptions"
+                        label="Block subscriptions (shop)" isChecked="{{ $event->block_subscriptions }}"
+                        disabled="{{ false }}" />
 
-                    <x-form.checkbox id="is_free" name="is_free" label="Free Event"
-                        isChecked="{{ $event->is_free }}" 
-                        disabled="{{!!$event->is_approved}}" />
+                    <x-form.checkbox id="is_free" name="is_free" label="Free Event" isChecked="{{ $event->is_free }}"
+                        disabled="{{ !!$event->is_approved }}" />
 
                     <x-form.input name="price" label="Price (include taxes)" type="number"
-                        value="{{ number_format($event->price, 2) }}"
-                        min="{{0}}" 
-                        required="{{ $event->is_free ? false : true }}" 
-                        disabled="{{!!$event->is_approved}}" />
-                        
-                    <x-form.checkbox id="block_subscriptions" name="block_subscriptions" label="Block subscriptions (shop)"
-                        isChecked="{{ $event->block_subscriptions }}" 
-                        disabled="{{false}}" />
-
-                    <x-form.input name="waiting_list_close_date" label="Waiting list closing date" type="datetime-local"
-                        value="{{ $event->waiting_list_close_date }}"
-                        placeholder="{{ fake()->date() }}" 
-                        disabled="{{!!$event->is_approved}}" />
-
+                        value="{{ number_format($event->price, 2) }}" min="{{ 0 }}"
+                        required="{{ $event->is_free ? false : true }}" disabled="{{ !!$event->is_approved }}" />
 
                 </div>
             </form>
@@ -128,7 +143,7 @@
             <x-event.thumbnail :event="$event" />
 
             <x-event.personnel :event="$event" />
-            
+
             @if ($event->is_approved)
                 @if ($event->resultType() === 'enabling')
                     <x-event.enabling-participants :event="$event" />
@@ -140,9 +155,10 @@
                     <x-event.ranking-results :results="$rankingResults" />
                 @endif
             @endif
-            
-            
+
+
 
         </div>
     </div>
+
 </x-app-layout>

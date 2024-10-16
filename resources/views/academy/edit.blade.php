@@ -10,52 +10,142 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
-            <form method="POST" action="{{ route('academies.update', $academy->id) }}"
-                class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                @csrf
-                <div class="flex items-center justify-between">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.info') }}</h3>
-                    <x-primary-button type="submit">
-                        <x-lucide-save class="w-6 h-6 text-white" />
-                    </x-primary-button>
-                </div>
-                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+
+            <div class="grid grid-cols-2 gap-4">
+
+                @if (auth()->user()->getRole() === 'admin')
+
+                    <form method="POST" action="{{ route('academies.update', $academy->id) }}"
+                        class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                        @csrf
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.info') }}
+                            </h3>
+
+                        </div>
+                        <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
 
-                <div class="flex flex-col gap-2 w-1/2 mb-8">
-                    <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                        :value="$academy->name" placeholder="{{ fake()->company() }}" />
-                    <div>
-                        <x-input-label for="nationality" value="Nationality" />
-                        <select x-model="selectedNationality" x-on:change="updateNationId()" name="nationality"
-                            id="nationality"
-                            class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
-                            @foreach ($nations as $key => $nation)
-                                <optgroup label="{{ $key }}"">
-                                    @foreach ($nation as $n)
-                                        <option value="{{ $n['id'] }}"
-                                            {{ $n['id'] == $academy->nation_id ? 'selected' : '' }}>
-                                            {{ $n['name'] }}</option>
+                        <div class="flex flex-col gap-2  mb-8">
+                            <x-form.input name="name" label="Name" type="text" required="{{ true }}"
+                                :value="$academy->name" placeholder="{{ fake()->company() }}" />
+                            <div>
+                                <x-input-label for="nationality" value="Nationality" />
+                                <select x-model="selectedNationality" x-on:change="updateNationId()" name="nationality"
+                                    id="nationality"
+                                    class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
+                                    @foreach ($nations as $key => $nation)
+                                        <optgroup label="{{ $key }}"">
+                                            @foreach ($nation as $n)
+                                                <option value="{{ $n['id'] }}"
+                                                    {{ $n['id'] == $academy->nation_id ? 'selected' : '' }}>
+                                                    {{ $n['name'] }}</option>
+                                            @endforeach
+                                        </optgroup>
                                     @endforeach
-                                </optgroup>
-                            @endforeach
-                        </select>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h1 class="text-background-800 dark:text-background-200 text-lg">{{ __('academies.address') }}
+                        </h1>
+                        <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                        <div class="flex flex-col gap-2 ">
+                            <x-form.input name="address" label="Address" type="text" value="{{ $academy->address }}"
+                                placeholder="{{ fake()->address() }}" />
+                            <x-form.input name="city" label="City" type="text" value="{{ $academy->city }}"
+                                placeholder="{{ fake()->city() }}" />
+                            <x-form.input name="zip" label="Zip" type="text" value="{{ $academy->zip }}"
+                                placeholder="{{ fake()->postcode() }}" />
+                        </div>
+
+                        <div class="fixed bottom-8 right-32">
+                            <x-primary-button type="submit">
+                                <x-lucide-save class="w-6 h-6 text-white" />
+                            </x-primary-button>
+                        </div>
+
+
+                    </form>
+                @else
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                        <div class="flex flex-col gap-2 ">
+                            <x-form.input name="name" label="Name" type="text" required="{{ true }}"
+                                disabled="{{ true }}" :value="$academy->name"
+                                placeholder="{{ fake()->company() }}" />
+                            @php
+                                $nationId = $academy->nation_id;
+                                $nationName = '';
+                                // $nations contiene i continenti e quelli contengono le nazioni
+                                foreach ($nations as $key => $nation) {
+                                    if ($nationName != '') {
+                                        break;
+                                    }
+                                    foreach ($nation as $n) {
+                                        if ($nationName != '') {
+                                            break;
+                                        }
+                                        if ($n['id'] == $nationId) {
+                                            $nationName = $n['name'];
+                                        }
+                                    }
+                                }
+                            @endphp
+                            <x-form.input name="name" label="Nationality" type="text"
+                                required="{{ true }}" disabled="{{ true }}"
+                                value="{{ $nationName }}" placeholder="{{ fake()->company() }}" />
+
+                            <x-form.input name="address" label="Address" type="text" required="{{ true }}"
+                                disabled="{{ true }}" value="{{ $academy->address }}"
+                                placeholder="{{ fake()->address() }}" />
+                            <x-form.input name="city" label="City" type="text" required="{{ true }}"
+                                disabled="{{ true }}" value="{{ $academy->city }}"
+                                placeholder="{{ fake()->city() }}" />
+                            <x-form.input name="zip" label="Zip" type="text" required="{{ true }}"
+                                disabled="{{ true }}" value="{{ $academy->zip }}"
+                                placeholder="{{ fake()->postcode() }}" />
+                        </div>
+                    </div>
+
+                @endif
+
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8"
+                    x-data="{}">
+                    <div class="flex justify-between">
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.logo') }}
+                        </h3>
+
+                        <div>
+                            <form method="POST" action="{{ route('academies.picture.update', $academy->id) }}"
+                                enctype="multipart/form-data" x-ref="pfpform">
+                                @csrf
+                                @method('PUT')
+
+                                <div class="flex flex-col gap-4">
+                                    <div class="flex flex-col gap-2">
+                                        <input type="file" name="academylogo" id="academylogo" class="hidden"
+                                            x-on:change="$refs.pfpform.submit()" />
+                                        <x-primary-button type="button"
+                                            onclick="document.getElementById('academylogo').click()">
+                                            {{ __('users.upload_picture') }}
+                                        </x-primary-button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+
+                    <div class="flex flex-col items-center justify-center flex-1 h-full">
+
+                        @if ($academy->picture)
+                            <img src="{{ route('academy-image', $academy->id) }}" alt="{{ $academy->name }}"
+                                class="w-1/2 rounded-lg">
+                        @endif
+
                     </div>
                 </div>
-
-                <h1 class="text-background-800 dark:text-background-200 text-lg">{{ __('academies.address') }}</h1>
-                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                <div class="flex flex-col gap-2 w-1/2">
-                    <x-form.input name="address" label="Address" type="text" required="{{ true }}"
-                        value="{{ $academy->address }}" placeholder="{{ fake()->address() }}" />
-                    <x-form.input name="city" label="City" type="text" required="{{ true }}"
-                        value="{{ $academy->city }}" placeholder="{{ fake()->city() }}" />
-                    <x-form.input name="zip" label="Zip" type="text" required="{{ true }}"
-                        value="{{ $academy->zip }}" placeholder="{{ fake()->postcode() }}" />
-                </div>
-
-
-            </form>
+            </div>
 
             <x-academy.search-users :academy="$academy" :roles="$roles" />
 
@@ -215,8 +305,12 @@
                 </x-table>
             </div>
 
-            @if (!$academy->is_disabled)
-                <x-academy.disable-form :academy="$academy->id" />
+            @if (auth()->user()->getRole() === 'admin')
+
+                @if (!$academy->is_disabled)
+                    <x-academy.disable-form :academy="$academy->id" />
+                @endif
+
             @endif
         </div>
     </div>

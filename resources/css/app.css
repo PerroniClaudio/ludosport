@@ -197,6 +197,12 @@
 
 /* TipTapEditor */
 
+.tiptap {
+    padding: 0.5rem 1rem;
+    margin: 1rem 0;
+    border: 1px solid var(--background-700);
+}
+
 .editor-button {
     @apply inline-flex 
         items-center 
@@ -275,6 +281,10 @@ ol {
 
 hr {
     @apply border-b border-background-100 dark:border-background-700 my-2;
+}
+
+.tiptap a {
+    @apply text-primary-500 dark:text-primary-400 underline;
 }
 
 /* FullCalendar */
@@ -388,3 +398,5 @@ hr {
 .expand {
     flex: 1 1 100%;
 }
+
+/* Flash */

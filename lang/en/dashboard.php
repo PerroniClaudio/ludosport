@@ -32,6 +32,7 @@ return [
     'athlete_announcements' => 'Announcements',
     'athlete_no_announcements' => 'No announcements',
     'athlete_announcements_text' => 'You have :count new announcements to read',
+    'athlete_upcoming_events' => 'Upcoming events',
     'athletes_nations_title' => 'Athletes by nations',
     'nations_with_athletes_char' => 'Nations with most athletes',
     'athletes_academies_title' => 'Athletes by academies, :nation',

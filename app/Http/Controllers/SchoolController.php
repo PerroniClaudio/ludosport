@@ -10,6 +10,7 @@ use App\Models\School;
 use App\Models\User;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -34,12 +35,11 @@ class SchoolController extends Controller {
         if ($authRole === 'rector') {
             $primaryAcademy = $authUser->primaryAcademy();
 
-            if (!$authUser->validatePrimaryInstitutionPersonnel() ) {
+            if (!$authUser->validatePrimaryInstitutionPersonnel()) {
                 return redirect()->route('dashboard')->with('error', 'Not authorized.');
             }
 
             $schools = School::with('nation')->where([['academy_id', $primaryAcademy->id], ['is_disabled', '0']])->orderBy('created_at', 'desc')->get();
-
         } else {
             $schools = School::with('nation')->where('is_disabled', '0')->orderBy('created_at', 'desc')->get();
         }
@@ -178,7 +178,7 @@ class SchoolController extends Controller {
         $nations = Nation::all();
 
         foreach ($nations as $nation) {
-            $countries[$nation['continent']][] = ['id' => $nation['id'], 'name' => $nation['name']];
+            $countries[$nation['continent']][] = ['id' => $nation['id'], 'name' => $nation['name'], 'code' => $nation['code']];
         }
 
         $countries = [
@@ -231,7 +231,23 @@ class SchoolController extends Controller {
     /**
      * Update the specified resource in storage.
      */
+
     public function update(Request $request, School $school) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'academy_id' => 'required|integer|exists:academies,id',
+        ]);
+
+        $school->update([
+            'name' => $request->name,
+            'slug' => Str::slug($request->name),
+            'academy_id' => $request->academy_id,
+        ]);
+
+        return redirect()->route('schools.edit', $school)->with('success', 'School updated successfully!');
+    }
+
+    public function notupdate(Request $request, School $school) {
         //
         if (!$this->checkPermission($school)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
@@ -241,7 +257,6 @@ class SchoolController extends Controller {
 
             $address = $request->address . " " . $request->city . " "  . $request->zip;
             $location = $this->getLocation($address);
-
 
             if (!$location) {
                 return back()->with('error', 'Invalid address. Please check the address and try again.');
@@ -313,6 +328,108 @@ class SchoolController extends Controller {
             'state' => $addressComponents[5]['long_name'] ?? "",
             'country' => $addressComponents[6]['long_name']  ?? "",
         ];
+    }
+
+    public function verifyAddress(Request $request) {
+
+        try {
+            $nation = Nation::find($request->nation);
+
+            $url = "https://addressvalidation.googleapis.com/v1:validateAddress?key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+            $data = [
+                'address' => [
+                    'regionCode' => $nation->code,
+                    'locality' =>  $request->zip . ' ' . $request->city,
+                    'addressLines' => [
+                        $request->address
+                    ],
+                ],
+            ];
+
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post($url, $data);
+
+            if ($response->successful()) {
+                //return response()->json($response->json());
+                $data = $response->json();
+
+                // Controlla se l'indirizzo è completo
+
+                if (isset($data['result']['verdict']['addressComplete'])) {
+                    $isAddressComplete = $data['result']['verdict']['addressComplete'];
+                } else {
+                    $isAddressComplete = false;
+                }
+                // Controlla se ci sono componenti non confermati
+                if (isset($data['result']['verdict']['hasUnconfirmedComponents'])) {
+                    $hasUnconfirmedComponents = $data['result']['verdict']['hasUnconfirmedComponents'];
+                } else {
+                    $hasUnconfirmedComponents = false;
+                }
+
+                // Ottieni l'indirizzo formattato
+                $formattedAddress = $data['result']['address']['formattedAddress'];
+
+                if ($isAddressComplete && !$hasUnconfirmedComponents) {
+                    // L'indirizzo è valido e completo
+
+                    $address = $request->address . " " . $request->city . " "  . $request->zip;
+                    $location = $this->getLocation($address);
+                    $school = School::find($request->school_id);
+
+                    $school->update([
+                        'address' => $request->address,
+                        'city' => $location['city'],
+                        'state' => $location['state'],
+                        'zip' => $request->zip,
+                        'country' => $location['country'],
+                        'coordinates' => json_encode(['lat' => $location['lat'], 'lng' => $location['lng']]),
+                    ]);
+
+
+                    return response()->json([
+                        'state' => 1,
+                        'message' => 'The address is valid.',
+                        'original' => $data
+                    ]);
+                } else {
+                    // L'indirizzo potrebbe essere incompleto o ambiguo
+
+                    if ($hasUnconfirmedComponents) {
+
+                        $unconfirmed = $data['result']['address']['unconfirmedComponentTypes'];
+                        $message = 'The given address is not completely correct, correct could be: ' . $formattedAddress;
+
+                        $unconfirmedComponents = [];
+                        foreach ($unconfirmed as $component) {
+                            $unconfirmedComponents[] = __('school.address_' . $component);
+                        }
+
+                        $unconfirmed = 'The following elements need to be corrected: ' . implode(', ', $unconfirmedComponents);
+
+                        return response()->json([
+                            'state' => 2,
+                            'message' => $message,
+                            'unconfirmed' => $unconfirmed,
+                            'original' => $data
+                        ]);
+                    } else {
+                        return response()->json([
+                            'state' => 2,
+                            'message' => 'The given address is not completely correct, correct could be ' . $formattedAddress,
+                            'original' => $data
+                        ]);
+                    }
+                }
+            } else {
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'state' => 3,
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
     private function getCoordinates($location) {
@@ -387,7 +504,7 @@ class SchoolController extends Controller {
 
         $athletes = $school->athletes->pluck('id')->toArray();
         $personnel = $school->personnel->pluck('id')->toArray();
-        
+
         $primaryPersonnel = $school->personnel->filter(function ($person) use ($school) {
             return $person->primarySchool() && $person->primarySchool()->id == $school->id;
         })->pluck('id')->toArray();
@@ -441,7 +558,7 @@ class SchoolController extends Controller {
         $school->personnel()->syncWithoutDetaching($personnel->id);
 
         // Se il personale non ha la scuola principale, la assegna
-        if(!$personnel->primarySchool()){
+        if (!$personnel->primarySchool()) {
             $personnel->setPrimarySchool($school->id);
         }
 
@@ -472,7 +589,7 @@ class SchoolController extends Controller {
         $school->athletes()->syncWithoutDetaching($athlete->id);
 
         // Se l'atleta non ha la scuola principale, la assegna
-        if(!$athlete->primarySchoolAthlete()){
+        if (!$athlete->primarySchoolAthlete()) {
             $athlete->setPrimarySchoolAthlete($school->id);
         }
 
@@ -532,7 +649,7 @@ class SchoolController extends Controller {
 
         if ($authRole === 'rector') {
             $academy = $authUser->primaryAcademy();
-            $schools = $academy 
+            $schools = $academy
                 ? School::query()->when($request->search, function ($q, $search) {
                     return $q->whereIn('id', School::search($search)->keys());
                 })->where([['is_disabled', '0'], ['academy_id', $academy->id]])->with(['academy'])->get()

@@ -60,7 +60,7 @@ class Event extends Model {
     public function results() {
         return $this->hasMany(EventResult::class);
     }
-    
+
     public function instructorResults() {
         return $this->hasMany(EventInstructorResult::class);
     }
@@ -80,7 +80,7 @@ class Event extends Model {
     public function type() {
         return $this->belongsTo(EventType::class, 'event_type');
     }
-    
+
     public function resultType() {
         return strtolower($this->type->name ?? '') == 'training course' ? 'enabling' : 'ranking';
     }
@@ -105,10 +105,10 @@ class Event extends Model {
         return $eventTypes;
     }
 
-    public function isWaitingList(){
+    public function isWaitingList() {
         $isEnabling = $this->resultType() === 'enabling';
         $participants = 0;
-        if($isEnabling){
+        if ($isEnabling) {
             $participants = $this->instructorResults->count();
         } else {
             $participants = $this->results->count();

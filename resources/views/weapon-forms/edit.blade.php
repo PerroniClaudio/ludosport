@@ -15,13 +15,17 @@
                     @csrf
                     <div class="flex items-center justify-between">
                         <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('weaponf.info') }}</h3>
-                        <x-primary-button type="submit">
-                            <x-lucide-save class="w-6 h-6 text-white" />
-                        </x-primary-button>
+
                     </div>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <div class="w-1/2">
                         <x-form.input label="Name" name="name" :value="$weaponForm->name" />
+                    </div>
+
+                    <div class="fixed bottom-8 right-32">
+                        <x-primary-button type="submit">
+                            <x-lucide-save class="w-6 h-6 text-white" />
+                        </x-primary-button>
                     </div>
                 </form>
             </div>

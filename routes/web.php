@@ -34,6 +34,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/invoices/update', [App\Http\Controllers\UserController::class, 'updateInvoice'])->name('users.invoices.update');
 });
 
+/** Eliminati */
+
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+    Route::get('/deleted-elements', [App\Http\Controllers\DeletedElementController::class, 'index'])->name('deleted-elements.index');
+    Route::post('/deleted-elements', [App\Http\Controllers\DeletedElementController::class, 'restore'])->name('deleted-elements.restore');
+});
+
 /** Users */
 
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
@@ -100,6 +107,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/academies/{academy}/athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('academies.athlete.store');
 
     Route::get('/academies/{academy}/users-search', [App\Http\Controllers\AcademyController::class, 'searchUsers'])->name('academies.users-search');
+    Route::put('/academies/{academy}/picture', [App\Http\Controllers\AcademyController::class, 'picture'])->name('academies.picture.update');
 });
 
 /** Scuole */
@@ -113,7 +121,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/schools/{school}/athletes-data', [App\Http\Controllers\SchoolController::class, 'athletesDataForSchool'])->name('schools.athletes-data');
     Route::get('/schools/{school}/athletes-clan-data', [App\Http\Controllers\SchoolController::class, 'athletesClanDataForSchool'])->name('schools.athletes-school-data');
     Route::get('/schools/{school}/athletes-year-data', [App\Http\Controllers\SchoolController::class, 'getAthletesNumberPerYear'])->name('schools.athletes-year-data');
-
+    Route::get('/verify-address', [App\Http\Controllers\SchoolController::class, 'verifyAddress'])->name('schools.verify-address');
 
     Route::get('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'edit'])->name('schools.edit');
     Route::delete('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'destroy'])->name('schools.disable');
@@ -302,6 +310,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/weapon-forms/{weaponForm}/athletes', [App\Http\Controllers\WeaponFormController::class, 'addAthletes'])->name('weapon-forms.athletes.store');
     Route::post('/weapon-forms/{weaponForm}', [App\Http\Controllers\WeaponFormController::class, 'update'])->name('weapon-forms.update');
 });
+
 
 
 /** Script */

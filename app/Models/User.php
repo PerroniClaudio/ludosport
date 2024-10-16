@@ -117,16 +117,14 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Restituisce l'accademia principale (per il personale)
-    public function primaryAcademy()
-    {   
+    public function primaryAcademy() {
         return $this->academies()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
     }
 
     // Imposta accademia primaria (per il personale)
-    public function setPrimaryAcademy($academyId)
-    {
+    public function setPrimaryAcademy($academyId) {
         // Rimuove l'attuale accademia principale del personale e imposta la nuova
-        if($this->primaryAcademy()) {
+        if ($this->primaryAcademy()) {
             $this->academies()->updateExistingPivot($this->primaryAcademy()->id, ['is_primary' => false]);
         }
         $this->academies()->updateExistingPivot($academyId, ['is_primary' => true]);
@@ -138,16 +136,14 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Restituisce l'accademia principale (per gli atleti)
-    public function primaryAcademyAthlete()
-    {
+    public function primaryAcademyAthlete() {
         return $this->academyAthletes()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
     }
 
     // Imposta accademia primaria (per gli atleti)
-    public function setPrimaryAcademyAthlete($academyId)
-    {
+    public function setPrimaryAcademyAthlete($academyId) {
         // Rimuove l'attuale accademia principale dell'atleta e imposta la nuova
-        if($this->primaryAcademyAthlete()) {
+        if ($this->primaryAcademyAthlete()) {
             $this->academyAthletes()->updateExistingPivot($this->primaryAcademyAthlete()->id, ['is_primary' => false]);
         }
         $this->academyAthletes()->updateExistingPivot($academyId, ['is_primary' => true]);
@@ -159,16 +155,14 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Restituisce la scuola principale (per il personale)
-    public function primarySchool()
-    {
+    public function primarySchool() {
         return $this->schools()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
     }
 
     // Imposta scuola primaria (per il personale)
-    public function setPrimarySchool($schoolId)
-    {
+    public function setPrimarySchool($schoolId) {
         // Rimuove l'attuale scuola principale del personale e imposta la nuova
-        if($this->primarySchool()) {
+        if ($this->primarySchool()) {
             $this->schools()->updateExistingPivot($this->primarySchool()->id, ['is_primary' => false]);
         }
         $this->schools()->updateExistingPivot($schoolId, ['is_primary' => true]);
@@ -180,16 +174,14 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Restituisce la scuola principale (per gli atleti)
-    public function primarySchoolAthlete()
-    {
+    public function primarySchoolAthlete() {
         return $this->schoolAthletes()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
     }
 
     // Imposta scuola primaria (per gli atleti)
-    public function setPrimarySchoolAthlete($schoolId)
-    {
+    public function setPrimarySchoolAthlete($schoolId) {
         // Rimuove l'attuale scuola principale dell'atleta e imposta la nuova
-        if($this->primarySchoolAthlete()) {
+        if ($this->primarySchoolAthlete()) {
             $this->schoolAthletes()->updateExistingPivot($this->primarySchoolAthlete()->id, ['is_primary' => false]);
         }
         $this->schoolAthletes()->updateExistingPivot($schoolId, ['is_primary' => true]);
@@ -552,11 +544,11 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
         $now = now();
         $expirationDate = Carbon::parse($fee->end_date);
-        return true;
+
         return $now->diffInDays($expirationDate) < 30;
     }
 
-    public function validatePrimaryInstitutionPersonnel(){
+    public function validatePrimaryInstitutionPersonnel() {
         $user = User::find(auth()->user()->id);
         $role = $user->getRole();
         $primary = null;
@@ -566,35 +558,35 @@ class User extends Authenticatable implements MustVerifyEmail {
                 break;
             case 'rector':
                 $primary = $user->primaryAcademy();
-                if(!$primary || $primary->id == 1){
+                if (!$primary || $primary->id == 1) {
                     return false;
                 }
                 return true;
                 break;
             case 'dean':
                 $primary = $user->primarySchool();
-                if(!$primary){
+                if (!$primary) {
                     return false;
                 }
                 return true;
                 break;
             case 'manager':
                 $primary = $user->primarySchool();
-                if(!$primary){
+                if (!$primary) {
                     return false;
                 }
                 return true;
                 break;
             case 'instructor':
                 $primary = $user->clans()->count() > 0;
-                if(!$primary){
+                if (!$primary) {
                     return false;
                 }
                 return true;
                 break;
             case 'technician':
                 $primary = $user->primaryAcademy();
-                if(!$primary || $primary->id == 1){
+                if (!$primary || $primary->id == 1) {
                     return false;
                 }
                 return true;

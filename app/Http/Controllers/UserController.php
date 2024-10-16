@@ -37,7 +37,7 @@ class UserController extends Controller {
             return redirect()->route("dashboard")->with('error', 'You do not have the required role to access this page!');
         }
 
-        if(!$authUser->validatePrimaryInstitutionPersonnel()) {
+        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
         }
 
@@ -102,7 +102,7 @@ class UserController extends Controller {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
-        if(!$authUser->validatePrimaryInstitutionPersonnel()) {
+        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
         }
 
@@ -186,7 +186,7 @@ class UserController extends Controller {
         foreach ($user->allowedRoles() as $role) {
             if (in_array($role, ['rector', 'dean', 'instructor', 'manager', 'technician'])) {
                 $academy->personnel()->syncWithoutDetaching($user->id);
-                if(!$user->primaryAcademy()) {
+                if (!$user->primaryAcademy()) {
                     $user->setPrimaryAcademy($academy->id);
                 }
                 break;
@@ -638,9 +638,9 @@ class UserController extends Controller {
 
 
         $authUserRole = User::find(auth()->user()->id)->getRole();
-        $redirectRoute = $authUserRole === 'admin' ? 'users.index' :  $authUserRole . '.users.index';
+        $redirectRoute = $authUserRole === 'admin' ? 'users.edit' :  $authUserRole . '.users.edit';
 
-        return redirect()->route($redirectRoute, $user)->with('success', 'User updated successfully!');
+        return redirect()->route($redirectRoute, $user->id)->with('success', 'User updated successfully!');
     }
 
     public function destroy(User $user) {
@@ -1063,9 +1063,11 @@ class UserController extends Controller {
             }
         }
 
+
         $view = 'dashboard.athlete.index';
         return view($view, [
             'announcements' => $not_seen,
+
         ]);
     }
 
@@ -1213,7 +1215,7 @@ class UserController extends Controller {
             'success' => true,
         ]);
     }
-    
+
     public function testUserTest() {
         return response()->json("hi there");
     }
@@ -1243,14 +1245,14 @@ class UserController extends Controller {
                 // Logica per modificare l'ordine delle accademie - personale
                 $user->setPrimaryAcademy($academy->id);
 
-                if($academy->id != 1 && ($user->academies()->count() > 1) && ($user->academies->where('id', 1)->count() > 0)) {
+                if ($academy->id != 1 && ($user->academies()->count() > 1) && ($user->academies->where('id', 1)->count() > 0)) {
                     $user->academies()->detach(1);
                 }
             } else {
                 // Logica per modificare l'ordine delle accademie - atleti
                 $user->setPrimaryAcademyAthlete($academy->id);
 
-                if($academy->id != 1 && ($user->academyAthletes()->count() > 1) && ($user->academyAthletes->where('id', 1)->count() > 0)) {
+                if ($academy->id != 1 && ($user->academyAthletes()->count() > 1) && ($user->academyAthletes->where('id', 1)->count() > 0)) {
                     $user->academyAthletes()->detach(1);
                 }
             }
@@ -1412,6 +1414,4 @@ class UserController extends Controller {
             'this_year' => $athletes_this_year,
         ]);
     }
-
-    
 }
