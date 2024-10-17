@@ -37,8 +37,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         'has_paid_fee',
         'battle_name',
         'instagram',
+        'telegram',
         'bio',
         'how_found_us',
+        'rank_id',
     ];
 
     public function toSearchableArray() {
@@ -242,9 +244,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     // Solo le richieste approvate. Le altre le vedono gli admin partendo da weaponForms
     public function weaponFormsPersonnel() {
         return $this->belongsToMany(WeaponForm::class, 'weapon_forms_personnel', 'user_id', 'weapon_form_id')
-            ->wherePivot('status', 'approved')
-            ->withPivot(['status', 'created_at as awarded_at'])
-            ->withTimestamps();
+            ->withPivot('created_at as awarded_at');
     }
 
     public function languages() {

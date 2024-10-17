@@ -150,17 +150,31 @@ class WeaponFormController extends Controller {
         $usersIds = json_decode($request->users);
         $personnel = User::whereIn('id', $usersIds)->get();
 
+        $rightCount = 0;
+        $wrongCount = 0;
+
         foreach ($personnel as $person) {
             if(!$person->hasAnyRole(['instructor', 'technician'])) {
-                return redirect()->route('weapon-forms.edit', $weaponForm)->with('error', 'Only instructors and technicians can be added');
+                $wrongCount++;
+                continue;
             }
             $weaponForm->personnel()->syncWithoutDetaching($person->id, [
                 'admin_id' => $authUser->id,
             ]);
             // Aggiunge anche la forma da atleta se non ce l'ha già. NON AGGIUNGE IL RUOLO.
             $weaponForm->users()->syncWithoutDetaching($person->id);
-        }
 
+            $rightCount++;
+        }
+        
+        // Se non ha aggiunto nessuno dà errore, se ha aggiunto solo in parte dà un altro errore e se ha aggiunto tutti dà successo
+        if($wrongCount > 0) {
+            return redirect()->route('weapon-forms.edit', $weaponForm)->with('error', 
+                $rightCount === 0 
+                    ? 'No personnel added. Only instructors and tecnici can be added'
+                    : 'Only partially added. Only instructors and tecnici have been added'
+            );
+        }
         return redirect()->route('weapon-forms.edit', $weaponForm)->with('success', 'Personnel added successfully');
     }
 
@@ -177,7 +191,6 @@ class WeaponFormController extends Controller {
         $athletes = User::whereIn('id', $usersIds)->get();
 
         $weaponForm->users()->syncWithoutDetaching($athletes->pluck('id'));
-
         return redirect()->route('weapon-forms.edit', $weaponForm)->with('success', 'Athletes added successfully');
     }
 }

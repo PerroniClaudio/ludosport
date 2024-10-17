@@ -133,6 +133,24 @@ return [
             'level' => 'debug',
         ],
         
+        'fee' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/fee.log'),
+            'level' => 'debug',
+        ],
+        
+        'rank' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/rank.log'),
+            'level' => 'debug',
+        ],
+        
+        'weapon_form' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/weapon_form.log'),
+            'level' => 'debug',
+        ],
+        
         'clan' => [
             'driver' => 'single',
             'path' => storage_path('logs/clan.log'),

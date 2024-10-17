@@ -34,7 +34,7 @@
         <div>
             <x-input-label for="battle_name" :value="__('Battle name')" />
             <x-text-input id="battle_name" name="battle_name" type="text" class="mt-1 block w-full" :value="old('battle_name', $user->battle_name)"
-                required autofocus autocomplete="battle_name" />
+                autofocus autocomplete="battle_name" />
             <x-input-error class="mt-2" :messages="$errors->get('battle_name')" />
         </div>
 
@@ -67,6 +67,9 @@
 
         <x-form.input name="instagram" label="Instagram" type="text" required="{{ false }}" :value="$user->instagram"
             placeholder="{{ fake()->username() }}" />
+
+        <x-form.input name="telegram" label="Telegram handle" type="text" required="{{ false }}" :value="$user->telegram"
+            placeholder="@username" />
 
         <x-form.textarea name="bio" label="Bio" required="{{ false }}" :value="$user->bio" />
 

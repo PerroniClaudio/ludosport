@@ -9,11 +9,26 @@
     'hidden' => false,
     'min' => null,
     'max' => null,
+    'description' => null,
 ])
 
 <div>
     @if(!$hidden)
-        <x-input-label value="{{ $label }}" />
+        @if($description)
+            <div class="flex gap-1">
+                <x-input-label value="{{ $label }}" />
+                <div x-data="{tooltip: false}" x-on:mouseover="tooltip = true" x-on:mouseleave="tooltip = false" >
+                    <div x-show="tooltip" class="absolute bg-background-100 
+                        p-2 rounded-md text-sm text-background-800 
+                        inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
+                        {{ $description }}
+                    </div>
+                    <x-lucide-info class="h-4 text-background-300" />
+                </div>
+            </div>
+        @else
+            <x-input-label value="{{ $label }}" />
+        @endif
     @endif
     <input name="{{ $name }}" type="{{ $type }}" {{ $disabled ? 'disabled' : '' }}
         {{ $required ? 'required' : '' }} value="{{ $value }}" placeholder="{{ $placeholder }}"

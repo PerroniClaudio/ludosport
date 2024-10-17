@@ -26,7 +26,7 @@
                                 value="{{ old('surname') }}" placeholder="{!! fake()->lastName() !!}" />
                             <x-form.input name="email" label="Email" type="email" required="{{ true }}"
                                 value="{{ old('email') }}" placeholder="{{ fake()->email() }}" />
-                            <x-form.input name="year" label="Subscription year" type="text"
+                            <x-form.input name="year" label="First subscription year" type="text"
                                 required="{{ true }}" value="{{ old('year') }}"
                                 placeholder="{{ date('Y') }}" />
                             <small

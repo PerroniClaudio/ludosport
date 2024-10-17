@@ -108,15 +108,16 @@
                         {{ __('users.personal_details_message') }}</h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <div class="flex flex-col gap-2">
+                        <x-form.checkbox id="has_paid_fee" name="has_paid_fee" label="Has paid fee" isChecked="{{ $user->has_paid_fee }}" />
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                             :value="$user->name" placeholder="{{ fake()->firstName() }}" />
                         <x-form.input name="surname" label="Surname" type="text" required="{{ true }}"
                             :value="$user->surname" placeholder="{{ fake()->lastName() }}" />
                         <x-form.input name="email" label="Email" type="email" required="{{ true }}"
                             value="{{ $user->email }}" placeholder="{{ fake()->email() }}" />
-                        <x-form.input name="year" label="Subscription year" type="text"
+                        <x-form.input name="year" label="First subscription year" type="text"
                             required="{{ true }}" value="{{ $user->subscription_year }}"
-                            placeholder="{{ date('Y') }}" />
+                            placeholder="{{ date('Y') }}" description="The year of the first registration to LudoSport" />
 
                         <div>
                             <x-input-label for="nationality" value="Nationality" />
@@ -130,6 +131,17 @@
                                                 {{ $n['name'] }}</option>
                                         @endforeach
                                     </optgroup>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <x-input-label for="rank" value="Rank" />
+                            <select name="rank" id="rank"
+                                class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
+                                @foreach ($ranks as $id => $rank)
+                                    <option value="{{ $id }}"
+                                        {{ $id == $user->rank_id ? 'selected' : '' }}>
+                                        {{ $rank }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -214,46 +226,49 @@
 
             <div class="grid grid-cols-2 gap-4 my-4">
                 @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
-                    <x-user.weapon-forms :forms="$user->weaponForms" />
-                @endif
-                @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponForms" />
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsPersonnel" isPersonnel="{{true}}" />
                     <x-user.languages :languages="$user->languages" :user="$user->id" :availableLanguages="collect($languages)" />
                 @endif
-            </div>
-
-
-            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4"
-                x-data="{}">
-                <div class="flex justify-between">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('users.profile_picture') }}
-                    </h3>
-                    <div>
-                        <form method="POST" action="{{ route('users.picture.update', $user->id) }}"
-                            enctype="multipart/form-data" x-ref="pfpform">
-                            @csrf
-                            @method('PUT')
-
-                            <div class="flex flex-col gap-4">
-                                <div class="flex flex-col gap-2">
-                                    <input type="file" name="profilepicture" id="profilepicture" class="hidden"
-                                        x-on:change="$refs.pfpform.submit()" />
-                                    <x-primary-button type="button"
-                                        onclick="document.getElementById('profilepicture').click()">
-                                        {{ __('users.upload_picture') }}
-                                    </x-primary-button>
+                <div 
+                    @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
+                        class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8"
+                    @else
+                        class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 col-span-2"
+                    @endif
+                    x-data="{}">
+                    <div class="flex justify-between">
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('users.profile_picture') }}
+                        </h3>
+                        <div>
+                            <form method="POST" action="{{ route('users.picture.update', $user->id) }}"
+                                enctype="multipart/form-data" x-ref="pfpform">
+                                @csrf
+                                @method('PUT')
+    
+                                <div class="flex flex-col gap-4">
+                                    <div class="flex flex-col gap-2">
+                                        <input type="file" name="profilepicture" id="profilepicture" class="hidden"
+                                            x-on:change="$refs.pfpform.submit()" />
+                                        <x-primary-button type="button"
+                                            onclick="document.getElementById('profilepicture').click()">
+                                            {{ __('users.upload_picture') }}
+                                        </x-primary-button>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+    
+                    @if ($user->profile_picture)
+                        <img src="{{ route('user.profile-picture-show', $user->id) }}" alt="{{ $user->name }}"
+                            class="w-1/3 rounded-lg">
+                    @endif
+    
                 </div>
-                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-
-                @if ($user->profile_picture)
-                    <img src="{{ route('user.profile-picture-show', $user->id) }}" alt="{{ $user->name }}"
-                        class="w-1/3 rounded-lg">
-                @endif
-
             </div>
+
 
             <div class="grid grid-cols-2 gap-4" x-data="{
                 institutionType: 'academy',

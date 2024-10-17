@@ -20,7 +20,7 @@
         <!-- Battle name -->
         <div class="mt-4">
             <x-input-label for="battle_name" :value="__('Battle name')" />
-            <x-text-input id="battle_name" class="block mt-1 w-full" type="text" name="battle_name" :value="old('battle_name')" required
+            <x-text-input id="battle_name" class="block mt-1 w-full" type="text" name="battle_name" :value="old('battle_name')"
                 autofocus autocomplete="battle_name" />
             <x-input-error :messages="$errors->get('battle_name')" class="mt-2" />
         </div>

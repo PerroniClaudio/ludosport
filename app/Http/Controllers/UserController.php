@@ -13,6 +13,7 @@ use App\Models\Rank;
 use App\Models\Role;
 use App\Models\School;
 use App\Models\User;
+use App\Models\WeaponForm;
 use Carbon\Carbon;
 use GPBMetadata\Google\Api\Auth;
 use Illuminate\Support\Facades\Log;
@@ -436,6 +437,8 @@ class UserController extends Controller {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
+        $ranks = Rank::all()->pluck('name', 'id');
+
         $nations = Nation::all();
 
         foreach ($nations as $nation) {
@@ -476,6 +479,7 @@ class UserController extends Controller {
         }
 
         $allLanguages = Language::all();
+        $allWeaponForms = WeaponForm::all();
 
         $authRole = User::find(auth()->user()->id)->getRole();
         $viewPath = $authRole === 'admin' ? 'users.edit' :  'users.' . $authRole . '.edit';
@@ -487,6 +491,8 @@ class UserController extends Controller {
             'nations' => $countries,
             'roles' => $roles,
             'languages' => $allLanguages,
+            'ranks' => $ranks,
+            'allWeaponForms' => $allWeaponForms,
         ]);
     }
 
@@ -569,7 +575,8 @@ class UserController extends Controller {
     }
 
     public function update(Request $request, User $user) {
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
@@ -582,6 +589,16 @@ class UserController extends Controller {
             'nationality' => 'required|string|exists:nations,id',
         ]);
 
+        // Per il log dopo la modifica
+        $oldHasPaidFee = $user->has_paid_fee;
+        $newHasPaidFee = $user->has_paid_fee;
+        $oldRank = $user->rank_id;
+        $newRank = $user->rank_id;
+
+        if($authRole === 'admin') {
+            $newHasPaidFee = ($request->has_paid_fee == 'on' ?  1 :  0);
+            $newRank = Rank::find($request->rank)->id ?? $user->rank_id;
+        }
 
         $user->update([
             'name' => $request->name,
@@ -589,7 +606,27 @@ class UserController extends Controller {
             'email' => $request->email,
             'subscription_year' => $request->year,
             'nation_id' => $request->nationality,
+            'has_paid_fee' => $newHasPaidFee,
+            'rank_id' => $newRank,
         ]);
+
+        if($oldHasPaidFee != $newHasPaidFee) {
+            Log::channel('fee')->info('Fee changed', [
+                'user_id' => $user->id,
+                'made_by' => $authUser->id,
+                'old_value' => $oldHasPaidFee,
+                'new_value' => $newHasPaidFee,
+            ]);
+        }
+        
+        if($oldRank != $newRank) {
+            Log::channel('rank')->info('Rank changed', [
+                'user_id' => $user->id,
+                'made_by' => $authUser->id,
+                'old_value' => $oldRank,
+                'new_value' => $newRank,
+            ]);
+        }
 
         // Recupera i ruoli attuali dell'utente
         $currentRoles = $user->roles->pluck('label')->toArray();
@@ -1413,5 +1450,90 @@ class UserController extends Controller {
             'last_year' => $athletes_last_year,
             'this_year' => $athletes_this_year,
         ]);
+    }
+
+    public function editWeaponFormsAthlete(Request $request, User $user) {
+        $authUser = User::find(auth()->user()->id);
+        $authUserRole = $authUser->getRole();
+
+        if ($authUserRole !== 'admin') {
+            return response()->json([
+                'error' => 'You are not authorized to edit user\'s weapon forms!',
+            ]);
+        }
+
+        $previousForms = $user->weaponForms;
+        $requestForms = explode(',', $request->weapon_forms);
+
+        $toRemove = $previousForms->whereNotIn('id', $requestForms);
+        foreach($toRemove as $form){
+            Log::channel('weapon_form')->info('Athlete weapon form removed', [
+                'user_id' => $user->id,
+                'form_id' => $form->id,
+                'made_by' => $authUser->id,
+            ]);
+            $form->users()->detach($user->id);
+        }
+
+        
+        $toAdd = $previousForms ? collect($requestForms)->diff($previousForms->pluck('id')) : $requestForms;
+        foreach ($toAdd as $formId) {
+            $form = WeaponForm::find($formId);
+            if ($form) {
+                Log::channel('weapon_form')->info('Athlete weapon form added', [
+                    'user_id' => $user->id,
+                    'form_id' => $form->id,
+                    'made_by' => $authUser->id,
+                ]);
+                $form->users()->syncWithoutDetaching($user->id);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+        ]); 
+    }
+    
+    public function editWeaponFormsPersonnel(Request $request, User $user) {
+        $authUser = User::find(auth()->user()->id);
+        $authUserRole = $authUser->getRole();
+
+        if ($authUserRole !== 'admin') {
+            return response()->json([
+                'error' => 'You are not authorized to edit user\'s weapon forms!',
+            ]);
+        }
+
+        $previousForms = $user->weaponFormsPersonnel;
+        $requestForms = explode(',', $request->weapon_forms);
+
+        $toRemove = $previousForms->whereNotIn('id', $requestForms);
+        foreach($toRemove as $form){
+            Log::channel('weapon_form')->info('Personnel weapon form removed', [
+                'user_id' => $user->id,
+                'form_id' => $form->id,
+                'made_by' => $authUser->id,
+            ]);
+            $form->personnel()->detach($user->id);
+        }
+
+        
+        $toAdd = $previousForms ? collect($requestForms)->diff($previousForms->pluck('id')) : $requestForms;
+        foreach ($toAdd as $formId) {
+            $form = WeaponForm::find($formId);
+            if ($form) {
+                Log::channel('weapon_form')->info('Personnel weapon form added', [
+                    'user_id' => $user->id,
+                    'form_id' => $form->id,
+                    'made_by' => $authUser->id,
+                ]);
+                $form->personnel()->syncWithoutDetaching($user->id);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+        ]); 
+
     }
 }

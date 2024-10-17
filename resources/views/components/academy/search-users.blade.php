@@ -63,7 +63,7 @@
             </h3>
             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
             <div class="flex flex-col w-1/2">
-                <x-form.input name="year" label="Subscription year" type="number"
+                <x-form.input name="year" label="First subscription year" type="number"
                     placeholder="{{ date('Y') }}" />
             </div>
         </div>

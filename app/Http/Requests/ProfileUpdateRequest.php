@@ -17,6 +17,7 @@ class ProfileUpdateRequest extends FormRequest {
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
             'instagram' => ['nullable', 'string', 'max:255'],
+            'telegram' => ['nullable', 'string', 'max:255'],
             'bio' => ['nullable', 'string'],
         ];
     }
