@@ -64,13 +64,19 @@
                     </div>
 
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                        <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('school.location') }}
-                        </h3>
+                        <div class="flex items-center gap-1">
+                            <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                {{ __('school.location') }}
+                            </h3>
+                            <div class='has-tooltip'>
+                                <span class='tooltip rounded shadow-lg p-1 bg-primary-500 text-white -mt-8'>
+                                    {{ __('school.location_explanation') }}</span>
+                                <x-lucide-info class="w-5 h-5 text-primary-500 dark:text-primary-500 cursor-pointer" />
+                            </div>
+                        </div>
                         <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                        <small class="text-background-800 dark:text-background-200">
-                            {{ __('school.location_explanation') }}
-                        </small>
+
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="flex flex-col gap-2">

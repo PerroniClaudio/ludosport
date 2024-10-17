@@ -45,6 +45,10 @@ class Event extends Model {
         'internal_shop',
     ];
 
+    protected $casts = [
+        'start_date' => 'date',
+    ];
+
     public function nation() {
         return $this->belongsTo(Nation::class);
     }

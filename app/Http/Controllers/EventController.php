@@ -47,15 +47,17 @@ class EventController extends Controller {
             case 'rector':
             case 'dean':
             case 'manager':
-                $events = Event::where('academy_id', $authUser->primaryAcademy())->get();
+                $events = Event::where('academy_id', $authUser->primaryAcademy())
+                    ->where('start_date', '>=', Carbon::now()->format('Y-m-d'))
+                    ->get();
                 break;
             case 'technician':
                 $events = Event::whereHas('personnel', function ($query) use ($authUser) {
                     $query->where('user_id', $authUser->id);
-                })->get();
+                })->where('start_date', '>=', Carbon::now()->format('Y-m-d'))->get();
                 break;
             default:
-                $events = Event::all();
+                $events = Event::where('start_date', '>=', Carbon::now()->format('Y-m-d'))->get();
                 break;
         }
 
@@ -63,6 +65,10 @@ class EventController extends Controller {
         $pending = [];
 
         foreach ($events as $key => $event) {
+
+            $event['user_name'] = $event->user->name . " " . $event->user->surname;
+            $event['academy_name'] = $event->academy ? $event->academy->name : '';
+
             if ($event->is_approved) {
                 $approved[] = $event;
             } else {
