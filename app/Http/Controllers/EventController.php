@@ -852,6 +852,8 @@ class EventController extends Controller {
 
     public function eventsList(Request $request) {
 
+        /*
+
         $countries = Nation::all();
         $continents = [];
 
@@ -885,10 +887,11 @@ class EventController extends Controller {
             ];
         }
 
-
         $europe = $continents['Europe'];
         unset($continents['Europe']);
         $continents = ['Europe' => $europe] + $continents;
+
+        */
 
         $date = Carbon::parse(now());
 
@@ -907,15 +910,20 @@ class EventController extends Controller {
             ])->get();
         }
 
+        $nations = [];
 
         foreach ($events as $key => $value) {
             $events[$key]['full_address'] = $value['address'] . ", " .  $value['postal_code'] . ", " .  $value['city'] . ", " .  $value['nation']['name'];
+            $nations[] = [
+                'label' => $value['nation']['name'],
+                'value' => $value['nation']['id']
+            ];
         }
 
 
         return view('website.events-list', [
             'events' => $events,
-            'continents' => $continents,
+            'continents' => $nations,
             'nationFilter' => $request->nation,
         ]);
     }

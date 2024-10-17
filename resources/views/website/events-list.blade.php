@@ -14,7 +14,7 @@
             }" x-init="$watch('nationFilter', (value) => window.location.href = `{{ env('APP_URL') }}events-list?nation=${value}`)">
                 <div class="flex-1">
                     <x-form.select name="country" label="{{ __('website.academies_map_nations') }}" x-model="nationFilter"
-                        shouldHaveEmptyOption="false" :optgroups="$continents" />
+                        shouldHaveEmptyOption="false" :options="$continents" />
                 </div>
                 <a href="{{ route('events-list') }}" class="ml-2">
                     <x-primary-button>
