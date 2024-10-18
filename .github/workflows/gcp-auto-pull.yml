@@ -10,6 +10,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Configure Git safe directory
+      run: git config --global --add safe.directory /server/site/ludosport
+
     - id: 'auth'
       uses: 'google-github-actions/auth@v2'
       with:
@@ -17,10 +20,6 @@ jobs:
 
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
-      
-    - name: Configure Git safe directory
-      run: git config --global --add safe.directory /server/site/ludosport
-
 
     - name: Connect to VM and pull changes
       run: |
