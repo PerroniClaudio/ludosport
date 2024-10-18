@@ -35,6 +35,17 @@ class WeaponFormController extends Controller {
      */
     public function store(Request $request) {
         //
+
+        $request->validate([
+            'name' => 'required|unique:weapon_forms',
+        ]);
+
+        $weaponf = WeaponForm::create([
+            'name' => $request->name,
+            'image' => '/'
+        ]);
+
+        return redirect()->route('weapon-forms.edit', $weaponf->id);
     }
 
     /**
@@ -193,5 +204,28 @@ class WeaponFormController extends Controller {
 
         $weaponForm->users()->syncWithoutDetaching($athletes->pluck('id'));
         return redirect()->route('weapon-forms.edit', $weaponForm)->with('success', 'Athletes added successfully');
+    }
+
+    public function image(WeaponForm $weaponform, Request $request) {
+        if ($request->file('weaponformlogo') != null) {
+            $file = $request->file('weaponformlogo');
+
+            $file_extension = $file->getClientOriginalExtension();
+            $file_name = time() . '_logo.' . $file_extension;
+            $path = "/weapon-forms/" . $weaponform->id . "/" . $file_name;
+            $storeFile = $file->storeAs("/weapon-forms/" . $weaponform->id . "/", $file_name, "gcs");
+
+            if ($storeFile) {
+
+                $weaponform->image = $path;
+                $weaponform->save();
+
+                return redirect()->route('weapon-forms.edit', $weaponform->id)->with('success', 'Weapon form picture uploaded successfully!');
+            } else {
+                ddd($storeFile);
+            }
+        } else {
+            return redirect()->route('weapon-forms.edit', $weaponform->id)->with('error', 'Error uploading weapon form picture!');
+        }
     }
 }
