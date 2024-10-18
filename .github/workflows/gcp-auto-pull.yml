@@ -1,0 +1,22 @@
+name: Auto Pull to GCP VM
+
+on:
+  push:
+    branches: [ main ]  # Modifica questo se usi un branch diverso
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+    - name: Connect to VM and pull changes
+      run: |
+        gcloud compute ssh ${{ secrets.VM_INSTANCE_NAME }} --zone ${{ secrets.VM_ZONE }} --command="cd /path/to/your/repo && git pull origin main"
