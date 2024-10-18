@@ -24,3 +24,8 @@ dump.rdb
 dump.rdb
 **/.DS_Store
 /ssl
+docker-compose.prod.yml
+docker-compose.prod.yml
+pnpm-lock.yaml
+start.sh
+docker/nginx/nginx.prod.conf
