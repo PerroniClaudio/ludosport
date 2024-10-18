@@ -14,4 +14,5 @@ return [
     'associate_from_event_modal_text' => 'Select the Event you want to associate users from',
     'currently_selected_athletes' => 'Currently Selected Athletes',
     'save' => 'Save',
+    'create' => 'Create Weapon Form',
 ];
