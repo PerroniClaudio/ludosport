@@ -26,6 +26,8 @@ class WeaponFormController extends Controller {
      */
     public function create() {
         //
+
+        return view('weapon-forms.create');
     }
 
     /**
@@ -48,7 +50,7 @@ class WeaponFormController extends Controller {
     public function edit(WeaponForm $weaponForm) {
         // Può accedere solo l'admin
         $authRole = User::find(auth()->user()->id)->getRole();
-        if($authRole !== 'admin') {
+        if ($authRole !== 'admin') {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to view this page');
         }
 
@@ -86,7 +88,7 @@ class WeaponFormController extends Controller {
                 return __('users.' . $role);
             })->toArray());
         }
-        
+
         // Possibile personale da aggiungere
         $personnel = User::where('is_disabled', '0')->whereNotIn('id', $weaponForm->personnel->pluck('id'))->whereHas('roles', function ($query) {
             $query->whereIn('name', ['instructor', 'technician']);
@@ -138,12 +140,11 @@ class WeaponFormController extends Controller {
     //     return redirect()->route('weapon-forms.edit', $weaponForm)->with('success', 'Personnel added successfully');
     // }
 
-    public function addPersonnel(Request $request, WeaponForm $weaponForm)
-    {
+    public function addPersonnel(Request $request, WeaponForm $weaponForm) {
         // Può accedere solo l'admin
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
-        if($authRole !== 'admin') {
+        if ($authRole !== 'admin') {
             return redirect()->route('dashboard')->with('error', 'You are not authorized');
         }
 
@@ -154,7 +155,7 @@ class WeaponFormController extends Controller {
         $wrongCount = 0;
 
         foreach ($personnel as $person) {
-            if(!$person->hasAnyRole(['instructor', 'technician'])) {
+            if (!$person->hasAnyRole(['instructor', 'technician'])) {
                 $wrongCount++;
                 continue;
             }
@@ -166,11 +167,12 @@ class WeaponFormController extends Controller {
 
             $rightCount++;
         }
-        
+
         // Se non ha aggiunto nessuno dà errore, se ha aggiunto solo in parte dà un altro errore e se ha aggiunto tutti dà successo
-        if($wrongCount > 0) {
-            return redirect()->route('weapon-forms.edit', $weaponForm)->with('error', 
-                $rightCount === 0 
+        if ($wrongCount > 0) {
+            return redirect()->route('weapon-forms.edit', $weaponForm)->with(
+                'error',
+                $rightCount === 0
                     ? 'No personnel added. Only instructors and tecnici can be added'
                     : 'Only partially added. Only instructors and tecnici have been added'
             );
@@ -178,12 +180,11 @@ class WeaponFormController extends Controller {
         return redirect()->route('weapon-forms.edit', $weaponForm)->with('success', 'Personnel added successfully');
     }
 
-    public function addAthletes(Request $request, WeaponForm $weaponForm)
-    {
+    public function addAthletes(Request $request, WeaponForm $weaponForm) {
         // Può accedere solo l'admin
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
-        if($authRole !== 'admin') {
+        if ($authRole !== 'admin') {
             return redirect()->route('dashboard')->with('error', 'You are not authorized');
         }
 

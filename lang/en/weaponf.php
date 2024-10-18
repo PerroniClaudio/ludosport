@@ -2,6 +2,7 @@
 
 return [
     'title' => 'Weapon Forms',
+    'new' => 'New Weapon Form',
     'info' => 'Weapon Form Information',
     'instructors' => 'Instructors and Tecnici with this Weapon Form',
     'athletes' => 'Athletes with this Weapon Form',
