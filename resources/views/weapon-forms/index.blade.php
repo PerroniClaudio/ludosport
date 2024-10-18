@@ -4,7 +4,9 @@
             <h2 class="font-semibold text-xl text-background-800 dark:text-background-200 leading-tight">
                 {{ __('weaponf.title') }}
             </h2>
-
+            <div>
+                <x-create-new-button :href="route('weapon-forms.create')" />
+            </div>
         </div>
     </x-slot>
     <div class="py-12">
