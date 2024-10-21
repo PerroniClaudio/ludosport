@@ -23,7 +23,8 @@ class Announcement extends Model {
         'role_id',
         'nations',
         'academies',
-        'is_deleted'
+        'is_deleted',
+        'roles'
     ];
 
     public function user() {
