@@ -22,18 +22,19 @@
                     <x-form.input name="object" label="Object" type="text" required="{{ true }}"
                         :value="$announcement->object" placeholder="{{ fake()->sentence() }}" />
 
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <x-form.select name="role" label="Role" required="{{ true }}"
-                                :options="$roles" value="{{ $announcement->role_id }}" shouldHaveEmptyOption="true" />
-                        </div>
-                        <div class="flex-1">
-                            <x-form.select name="type" label="Type" required="{{ true }}"
-                                :options="$types" value="{{ $announcement->type }}" shouldHaveEmptyOption="true" />
-                        </div>
+
+                    <div class="flex-1">
+                        <x-form.select name="type" label="Type" required="{{ true }}" :options="$types"
+                            value="{{ $announcement->type }}" shouldHaveEmptyOption="true" />
                     </div>
 
+
                     <div class="flex items-top gap-4">
+                        <div class="flex-1">
+                            <x-announcements.roles-select :roles="$roles"
+                                selected="{{ $announcement->roles != '' ? $announcement->roles : '[]' }}" />
+
+                        </div>
                         <div class="flex-1">
                             <x-announcements.nation-select :nations="collect($nations)"
                                 selected="{{ $announcement->nations != '' ? $announcement->nations : '[]' }}" />

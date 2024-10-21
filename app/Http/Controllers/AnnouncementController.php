@@ -20,8 +20,18 @@ class AnnouncementController extends Controller {
         $announcements = Announcement::where('is_deleted', false)->where('type', '!=', '4')->get();
 
         foreach ($announcements as $announcement) {
-            $announcement->target = __('users.' . $announcement->role->name . '_role');
+            if ($announcement->roles !== null) {
+                foreach (json_decode($announcement->roles) as $roles) {
+                    $announcement->target .= __('users.' . Role::find($roles)->name . '_role') . ',';
+                }
+            } else {
+                $announcement->target = __('users.' . $announcement->role->name . '_role');
+            }
+
+            $announcement->target = rtrim($announcement->target, ',');
         }
+
+
 
         return view('announcements.index', [
             'announcements' => $announcements
@@ -49,13 +59,13 @@ class AnnouncementController extends Controller {
         $nations = Nation::all();
 
         $roles = Role::all();
-        $rolesOptions = [];
-        foreach ($roles as $role) {
-            $rolesOptions[] = [
-                'value' => $role->id,
-                'label' => __('users.' . $role->name)
+
+        $roles = $roles->map(function ($role) {
+            return [
+                'id' => $role->id,
+                'name' => __('users.' . $role->name)
             ];
-        }
+        });
 
         $typesOptions = [];
         foreach ($types as $key => $type) {
@@ -65,9 +75,10 @@ class AnnouncementController extends Controller {
             ];
         }
 
+
         return view('announcements.create', [
             'types' => $typesOptions,
-            'roles' => $rolesOptions,
+            'roles' => $roles,
             'nations' => $nations,
             'academies' => $academies
         ]);
@@ -83,7 +94,6 @@ class AnnouncementController extends Controller {
             'object' => 'required|string|max:255',
             'content' => 'required|string',
             'type' => 'required|integer',
-            'role' => 'integer'
         ]);
 
         if ($request->selectedNations != null) {
@@ -98,13 +108,20 @@ class AnnouncementController extends Controller {
             $academies = "[]";
         }
 
+        if ($request->selectedRoles != null) {
+            $roles = $request->selectedRoles;
+        } else {
+            $roles = "[]";
+        }
+
         $announcement = new Announcement([
             'object' => $request->object,
             'content' => $request->content,
             'type' => $request->type,
-            'role_id' => $request->role,
+            'role_id' => 1,
             'nations' => $nations,
-            'academies' => $academies
+            'academies' => $academies,
+            'roles' =>  $roles
         ]);
 
         $announcement->save();
@@ -138,13 +155,12 @@ class AnnouncementController extends Controller {
         $types = $announcement->getTypes();
 
         $roles = Role::all();
-        $rolesOptions = [];
-        foreach ($roles as $role) {
-            $rolesOptions[] = [
-                'value' => $role->id,
-                'label' => __('users.' . $role->name)
+        $roles = $roles->map(function ($role) {
+            return [
+                'id' => $role->id,
+                'name' => __('users.' . $role->name)
             ];
-        }
+        });
 
         $typesOptions = [];
         foreach ($types as $key => $type) {
@@ -168,7 +184,7 @@ class AnnouncementController extends Controller {
         return view('announcements.edit', [
             'announcement' => $announcement,
             'types' => $typesOptions,
-            'roles' => $rolesOptions,
+            'roles' => $roles,
             'haveseen' => $userhaveseen,
             'nations' => $nations,
             'academies' => $academies
@@ -191,7 +207,6 @@ class AnnouncementController extends Controller {
         $announcement->object = $request->object;
         $announcement->content = $request->content;
         $announcement->type = $request->type;
-        $announcement->role_id = $request->role;
 
         if ($request->selectedNations != null) {
             $nations = $request->selectedNations;
@@ -205,8 +220,15 @@ class AnnouncementController extends Controller {
             $academies = "[]";
         }
 
+        if ($request->selectedRoles != null) {
+            $roles = $request->selectedRoles;
+        } else {
+            $roles = "[]";
+        }
+
         $announcement->nations = $nations;
         $announcement->academies = $academies;
+        $announcement->roles = $roles;
 
         $announcement->save();
 
@@ -230,14 +252,22 @@ class AnnouncementController extends Controller {
         $auth = auth()->user();
         $user = User::find($auth->id);
 
+        $user_roles = $user->roles->pluck('id')->toArray();
+
         $seen_announcements = $user->seenAnnouncements()->get();
-        $announcements = Announcement::where('is_deleted', false)->whereIn('role_id', $user->roles->pluck('id'))->where('type', '!=', '4')->orderBy('created_at', 'desc')->get();
+        $announcements = Announcement::where('is_deleted', false)
+            ->where('type', '!=', '4')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+
 
         // Verifica se sei della nazione giusta ed accademia giusta per visualizzare l'annuncio
 
         $announcements = $announcements->filter(function ($announcement) use ($user) {
             $nations = json_decode($announcement->nations);
             $academies = json_decode($announcement->academies);
+            $roles = json_decode($announcement->roles);
 
             if ($nations != null) {
                 if (!in_array($user->nation_id, $nations)) {
@@ -251,11 +281,16 @@ class AnnouncementController extends Controller {
                 }
             }
 
+            if ($roles != null) {
+                if (!array_intersect($user->roles->pluck('id')->toArray(), $roles)) {
+                    return false;
+                }
+            }
+
             return true;
         });
 
         $first_announcement = $announcements->first();
-
 
         if ($first_announcement) {
             if (!in_array($first_announcement->id, $seen_announcements->pluck('id')->toArray())) {

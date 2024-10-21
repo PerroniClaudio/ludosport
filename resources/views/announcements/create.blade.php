@@ -17,18 +17,15 @@
                     <x-form.input name="object" label="Object" type="text" required="{{ true }}"
                         value="{{ old('object') }}" placeholder="{{ fake()->sentence() }}" />
 
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <x-form.select name="role" label="Role" required="{{ true }}"
-                                :options="$roles" value="{{ old('role') }}" shouldHaveEmptyOption="true" />
-                        </div>
-                        <div class="flex-1">
-                            <x-form.select name="type" label="Type" required="{{ true }}"
-                                :options="$types" value="{{ old('type') }}" shouldHaveEmptyOption="true" />
-                        </div>
-                    </div>
+
+                    <x-form.select name="type" label="Type" required="{{ true }}" :options="$types"
+                        value="{{ old('type') }}" shouldHaveEmptyOption="true" />
+
 
                     <div class="flex items-top gap-4">
+                        <div class="flex-1">
+                            <x-announcements.roles-select :roles="$roles" />
+                        </div>
                         <div class="flex-1">
                             <x-announcements.nation-select :nations="collect($nations)" />
                         </div>
