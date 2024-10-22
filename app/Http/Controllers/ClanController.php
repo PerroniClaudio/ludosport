@@ -100,6 +100,10 @@ class ClanController extends Controller {
         }
 
         $weaponForms = WeaponForm::all();
+        $weaponForms->prepend((object)[
+            'id' => 0,
+            'name' => 'Other'
+        ]);
 
         $viewPath = $authRole === 'admin' ? 'clan.create' : 'clan.' . $authRole . '.create';
         return view($viewPath, [
@@ -156,6 +160,10 @@ class ClanController extends Controller {
             $slug = $slug . '-' . time();
         }
 
+        if ($request->weapon_form_id == 0) {
+            $request->weapon_form_id = null;
+        }
+
         $clan = Clan::create([
             'name' => $request->name,
             'school_id' => $request->school_id,
@@ -210,10 +218,6 @@ class ClanController extends Controller {
      */
     public function edit(Clan $clan) {
 
-
-
-
-        //
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'instructor'])) {
@@ -290,6 +294,10 @@ class ClanController extends Controller {
         $editable_roles = $authUser->getEditableRoles();
 
         $weaponForms = WeaponForm::all();
+        $weaponForms->prepend((object)[
+            'id' => 0,
+            'name' => 'Other'
+        ]);
 
         $viewPath = $authRole === 'admin' ? 'clan.edit' : 'clan.' . $authRole . '.edit';
         return view($viewPath, [
@@ -341,6 +349,10 @@ class ClanController extends Controller {
             default:
                 return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
                 break;
+        }
+
+        if ($request->weapon_form_id == 0) {
+            $request->weapon_form_id = null;
         }
 
         $clan->update([
