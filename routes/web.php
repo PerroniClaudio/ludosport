@@ -124,7 +124,6 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/schools/{school}/athletes-data', [App\Http\Controllers\SchoolController::class, 'athletesDataForSchool'])->name('schools.athletes-data');
     Route::get('/schools/{school}/athletes-clan-data', [App\Http\Controllers\SchoolController::class, 'athletesClanDataForSchool'])->name('schools.athletes-school-data');
     Route::get('/schools/{school}/athletes-year-data', [App\Http\Controllers\SchoolController::class, 'getAthletesNumberPerYear'])->name('schools.athletes-year-data');
-    Route::get('/verify-address', [App\Http\Controllers\SchoolController::class, 'verifyAddress'])->name('schools.verify-address');
 
     Route::get('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'edit'])->name('schools.edit');
     Route::delete('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'destroy'])->name('schools.disable');
@@ -141,6 +140,10 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('schools.athlete.store');
 
     Route::get('/schools/{school}/users-search', [App\Http\Controllers\SchoolController::class, 'searchUsers'])->name('schools.users-search');
+});
+
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('/verify-address', [App\Http\Controllers\SchoolController::class, 'verifyAddress'])->name('schools.verify-address');
 });
 
 /** Clan */

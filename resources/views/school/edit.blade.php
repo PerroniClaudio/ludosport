@@ -9,7 +9,9 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
 
-            @if (auth()->user()->getRole() === 'admin' || auth()->user()->getRole() === 'rector')
+            @if (auth()->user()->getRole() === 'admin' ||
+                    auth()->user()->getRole() === 'rector' ||
+                    auth()->user()->getRole() === 'dean')
                 <div x-data="{
                     address: '{{ $school->address }}',
                     city: '{{ $school->city }}',
@@ -39,28 +41,84 @@
                     }
                 }" class="flex flex-col gap-4">
 
-                    <div class="fixed bottom-8 right-32">
-                        <x-primary-button type="submit">
-                            <x-lucide-save class="w-6 h-6 text-white" />
-                        </x-primary-button>
-                    </div>
+
 
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                         <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('school.info') }}</h3>
                         <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                        <form method="POST" action="{{ route('schools.update', $school->id) }}">
-                            @csrf
+                        @if (auth()->user()->getRole() === 'rector')
+                            <form method="POST" action="{{ route('rector.schools.update', $school->id) }}">
+                                @csrf
+                                <div class="flex flex-col gap-2 w-1/2">
+                                    <x-form.input name="name" label="Name" type="text"
+                                        required="{{ true }}" :value="$school->name"
+                                        placeholder="{{ fake()->company() }}" />
+                                    <x-school.rector.academy nationality="{{ $school->nation_id }}"
+                                        selectedAcademyId="{{ $school->academy_id }}"
+                                        selectedAcademy="{{ $school->academy->name }}" :nations="$nations"
+                                        :academies="$academies" />
+                                </div>
+
+                                <div class="fixed bottom-8 right-32 z-10">
+                                    <x-primary-button type="submit">
+                                        <x-lucide-save class="w-6 h-6 text-white" />
+                                    </x-primary-button>
+                                </div>
+                            </form>
+                        @elseif(auth()->user()->getRole() === 'dean')
                             <div class="flex flex-col gap-2 w-1/2">
                                 <x-form.input name="name" label="Name" type="text"
-                                    required="{{ true }}" :value="$school->name"
+                                    required="{{ true }}" disabled="{{ true }}" :value="$school->name"
                                     placeholder="{{ fake()->company() }}" />
-                                <x-school.academy nationality="{{ $school->nation_id }}"
-                                    selectedAcademyId="{{ $school->academy_id }}"
-                                    selectedAcademy="{{ $school->academy->name }}" :nations="$nations"
-                                    :academies="$academies" />
+                                @php
+                                    $nationId = $school->nation_id;
+                                    $nationName = '';
+                                    // $nations contiene i continenti e quelli contengono le nazioni
+                                    foreach ($nations as $key => $nation) {
+                                        if ($nationName != '') {
+                                            break;
+                                        }
+                                        foreach ($nation as $n) {
+                                            if ($nationName != '') {
+                                                break;
+                                            }
+                                            if ($n['id'] == $nationId) {
+                                                $nationName = $n['name'];
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                <input type="hidden" name="" id="nationality" value="{{ $school->nation_id }}">
+                                <x-form.input name="name" label="Nationality" type="text"
+                                    required="{{ true }}" disabled="{{ true }}" :value="$nationName"
+                                    placeholder="{{ fake()->company() }}" />
+                                <x-form.input name="name" label="Academy" type="text"
+                                    required="{{ true }}" disabled="{{ true }}" :value="$school->academy->name"
+                                    placeholder="{{ fake()->company() }}" />
                             </div>
-                        </form>
+                        @else
+                            <form method="POST" action="{{ route('schools.update', $school->id) }}">
+                                @csrf
+                                <div class="flex flex-col gap-2 w-1/2">
+                                    <x-form.input name="name" label="Name" type="text"
+                                        required="{{ true }}" :value="$school->name"
+                                        placeholder="{{ fake()->company() }}" />
+
+                                    <x-school.academy nationality="{{ $school->nation_id }}"
+                                        selectedAcademyId="{{ $school->academy_id }}"
+                                        selectedAcademy="{{ $school->academy->name }}" :nations="$nations" />
+
+                                    <div class="fixed bottom-8 right-32">
+                                        <x-primary-button type="submit">
+                                            <x-lucide-save class="w-6 h-6 text-white" />
+                                        </x-primary-button>
+                                    </div>
+                                </div>
+                            </form>
+                        @endif
+
+
                     </div>
 
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
@@ -104,7 +162,8 @@
                                     </div>
                                     <div>
                                         <p x-text="verdict" class="text-background-800 dark:text-background-200"></p>
-                                        <p x-text="to_correct" class="text-background-800 dark:text-background-200"></p>
+                                        <p x-text="to_correct" class="text-background-800 dark:text-background-200">
+                                        </p>
                                     </div>
                                 </div>
 
@@ -125,39 +184,13 @@
                     </div>
 
                 </div>
-            @else
-                <div>
-                    <div class="flex flex-col gap-2 w-1/2">
-                        <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                            disabled="{{ true }}" :value="$school->name" placeholder="{{ fake()->company() }}" />
-                        @php
-                            $nationId = $school->nation_id;
-                            $nationName = '';
-                            // $nations contiene i continenti e quelli contengono le nazioni
-                            foreach ($nations as $key => $nation) {
-                                if ($nationName != '') {
-                                    break;
-                                }
-                                foreach ($nation as $n) {
-                                    if ($nationName != '') {
-                                        break;
-                                    }
-                                    if ($n['id'] == $nationId) {
-                                        $nationName = $n['name'];
-                                    }
-                                }
-                            }
-                        @endphp
-                        <x-form.input name="name" label="Nationality" type="text" required="{{ true }}"
-                            disabled="{{ true }}" :value="$nationName" placeholder="{{ fake()->company() }}" />
-                        <x-form.input name="name" label="Academy" type="text" required="{{ true }}"
-                            disabled="{{ true }}" :value="$school->academy->name" placeholder="{{ fake()->company() }}" />
-                    </div>
-                </div>
+
             @endif
 
 
-            <x-school.search-users :school="$school" :roles="$roles" />
+            @if (auth()->user()->getRole() === 'admin' || auth()->user()->getRole() === 'rector')
+                <x-school.search-users :school="$school" :roles="$roles" />
+            @endif
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 <div class="flex items-center justify-between">
