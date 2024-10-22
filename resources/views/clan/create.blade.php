@@ -14,12 +14,8 @@
                     <div class="flex flex-col gap-2 w-1/2">
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                             value="{{ old('name') }}" placeholder="{{ fake()->company() }}" />
-                        {{-- 
-                        <x-form.select name="school_id" label="School" required="{{ true }}" :options="$schools"
-                            value="{{ old('school_id') }}" /> --}}
-
                         <x-clan.school />
-
+                        <x-clan.weapon-form :available_weapons=$weaponForms />
                     </div>
 
                     <div class="flex items-center justify-end gap-2">

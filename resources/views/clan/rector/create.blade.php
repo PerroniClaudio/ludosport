@@ -19,6 +19,7 @@
                             value="{{ old('school_id') }}" /> --}}
 
                         <x-clan.rector.school />
+                        <x-clan.weapon-form :available_weapons=$weaponForms />
 
                     </div>
 
