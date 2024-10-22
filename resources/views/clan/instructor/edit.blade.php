@@ -17,6 +17,7 @@
                             :value="$clan->name" placeholder="{{ fake()->company() }}" disabled />
 
                         <x-clan.instructor.school :selectedSchoolId="$clan->school_id" :selectedSchool="$clan->school->name" />
+                        <x-clan.weapon-form :selected_weapon="$clan->weaponform" :available_weapons="$available_weapons" />
 
                     </div>
 
