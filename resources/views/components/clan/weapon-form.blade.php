@@ -12,9 +12,15 @@
         this.$dispatch('open-modal', 'weapon-form-modal');
     },
     init() {
+
         if (this.weapon.id != undefined) {
             this.weaponFormId = this.weapon.id;
             this.weaponFormName = this.weapon.name;
+        }
+
+        if (this.weapon.length == 0) {
+            this.weaponFormId = 0;
+            this.weaponFormName = 'Other';
         }
     },
 }">
