@@ -108,7 +108,8 @@
                         {{ __('users.personal_details_message') }}</h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <div class="flex flex-col gap-2">
-                        <x-form.checkbox id="has_paid_fee" name="has_paid_fee" label="Has paid fee" isChecked="{{ $user->has_paid_fee }}" />
+                        <x-form.checkbox id="has_paid_fee" name="has_paid_fee" label="Has paid fee"
+                            isChecked="{{ $user->has_paid_fee }}" />
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                             :value="$user->name" placeholder="{{ fake()->firstName() }}" />
                         <x-form.input name="surname" label="Surname" type="text" required="{{ true }}"
@@ -117,7 +118,8 @@
                             value="{{ $user->email }}" placeholder="{{ fake()->email() }}" />
                         <x-form.input name="year" label="First subscription year" type="text"
                             required="{{ true }}" value="{{ $user->subscription_year }}"
-                            placeholder="{{ date('Y') }}" description="The year of the first registration to LudoSport" />
+                            placeholder="{{ date('Y') }}"
+                            description="The year of the first registration to LudoSport" />
 
                         <div>
                             <x-input-label for="nationality" value="Nationality" />
@@ -139,8 +141,7 @@
                             <select name="rank" id="rank"
                                 class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
                                 @foreach ($ranks as $id => $rank)
-                                    <option value="{{ $id }}"
-                                        {{ $id == $user->rank_id ? 'selected' : '' }}>
+                                    <option value="{{ $id }}" {{ $id == $user->rank_id ? 'selected' : '' }}>
                                         {{ $rank }}</option>
                                 @endforeach
                             </select>
@@ -227,29 +228,28 @@
             <div class="grid grid-cols-2 gap-4 my-4">
                 @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
                     <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponForms" />
-                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsPersonnel" isPersonnel="{{true}}" />
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsPersonnel"
+                        isPersonnel="{{ true }}" />
                     <x-user.languages :languages="$user->languages" :user="$user->id" :availableLanguages="collect($languages)" />
                 @endif
-                <div 
-                    @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
-                        class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8"
+                <div @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete')) class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8"
                     @else
-                        class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 col-span-2"
-                    @endif
+                        class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 col-span-2" @endif
                     x-data="{}">
                     <div class="flex justify-between">
-                        <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('users.profile_picture') }}
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                            {{ __('users.profile_picture') }}
                         </h3>
                         <div>
                             <form method="POST" action="{{ route('users.picture.update', $user->id) }}"
                                 enctype="multipart/form-data" x-ref="pfpform">
                                 @csrf
                                 @method('PUT')
-    
+
                                 <div class="flex flex-col gap-4">
                                     <div class="flex flex-col gap-2">
-                                        <input type="file" name="profilepicture" id="profilepicture" class="hidden"
-                                            x-on:change="$refs.pfpform.submit()" />
+                                        <input type="file" name="profilepicture" id="profilepicture"
+                                            class="hidden" x-on:change="$refs.pfpform.submit()" />
                                         <x-primary-button type="button"
                                             onclick="document.getElementById('profilepicture').click()">
                                             {{ __('users.upload_picture') }}
@@ -260,12 +260,12 @@
                         </div>
                     </div>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-    
+
                     @if ($user->profile_picture)
                         <img src="{{ route('user.profile-picture-show', $user->id) }}" alt="{{ $user->name }}"
                             class="w-1/3 rounded-lg">
                     @endif
-    
+
                 </div>
             </div>
 
@@ -480,8 +480,8 @@
                                     return ['value' => $academy->id, 'label' => $academy->name];
                                 });
                                 $selectedAcademy = [
-                                    'value' => $user->primaryAcademyAthlete()->id ?? null, 
-                                    'label' => $user->primaryAcademyAthlete()->name ?? null
+                                    'value' => $user->primaryAcademyAthlete()->id ?? null,
+                                    'label' => $user->primaryAcademyAthlete()->name ?? null,
                                 ];
                             @endphp
                             <x-form.select name="academy_id" label="{{ __('academies.academy') }}"
@@ -494,8 +494,8 @@
                                     return ['value' => $school->id, 'label' => $school->name];
                                 });
                                 $selectedSchool = [
-                                    'value' => $user->primarySchool()->id ?? null, 
-                                    'label' => $user->primarySchool()->name ?? null
+                                    'value' => $user->primarySchool()->id ?? null,
+                                    'label' => $user->primarySchool()->name ?? null,
                                 ];
                             @endphp
                             <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsPersonnelOptions" />
@@ -507,8 +507,8 @@
                                     return ['value' => $school->id, 'label' => $school->name];
                                 });
                                 $selectedSchool = [
-                                    'value' => $user->primarySchoolAthlete()->id ?? null, 
-                                    'label' => $user->primarySchoolAthlete()->name ?? null
+                                    'value' => $user->primarySchoolAthlete()->id ?? null,
+                                    'label' => $user->primarySchoolAthlete()->name ?? null,
                                 ];
                             @endphp
                             <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsAthleteOptions" />

@@ -213,8 +213,7 @@ class SchoolController extends Controller {
         $roles = Role::all();
         $editable_roles = $authUser->getEditableRoles();
 
-        $viewPath = $authRole === 'admin' ? 'school.edit' : 'school.' . $authRole . '.edit';
-        return view($viewPath, [
+        return view('school.edit', [
             'school' => $school,
             'nations' => $countries,
             'clans' => $clans,
@@ -244,7 +243,9 @@ class SchoolController extends Controller {
             'academy_id' => $request->academy_id,
         ]);
 
-        return redirect()->route('schools.edit', $school)->with('success', 'School updated successfully!');
+        $authRole = User::find(auth()->user()->id)->getRole();
+        $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
+        return redirect()->route($redirectRoute, $school)->with('success', 'School updated successfully!');
     }
 
     public function notupdate(Request $request, School $school) {
