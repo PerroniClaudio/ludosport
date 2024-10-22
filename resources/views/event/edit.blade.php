@@ -111,6 +111,10 @@
                         value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}"
                         disabled="{{ !!$event->is_approved }}" />
 
+                    <x-form.input name="waiting_list_close_date" label="Waiting list close date" type="datetime-local"
+                        required="{{ true }}" value="{{ $event->waiting_list_close_date }}"
+                        placeholder="{{ fake()->date() }}" disabled="{{ !!$event->is_approved }}" />
+
                     <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
                         selected="{{ $event->type->id }}" disabled="{{ !!$event->is_approved }}" />
 

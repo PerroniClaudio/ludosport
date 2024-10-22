@@ -25,4 +25,8 @@ return [
     'nations' => 'Nations',
     'academies' => 'Academies',
     'select_academies' => 'Select Academies',
+    'selected_academies' => 'Selected Academies',
+    'roles' => 'Roles',
+    'select_roles' => 'Select Roles',
+    'selected_roles' => 'Selected Roles',
 ];

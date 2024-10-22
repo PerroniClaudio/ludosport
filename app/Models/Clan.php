@@ -12,7 +12,8 @@ class Clan extends Model {
     protected $fillable = [
         'name',
         'school_id',
-        'slug'
+        'slug',
+        'weapon_form_id',
     ];
 
     public function toSearchableArray() {
@@ -42,5 +43,9 @@ class Clan extends Model {
 
     public function academy() {
         return $this->school->belongsTo(Academy::class);
+    }
+
+    public function weaponForm() {
+        return $this->belongsTo(WeaponForm::class);
     }
 }

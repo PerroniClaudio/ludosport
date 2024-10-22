@@ -47,7 +47,7 @@
         @foreach ($weapon_forms_cycle2 as $weapon_form)
             <div class="my-2 mx-2  {{ in_array($weapon_form->id, $user_forms) ? '' : 'opacity-30' }}">
                 <div
-                    class="{{ strpos($weapon_form->name, '6') !== false || strpos($weapon_form->name, '7') !== false ? 'bg-background-700' : 'bg-primary-500' }}  p-2 rounded w-full flex items-center justify-center ">
+                    class="{{ strpos($weapon_form->name, '6') !== false || strpos($weapon_form->name, '7') !== false ? 'hidden' : 'bg-primary-500' }}  p-2 rounded w-full flex items-center justify-center ">
                     <img src="{{ route('weapon-form-image', $weapon_form->id) }}" alt="{{ $weapon_form->name }}"
                         class="w-16 h-16">
 

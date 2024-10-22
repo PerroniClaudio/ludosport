@@ -121,7 +121,7 @@ class EventController extends Controller {
         ]);
 
         // Non hanno chiesto un valore di default per la data di chiusura della waiting list
-        // $waitingCloseDate = Carbon::parse($request->start_date)->subDays(30)->isBefore(now()) ? null : Carbon::parse($request->start_date)->subDays(30);
+        $waitingCloseDate = Carbon::parse($request->start_date)->subDays(30)->isBefore(now()) ? null : Carbon::parse($request->start_date)->subDays(30);
 
         // Se l'utente è admin si imposta il pagamento interno di default. Altrimenti è sempre esterno.
         $internalShop = $authRole == "admin" ? true : false;
@@ -151,7 +151,7 @@ class EventController extends Controller {
             'is_published' => 0,
             'academy_id' => $request->academy_id,
             'event_type' => EventType::first()->id,
-            // 'waiting_list_close_date' => $waitingCloseDate,
+            'waiting_list_close_date' => $waitingCloseDate,
             'internal_shop' => $internalShop,
         ]);
 
@@ -1340,6 +1340,14 @@ class EventController extends Controller {
             return response()->json([
                 'success' => false,
                 'error' => 'Order not found',
+                'url' => route('shop.events.waiting-list-cancel') . '?order_id=' . $order->id,
+            ]);
+        }
+
+        if ($event->waiting_list_close_date && Carbon::now()->isAfter($event->waiting_list_close_date)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'The waiting list for this event is closed',
                 'url' => route('shop.events.waiting-list-cancel') . '?order_id=' . $order->id,
             ]);
         }
