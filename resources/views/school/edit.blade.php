@@ -198,7 +198,10 @@
                     </h3>
                     <div class="flex items-center gap-1">
                         <x-school.personnel :school="$school" :personnel="$personnel" />
-                        <x-school.create-user :school="$school->id" type="personnel" :roles="$editable_roles" />
+                        @if (auth()->user()->getRole() === 'admin' || auth()->user()->getRole() === 'rector')
+                            <x-school.create-user :school="$school->id" type="personnel" :roles="$editable_roles" />
+                        @endif
+
                     </div>
 
                 </div>
@@ -311,7 +314,9 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('school.clans') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        {{-- <x-school.clans :school="$school" :athletes="$clans" /> --}}
+                        @if (auth()->user()->getRole() === 'admin')
+                            <x-school.clans :school="$school" :athletes="$clans" />
+                        @endif
                         <x-school.create-clan :school="$school->id" />
                     </div>
                 </div>
