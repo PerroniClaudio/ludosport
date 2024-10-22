@@ -11,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 use App\Models\Invoice as Invoice;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmail {
@@ -595,5 +596,121 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return false;
                 break;
         }
+    }
+
+    // Rimuove tutte le associazioni dell'atleta con tutte le accademie (escluso quella indicata) e le rispettive scuole e corsi
+    public function removeAcademiesAthleteAssociations($academyExeption = null) {
+        $authUser = User::find(auth()->user()->id);
+        // Chi usa la funzione ha già il controllo sull'autorizzazione
+        // $authRole = $authUser->getRole();
+
+        $removedCourses = $this->clans()->whereNotIn('school_id', $academyExeption ? $academyExeption->schools->pluck('id') : [])->get();
+        foreach ($removedCourses as $course) {
+            $this->clans()->detach($course->id);
+        }
+        $removedCoursesIds = $removedCourses->pluck('id')->toArray();
+
+        $removedSchools = $this->schoolAthletes()->where('academy_id', '!=', $academyExeption->id ?? null)->get();
+        foreach ($removedSchools as $school) {
+            $this->schoolAthletes()->detach($school->id);
+        }
+        $removedSchoolsIds = $removedSchools->pluck('id')->toArray();
+
+        $removedAcademies = $this->academyAthletes()->where('academy_id', '!=', $academyExeption->id ?? null)->get();
+        foreach ($removedAcademies as $acad) {
+            $this->academyAthletes()->detach($acad->id);
+        }
+        $removedAcademiesIds = $removedAcademies->pluck('id')->toArray();
+        // Metto tutti i dati su tutti e tre i canali. Si può modificare in futuro
+        Log::channel('user')->info('Removed athlete associations', [
+            'made_by' => $authUser->id,
+            'athlete' => $this->id,
+            'academies' => $removedAcademiesIds,
+            'schools' => $removedSchoolsIds,
+            'courses' => $removedCoursesIds,
+        ]);
+    }
+
+    // Rimuove l'associazione del personnel con l'accademia indicata e le rispettive scuole e corsi associati
+    public function removeAcademyPersonnelAssociations($academyToRemove = null) {
+        if($academyToRemove == null) {
+            return;
+        }
+        $authUser = User::find(auth()->user()->id);
+        // Chi usa la funzione ha già il controllo sull'autorizzazione
+        // $authRole = $authUser->getRole();
+
+        $removedCourses = $this->clansPersonnel()->whereIn('school_id', $academyToRemove ? $academyToRemove->schools->pluck('id') : [])->get();
+        foreach ($removedCourses as $course) {
+            $this->clansPersonnel()->detach($course->id);
+        }
+        $removedCoursesIds = $removedCourses->pluck('id')->toArray();
+
+        $removedSchools = $this->schools()->where('academy_id', $academyToRemove->id)->get();
+        foreach ($removedSchools as $school) {
+            $this->schools()->detach($school->id);
+        }
+        $removedSchoolsIds = $removedSchools->pluck('id')->toArray();
+
+        $removedAcademies = $this->academies()->where('academy_id', $academyToRemove->id)->get();
+        foreach ($removedAcademies as $acad) {
+            $this->academies()->detach($acad->id);
+        }
+        $removedAcademiesIds = $removedAcademies->pluck('id')->toArray();
+        // Metto tutti i dati su tutti e tre i canali. Si può modificare in futuro
+        Log::channel('user')->info('Removed personnel associations', [
+            'made_by' => $authUser->id,
+            'personnel' => $this->id,
+            'academies' => $removedAcademiesIds,
+            'schools' => $removedSchoolsIds,
+            'courses' => $removedCoursesIds,
+        ]);
+    }
+
+    // Rimuove tutte le associazioni del personnel la scuola indicata e i rispettivi corsi
+    public function removeSchoolPersonnelAssociations($schoolToRemove = null) {
+        $authUser = User::find(auth()->user()->id);
+        // Chi usa la funzione ha già il controllo sull'autorizzazione
+        // $authRole = $authUser->getRole();
+
+        $removedCourses = $this->clansPersonnel()->where('school_id', $schoolToRemove->id)->get();
+        foreach ($removedCourses as $course) {
+            $this->clansPersonnel()->detach($course->id);
+        }
+        $removedCoursesIds = $removedCourses->pluck('id')->toArray();
+
+        $this->schools()->detach($schoolToRemove->id);
+        $removedSchoolsIds = [$schoolToRemove->id];
+
+        // Metto tutti i dati su tutti e tre i canali. Si può modificare in futuro
+        Log::channel('user')->info('Removed personnel associations', [
+            'made_by' => $authUser->id,
+            'personnel' => $this->id,
+            'schools' => $removedSchoolsIds,
+            'courses' => $removedCoursesIds,
+        ]);
+    }
+
+    // Rimuove l'associazione dell'atleta con la scuola indicata e i rispettivi corsi
+    public function removeSchoolAthleteAssociations($schoolToRemove = null){
+        $authUser = User::find(auth()->user()->id);
+        // Chi usa la funzione ha già il controllo sull'autorizzazione
+        // $authRole = $authUser->getRole();
+        $removedCourses = $this->clans()->where('school_id', $schoolToRemove->id)->get();
+        foreach ($removedCourses as $course) {
+            $this->clans()->detach($course->id);
+        }
+        $removedCoursesIds = $removedCourses->pluck('id')->toArray();
+
+        $this->schoolAthletes()->detach($schoolToRemove->id);
+        $removedSchoolsIds = [$schoolToRemove->id];
+
+        // Metto tutti i dati su tutti e tre i canali. Si può modificare in futuro
+        Log::channel('user')->info('Removed athlete associations', [
+            'made_by' => $authUser->id,
+            'athlete' => $this->id,
+            'schools' => $removedSchoolsIds,
+            'courses' => $removedCoursesIds,
+        ]);
     }
 }

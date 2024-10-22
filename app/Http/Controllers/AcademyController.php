@@ -358,22 +358,27 @@ class AcademyController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
         $athlete = User::find($request->athlete_id);
+        $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
 
-        $academy->athletes()->syncWithoutDetaching($athlete->id);
-        if ($athlete->academyAthletes()->count() > 1) {
-            $noAcademy = Academy::where('slug', 'no-academy')->first();
-            $noAcademy->athletes()->detach($athlete->id);
+        // l'atleta può essere associato ad una sola accademia, quindi se si modifica vanno rimossi anche tutti i collegamenti inferiori (scuole e corsi)
+        if ($academy->athletes->contains($athlete->id)) {
+            return redirect()->route($redirectRoute, $academy)->with('success', 'Athlete is already associated with this academy.');
         }
+        
+        // l'argomento è l'accademia che fa eccezione, (se serve)
+        $athlete->removeAcademiesAthleteAssociations($academy);
+        
+        $academy->athletes()->syncWithoutDetaching($athlete->id);
         // Se l'atleta non ha l'accademia principale, la assegna
         if (!$athlete->primaryAcademyAthlete()) {
             $schoolAcademy = null;
             if ($athlete->primarySchoolAthlete()) {
                 $schoolAcademy = $athlete->primarySchoolAthlete()->academy;
             }
-            $athlete->setPrimaryAcademy($schoolAcademy ? $schoolAcademy->id : $academy->id);
+            $athlete->setPrimaryAcademyAthlete($schoolAcademy ? $schoolAcademy->id : $academy->id);
         }
 
-        $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
+        
         return redirect()->route($redirectRoute, $academy)->with('success', 'Athlete added successfully!');
     }
 

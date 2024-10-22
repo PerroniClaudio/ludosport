@@ -94,7 +94,7 @@
                             <template x-for="weaponForm in weapon_forms" :key="weaponForm.id">
                                 <div x-show="shouldShowWeaponForm(weaponForm.id)" x-on:click="addLanguage(weaponForm)"
                                     class="p-2 border border-background-100 dark:border-background-700 rounded-lg cursor-pointer">
-                                    <p class="text-background-500 dark:text-background-300" x-text="weaponForm.name"></p>
+                                    <p class="text-sm text-background-500 dark:text-background-300" x-text="weaponForm.name"></p>
                                 </div>
                             </template>
                         </div>
@@ -109,7 +109,7 @@
                             <template x-for="weaponForm in selectedWeaponForms" :key="weaponForm.id">
                                 <div x-on:click="removeLanguage(weaponForm)"
                                     class="p-2 border border-primary-500 dark:border-primary-500 rounded-lg cursor-pointer">
-                                    <p class="text-primary-500" x-text="weaponForm.name"></p>
+                                    <p class="text-sm text-primary-500" x-text="weaponForm.name"></p>
                                 </div>
                             </template>
                         </div>
@@ -169,7 +169,7 @@
                             <template x-for="weaponForm in weapon_forms" :key="weaponForm.id">
                                 <div x-show="shouldShowWeaponForm(weaponForm.id)" x-on:click="addLanguage(weaponForm)"
                                     class="p-2 border border-background-100 dark:border-background-700 rounded-lg cursor-pointer">
-                                    <p class="text-background-500 dark:text-background-300" x-text="weaponForm.name"></p>
+                                    <p class="text-sm text-background-500 dark:text-background-300" x-text="weaponForm.name"></p>
                                 </div>
                             </template>
                         </div>
@@ -184,7 +184,7 @@
                             <template x-for="weaponForm in selectedWeaponForms" :key="weaponForm.id">
                                 <div x-on:click="removeLanguage(weaponForm)"
                                     class="p-2 border border-primary-500 dark:border-primary-500 rounded-lg cursor-pointer">
-                                    <p class="text-primary-500" x-text="weaponForm.name"></p>
+                                    <p class="text-sm text-primary-500" x-text="weaponForm.name"></p>
                                 </div>
                             </template>
                         </div>
