@@ -51,6 +51,11 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('users.create');
     Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
 
+    Route::post('/users/associate-school', [App\Http\Controllers\UserController::class, 'associateSchool'])->name('users.associate-school');
+    Route::post('/users/associate-academy', [App\Http\Controllers\UserController::class, 'associateAcademy'])->name('users.associate-academy');
+    Route::post('/users/remove-school', [App\Http\Controllers\UserController::class, 'removeSchool'])->name('users.remove-school');
+    Route::post('/users/remove-academy', [App\Http\Controllers\UserController::class, 'removeAcademy'])->name('users.remove-academy');
+
     Route::get('/world-athletes-data', [App\Http\Controllers\UserController::class, 'athletesDataForWorld'])->name('users.world-athletes-data');
     Route::get('/world-athletes-data-list', [App\Http\Controllers\UserController::class, 'athletesDataWorldList'])->name('users.world-athletes-data-list');
     Route::get('/world-athletes-year-data', [App\Http\Controllers\UserController::class, 'getWorldAthletesNumberPerYear'])->name('users.world-athletes-year-data');

@@ -481,18 +481,25 @@ class UserController extends Controller {
         $allLanguages = Language::all();
         $allWeaponForms = WeaponForm::all();
 
+        // Per select-institutions
+        $allAcademies = Academy::all();
         $authRole = User::find(auth()->user()->id)->getRole();
         $viewPath = $authRole === 'admin' ? 'users.edit' :  'users.' . $authRole . '.edit';
+        $filteredSchoolsPersonnel = School::whereIn('academy_id', $user->academies->pluck('id'))->whereNotIn('id', $user->schools->pluck('id'))->where('is_disabled', '0')->with(['nation'])->get();
+        $filteredSchoolsAthlete = School::whereIn('academy_id', $user->academyAthletes->pluck('id'))->whereNotIn('id', $user->schoolAthletes->pluck('id'))->where('is_disabled', '0')->with(['nation'])->get();
 
         return view($viewPath, [
             'user' => $user,
             'academies' => $user->nation->academies ?? [],
+            'allAcademies' => $allAcademies,
             'schools' => $schools,
             'nations' => $countries,
             'roles' => $roles,
             'languages' => $allLanguages,
             'ranks' => $ranks,
             'allWeaponForms' => $allWeaponForms,
+            'filteredSchoolsPersonnel' => $filteredSchoolsPersonnel,
+            'filteredSchoolsAthlete' => $filteredSchoolsAthlete,
         ]);
     }
 
@@ -1536,4 +1543,215 @@ class UserController extends Controller {
         ]); 
 
     }
+
+    public function associateAcademy(Request $request) {
+        $authUser = User::find(auth()->user()->id);
+        $authUserRole = $authUser->getRole();
+
+        if ($authUserRole !== 'admin') {
+            return response()->json([
+                'error' => 'You are not authorized to associate user with academy!',
+            ]);
+        }
+
+        $user = User::find($request->user_id);
+        $academy = Academy::find($request->academy_id);
+
+        if (!$academy) {
+            return response()->json([
+                'error' => 'Academy not found!',
+            ]);
+        }
+
+        if ($request->type == 'personnel') {
+            $user->academies()->syncWithoutDetaching($academy->id);
+            Log::channel('academy')->info('Personnel associated with academy', [
+                'user_id' => $user->id,
+                'academy_id' => $academy->id,
+                'made_by' => $authUser->id,
+            ]);
+            if($user->academies->where('id', 1)->count() > 0){
+                // Se è associato a no academy viene rimosso
+                $user->academies()->detach(1);
+                $user->setPrimaryAcademy($academy->id);
+            }
+        } else if ($request->type == 'athlete') {
+            if ($user->academyAthletes->contains($academy->id)) {
+                return response()->json([
+                    'error' => 'User is already associated with this academy!',
+                ]);
+            }
+            if ($user->academyAthletes->count() > 0) {
+                // Dato che un atleta può essere associato ad una sola accademia possiamo usare la funzione che toglie l'associazione da tutte le accademie e crea il log
+                // L'argomento è l'accademia che fa eccezione (se serve)
+                $user->removeAcademiesAthleteAssociations();
+            }
+
+            $user->academyAthletes()->syncWithoutDetaching($academy->id);
+            $user->setPrimaryAcademyAthlete($academy->id);
+
+            // Fallback se l'associazione non è andata a buon fine
+            if($user->academyAthletes->count() == 0){
+                // Se non ha accademie come atleta viene assegnato a No academy
+                $user->academyAthletes()->syncWithoutDetaching(1);
+                $user->setPrimaryAcademyAthlete(1);
+            }
+            Log::channel('academy')->info('Athlete associated with academy', [
+                'user_id' => $user->id,
+                'academy_id' => $academy->id,
+                'made_by' => $authUser->id,
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Invalid type!',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    public function associateSchool(Request $request) {
+        $authUser = User::find(auth()->user()->id);
+        $authUserRole = $authUser->getRole();
+
+        if ($authUserRole !== 'admin') {
+            return response()->json([
+                'error' => 'You are not authorized to associate user with school!',
+            ]);
+        }
+
+        $user = User::find($request->user_id);
+        $school = School::find($request->school_id);
+
+        if (!$school) {
+            return response()->json([
+                'error' => 'School not found!',
+            ]);
+        }
+
+        if ($request->type == 'personnel') {
+            $user->schools()->syncWithoutDetaching($school->id);
+            Log::channel('school')->info('Personnel associated with school', [
+                'user_id' => $user->id,
+                'school_id' => $school->id,
+                'made_by' => $authUser->id,
+            ]);
+            // L'associazione alla scuola principale non è obbligatoria.
+        } else if ($request->type == 'athlete') {
+            $user->schoolAthletes()->syncWithoutDetaching($school->id);
+            Log::channel('school')->info('Athlete associated with school', [
+                'user_id' => $user->id,
+                'school_id' => $school->id,
+                'made_by' => $authUser->id,
+            ]);
+            // L'associazione alla scuola principale non è obbligatoria.
+        } else {
+            return response()->json([
+                'error' => 'Invalid type!',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    public function removeAcademy(Request $request) {
+        $authUser = User::find(auth()->user()->id);
+        $authUserRole = $authUser->getRole();
+
+        if ($authUserRole !== 'admin') {
+            return response()->json([
+                'error' => 'You are not authorized to remove user from academy!',
+            ]);
+        }
+
+        $user = User::find($request->user_id);
+        $academy = Academy::find($request->academy_id);
+
+        if (!$academy) {
+            return response()->json([
+                'error' => 'Academy not found!',
+            ]);
+        }
+
+        if ($request->type == 'personnel') {
+            // Prima di rimuovere l'associazione all'accademia rimuovere le associazioni a corsi e scuole
+            // Rimuove tutte le associazioni a corsi, scuole e accademia indicata e crea i log
+            $user->removeAcademyPersonnelAssociations($academy);
+
+            if($user->academies->count() == 0){
+                // Se non ha accademie come personnel viene assegnato a No academy
+                $user->academies()->syncWithoutDetaching(1);
+                $user->setPrimaryAcademy(1);
+                Log::channel('academy')->info('Personnel associated with academy', [
+                    'user_id' => $user->id,
+                    'academy_id' => 1,
+                    'made_by' => $authUser->id,
+                ]);
+            }
+        } else if ($request->type == 'athlete') {
+            // Dato che un atleta può essere associato ad una sola accademia possiamo usare la funzione che toglie l'associazione da tutte le accademie e crea il log
+            // L'argomento è l'accademia che fa eccezione (se serve)
+            $user->removeAcademiesAthleteAssociations();
+
+            if($user->academyAthletes->count() == 0){
+                // Se non ha accademie come atleta viene assegnato a No academy
+                $user->academyAthletes()->syncWithoutDetaching(1);
+                $user->setPrimaryAcademyAthlete(1);
+                Log::channel('academy')->info('Athlete associated with academy', [
+                    'user_id' => $user->id,
+                    'academy_id' => 1,
+                    'made_by' => $authUser->id,
+                ]);               
+            }
+        } else {
+            return response()->json([
+                'error' => 'Invalid type!',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    public function removeSchool(Request $request) {
+        $authUser = User::find(auth()->user()->id);
+        $authUserRole = $authUser->getRole();
+
+        if ($authUserRole !== 'admin') {
+            return response()->json([
+                'error' => 'You are not authorized to remove user from school!',
+            ]);
+        }
+
+        $user = User::find($request->user_id);
+        $school = School::find($request->school_id);
+
+        if (!$school) {
+            return response()->json([
+                'error' => 'School not found!',
+            ]);
+        }
+
+        if ($request->type == 'personnel') {
+            // Rimuove tutte le associazioni (personnel) a corsi e scuola indicata e crea i log
+            $user->removeSchoolPersonnelAssociations($school);
+        } else if ($request->type == 'athlete') {
+            // Rimuove tutte le associazioni (athlete) a corsi e scuola indicata e crea i log
+            $user->removeSchoolAthleteAssociations($school);
+        } else {
+            return response()->json([
+                'error' => 'Invalid type!',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+        
 }

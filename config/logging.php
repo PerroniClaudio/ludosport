@@ -168,6 +168,11 @@ return [
             'path' => storage_path('logs/academy.log'),
             'level' => 'debug',
         ],
+        'user' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/user.log'),
+            'level' => 'debug',
+        ],
 
     ],
 

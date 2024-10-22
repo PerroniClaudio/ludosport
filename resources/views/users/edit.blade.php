@@ -293,11 +293,16 @@
                     <div class="flex justify-between">
                         <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
 
-                        <x-primary-button :disabled="$user->academies()->count() < 1"
-                            x-on:click.prevent="setInstitutionType('academy'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
-                            <span>{{ __('users.set_main_personnel_academy') }}</span>
-                        </x-primary-button>
-
+                        <div class="flex gap-2">
+                            <x-primary-button :disabled="$user->academies()->count() < 1"
+                                x-on:click.prevent="setInstitutionType('academy'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
+                                <span>{{ __('users.set_main_personnel_academy') }}</span>
+                            </x-primary-button>
+                            @php
+                                $filteredAcademies = $allAcademies->diff($user->academies);
+                            @endphp
+                            <x-user.select-institutions type="academy-personnel" :user="$user" :academies="$filteredAcademies" :selectedAcademies="$user->academies" />
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-2">
@@ -323,10 +328,13 @@
 
                     <div class="flex justify-between">
                         <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
-                        <x-primary-button :disabled="$user->academyAthletes()->count() < 1"
-                            x-on:click.prevent="setInstitutionType('academy'), setRoleType('athlete'), $dispatch('open-modal', 'set-main-institution-modal')">
-                            <span>{{ __('users.set_main_athletes_academy') }}</span>
-                        </x-primary-button>
+                        {{-- Si è deciso che gli utenti hanno una sola accademia come atleti --}}
+                        <div class="flex gap-2">
+                            @php
+                                $filteredAcademies = $allAcademies->diff($user->academyAthletes);
+                            @endphp
+                            <x-user.select-institutions type="academy-athlete" :user="$user" :academies="$filteredAcademies" :selectedAcademies="$user->academyAthletes" />
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-2">
@@ -356,10 +364,13 @@
 
                     <div class="flex justify-between">
                         <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
-                        <x-primary-button :disabled="$user->schools()->count() < 1"
-                            x-on:click.prevent="setInstitutionType('school'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
-                            <span>{{ __('users.set_main_personnel_school') }}</span>
-                        </x-primary-button>
+                        <div class="flex gap-2">
+                            <x-primary-button :disabled="$user->schools()->count() < 1"
+                                x-on:click.prevent="setInstitutionType('school'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
+                                <span>{{ __('users.set_main_personnel_school') }}</span>
+                            </x-primary-button>
+                            <x-user.select-institutions type="school-personnel" :user="$user" :schools="$filteredSchoolsPersonnel" :selectedSchools="$user->schools" />
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-2">
@@ -385,10 +396,14 @@
 
                     <div class="flex justify-between">
                         <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
-                        <x-primary-button :disabled="$user->schoolAthletes()->count() < 1"
-                            x-on:click.prevent="setInstitutionType('school'), setRoleType('athlete'), $dispatch('open-modal', 'set-main-institution-modal')">
-                            <span>{{ __('users.set_main_athletes_school') }}</span>
-                        </x-primary-button>
+                        <div class="flex gap-2">
+                            <x-primary-button :disabled="$user->schoolAthletes()->count() < 1"
+                                x-on:click.prevent="setInstitutionType('school'), setRoleType('athlete'), $dispatch('open-modal', 'set-main-institution-modal')">
+                                <span>{{ __('users.set_main_athletes_school') }}</span>
+                            </x-primary-button>
+                            
+                            <x-user.select-institutions type="school-athlete" :user="$user" :schools="$filteredSchoolsAthlete" :selectedSchools="$user->schoolAthletes" />
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-2">
