@@ -204,7 +204,7 @@
             </div>
         @endif
     </div>
-    <main class="min-h-screen bg-background-100 dark:bg-background-900">
+    <main class="min-h-screen bg-background-200 dark:bg-background-900">
         {{ $slot }}
     </main>
 

@@ -1,7 +1,7 @@
 <x-website-layout>
 
     <div class="flex">
-        <div id="bigone" class="relative">
+        <div id="bigone" class="relative bg-background-400 dark:bg-background-900">
             <div class="hidden lg:block absolute" style="top: 38%; right: -2%">
                 <img src="{{ route('bollino') }}" alt="">
             </div>
@@ -14,7 +14,7 @@
                 </a>
             </div>
         </div>
-        <div id="smallone" class="hidden lg:block">
+        <div id="smallone" class="hidden lg:block bg-background-200 dark:bg-background-700">
 
             <div class="inset-0 h-full bg-cover bg-no-repeat lg:max-w-[50vw]"
                 style="background-image: url('{{ route('spada-home') }}')">

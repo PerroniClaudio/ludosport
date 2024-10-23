@@ -67,7 +67,7 @@
                         <template x-for="school in paginatedResults" :key="school.id">
                             <a x-bind:href="'{{ env('APP_URL') }}/school-profile/' + school.slug">
                                 <div
-                                    class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2">
+                                    class="rounded bg-white dark:bg-background-800 dark:text-background-300 p-4 flex flex-row justify-between gap-2">
                                     <div class="flex flex-col gap-1">
                                         <h1 class="font-bold dark:text-background-100" x-text="school.name"></h1>
                                         <p x-text="school.address"></p>

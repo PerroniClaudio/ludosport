@@ -45,7 +45,7 @@
 
                 <div class="grid grid-cols-3 gap-4 py-8 text-background-900 dark:text-background-100">
                     <template x-for="user in users" :key="user.id">
-                        <div class="flex gap-4 mb-4 border border-background-700 rounded p-4 hover:border-primary-500 cursor-pointer"
+                        <div class="bg-white dark:bg-transparent flex gap-4 mb-4  border dark:border-background-700 rounded p-4 hover:border-primary-500 cursor-pointer"
                             @click="userDetail(user.battle_name)">
                             <div class="rounded-full h-12 w-12">
                                 <img x-bind:src="'{{ env('APP_URL') }}/profile-picture/' + user.id" alt="avatar"
