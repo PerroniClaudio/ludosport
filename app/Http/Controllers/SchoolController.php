@@ -577,18 +577,23 @@ class SchoolController extends Controller {
 
         // Se mancano le associazioni a scuola e accademia del corso, si aggiungono
         $athlete = User::find($request->athlete_id);
-        $academy = Academy::find($school->academy_id);
-        $isInThisAcademy = $academy->athletes->where('id', $athlete->id)->count();
-        if (!$isInThisAcademy) {
-            $academy->athletes()->syncWithoutDetaching($athlete->id);
-            if ($athlete->academyAthletes()->count() > 1) {
-                $noAcademy = Academy::where('slug', 'no-academy')->first();
-                $noAcademy->athletes()->detach($athlete->id);
+        // $academy = Academy::find($school->academy_id);
+
+        if(!$athlete->schoolAthletes()->where('school_id', $school->id)->exists()) {
+                    
+            if($athlete->academyAthletes()->first()->id != $school->academy->id) {
+                // L'atleta può avere solo un'accademia associata
+                $athlete->removeAcademiesAthleteAssociations();
             }
+
+            $athlete->academyAthletes()->syncWithoutDetaching([$school->academy->id]);
+            $athlete->schoolAthletes()->syncWithoutDetaching([$school->id]);
         }
 
-        $school->athletes()->syncWithoutDetaching($athlete->id);
-
+        // Se l'atleta non ha l'accademia principale, la assegna
+        if(!$athlete->primaryAcademyAthlete()){
+            $athlete->setPrimaryAcademyAthlete($school->academy->id);
+        }
         // Se l'atleta non ha la scuola principale, la assegna
         if (!$athlete->primarySchoolAthlete()) {
             $athlete->setPrimarySchoolAthlete($school->id);

@@ -1582,8 +1582,8 @@ class UserController extends Controller {
                 ]);
             }
             if ($user->academyAthletes->count() > 0) {
-                // Dato che un atleta può essere associato ad una sola accademia possiamo usare la funzione che toglie l'associazione da tutte le accademie e crea il log
-                // L'argomento è l'accademia che fa eccezione (se serve)
+                // L'atleta può essere associato ad una sola accademia.
+                // Toglie l'associazione da tutte le accademie e crea il log. L'argomento è l'accademia che fa eccezione (se serve)
                 $user->removeAcademiesAthleteAssociations();
             }
 
@@ -1638,7 +1638,11 @@ class UserController extends Controller {
                 'school_id' => $school->id,
                 'made_by' => $authUser->id,
             ]);
-            // L'associazione alla scuola principale non è obbligatoria.
+            // Se l'atleta non ha la scuola principale, la assegna
+            if(!$user->primarySchool()){
+                $user->setPrimarySchool($school->id);
+            }
+
         } else if ($request->type == 'athlete') {
             $user->schoolAthletes()->syncWithoutDetaching($school->id);
             Log::channel('school')->info('Athlete associated with school', [
@@ -1646,7 +1650,10 @@ class UserController extends Controller {
                 'school_id' => $school->id,
                 'made_by' => $authUser->id,
             ]);
-            // L'associazione alla scuola principale non è obbligatoria.
+            // Se l'atleta non ha la scuola principale, la assegna
+            if(!$user->primarySchoolAthlete()){
+                $user->setPrimarySchoolAthlete($school->id);
+            }
         } else {
             return response()->json([
                 'error' => 'Invalid type!',

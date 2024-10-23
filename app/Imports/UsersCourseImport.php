@@ -49,10 +49,16 @@ class UsersCourseImport implements ToCollection {
                     continue;
                 }
 
-                $user->academyAthletes()->syncWithoutDetaching([$course->academy->id]);
-                $user->schoolAthletes()->syncWithoutDetaching([$course->school->id]);
-                $user->clans()->syncWithoutDetaching([$course->id]);
-                $user->roles()->syncWithoutDetaching(Role::where('label', 'athlete')->first()->id);
+                if(!$user->clans()->where('clan_id', $course->id)->exists()) {
+                    if($user->academyAthletes()->first()->id != $course->academy->id) {
+                        // L'atleta può avere solo un'accademia associata
+                        $user->removeAcademiesAthleteAssociations();
+                    }
+                    $user->academyAthletes()->syncWithoutDetaching([$course->academy->id]);
+                    $user->schoolAthletes()->syncWithoutDetaching([$course->school->id]);
+                    $user->clans()->syncWithoutDetaching([$course->id]);
+                    $user->roles()->syncWithoutDetaching(Role::where('label', 'athlete')->first()->id);
+                }
 
                 $noAcademy = Academy::where('slug', 'no-academy')->first();
                 if ($user->academyAthletes()->whereNot('academy_id', $noAcademy->id)->count() > 0) {
@@ -65,7 +71,7 @@ class UsersCourseImport implements ToCollection {
                     if($user->primarySchoolAthlete()){
                         $schoolAcademy = $user->primarySchoolAthlete()->academy;
                     } 
-                    $user->setPrimaryAcademy($schoolAcademy ? $schoolAcademy->id : $course->academy->id);
+                    $user->setPrimaryAcademyAthlete($schoolAcademy ? $schoolAcademy->id : $course->academy->id);
                 }
                 // Se l'atleta non ha la scuola principale, la assegna
                 if(!$user->primarySchoolAthlete()){
