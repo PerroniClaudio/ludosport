@@ -121,4 +121,6 @@ return [
     'select' => 'Select',
     'replace' => 'Replace',
     'select' => 'Select',
+    'since_to' => 'Since :since to :to',
+    'uninque_id_card' => 'ID :'
 ];

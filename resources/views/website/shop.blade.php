@@ -7,7 +7,7 @@
             </h1>
 
             <div class="grid lg:grid-cols-2 gap-8 text-background-800 dark:text-background-200 text-center">
-                <section class="flex flex-col gap-4 bg-background-200 dark:bg-background-800 p-8 rounded-md col-span-2">
+                <section class="flex flex-col gap-4 bg-white dark:bg-background-800 p-8 rounded-md col-span-2">
                     <h3
                         class="text-4xl font-bold tracking-tighter sm:text-3xl xl:text-4xl/none pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300 text-center">
                         {{ __('website.shop_membership_activation') }}
@@ -53,7 +53,7 @@
 
                 </section>
 
-                <section class="flex flex-col gap-4 bg-background-200 dark:bg-background-800 p-8 rounded-md">
+                <section class="flex flex-col gap-4 bg-white dark:bg-background-800 p-8 rounded-md">
                     <h3
                         class="text-4xl font-bold tracking-tighter sm:text-3xl xl:text-4xl/none pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300">
                         {{ __('website.shop_events') }}
@@ -80,7 +80,7 @@
                     </div>
                 </section>
 
-                <section class="flex flex-col gap-4 bg-background-200 dark:bg-background-800 p-8 rounded-md">
+                <section class="flex flex-col gap-4 bg-white dark:bg-background-800 p-8 rounded-md">
                     <h3
                         class="text-4xl font-bold tracking-tighter sm:text-3xl xl:text-4xl/none pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300">
                         {{ __('website.shop_digital_resources') }}

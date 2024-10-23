@@ -1,7 +1,7 @@
 <x-website-layout>
     <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
         <section class="col-span-12 py-12 flex flex-col gap-8">
-            <section class="bg-background-800 flex lg:p-8 p-4 rounded">
+            <section class="bg-white dark:bg-background-800 flex lg:p-8 p-4 rounded">
                 <div class="rounded-full h-24 w-24 hidden lg:block">
                     <img src="{{ route('profile-picture', $user->id) }}" alt="avatar" class="rounded-full h-24 w-24" />
                 </div>

@@ -5,8 +5,8 @@
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                <div class="shrink-0 flex items-center ">
+                    <a href="{{ route('dashboard') }}" class="bg-background-800 p-1 rounded">
                         {{-- <x-application-logo
                             class="block h-9 w-auto fill-current text-background-800 dark:text-background-200" /> --}}
                         <x-application-logo class="block h-9 w-auto" />
