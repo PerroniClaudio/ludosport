@@ -605,7 +605,12 @@ class EventController extends Controller {
 
     public function availablePersonnel(Event $event) {
         $users = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
-            $query->where('name', 'technician');
+            $query
+                ->where('name', 'technician')
+                ->orWhere('name', 'instructor')
+                ->orWhere('name', 'manager')
+                ->orWhere('name', 'dean')
+                ->orWhere('name', 'rector');
         })->get();
         return response()->json($users);
     }
@@ -1086,11 +1091,11 @@ class EventController extends Controller {
             // Controlla il tipo di evento
             $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
             $isWaitingPayment = EventWaitingList::where(['event_id' => $event->id, 'user_id' => $user->id, 'is_waiting_payment' => true])->exists();
-            
+
             // Shop interno, attesa pagamento, iscrizioni sbloccate, non partecipa, non in waiting list (se in attesa di pagamento può), se waiting list deve essere prima della data di chiusura della waiting list
             $canpurchase = $event->internal_shop && (
                 $isWaitingPayment || (
-                    !$event->block_subscriptions && !$isParticipating && !$isInWaitingList 
+                    !$event->block_subscriptions && !$isParticipating && !$isInWaitingList
                     && !($onlyWaitingList && $isWaitngListClosed)
                 )
             );

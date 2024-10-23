@@ -14,8 +14,7 @@
                 $canSetPrice = in_array($authRole, ['admin']);
             @endphp --}}
             {{-- <form method="POST" action={{ route('dean.events.update', $event->id) }} --}}
-            <form 
-                class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+            <form class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 @csrf
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.info') }}</h3>
@@ -29,55 +28,46 @@
 
                 <div class="flex flex-col gap-2 w-1/2">
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                        :value="$event->name" placeholder="{{ fake()->company() }}" 
-                        disabled="{{true}}" />
+                        :value="$event->name" placeholder="{{ fake()->company() }}" disabled="{{ true }}" />
 
                     <x-form.input name="start_date" label="Start Date" type="datetime-local"
                         required="{{ true }}" value="{{ $event->start_date }}"
-                        placeholder="{{ fake()->date() }}" 
-                        disabled="{{true}}" />
+                        placeholder="{{ fake()->date() }}" disabled="{{ true }}" />
 
                     <x-form.input name="end_date" label="End Date" type="datetime-local" required="{{ true }}"
-                        value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}" 
-                        disabled="{{true}}" />
+                        value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}"
+                        disabled="{{ true }}" />
 
                     @if ($event->is_approved)
-                    
                         <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
-                            selected="{{ $event->type->id }}" 
-                            disabled="{{true}}" />
+                            selected="{{ $event->type->id }}" disabled="{{ true }}" />
 
-                        <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms" 
-                            disabled="{{true}}" />
+                        <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms"
+                            disabled="{{ true }}" />
 
-                        <x-form.input name="max_participants" label="Max Participants (0 means unlimited)" type="number" required="{{ true }}"
-                            value="{{ $event->max_participants }}" min="{{0}}" 
-                            placeholder="{{ __('events.max_participants_placeholder') }}"
-                            disabled="{{true}}" />
+                        <x-form.input name="max_participants" label="Max Participants (0 means unlimited)"
+                            type="number" required="{{ true }}" value="{{ $event->max_participants }}"
+                            min="{{ 0 }}" placeholder="{{ __('events.max_participants_placeholder') }}"
+                            disabled="{{ true }}" />
 
                         {{-- <x-form.checkbox id="internal_shop" name="internal_shop" label="Internal Shop"
                             isChecked="{{ $event->internal_shop }}" 
                             disabled="{{true}}" /> --}}
 
                         <x-form.checkbox id="is_free" name="is_free" label="Free Event"
-                            isChecked="{{ $event->is_free }}" 
-                            disabled="{{true}}" />
+                            isChecked="{{ $event->is_free }}" disabled="{{ true }}" />
 
                         <x-form.input name="price" label="Price (include taxes)" type="number"
-                            value="{{ number_format($event->price, 2) }}"
-                            min="{{0}}" 
-                            required="{{ $event->is_free ? false : true }}" 
-                            disabled="{{true}}" />
+                            value="{{ number_format($event->price, 2) }}" min="{{ 0 }}"
+                            required="{{ $event->is_free ? false : true }}" disabled="{{ true }}" />
 
-                        <x-form.checkbox id="block_subscriptions" name="block_subscriptions" label="Block subscriptions (shop)"
-                            isChecked="{{ $event->block_subscriptions }}" 
-                            disabled="{{true}}" />
+                        <x-form.checkbox id="block_subscriptions" name="block_subscriptions"
+                            label="Block subscriptions (shop)" isChecked="{{ $event->block_subscriptions }}"
+                            disabled="{{ true }}" />
 
-                        <x-form.input name="waiting_list_close_date" label="Waiting list closing date" type="datetime-local"
-                            value="{{ $event->waiting_list_close_date }}"
-                            placeholder="{{ fake()->date() }}" 
-                            disabled="{{true}}" />
-
+                        <x-form.input name="waiting_list_close_date" label="Waiting list closing date"
+                            type="datetime-local" value="{{ $event->waiting_list_close_date }}"
+                            placeholder="{{ fake()->date() }}" disabled="{{ true }}" />
                     @endif
 
                 </div>
@@ -90,7 +80,7 @@
             <x-event.thumbnail :event="$event" />
 
             <x-event.personnel :event="$event" />
-            
+
             @if ($event->is_approved)
                 @if ($event->resultType() === 'enabling')
                     <x-event.enabling-participants :event="$event" />
