@@ -48,10 +48,10 @@ class UsersAcademyImport implements ToCollection {
                     continue;
                 }
 
-                $user->academyAthletes()->syncWithoutDetaching([$academy->id]);
-                
-                if ($user->academyAthletes()->whereNot('academy_id', $noAcademy->id)->count() > 0) {
-                    $noAcademy->athletes()->detach($user->id);
+                if(!$user->academyAthletes()->first()->id == $academy->id) {
+                    // L'atleta può avere solo un'accademia associata
+                    $user->removeAcademiesAthleteAssociations();
+                    $user->academyAthletes()->syncWithoutDetaching([$academy->id]);
                 }
 
                 // Se l'atleta non ha l'accademia principale, la assegna
@@ -60,7 +60,7 @@ class UsersAcademyImport implements ToCollection {
                     if($user->primarySchoolAthlete()){
                         $schoolAcademy = $user->primarySchoolAthlete()->academy;
                     }
-                    $user->setPrimaryAcademy($schoolAcademy ? $schoolAcademy->id : $academy->id);
+                    $user->setPrimaryAcademyAthlete($schoolAcademy ? $schoolAcademy->id : $academy->id);
                 }
                 
             } catch (\Exception $e) {

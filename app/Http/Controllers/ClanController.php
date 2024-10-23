@@ -444,20 +444,17 @@ class ClanController extends Controller {
         $user = User::find($request->athlete_id);
         $school = School::find($clan->school_id);
         $academy = Academy::find($school->academy_id);
-        $isInThisSchool = $school->athletes->where('id', $user->id)->count();
-        $isInThisAcademy = $academy->athletes->where('id', $user->id)->count();
-        if (!$isInThisAcademy) {
-            $academy->athletes()->syncWithoutDetaching($user->id);
-            if ($user->academyAthletes()->count() > 1) {
-                $noAcademy = Academy::where('slug', 'no-academy')->first();
-                $noAcademy->athletes()->detach($user->id);
-            }
-        }
-        if (!$isInThisSchool) {
-            $school->athletes()->syncWithoutDetaching($user->id);
-        }
 
-        $clan->users()->syncWithoutDetaching($request->athlete_id);
+        if(!$user->clans()->where('clan_id', $clan->id)->exists()){
+            if($user->academyAthletes()->first()->id != $academy->id) {
+                // L'atleta può avere solo un'accademia associata
+                $user->removeAcademiesAthleteAssociations();
+            }
+
+            $user->academyAthletes()->syncWithoutDetaching($academy->id);
+            $user->schoolAthletes()->syncWithoutDetaching($school->id);
+            $user->clans()->syncWithoutDetaching($clan->id);
+        }
 
         $user->roles()->syncWithoutDetaching(Role::where('label', 'athlete')->first()->id);
 

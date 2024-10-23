@@ -360,11 +360,11 @@ class AcademyController extends Controller {
         $athlete = User::find($request->athlete_id);
         $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
 
-        // l'atleta può essere associato ad una sola accademia, quindi se si modifica vanno rimossi anche tutti i collegamenti inferiori (scuole e corsi)
         if ($academy->athletes->contains($athlete->id)) {
             return redirect()->route($redirectRoute, $academy)->with('success', 'Athlete is already associated with this academy.');
         }
         
+        // l'atleta può essere associato ad una sola accademia, quindi se si modifica vanno rimossi anche tutti i collegamenti inferiori (scuole e corsi)
         // l'argomento è l'accademia che fa eccezione, (se serve)
         $athlete->removeAcademiesAthleteAssociations($academy);
         
