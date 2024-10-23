@@ -37,7 +37,7 @@
                         </div>
 
                         <template x-for="event in events" :key="event.id">
-                            <div class="bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer"
+                            <div class="bg-white dark:bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer"
                                 data-id="0" @click="getDataForEvent(event.id); eventName = event.name">
                                 <span x-text="event.name"></span>
                                 <div
@@ -58,11 +58,11 @@
                         x-text="eventName"></h1>
 
                     <div
-                        class="mb-5 overflow-x-auto bg-white dark:bg-background-800 rounded-lg shadow overflow-y-auto relative p-2 w-full">
+                        class="mb-5 overflow-x-auto bg-white dark:bg-background-800 rounded-lg shadow overflow-y-auto relative   w-full">
                         <div>
                             <p x-text="rows.count"></p>
 
-                            <div class="mb-5 bg-white dark:bg-background-900 rounded-lg shadow  relative">
+                            <div class=" bg-white dark:bg-background-900 rounded-lg shadow  relative">
                                 <div class="flex justify-between items-center p-6">
                                     <div class="flex items-center justify-end w-full">
                                         <x-text-input type="text" x-on:input="searchByValue($event)"
@@ -108,7 +108,7 @@
 
                                             <template x-for="(row, rowIndex) in paginatedRows" :key="'row-' + rowIndex">
                                                 <tr
-                                                    class="bg-background-200 dark:bg-background-900 hover:bg-background-50 hover:dark:bg-background-800 cursor-pointer">
+                                                    class="bg-white dark:bg-background-900 hover:bg-background-50 hover:dark:bg-background-800 cursor-pointer">
                                                     <template x-for="(column, columnIndex) in columns"
                                                         :key="'column-' + columnIndex">
                                                         <td :class="`${column.rowClasses}`"
