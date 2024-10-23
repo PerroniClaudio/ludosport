@@ -1627,19 +1627,13 @@ class UserController extends Controller {
     public function associateSchool(Request $request) {
         $authUser = User::find(auth()->user()->id);
         $authUserRole = $authUser->getRole();
-
-        if ($authUserRole !== 'admin') {
-            return response()->json([
-                'error' => 'You are not authorized to associate user with school!',
-            ]);
-        }
-
+        
         $user = User::find($request->user_id);
         $school = School::find($request->school_id);
 
-        if (!$school) {
+        if ($authUserRole !== 'admin' && !($authUserRole === "rector" && ($authUser->primaryAcademy()->id === $school->academy->id))) {
             return response()->json([
-                'error' => 'School not found!',
+                'error' => 'You are not authorized to associate this user with this school!',
             ]);
         }
 
@@ -1701,8 +1695,8 @@ class UserController extends Controller {
             // Rimuove tutte le associazioni a corsi, scuole e accademia indicata e crea i log
             $user->removeAcademyPersonnelAssociations($academy);
 
-            if($user->academies->count() == 0){
-                // Se non ha accademie come personnel viene assegnato a No academy
+            if ($user->academies()->count() == 0){
+                // Se non ha accademie come personnel viene assegnato a No academy. Se si usa il codice più giù, si può rimuovere questo
                 $user->academies()->syncWithoutDetaching(1);
                 $user->setPrimaryAcademy(1);
                 Log::channel('academy')->info('Personnel associated with academy', [
@@ -1711,21 +1705,54 @@ class UserController extends Controller {
                     'made_by' => $authUser->id,
                 ]);
             }
+
+            // Questa parte serve ad associare automaticamente una nuova accademia primaria. per ora la commentiamo perchè è preferibile associarle volutamente. Se il personale non ha l'istituzione primaria al massimo vede un messaggio di errore.
+            // if($user->primaryAcademy() == null){
+            //     $newAcademy = $user->academies->first();
+            //     if($newAcademy){
+            //         $user->setPrimaryAcademy($newAcademy->id);
+            //         Log::channel('academy')->info('Personnel associated with academy', [
+            //             'user_id' => $user->id,
+            //             'academy_id' => 1,
+            //             'made_by' => $authUser->id,
+            //         ]);
+            //     } else if ($user->academies()->count() == 0){
+            //         // Se non ha accademie come personnel viene assegnato a No academy
+            //         $user->academies()->syncWithoutDetaching(1);
+            //         $user->setPrimaryAcademy(1);
+            //         Log::channel('academy')->info('Personnel associated with academy', [
+            //             'user_id' => $user->id,
+            //             'academy_id' => 1,
+            //             'made_by' => $authUser->id,
+            //         ]);
+            //     }
+            // }
         } else if ($request->type == 'athlete') {
             // Dato che un atleta può essere associato ad una sola accademia possiamo usare la funzione che toglie l'associazione da tutte le accademie e crea il log
             // L'argomento è l'accademia che fa eccezione (se serve)
             $user->removeAcademiesAthleteAssociations();
 
-            if($user->academyAthletes->count() == 0){
-                // Se non ha accademie come atleta viene assegnato a No academy
-                $user->academyAthletes()->syncWithoutDetaching(1);
-                $user->setPrimaryAcademyAthlete(1);
-                Log::channel('academy')->info('Athlete associated with academy', [
-                    'user_id' => $user->id,
-                    'academy_id' => 1,
-                    'made_by' => $authUser->id,
-                ]);               
-            }
+            // Nel caso dell'atleta non si fa nessun danno ad associarlo in automatico se non ha l'istituzione primaria
+            if($user->primaryAcademyAthlete() == null){
+                $newAcademy = $user->academyAthletes->first();
+                if($newAcademy){
+                    $user->setPrimaryAcademyAthlete($newAcademy->id);
+                    Log::channel('academy')->info('Athlete associated with academy', [
+                        'user_id' => $user->id,
+                        'academy_id' => 1,
+                        'made_by' => $authUser->id,
+                    ]);               
+                } else if($user->academyAthletes->count() == 0){
+                    // Se non ha accademie come atleta viene assegnato a No academy
+                    $user->academyAthletes()->syncWithoutDetaching(1);
+                    $user->setPrimaryAcademyAthlete(1);
+                    Log::channel('academy')->info('Athlete associated with academy', [
+                        'user_id' => $user->id,
+                        'academy_id' => 1,
+                        'made_by' => $authUser->id,
+                    ]);               
+                }
+            } 
         } else {
             return response()->json([
                 'error' => 'Invalid type!',
@@ -1741,14 +1768,14 @@ class UserController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authUserRole = $authUser->getRole();
 
-        if ($authUserRole !== 'admin') {
-            return response()->json([
-                'error' => 'You are not authorized to remove user from school!',
-            ]);
-        }
-
         $user = User::find($request->user_id);
         $school = School::find($request->school_id);
+        
+        if ($authUserRole !== 'admin' && !($authUserRole === "rector" && ($authUser->primaryAcademy()->id === $school->academy->id))) {
+            return response()->json([
+                'error' => 'You are not authorized to remove this user from this school!',
+            ]);
+        }
 
         if (!$school) {
             return response()->json([
@@ -1759,9 +1786,25 @@ class UserController extends Controller {
         if ($request->type == 'personnel') {
             // Rimuove tutte le associazioni (personnel) a corsi e scuola indicata e crea i log
             $user->removeSchoolPersonnelAssociations($school);
+
+            // Questa parte serve ad associare automaticamente una nuova accademia primaria. per ora la commentiamo perchè è preferibile associarle volutamente. Se il personale non ha l'istituzione primaria al massimo vede un messaggio di errore.
+            // if($user->primarySchool() == null){
+            //     $newSchool = $user->schools->first();
+            //     if($newSchool){
+            //         $user->setPrimarySchool($newSchool->id);
+            //     }
+            // }
         } else if ($request->type == 'athlete') {
             // Rimuove tutte le associazioni (athlete) a corsi e scuola indicata e crea i log
             $user->removeSchoolAthleteAssociations($school);
+
+            // Nel caso dell'atleta non si fa nessun danno ad associarlo in automatico se non ha l'istituzione primaria
+            if($user->primarySchoolAthlete() == null){
+                $newSchool = $user->schoolAthletes->first();
+                if($newSchool){
+                    $user->setPrimarySchoolAthlete($newSchool->id);
+                }
+            }
         } else {
             return response()->json([
                 'error' => 'Invalid type!',

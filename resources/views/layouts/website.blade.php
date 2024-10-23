@@ -154,7 +154,11 @@
             <x-responsive-nav-link :href="route('user-search')" :active="request()->routeIs('user-search')">
                 {{ __('website.user_search') }}
             </x-responsive-nav-link>
-
+            @if (Auth::check())
+                <x-responsive-nav-link  :href="route('events-list')" :active="request()->routeIs('events-list')">
+                    {{ __('website.events_list') }}
+                </x-responsive-nav-link >
+            @endif
 
         </div>
 
