@@ -97,6 +97,13 @@
                             @endif
                         </div>
 
+                        <form method="POST" action="{{ route('users.reset-password', $user->id) }}">
+                            @csrf
+                            <x-primary-button>
+                                <span>{{ __('users.send_password_reset') }}</span>
+                            </x-primary-button>
+                        </form>
+
                     </div>
                 </div>
             </div>
@@ -146,6 +153,8 @@
                                 @endforeach
                             </select>
                         </div>
+
+
 
                     </div>
                 </div>
