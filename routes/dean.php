@@ -98,9 +98,9 @@ Route::prefix('dean')->middleware('auth')->middleware('role:admin,dean')->group(
   Route::group([], function () {
     Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('dean.events.index');
     Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('dean.events.calendar');
-    // Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('dean.events.create');
+    Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('dean.events.create');
     Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('dean.events.edit');
-    // Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('dean.events.store');
+    Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('dean.events.store');
     // Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('dean.events.update');
     // Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('dean.events.save.description');
     // Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('dean.events.save.location');
