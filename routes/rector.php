@@ -28,6 +28,10 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
   /** Users */
 
   Route::group([], function () {
+    Route::post('/users/associate-school', [App\Http\Controllers\UserController::class, 'associateSchool'])->name('rector.users.associate-school');
+    Route::post('/users/remove-school', [App\Http\Controllers\UserController::class, 'removeSchool'])->name('rector.users.remove-school');
+    Route::post('/users/set-main-institution', [App\Http\Controllers\UserController::class, 'setMainInstitution'])->name('rector.users.set-main-institution');
+
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('rector.users.index');
     Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('rector.users.filter');
     Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('rector.users.filter.result');

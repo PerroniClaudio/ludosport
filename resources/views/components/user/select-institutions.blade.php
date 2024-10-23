@@ -7,11 +7,22 @@
     'selectedSchools' => []
 ])
 @php
-    $authRole = auth()->user()->getRole();
+    $authUser = auth()->user();
+    $authRole = $authUser->getRole();
     $modalName = 'select-institutions-' . $type . '-modal';
     $isAcademy = str_contains($type, 'academy');
     $isPersonnel = str_contains($type, 'personnel');
     $selectedAcademyIds = collect($selectedAcademies)->pluck('id')->toArray();    
+
+    $isDisabled = false;
+    // Il controllo serve per il rettore, quindi non serve controllare le accademie perchè il rettore non ha il componente in quel caso
+    if(!$isAcademy && $authRole !== 'admin'){
+        if($isPersonnel){
+            $isDisabled = !in_array($authUser->primaryAcademy()->id, $user->academies->pluck('id')->toArray());
+        }else{
+            $isDisabled = !in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray());
+        }
+    }
 @endphp
 <div class="" x-data="{
   addAcademy(academyId) {
@@ -60,7 +71,7 @@
     formData.append('school_id', schoolId);
     formData.append('type', '{{$isPersonnel ? 'personnel' : 'athlete'}}');
 
-    fetch(`/users/associate-school`, {
+    fetch('{{route(($authRole === 'admin' ? '' : ($authRole . '.')) . 'users.associate-school')}}', {
         method: 'POST',
         headers: {
           'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -80,7 +91,7 @@
     formData.append('school_id', schoolId);
     formData.append('type', '{{$isPersonnel ? 'personnel' : 'athlete'}}');
 
-    fetch(`/users/remove-school`, {
+    fetch('{{route(($authRole === 'admin' ? '' : ($authRole . '.')) . 'users.remove-school')}}', {
         method: 'POST',
         headers: {
           'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -96,7 +107,9 @@
 
 }">
     <div class="flex justify-between">
-      <x-primary-button type="button" x-on:click.prevent="$dispatch('open-modal', '{{ $modalName }}')">
+      <x-primary-button type="button" x-on:click.prevent="$dispatch('open-modal', '{{ $modalName }}')"
+        :disabled="$isDisabled"
+      >
           <x-lucide-edit class="w-5 h-5 text-white" />
       </x-primary-button>
     </div>
@@ -130,10 +143,6 @@
                           ],
                         ]" :rows="$academies">
                           <x-slot name="tableActions">
-                              {{-- <a x-bind:href="'/users/' + row.id">
-                                  <x-lucide-pencil
-                                      class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                              </a> --}}
                               <x-primary-button type="button" x-on:click="addAcademy(row.id)">
                                 <span>
                                   @if($isPersonnel)
@@ -165,10 +174,6 @@
                             ],
                           ]" :rows="$selectedAcademies">
                             <x-slot name="tableActions">
-                                {{-- <a x-bind:href="'/users/' + row.id">
-                                    <x-lucide-pencil
-                                        class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                                </a> --}}
                                 <x-primary-button type="button" x-on:click="removeAcademy(row.id)">
                                   <span>{{ __('users.remove') }}</span>
                                 </x-primary-button>
@@ -191,11 +196,7 @@
                           ],
                         ]" :rows="$schools">
                           <x-slot name="tableActions">
-                              {{-- <a x-bind:href="'/users/' + row.id">
-                                  <x-lucide-pencil
-                                      class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                              </a> --}}
-                                <x-primary-button type="button" x-on:click="addSchool(row.id)">
+                                <x-primary-button x-bind:disabled="{{$authRole != 'admin' ? 'row.academy_id != ' . $authUser->primaryAcademy()->id : false}}" type="button" x-on:click="addSchool(row.id)">
                                   <span>{{ __('users.add') }}</span>
                                 </x-primary-button>
                           </x-slot>
@@ -215,11 +216,7 @@
                           ],
                         ]" :rows="$selectedSchools">
                           <x-slot name="tableActions">
-                              {{-- <a x-bind:href="'/users/' + row.id">
-                                  <x-lucide-pencil
-                                      class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                              </a> --}}
-                              <x-primary-button type="button" x-on:click="removeSchool(row.id)">
+                              <x-primary-button x-bind:disabled="{{$authRole != 'admin' ? 'row.academy_id != ' . $authUser->primaryAcademy()->id : false}}" type="button" x-on:click="removeSchool(row.id)">
                                 <span>{{ __('users.remove') }}</span>
                               </x-primary-button>
                           </x-slot>

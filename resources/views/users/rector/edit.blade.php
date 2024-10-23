@@ -4,6 +4,8 @@
     atleta da admin, rettore, dean e manager.
 --}}
 @php
+    $authUser = auth()->user();
+    $authRole = $authUser->getRole();
     $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
 @endphp
 <x-app-layout>
@@ -228,7 +230,18 @@
 
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-4" x-data="{
+                institutionType: 'school',
+                roleType: 'personnel',
+                selectedAcademy: '',
+                selectedSchool: '',
+                setInstitutionType(type) {
+                    this.institutionType = type;
+                },
+                setRoleType(type) {
+                    this.roleType = type;
+                }
+            }">
 
                 <div
                     class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 text-background-800 dark:text-background-200 ">
@@ -240,13 +253,6 @@
 
                     <div class="flex flex-col gap-2">
                         {{-- Solo per gli admin c'è il reindirizzamento per ora. quando si saranno le view nel sito potremo rimandare a quelle, magari con target _blank --}}
-                        {{-- @foreach ($user->academies as $academy)
-                            <a href="{{ route('academies.edit', $academy->id) }}"
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $academy->name }}</span>
-                            </a>
-                        @endforeach --}}
                         @php
                             $mainAcademy = $user->primaryAcademy();
                         @endphp
@@ -267,13 +273,6 @@
                     <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
 
                     <div class="flex flex-col gap-2">
-                        {{-- @foreach ($user->academyAthletes as $academy)
-                            <a href="{{ route('academies.edit', $academy->id) }}"
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $academy->name }}</span>
-                            </a>
-                        @endforeach --}}
                         @php
                             $mainAcademyAthlete = $user->primaryAcademyAthlete();
                         @endphp
@@ -299,20 +298,22 @@
 
                     <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
 
-                    <div class="flex flex-col gap-2">
+                    <div class="flex gap-2">
+                        {{-- <x-primary-button :disabled="$user->schools()->count() < 1" --}}
+                        <x-primary-button :disabled="$user->schools()->count() < 1 || ($authRole === 'admin' ? false : (in_array($authUser->primaryAcademy()->id, $user->academies()->pluck('academy_id')->toArray()) ? false : true))"
+                            x-on:click.prevent="setInstitutionType('school'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
+                            <span>{{ __('users.set_main_personnel_school') }}</span>
+                        </x-primary-button>
+                        <x-user.select-institutions type="school-personnel" :user="$user" :schools="$filteredSchoolsPersonnel" :selectedSchools="$user->schools" />
+                    </div>
 
-                        {{-- @foreach ($user->schools as $school)
-                            <a href="{{ route('schools.edit', $school->id) }}"
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $school->name }}</span>
-                            </a>
-                        @endforeach --}}
+                    <div class="flex flex-col gap-2">
                         @php
                             $mainSchool = $user->primarySchool();
                         @endphp
                         @foreach ($user->schools as $school)
-                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                            <a href="{{ route('schools.edit', $school->id) }}"
+                             class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $school->name }}
@@ -320,26 +321,29 @@
                                         ({{ __('users.main_school') }})
                                     @endif
                                 </span>
-                            </div>
+                            </a>
                         @endforeach
 
                     </div>
 
                     <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
 
+                    <div class="flex gap-2">
+                        <x-primary-button :disabled="$user->schoolAthletes()->count() < 1 || ($authRole === 'admin' ? false : ($authUser->primaryAcademy()->id == $user->primaryAcademyAthlete()->id ? false : true))"
+                            x-on:click.prevent="setInstitutionType('school'), setRoleType('athlete'), $dispatch('open-modal', 'set-main-institution-modal')">
+                            <span>{{ __('users.set_main_athletes_school') }}</span>
+                        </x-primary-button>
+                        
+                        <x-user.select-institutions type="school-athlete" :user="$user" :schools="$filteredSchoolsAthlete" :selectedSchools="$user->schoolAthletes" />
+                    </div>
+
                     <div class="flex flex-col gap-2">
-                        {{-- @foreach ($user->schoolAthletes as $schools)
-                            <a href="{{ route('schools.edit', $schools->id) }}"
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $schools->name }}</span>
-                            </a>
-                        @endforeach --}}
                         @php
                             $mainSchoolAthlete = $user->primarySchoolAthlete();
                         @endphp
                         @foreach ($user->schoolAthletes as $schools)
-                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                            <a href="{{ route('schools.edit', $schools->id) }}" 
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $schools->name }}
@@ -347,10 +351,117 @@
                                         ({{ __('users.main_school') }})
                                     @endif
                                 </span>
-                            </div>
+                            </a>
                         @endforeach
                     </div>
                 </div>
+
+                {{-- Modal con form dinamico per modifica accademia/scuola principale --}}
+                <x-modal name="set-main-institution-modal" :show="$errors->get('name') || $errors->get('go_to_edit')" focusable>
+                    <form method="POST" action="{{ route(($authRole === 'admin' ? '' : $authRole . '.')  . 'users.set-main-institution') }}"
+                        class="p-6 flex flex-col gap-4" x-ref="edituserform" enctype="multipart/form-data">
+                        @csrf
+
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
+                                    <div x-show="institutionType == 'academy' && roleType == 'personnel'">
+                                        {{ __('users.set_main_personnel_academy') }}
+                                    </div>
+                                    <div x-show="institutionType == 'academy' && roleType == 'athlete'">
+                                        {{ __('users.set_main_athletes_academy') }}
+                                    </div>
+                                    <div x-show="institutionType == 'school' && roleType == 'personnel'">
+                                        {{ __('users.set_main_personnel_school') }}
+                                    </div>
+                                    <div x-show="institutionType == 'school' && roleType == 'athlete'">
+                                        {{ __('users.set_main_athletes_school') }}
+                                    </div>
+                                </h2>
+                                <div>
+                                    <x-lucide-x
+                                        class="w-6 h-6 text-background-500 dark:text-background-300 cursor-pointer"
+                                        x-on:click="$dispatch('close-modal', 'set-main-institution-modal')" />
+                                </div>
+                            </div>
+                            <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                        </div>
+
+                        <input type="hidden" name="institution_type" :value="institutionType">
+                        <input type="hidden" name="role_type" :value="roleType">
+                        <input type="hidden" name="user_id" value="{{ $user->id }}">
+
+                        <template x-if="institutionType == 'academy' && roleType == 'personnel'">
+                            @php
+                                $academiesPersonnelOptions = $user->academies->map(function ($academy) {
+                                    return ['value' => $academy->id, 'label' => $academy->name];
+                                });
+                                $selectedAcademy = [
+                                    'value' => $user->primaryAcademy()->id ?? null,
+                                    'label' => $user->primaryAcademy()->name ?? null,
+                                ];
+                            @endphp
+                            <x-form.select name="academy_id" label="{{ __('academies.academy') }}" :options="$academiesPersonnelOptions"
+                                x-model="selectedAcademy" />
+                        </template>
+
+                        <template x-if="institutionType == 'academy' && roleType == 'athlete'">
+                            @php
+                                $academiesAthleteOptions = $user->academyAthletes->map(function ($academy) {
+                                    return ['value' => $academy->id, 'label' => $academy->name];
+                                });
+                                $selectedAcademy = [
+                                    'value' => $user->primaryAcademyAthlete()->id ?? null,
+                                    'label' => $user->primaryAcademyAthlete()->name ?? null,
+                                ];
+                            @endphp
+                            <x-form.select name="academy_id" label="{{ __('academies.academy') }}"
+                                :options="$academiesAthleteOptions" />
+                        </template>
+
+                        <template x-if="institutionType == 'school' && roleType == 'personnel'">
+                            @php
+                                $schoolsPersonnelOptions = [];
+                                if($authRole == "admin"){
+                                    $schoolsPersonnelOptions = $user->schools->map(function ($school) {
+                                        return ['value' => $school->id, 'label' => $school->name];
+                                    });
+                                }else{
+                                    $schoolsPersonnelOptions = $user->schools->whereIn('academy_id', $authUser->primaryAcademy()->id)->map(function ($school) {
+                                        return ['value' => $school->id, 'label' => $school->name];
+                                    });
+                                }
+                                $selectedSchool = [
+                                    'value' => $user->primarySchool()->id ?? null,
+                                    'label' => $user->primarySchool()->name ?? null,
+                                ];
+                            @endphp
+                            <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsPersonnelOptions" />
+                        </template>
+
+                        <template x-if="institutionType == 'school' && roleType == 'athlete'">
+                            @php
+                                $schoolsAthleteOptions = $user->schoolAthletes->map(function ($school) {
+                                    return ['value' => $school->id, 'label' => $school->name];
+                                });
+                                $selectedSchool = [
+                                    'value' => $user->primarySchoolAthlete()->id ?? null,
+                                    'label' => $user->primarySchoolAthlete()->name ?? null,
+                                ];
+                            @endphp
+                            <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsAthleteOptions" />
+                        </template>
+
+
+                        <div class="flex justify-end">
+                            <x-primary-button x-on:click.prevent="$refs.edituserform.submit()">
+                                <span>{{ __('users.confirm') }}</span>
+                            </x-primary-button>
+                        </div>
+
+                    </form>
+                </x-modal>
+
 
             </div>
 

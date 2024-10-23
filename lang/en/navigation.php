@@ -14,7 +14,7 @@ return [
     */
 
     'users' => 'Users',
-    'eventi' => 'Events',
+    'eventi' => 'Your Events',
     'scuola' => 'School',
     'scuole' => 'Schools',
     'accademia' => 'Academy',
