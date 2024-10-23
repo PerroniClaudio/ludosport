@@ -261,9 +261,15 @@
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                                 <div>
                                     @if ($isWaitingList)
-                                        <p class="mt-2 text-error-500">
-                                            {{ __('website.event_waiting_list_checkout_text') }}
-                                        </p>
+                                        @if(isset($event->waiting_list_close_date) && $event->waiting_list_close_date < now())
+                                            <p class="mt-2 text-error-500">
+                                                {{ __('website.event_waiting_list_closed_text') }}
+                                            </p>
+                                        @else
+                                            <p class="mt-2 text-error-500">
+                                                {{ __('website.event_waiting_list_checkout_text') }}
+                                            </p>
+                                        @endif
                                     @else
                                         <p class="text-background-800 dark:text-background-200">
                                             {{ __('website.event_participation_checkout_text') }}
@@ -379,12 +385,14 @@
                                     x-text="'€ ' + totalPrice.toFixed(2)"></p>
 
                                 @if ($isWaitingList)
-                                    <div x-show="shouldShowPayment" class="mt-4">
-                                        <div @click="startWaitingListCheckout"
-                                            class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer">
-                                            <span>Join the waiting list</span>
+                                    @if(!(isset($event->waiting_list_close_date) && $event->waiting_list_close_date < now()))
+                                        <div x-show="shouldShowPayment" class="mt-4">
+                                            <div @click="startWaitingListCheckout"
+                                                class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer">
+                                                <span>Join the waiting list</span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 @elseif ($isFreeCheckout)
                                     <div x-show="shouldShowPayment" class="mt-4">
                                         <div @click="startFreeCheckout"

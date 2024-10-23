@@ -126,6 +126,10 @@
                     <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms"
                         disabled="{{ !!$event->is_approved }}" />
 
+                    <x-form.checkbox id="internal_shop" name="internal_shop" label="Internal Shop"
+                            isChecked="{{ $event->internal_shop }}" 
+                            disabled="{{ !!$event->is_approved }}" />
+
                     <x-form.checkbox id="block_subscriptions" name="block_subscriptions"
                         label="Block subscriptions (shop)" isChecked="{{ $event->block_subscriptions }}"
                         disabled="{{ false }}" />

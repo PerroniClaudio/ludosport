@@ -61,6 +61,8 @@
                             <p>{{__('website.events_in_waiting_list')}}</p>
                         @elseif ($block_subscriptions || !$event->internal_shop)
                             <p>{{__('website.events_subscriptions_blocked')}}</p>
+                        @elseif ($waiting_list_closed)
+                            <p>{{__('website.event_waiting_list_closed_text')}}</p>
                         @endif
 
                     </div>

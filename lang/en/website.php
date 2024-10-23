@@ -79,6 +79,7 @@ return [
     'event_external' => 'You cannot register for this event online. Contact a school for details.',
     'event_participation_checkout_text' => 'Event participation fee',
     'event_waiting_list_checkout_text' => 'Event is full. Join the waiting list.',
+    'event_waiting_list_closed_text' => 'The event is full and the waiting list is closed.',
     'total_price' => 'Total price',
     'shop_event_success' => 'Event successfully paid',
     'shop_event_free_success' => 'Successfully registered to the event',

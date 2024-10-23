@@ -1078,6 +1078,7 @@ class EventController extends Controller {
         $isInWaitingList = false;
         $isWaitingPayment = false;
         $onlyWaitingList = $event->isWaitingList();
+        $isWaitngListClosed = $event->waiting_list_close_date && ($event->waiting_list_close_date < now());
 
         $user = User::find(auth()->user()->id);
 
@@ -1085,12 +1086,19 @@ class EventController extends Controller {
             // Controlla il tipo di evento
             $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
             $isWaitingPayment = EventWaitingList::where(['event_id' => $event->id, 'user_id' => $user->id, 'is_waiting_payment' => true])->exists();
+            
+            // Shop interno, attesa pagamento, iscrizioni sbloccate, non partecipa, non in waiting list (se in attesa di pagamento può), se waiting list deve essere prima della data di chiusura della waiting list
+            $canpurchase = $event->internal_shop && (
+                $isWaitingPayment || (
+                    !$event->block_subscriptions && !$isParticipating && !$isInWaitingList 
+                    && !($onlyWaitingList && $isWaitngListClosed)
+                )
+            );
+
             if ($event->resultType() === 'enabling') {
                 $isParticipating = $event->instructorResults()->where('user_id', $user->id)->exists();
-                $canpurchase = $event->internal_shop && !$event->block_subscriptions && !$isParticipating && (!$isInWaitingList || $isWaitingPayment);
             } else if ($event->resultType() === 'ranking') {
                 $isParticipating = $event->results()->where('user_id', $user->id)->exists();
-                $canpurchase = $event->internal_shop && !$event->block_subscriptions && !$isParticipating && (!$isInWaitingList || $isWaitingPayment);
             }
         }
 
@@ -1098,6 +1106,7 @@ class EventController extends Controller {
             'event' => $event,
             'canpurchase' => $canpurchase,
             'only_waiting_list' => $onlyWaitingList,
+            'waiting_list_closed' => $isWaitngListClosed,
             'is_participating' => $isParticipating,
             'is_in_waiting_list' => $isInWaitingList,
             'block_subscriptions' => $event->block_subscriptions,
@@ -1324,13 +1333,6 @@ class EventController extends Controller {
     // Checkout waiting list
     public function userCheckoutWaitingList(Event $event, Request $request) {
         // Deve aggiungere l'utente alla waiting list se non c'è già.
-        //  - Poi quando viene selezionato dalla waiting list, nel record in waiting list si imposta lo stato in deve pagare
-        //  - In questa fase, se ci sono errori di pagamento possono essere creati altri ordini, quindi non colleghiamo l'ordine alla waiting list
-        //  - per vedere se prendere altri dalla waiting list si devono contare i partecipanti + quelli in waiting list con lo stato deve pagare
-        //  - Poi serve la pagina in cui quelli nello stato deve pagare possono pagare. Usiamo sempre purchase.
-        //  - Quando hanno pagato, lo stato passa a completed e vengono aggiunti ai partecipanti
-        //  - Si aggiunge l'eliminazione dalla waiting list se si è pagato, non se si è cancellato l'ordine (perchè potrebbero essere errori di pagamento)
-        //  - Quando il tempo per pagare scade (job che controlla giornalmente), si elimina dalla waiting list, si avvisa l'utente e si controlla se ci sono altri posti liberi e persone in waiting list (evento già esistente da triggerare) 
 
         $order_id = $request->session()->get('order_id');
         $order = Order::findOrFail($order_id);
