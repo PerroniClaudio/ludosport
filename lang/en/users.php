@@ -122,5 +122,6 @@ return [
     'replace' => 'Replace',
     'select' => 'Select',
     'since_to' => 'Since :since to :to',
-    'uninque_id_card' => 'ID :'
+    'uninque_id_card' => 'ID :',
+    'send_password_reset' => 'Send Password Reset',
 ];

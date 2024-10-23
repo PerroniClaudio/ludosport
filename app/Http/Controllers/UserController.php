@@ -15,7 +15,6 @@ use App\Models\School;
 use App\Models\User;
 use App\Models\WeaponForm;
 use Carbon\Carbon;
-use GPBMetadata\Google\Api\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -25,6 +24,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller {
 
@@ -602,7 +602,7 @@ class UserController extends Controller {
         $oldRank = $user->rank_id;
         $newRank = $user->rank_id;
 
-        if($authRole === 'admin') {
+        if ($authRole === 'admin') {
             $newHasPaidFee = ($request->has_paid_fee == 'on' ?  1 :  0);
             $newRank = Rank::find($request->rank)->id ?? $user->rank_id;
         }
@@ -617,7 +617,7 @@ class UserController extends Controller {
             'rank_id' => $newRank,
         ]);
 
-        if($oldHasPaidFee != $newHasPaidFee) {
+        if ($oldHasPaidFee != $newHasPaidFee) {
             Log::channel('fee')->info('Fee changed', [
                 'user_id' => $user->id,
                 'made_by' => $authUser->id,
@@ -625,8 +625,8 @@ class UserController extends Controller {
                 'new_value' => $newHasPaidFee,
             ]);
         }
-        
-        if($oldRank != $newRank) {
+
+        if ($oldRank != $newRank) {
             Log::channel('rank')->info('Rank changed', [
                 'user_id' => $user->id,
                 'made_by' => $authUser->id,
@@ -1473,7 +1473,7 @@ class UserController extends Controller {
         $requestForms = explode(',', $request->weapon_forms);
 
         $toRemove = $previousForms->whereNotIn('id', $requestForms);
-        foreach($toRemove as $form){
+        foreach ($toRemove as $form) {
             Log::channel('weapon_form')->info('Athlete weapon form removed', [
                 'user_id' => $user->id,
                 'form_id' => $form->id,
@@ -1482,7 +1482,7 @@ class UserController extends Controller {
             $form->users()->detach($user->id);
         }
 
-        
+
         $toAdd = $previousForms ? collect($requestForms)->diff($previousForms->pluck('id')) : $requestForms;
         foreach ($toAdd as $formId) {
             $form = WeaponForm::find($formId);
@@ -1498,9 +1498,9 @@ class UserController extends Controller {
 
         return response()->json([
             'success' => true,
-        ]); 
+        ]);
     }
-    
+
     public function editWeaponFormsPersonnel(Request $request, User $user) {
         $authUser = User::find(auth()->user()->id);
         $authUserRole = $authUser->getRole();
@@ -1515,7 +1515,7 @@ class UserController extends Controller {
         $requestForms = explode(',', $request->weapon_forms);
 
         $toRemove = $previousForms->whereNotIn('id', $requestForms);
-        foreach($toRemove as $form){
+        foreach ($toRemove as $form) {
             Log::channel('weapon_form')->info('Personnel weapon form removed', [
                 'user_id' => $user->id,
                 'form_id' => $form->id,
@@ -1524,7 +1524,7 @@ class UserController extends Controller {
             $form->personnel()->detach($user->id);
         }
 
-        
+
         $toAdd = $previousForms ? collect($requestForms)->diff($previousForms->pluck('id')) : $requestForms;
         foreach ($toAdd as $formId) {
             $form = WeaponForm::find($formId);
@@ -1540,8 +1540,20 @@ class UserController extends Controller {
 
         return response()->json([
             'success' => true,
-        ]); 
+        ]);
+    }
 
+    public function resetPassword(User $user) {
+
+        $status = Password::sendResetLink(
+            ['email' => $user->email]
+        );
+
+
+        return $status == Password::RESET_LINK_SENT
+            ? back()->with('status', __($status))
+            : back()->withInput($user->email)
+            ->withErrors(['email' => __($status)]);
     }
 
     public function associateAcademy(Request $request) {

@@ -72,6 +72,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::post('/users/{user}/weapon-forms-personnel', [App\Http\Controllers\UserController::class, 'editWeaponFormsPersonnel'])->name('user.weapon-forms-personnel.store');
     Route::post('/users/{user}/weapon-forms-athlete', [App\Http\Controllers\UserController::class, 'editWeaponFormsAthlete'])->name('user.weapon-forms-athlete.store');
+
+    Route::post('/user/{user}/reset-password', [App\Http\Controllers\UserController::class, 'resetPassword'])->name('users.reset-password');
 });
 
 Route::post('/users/{user}/languages', [App\Http\Controllers\UserController::class, 'languages'])->name('users.languages.store');
