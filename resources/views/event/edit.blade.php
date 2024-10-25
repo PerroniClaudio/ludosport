@@ -134,12 +134,9 @@
                         label="Block subscriptions (shop)" isChecked="{{ $event->block_subscriptions }}"
                         disabled="{{ false }}" />
 
-                    <x-form.checkbox id="is_free" name="is_free" label="Free Event" isChecked="{{ $event->is_free }}"
-                        disabled="{{ !!$event->is_approved }}" />
-
                     <x-form.input name="price" label="Price (include taxes)" type="number"
-                        value="{{ number_format($event->price, 2) }}" min="{{ 0 }}"
-                        required="{{ $event->is_free ? false : true }}" disabled="{{ !!$event->is_approved }}" />
+                        value="{{ number_format($event->price, 2) }}" min="{{ 0 }}" step="0.01"
+                        required="{{ true }}" disabled="{{ !!$event->is_approved }}" />
 
                 </div>
             </form>

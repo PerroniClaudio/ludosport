@@ -386,13 +386,7 @@ class EventController extends Controller {
                 $event_type = EventType::where('name', $request->event_type)->first();
                 $event->event_type = $event_type->id;
 
-                if ($request->is_free == 'on') {
-                    $event->is_free = true;
-                    $event->price = 0;
-                } else {
-                    $event->is_free = false;
-                    $event->price = $request->price;
-                }
+                $event->price = $request->price ?? 0;
 
                 $event->block_subscriptions = $request->block_subscriptions == 'on' ? true : false;
                 $event->waiting_list_close_date = $request->waiting_list_close_date ?? null;
@@ -696,7 +690,7 @@ class EventController extends Controller {
             return response()->json(['error' => 'Event not found'], 404);
         }
         // Il tecnico non può modificare i partecipanti in nessun caso. Solo gli admin possono modificare i partecipanti di eventi a pagamento.
-        if ($authRole == 'technician' || ($authRole != 'admin' && !$event->is_free)) {
+        if ($authRole == 'technician' || ($authRole != 'admin' && !$event->isFree())) {
             return response()->json(['error' => 'You are not authorized to manage this event\'s participants']);
         }
 
@@ -1294,7 +1288,7 @@ class EventController extends Controller {
         }
 
         // Se l'evento non è gratuito non si può procedere
-        if (!$event->is_free && $event->price != 0) {
+        if (!$event->isFree() && $event->price != 0) {
             Log::error('Free checkout failed - Event is not free - User ID: ' . $authUser->id . ' - Event ID: ' . $event->id . ' - Order ID: ' . $order_id);
             return response()->json([
                 'success' => false,

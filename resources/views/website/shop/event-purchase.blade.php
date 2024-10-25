@@ -1,6 +1,6 @@
 @php
     $isWaitingList = $event->isWaitingList();
-    $isFreeCheckout = $event->is_free || $event->price == 0;
+    $isFreeCheckout = $event->isFree();
     $freeUrl = route('shop.events.free-checkout', ['event' => $event]);
     $stripeUrl = route('shop.events.stripe-checkout', ['event' => $event]);
     $paypalUrl = route('shop.events.paypal-checkout', ['event' => $event]);
