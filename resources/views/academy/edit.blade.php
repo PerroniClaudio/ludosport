@@ -1,3 +1,6 @@
+@php
+    $authRole = auth()->user()->getRole();
+@endphp
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -13,7 +16,7 @@
 
             <div class="grid grid-cols-2 gap-4">
 
-                @if (auth()->user()->getRole() === 'admin')
+                @if ($authRole === 'admin')
 
                     <form method="POST" action="{{ route('academies.update', $academy->id) }}"
                         class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
@@ -186,7 +189,7 @@
                     ],
                 ]" :rows="$associated_personnel">
                     <x-slot name="tableActions">
-                        <a x-bind:href="'/users/' + row.id">
+                        <a x-bind:href="'{{$authRole === 'admin' ? '' : '/' . $authRole}}' + '/users/' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>
@@ -261,7 +264,7 @@
                             x-text="row.school"></td>
                         <td
                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                            <a x-bind:href="'/users/' + row.id">
+                            <a x-bind:href="'{{$authRole === 'admin' ? '' : '/' . $authRole}}' + '/users/' + row.id">
                                 <x-lucide-pencil
                                     class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                             </a>
@@ -298,14 +301,14 @@
                     ],
                 ]" :rows="$academy->schools">
                     <x-slot name="tableActions">
-                        <a x-bind:href="'/schools/' + row.id">
+                        <a x-bind:href="'{{$authRole === "admin" ? '' : '/' . $authRole}}' + '/schools/' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>
                 </x-table>
             </div>
 
-            @if (auth()->user()->getRole() === 'admin')
+            @if ($authRole === 'admin')
 
                 @if (!$academy->is_disabled)
                     <x-academy.disable-form :academy="$academy->id" />

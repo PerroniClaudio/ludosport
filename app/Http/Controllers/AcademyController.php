@@ -151,7 +151,14 @@ class AcademyController extends Controller {
         $associated_athletes = $academy->athletes;
         $associated_personnel = $academy->personnel;
 
-        $personnel = User::where('is_disabled', '0')->whereNotIn('id', $academy->personnel->pluck('id'))->with(['roles'])->get();
+        // $personnel = User::where('is_disabled', '0')->whereNotIn('id', $academy->personnel->pluck('id'))->with(['roles'])->get();
+        $personnel = User::where('is_disabled', '0')
+            ->whereNotIn('id', $academy->personnel->pluck('id'))
+            ->whereHas('roles', function ($query) {
+                $query->whereIn('name', ['rector', 'dean', 'manager', 'technician', 'instructor']);
+                })
+            ->with(['roles'])
+            ->get();
 
         foreach ($personnel as $key => $person) {
             $personnel[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {
@@ -174,7 +181,29 @@ class AcademyController extends Controller {
         }
 
 
-        $athletes = User::whereNotIn('id', $academy->athletes->pluck('id'))->where('is_disabled', '0')->get();
+        $athletes = [];
+        switch($authRole) {
+            case 'admin':
+                $athletes = User::where('is_disabled', '0')->whereNotIn('id', $academy->athletes->pluck('id'))->whereHas(
+                    'roles', function ($query) {
+                        $query->where('name', 'athlete');
+                    }
+                )->get();
+                break;
+            case 'rector':
+                $athletes = User::where('is_disabled', '0')->whereNotIn('id', $academy->athletes->pluck('id'))->whereHas(
+                    'roles', function ($query) {
+                        $query->where('name', 'athlete');
+                    }
+                )->whereHas(
+                    'academyAthletes', function ($query) use ($academy) {
+                        $query->whereIn('academy_id', [$academy->id, 1]); //1 è no academy
+                    }
+                )->get();
+                break;
+            default:
+                break;
+        }
 
         $roles = Role::all();
         $editable_roles = $authUser->getEditableRoles();
@@ -365,6 +394,11 @@ class AcademyController extends Controller {
         }
         
         // l'atleta può essere associato ad una sola accademia, quindi se si modifica vanno rimossi anche tutti i collegamenti inferiori (scuole e corsi)
+
+        // L'admin può farlo sempre, il rettore solo se l'accademia è no academy
+        if($authRole !== 'admin' && $athlete->academyAthletes()->first()->id !== 1) {
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
         // l'argomento è l'accademia che fa eccezione, (se serve)
         $athlete->removeAcademiesAthleteAssociations($academy);
         

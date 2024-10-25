@@ -49,12 +49,12 @@
             <x-input-label for="nationality" value="Nationality" />
             <select x-model="selectedNationality" x-on:change="updateNationId()" name="nationality" id="nationality"
                 class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
-
+                {{-- Si è deciso di non modificare l'accademia di appartenenza per evitare problemi con le associazioni degli atleti eventualmente presenti --}}
                 <option value="" selected disabled>{{ __('Select a country') }}</option>
                 @foreach ($nations as $key => $nation)
                     <optgroup label="{{ $key }}">
                         @foreach ($nation as $n)
-                            <option value="{{ $n['id'] }}" {{ $n['id'] == $nationality ? 'selected' : '' }}>
+                            <option value="{{ $n['id'] }}" {{ $n['id'] == $nationality ? 'selected' : 'disabled' }}>
                                 {{ $n['name'] }}</option>
                         @endforeach
                     </optgroup>
@@ -68,10 +68,11 @@
             <div class="flex w-full gap-2">
                 <input type="hidden" name="academy_id" x-model="selectedAcademyId">
                 <x-text-input disabled name="academy" class="flex-1" type="text" x-model="selectedAcademy" />
-                <div class="text-primary-500 hover:bg-background-500 dark:hover:bg-background-900 p-2 rounded-full cursor-pointer"
+                {{-- Si è deciso di non modificare l'accademia di appartenenza per evitare problemi con le associazioni degli atleti eventualmente presenti --}}
+                {{-- <div class="text-primary-500 hover:bg-background-500 dark:hover:bg-background-900 p-2 rounded-full cursor-pointer"
                     x-on:click="isAcademyDialogOpen = true">
                     <x-lucide-search class="w-6 h-6 text-primary-500 dark:text-primary-400" />
-                </div>
+                </div> --}}
             </div>
             <x-input-error :messages="$errors->get('academy_id')" class="mt-2" />
 

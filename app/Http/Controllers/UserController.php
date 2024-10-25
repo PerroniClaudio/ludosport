@@ -53,16 +53,50 @@ class UserController extends Controller {
                     continue;
                 }
 
-                // admin, rector, dean, manager e technician possono vedere tutti gli utenti.
-                // instructor può vedere solo gli utenti delle scuole in cui ha corsi in cui è associato come personale.
-                if ($authUserRole === 'instructor') {
-                    $authSchools = auth()->user()->schools->pluck('id')->toArray();
-                    if (
-                        $user->schools->whereIn('id', $authSchools)->isEmpty()
-                        && $user->schoolAthletes->whereIn('id', $authSchools)->isEmpty()
-                    ) {
-                        continue;
-                    }
+                // utenti visualizzabili (sia athlete che personnel): 
+                // admin e technician (tutti), 
+                // rector (quelli nell'accademia, athlete e personnel), 
+                // dean e manager (quelli nella scuola, athlete e personnel)
+                // instructor (quelli delle scuole in cui ha corsi in cui è associato come personale, solo athlete).
+                $skipUser = false;
+                switch ($authUserRole) {
+                    case 'admin':
+                    case 'technician':
+                        break;
+                    case 'rector':
+                        if (!in_array($authUser->primaryAcademy()->id, 
+                                array_merge(
+                                    $user->academies()->pluck('academy_id')->toArray(), 
+                                    [$user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->id : null]
+                            ))) {
+                            $skipUser = true;
+                        }
+                        break;
+                    case 'dean':
+                    case 'manager':
+                        if(!in_array($authUser->primarySchool()->id, 
+                                array_merge(
+                                    $user->schools()->pluck('school_id')->toArray(), 
+                                    [$user->primarySchoolAthlete() ? $user->primarySchoolAthlete()->id : null]
+                            ))) {
+                            $skipUser = true;
+                        }
+                        break;
+                    case 'instructor':
+                        $authSchools = $authUser->schools->pluck('id')->toArray();
+                        if (
+                            $user->schools->whereIn('id', $authSchools)->isEmpty()
+                            && $user->schoolAthletes->whereIn('id', $authSchools)->isEmpty()
+                        ) {
+                            $skipUser = true;
+                        }
+                        break;
+                    default:
+                        return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
+                }
+
+                if ($skipUser) {
+                    continue;
                 }
 
                 if ($role->label === 'athlete') {
@@ -431,10 +465,17 @@ class UserController extends Controller {
     }
 
     public function edit(User $user) {
-
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
+        }
+
+        // Possono vedere solo le persone associate alla loro accademia/scuola come atleti o come personale
+        if(($authRole === "rector" && (!in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray()) && !in_array($authUser->primaryAcademy()->id, $user->academies->pluck('id')->toArray())))
+            || (in_array($authRole, ['dean', 'manager']) && (!in_array($authUser->primarySchool()->id, $user->schoolAthletes()->pluck('school_id')->toArray()) && !in_array($authUser->primarySchool()->id, $user->schools()->pluck('school_id')->toArray())))
+        ){
+            return back()->with('error', 'You are not authorized to access this page!');
         }
 
         $ranks = Rank::all()->pluck('name', 'id');
@@ -587,6 +628,36 @@ class UserController extends Controller {
 
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
+        }
+
+        $canUpdate = true;
+        switch ($authRole) {
+            case 'admin':
+                break;
+            case 'rector':
+                if (!in_array($authUser->primaryAcademy()->id, 
+                    array_merge(
+                        $user->academies()->pluck('academy_id')->toArray(), 
+                        [$user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->id : null]
+                ))) {
+                    $canUpdate = false;
+                }
+                break;
+            case 'dean':
+            case 'manager':
+                if(!in_array($authUser->primarySchool()->id, 
+                        array_merge(
+                            $user->schools()->pluck('school_id')->toArray(), 
+                            [$user->primarySchoolAthlete() ? $user->primarySchoolAthlete()->id : null]
+                    ))) {
+                    $canUpdate = false;
+                }
+                break;
+            default:
+                return back()->with('error', 'You do not have the required role to access this page!');
+        }
+        if (!$canUpdate) {
+            return back()->with('error', 'You are not authorized to edit this user!');
         }
 
         $request->validate([
@@ -1585,6 +1656,10 @@ class UserController extends Controller {
             if($user->academies->where('id', 1)->count() > 0){
                 // Se è associato a no academy viene rimosso
                 $user->academies()->detach(1);
+                $user->setPrimaryAcademy($academy->id);
+            }
+            // Se ha una sola associazione ad accademie, la rende primaria
+            if($user->academies->count() == 1){
                 $user->setPrimaryAcademy($academy->id);
             }
         } else if ($request->type == 'athlete') {

@@ -7,6 +7,10 @@
     $authUser = auth()->user();
     $authRole = $authUser->getRole();
     $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
+    // L'atleta dovrebbe avere una sola accademia associata, ma le recupero comunque tutte per sicurezza
+    $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray());
+    // Dal momento che non può accedere alla pagina se l'utente non è associato alla sua accademia e che è del personale può comunque modificare il ruolo, $canEditRoles può essere sempre vero.
+    $canEditRoles = true;
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -91,24 +95,24 @@
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <div class="flex flex-col gap-2">
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                            :value="$user->name" placeholder="{{ fake()->firstName() }}" />
+                            :value="$user->name" placeholder="{{ fake()->firstName() }}" :readonly="!$canEdit" />
                         <x-form.input name="surname" label="Surname" type="text" required="{{ true }}"
-                            :value="$user->surname" placeholder="{{ fake()->lastName() }}" />
+                            :value="$user->surname" placeholder="{{ fake()->lastName() }}" :readonly="!$canEdit" />
                         <x-form.input name="email" label="Email" type="email" required="{{ true }}"
-                            value="{{ $user->email }}" placeholder="{{ fake()->email() }}" />
+                            value="{{ $user->email }}" placeholder="{{ fake()->email() }}" :readonly="!$canEdit" />
                         <x-form.input name="year" label="First subscription year" type="text"
                             required="{{ true }}" value="{{ $user->subscription_year }}"
-                            placeholder="{{ date('Y') }}" />
+                            placeholder="{{ date('Y') }}" :readonly="!$canEdit" />
 
                         <div>
                             <x-input-label for="nationality" value="Nationality" />
                             <select name="nationality" id="nationality"
                                 class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
                                 @foreach ($nations as $key => $nation)
-                                    <optgroup label="{{ $key }}"">
+                                    <optgroup label="{{ $key }}">
                                         @foreach ($nation as $n)
                                             <option value="{{ $n['id'] }}"
-                                                {{ $n['id'] == $user->nation_id ? 'selected' : '' }}>
+                                                {{ $n['id'] == $user->nation_id ? 'selected' : 'disabled' }}>
                                                 {{ $n['name'] }}</option>
                                         @endforeach
                                     </optgroup>
@@ -130,7 +134,7 @@
                         x-data="{
                             selected: {{ collect($user->roles) }},
                             selectRole(role) {
-                                if ({{ collect($editable_roles) }}.includes(role)) {
+                                if ({{$canEditRoles ? 'true' : 'false'}} && {{ collect($editable_roles) }}.includes(role)) {
                                     if (this.selected.includes(role)) {
                                         this.selected = this.selected.filter(item => item !== role);
                                     } else {
@@ -189,12 +193,13 @@
                     @endif
                 </div>
 
-
-                <div class="fixed bottom-8 right-32">
-                    <x-primary-button type="submit">
-                        <x-lucide-save class="w-6 h-6 text-white" />
-                    </x-primary-button>
-                </div>
+                @if($canEdit || $canEditRoles)
+                    <div class="fixed bottom-8 right-32">
+                        <x-primary-button type="submit">
+                            <x-lucide-save class="w-6 h-6 text-white" />
+                        </x-primary-button>
+                    </div>
+                @endif
 
             </form>
 
@@ -211,12 +216,14 @@
 
                             <div class="flex flex-col gap-4">
                                 <div class="flex flex-col gap-2">
-                                    <input type="file" name="profilepicture" id="profilepicture" class="hidden"
-                                        x-on:change="$refs.pfpform.submit()" />
-                                    <x-primary-button type="button"
-                                        onclick="document.getElementById('profilepicture').click()">
-                                        {{ __('users.upload_picture') }}
-                                    </x-primary-button>
+                                    @if($canEdit)
+                                        <input type="file" name="profilepicture" id="profilepicture" class="hidden"
+                                            x-on:change="$refs.pfpform.submit()" />
+                                        <x-primary-button type="button"
+                                            onclick="document.getElementById('profilepicture').click()">
+                                            {{ __('users.upload_picture') }}
+                                        </x-primary-button>
+                                    @endif
                                 </div>
                             </div>
                         </form>

@@ -4,7 +4,11 @@
     atleta da admin, rettore, dean e manager.
 --}}
 @php
+    $authUser = auth()->user();
+    $authRole = $authUser->getRole();
     $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
+    // Può modificare l'utente solo se è un atleta della stessa scuola
+    $canEdit = in_array($authUser->primarySchool()->id, $user->schoolAthletes->pluck('id')->toArray());
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -89,21 +93,21 @@
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <div class="flex flex-col gap-2">
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                            :value="$user->name" placeholder="{{ fake()->firstName() }}" />
+                            :value="$user->name" placeholder="{{ fake()->firstName() }}" :disabled="!$canEdit" />
                         <x-form.input name="surname" label="Surname" type="text" required="{{ true }}"
-                            :value="$user->surname" placeholder="{{ fake()->lastName() }}" />
+                            :value="$user->surname" placeholder="{{ fake()->lastName() }}" :disabled="!$canEdit" />
                         <x-form.input name="email" label="Email" type="email" required="{{ true }}"
-                            value="{{ $user->email }}" placeholder="{{ fake()->email() }}" />
+                            value="{{ $user->email }}" placeholder="{{ fake()->email() }}" :disabled="!$canEdit" />
                         <x-form.input name="year" label="First subscription year" type="text"
                             required="{{ true }}" value="{{ $user->subscription_year }}"
-                            placeholder="{{ date('Y') }}" />
+                            placeholder="{{ date('Y') }}" :disabled="!$canEdit" />
 
                         <div>
                             <x-input-label for="nationality" value="Nationality" />
-                            <select name="nationality" id="nationality"
+                            <select name="nationality" id="nationality" {{!$canEdit ? 'disabled' : ''}}
                                 class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
                                 @foreach ($nations as $key => $nation)
-                                    <optgroup label="{{ $key }}"">
+                                    <optgroup label="{{ $key }}">
                                         @foreach ($nation as $n)
                                             <option value="{{ $n['id'] }}"
                                                 {{ $n['id'] == $user->nation_id ? 'selected' : '' }}>
@@ -128,7 +132,7 @@
                         x-data="{
                             selected: {{ collect($user->roles) }},
                             selectRole(role) {
-                                if ({{ collect($editable_roles) }}.includes(role)) {
+                                if ({{$canEdit ? 'true' : 'false'}} && {{ collect($editable_roles) }}.includes(role)) {
                                     if (this.selected.includes(role)) {
                                         this.selected = this.selected.filter(item => item !== role);
                                     } else {
@@ -187,12 +191,13 @@
                     @endif
                 </div>
 
-
-                <div class="fixed bottom-8 right-32">
-                    <x-primary-button type="submit">
-                        <x-lucide-save class="w-6 h-6 text-white" />
-                    </x-primary-button>
-                </div>
+                @if($canEdit)
+                    <div class="fixed bottom-8 right-32">
+                        <x-primary-button type="submit">
+                            <x-lucide-save class="w-6 h-6 text-white" />
+                        </x-primary-button>
+                    </div>
+                @endif
 
             </form>
 
@@ -209,12 +214,14 @@
 
                             <div class="flex flex-col gap-4">
                                 <div class="flex flex-col gap-2">
-                                    <input type="file" name="profilepicture" id="profilepicture" class="hidden"
-                                        x-on:change="$refs.pfpform.submit()" />
-                                    <x-primary-button type="button"
-                                        onclick="document.getElementById('profilepicture').click()">
-                                        {{ __('users.upload_picture') }}
-                                    </x-primary-button>
+                                    @if($canEdit)
+                                        <input type="file" name="profilepicture" id="profilepicture" class="hidden"
+                                            x-on:change="$refs.pfpform.submit()" />
+                                        <x-primary-button type="button"
+                                            onclick="document.getElementById('profilepicture').click()">
+                                            {{ __('users.upload_picture') }}
+                                        </x-primary-button>
+                                    @endif
                                 </div>
                             </div>
                         </form>
@@ -239,14 +246,6 @@
                     <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
 
                     <div class="flex flex-col gap-2">
-
-                        {{-- @foreach ($user->academies as $academy)
-                            <a href="{{ route('academies.edit', $academy->id) }}"
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $academy->name }}</span>
-                            </a>
-                        @endforeach --}}
                         @php
                             $mainAcademyPersonnel = $user->primaryAcademy();
                         @endphp
@@ -267,13 +266,6 @@
                     <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
 
                     <div class="flex flex-col gap-2">
-                        {{-- @foreach ($user->academyAthletes as $academy)
-                            <a href="{{ route('academies.edit', $academy->id) }}"
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $academy->name }}</span>
-                            </a>
-                        @endforeach --}}
                         @php
                             $mainAcademyAthlete = $user->primaryAcademyAthlete();
                         @endphp
@@ -300,14 +292,6 @@
                     <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
 
                     <div class="flex flex-col gap-2">
-
-                        {{-- @foreach ($user->schools as $school)
-                            <a href="{{ route('schools.edit', $school->id) }}"
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $school->name }}</span>
-                            </a>
-                        @endforeach --}}
                         @php
                             $mainSchoolPersonnel = $user->primarySchool();
                         @endphp
@@ -328,13 +312,6 @@
                     <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
 
                     <div class="flex flex-col gap-2">
-                        {{-- @foreach ($user->schoolAthletes as $schools)
-                            <a href="{{ route('schools.edit', $schools->id) }}"
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>{{ $schools->name }}</span>
-                            </a>
-                        @endforeach --}}
                         @php
                             $mainSchoolAthlete = $user->primarySchoolAthlete();
                         @endphp

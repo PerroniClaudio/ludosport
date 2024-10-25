@@ -1,3 +1,7 @@
+@php
+    $authUser = auth()->user();
+    $authRole = $authUser->getRole();
+@endphp
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -9,9 +13,9 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
 
-            @if (auth()->user()->getRole() === 'admin' ||
-                    auth()->user()->getRole() === 'rector' ||
-                    auth()->user()->getRole() === 'dean')
+            @if ($authRole === 'admin' ||
+                    $authRole === 'rector' ||
+                    $authRole === 'dean')
                 <div x-data="{
                     address: '{{ $school->address }}',
                     city: '{{ $school->city }}',
@@ -47,7 +51,7 @@
                         <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('school.info') }}</h3>
                         <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                        @if (auth()->user()->getRole() === 'rector')
+                        @if ($authRole === 'rector')
                             <form method="POST" action="{{ route('rector.schools.update', $school->id) }}">
                                 @csrf
                                 <div class="flex flex-col gap-2 w-1/2">
@@ -66,7 +70,7 @@
                                     </x-primary-button>
                                 </div>
                             </form>
-                        @elseif(auth()->user()->getRole() === 'dean')
+                        @elseif($authRole === 'dean')
                             <div class="flex flex-col gap-2 w-1/2">
                                 <x-form.input name="name" label="Name" type="text"
                                     required="{{ true }}" disabled="{{ true }}" :value="$school->name"
@@ -188,7 +192,7 @@
             @endif
 
 
-            @if (auth()->user()->getRole() === 'admin' || auth()->user()->getRole() === 'rector')
+            @if ($authRole === 'admin' || $authRole === 'rector')
                 <x-school.search-users :school="$school" :roles="$roles" />
             @endif
 
@@ -198,7 +202,7 @@
                     </h3>
                     <div class="flex items-center gap-1">
                         <x-school.personnel :school="$school" :personnel="$personnel" />
-                        @if (auth()->user()->getRole() === 'admin' || auth()->user()->getRole() === 'rector')
+                        @if ($authRole === 'admin' || $authRole === 'rector')
                             <x-school.create-user :school="$school->id" type="personnel" :roles="$editable_roles" />
                         @endif
 
@@ -233,7 +237,7 @@
                     ],
                 ]" :rows="$associated_personnel">
                     <x-slot name="tableActions">
-                        <a x-bind:href="'/users/' + row.id">
+                        <a x-bind:href="'{{$authRole === "admin" ? "" : "/" . $authRole}}' + '/users/' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>
@@ -300,7 +304,7 @@
                         </td>
                         <td
                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                            <a x-bind:href="'/users/' + row.id">
+                            <a x-bind:href="'{{$authRole === "admin" ? "" : "/" . $authRole}}' + '/users/' + row.id">
                                 <x-lucide-pencil
                                     class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                             </a>
@@ -314,7 +318,7 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('school.clans') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        @if (auth()->user()->getRole() === 'admin')
+                        @if ($authRole === 'admin')
                             <x-school.clans :school="$school" :athletes="$clans" />
                         @endif
                         <x-school.create-clan :school="$school->id" />
@@ -336,14 +340,14 @@
                     ],
                 ]" :rows="$school->clan">
                     <x-slot name="tableActions">
-                        <a x-bind:href="'/courses/' + row.id">
+                        <a x-bind:href="'{{$authRole === "admin" ? "" : "/" . $authRole}}' + '/courses/' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>
                 </x-table>
             </div>
 
-            @if (auth()->user()->getRole() === 'admin')
+            @if ($authRole === 'admin')
                 @if (!$school->is_disabled)
                     <x-school.disable-form :school="$school->id" />
                 @endif

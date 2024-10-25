@@ -4,6 +4,7 @@
     'type' => 'text',
     'required' => false,
     'disabled' => false,
+    'readonly' => false,
     'value' => '',
     'placeholder' => '',
     'hidden' => false,
@@ -30,7 +31,7 @@
             <x-input-label value="{{ $label }}" />
         @endif
     @endif
-    <input name="{{ $name }}" type="{{ $type }}" {{ $disabled ? 'disabled' : '' }}
+    <input name="{{ $name }}" type="{{ $type }}" {{ $disabled ? 'disabled' : '' }} {{ $readonly ? 'readonly' : '' }}
         {{ $required ? 'required' : '' }} value="{{ $value }}" placeholder="{{ $placeholder }}"
         @if($min != null) min="{{ $min }}" @endif @if($max != null) max="{{ $max }}" @endif
         class="{{$hidden ? 'hidden' : ''}} w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
