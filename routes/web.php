@@ -344,8 +344,6 @@ require __DIR__ . '/script.php';
 
 Route::group([], function () {
     Route::get('/healthcheck', function () {
-        $user = \App\Models\User::find(2);
-        dump($user->schoolAthletes()->first()->academy->id);
         return 'healthcheck';
     })->name('healthcheck');
 });

@@ -51,7 +51,7 @@ class UpdateEventParticipants
             if($waitingListItem) {
 
                 // Check if payment is required
-                if($event->is_free || $event->price == 0) {
+                if($event->isFree()) {
                     
                     if($event->resultType() === 'enabling') {
                         $event->instructorResults()->create([

@@ -36,7 +36,6 @@ class Event extends Model {
         'address',
         'postal_code',
         'event_type',
-        'is_free',
         'price',
         'weapon_form_id',
         'max_participants',
@@ -107,6 +106,10 @@ class Event extends Model {
         }
 
         return $eventTypes;
+    }
+
+    public function isFree() {
+        return !isset($this->price) || $this->price == 0;
     }
 
     public function isWaitingList() {

@@ -4,7 +4,7 @@
 
 {{ __('emails.event_waiting_list_add_email_introduction', ['event' => $event->name]) }}
 
-@if (!$event->is_free && $event->price > 0)
+@if (!$event->isFree() && $event->price > 0)
 {{ __('emails.event_waiting_list_add_email_future_payment') }}
 -   **{{ __('emails.event_waiting_list_add_email_total') }}**: {{ '€ ' . number_format($event->price, 2) . '' }}
 @endif
