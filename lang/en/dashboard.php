@@ -38,7 +38,7 @@ return [
     'athletes_academies_title' => 'Athletes by academies, :nation',
     'academies_with_athletes_char' => 'Academies with most athletes',
     'athletes_courses_title' => 'Athletes by courses, :school',
-    'technician_events_participants_title' => 'Tecnico\'s events participants',
+    'technician_events_participants_title' => 'Tecnico - events participants',
     'events_with_participants_char' => 'Events with most participants (this year)',
     'courses_with_athletes_char' => 'Courses with most athletes',
     'rector_athletes_nations_title' => 'Athletes by nations',
