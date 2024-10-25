@@ -52,13 +52,14 @@
     <div class="flex items-center gap-2">
         <input type="hidden" name="school_id" x-model="selectedSchoolId">
         <x-text-input disabled name="School" class="flex-1" type="text" x-model="selectedSchool" />
-        <div class="text-primary-500 hover:bg-background-500 dark:hover:bg-background-900 p-2 rounded-full cursor-pointer"
+        {{-- Si è deciso di non modificare la scuola di appartenenza per evitare problemi con le associazioni degli atleti eventualmente presenti --}}
+        {{-- <div class="text-primary-500 hover:bg-background-500 dark:hover:bg-background-900 p-2 rounded-full cursor-pointer"
             x-on:click.prevent="$dispatch('open-modal', 'selected-school-modal')">
             <x-lucide-search class="w-6 h-6 text-primary-500 dark:text-primary-400" />
-        </div>
+        </div> --}}
     </div>
 
-    <x-modal name="selected-school-modal" :show="$errors->userId->isNotEmpty()" focusable>
+    {{-- <x-modal name="selected-school-modal" :show="$errors->userId->isNotEmpty()" focusable>
         <div class="p-6 flex flex-col gap-2">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
@@ -160,6 +161,6 @@
                 </div>
             </div>
         </div>
-    </x-modal>
+    </x-modal> --}}
 
 </div>

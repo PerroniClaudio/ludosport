@@ -276,13 +276,38 @@ class ClanController extends Controller {
         $associated_instructors = $clan->personnel;
         $associated_athletes = $clan->users()->where('is_disabled', '0')->get();
 
-        // Possono vedere tutti gli utenti e poi, se mancano delle associazioni con scuola e accademia, si aggiungono.
         $instructors = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
             $query->where('label', 'instructor');
         })->whereNotIn('id', $clan->personnel->pluck('id'))->get();
-        $athletes = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
-            $query->where('label', 'athlete');
-        })->whereNotIn('id', $clan->users->pluck('id'))->get();
+        
+        $athletes = [];
+        
+        // Admin (tutti), rector (della sua accademia), dean (della sua scuola), manager (della sua scuola)
+        // Poi se mancano delle associazioni con scuola e accademia, si aggiungono.
+        switch ($authRole) {
+            case 'admin':
+                $athletes = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
+                    $query->where('label', 'athlete');
+                })->whereNotIn('id', $clan->users->pluck('id'))->get();
+                break;
+            case 'rector':
+                $academy = $clan->academy;
+                $athletes = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
+                    $query->where('label', 'athlete');
+                })->whereNotIn('id', $clan->users->pluck('id'))->whereHas('academyAthletes', function ($query) use ($academy) {
+                    $query->where('academy_id', $academy->id);
+                })->get();
+                break;
+            case 'dean':
+            case 'manager':
+                $school = $clan->school;
+                $athletes = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
+                    $query->where('label', 'athlete');
+                })->whereNotIn('id', $clan->users->pluck('id'))->whereHas('schoolAthletes', function ($query) use ($school) {
+                    $query->where('school_id', $school->id);
+                })->get();
+                break;
+        }
 
         foreach ($associated_instructors as $key => $person) {
             $associated_instructors[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {
@@ -435,7 +460,8 @@ class ClanController extends Controller {
     }
 
     public function addAthlete(Clan $clan, Request $request) {
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'instructor'])) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
@@ -447,6 +473,10 @@ class ClanController extends Controller {
 
         if(!$user->clans()->where('clan_id', $clan->id)->exists()){
             if($user->academyAthletes()->first()->id != $academy->id) {
+                // L'admin può farlo sempre, il rettore, il dean e il manager solo se l'accademia è no academy
+                if($authRole !== 'admin' && $user->academyAthletes()->first()->id !== 1) {
+                    return redirect()->route('dashboard')->with('error', 'Not authorized.');
+                }
                 // L'atleta può avere solo un'accademia associata
                 $user->removeAcademiesAthleteAssociations();
             }

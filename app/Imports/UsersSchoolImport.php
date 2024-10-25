@@ -23,7 +23,8 @@ class UsersSchoolImport implements ToCollection {
      * @param Collection $collection
      */
     public function collection(Collection $collection) {
-        //
+        
+        $importingUserRole = $this->importingUser->getHighestRole();
 
         $firstRow = true;
 
@@ -52,8 +53,14 @@ class UsersSchoolImport implements ToCollection {
                 if(!$user->schoolAthletes()->where('school_id', $school->id)->exists()) {
                     
                     if($user->academyAthletes()->first()->id != $school->academy->id) {
+                        // L'admin può farlo sempre, il rettore solo se l'accademia è no academy, gli altri possono associare solo se è già nella stessa accademia (controllo precedente)
+                        if($importingUserRole !== 'admin' && ($importingUserRole !== "rector" || $user->academyAthletes()->first()->id !== 1)) {
+                            $this->log[] = "['Error: The " . $importingUserRole . " cannot import this user from another academy. Email: " . $row[0] . "']";
+                            $this->is_partial = true;
+                            continue;
+                        }
                         // L'atleta può avere solo un'accademia associata
-                        $user->removeAcademiesAthleteAssociations();
+                        $user->removeAcademiesAthleteAssociations(null, $this->importingUser->id);
                     }
 
                     $user->academyAthletes()->syncWithoutDetaching([$school->academy->id]);

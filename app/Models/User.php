@@ -599,8 +599,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Rimuove tutte le associazioni dell'atleta con tutte le accademie (escluso quella indicata) e le rispettive scuole e corsi
-    public function removeAcademiesAthleteAssociations($academyExeption = null) {
-        $authUser = User::find(auth()->user()->id);
+    public function removeAcademiesAthleteAssociations($academyExeption = null, $importingUserId = null) {
+        $authUser = User::find($importingUserId ? $importingUserId : auth()->user()->id);
         // Chi usa la funzione ha già il controllo sull'autorizzazione
         // $authRole = $authUser->getRole();
 
@@ -712,5 +712,17 @@ class User extends Authenticatable implements MustVerifyEmail {
             'schools' => $removedSchoolsIds,
             'courses' => $removedCoursesIds,
         ]);
+    }
+
+    // Usatp negli import per capire l'autorizzazione per associazioni di atleti ad accademie, scuole e corsi. la parte di istruttore e tecnico non mi interessa per ora
+    public function getHighestRole() {
+        $highestRole = null;
+        if($this->hasRole('admin')){ $highestRole = 'admin'; }
+        if(!$highestRole && $this->hasRole('rector')){ $highestRole = 'rector'; }
+        if(!$highestRole && $this->hasRole('dean')){ $highestRole = 'dean'; }
+        if(!$highestRole && $this->hasRole('manager')){ $highestRole = 'manager'; }
+        if(!$highestRole && $this->hasRole('instructor')){ $highestRole = 'instructor'; }
+        if(!$highestRole && $this->hasRole('technician')){ $highestRole = 'technician'; }
+        return $highestRole;
     }
 }

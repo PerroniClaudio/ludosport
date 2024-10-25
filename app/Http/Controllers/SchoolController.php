@@ -194,7 +194,14 @@ class SchoolController extends Controller {
         $associated_athletes = $school->athletes;
         $associated_personnel = $school->personnel;
 
-        $personnel = User::where('is_disabled', '0')->whereNotIn('id', $school->personnel->pluck('id'))->with(['roles'])->get();
+        // $personnel = User::where('is_disabled', '0')->whereNotIn('id', $school->personnel->pluck('id'))->with(['roles'])->get();
+        $personnel = User::where('is_disabled', '0')
+            ->whereNotIn('id', $school->personnel->pluck('id'))
+            ->whereHas('roles', function ($query) {
+                $query->whereIn('name', ['rector', 'dean', 'manager', 'technician', 'instructor']);
+                })
+            ->with(['roles'])
+            ->get();
 
         foreach ($personnel as $key => $person) {
             $personnel[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {
@@ -208,7 +215,30 @@ class SchoolController extends Controller {
             })->toArray());
         }
 
-        $athletes = User::where('is_disabled', '0')->whereNotIn('id', $school->athletes->pluck('id'))->get();
+        $athletes = [];
+
+        // admin (tutti), rector, dean e manager (solo gli utenti associati all'accademia della scuola o a no academy)
+        switch($authRole){
+            case 'admin':
+                $athletes = User::where('is_disabled', '0')->whereNotIn('id', $school->athletes->pluck('id'))->get();
+                break;
+            case 'rector':
+            case 'dean':
+            case 'manager':
+                $athletes = User::where('is_disabled', '0')->whereNotIn('id', $school->athletes->pluck('id'))->whereHas(
+                    'roles', function ($query) {
+                        $query->where('name', 'athlete');
+                    }
+                )->whereHas(
+                    'academyAthletes', function ($query) use ($school) {
+                        // $query->whereIn('academy_id', [$school->academy->id, 1]); //1 è no academy. Se si vuole far pescare anche da no academy direttamente nella scuola si fa così
+                        $query->where('academy_id', $school->academy->id);
+                    }
+                )->get();
+                break;
+            default:
+                break;
+        }
 
         $roles = Role::all();
         $editable_roles = $authUser->getEditableRoles();
@@ -570,7 +600,9 @@ class SchoolController extends Controller {
     }
 
     public function addAthlete(School $school, Request $request) {
-        //
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
         if (!$this->checkPermission($school)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
@@ -582,6 +614,10 @@ class SchoolController extends Controller {
         if(!$athlete->schoolAthletes()->where('school_id', $school->id)->exists()) {
                     
             if($athlete->academyAthletes()->first()->id != $school->academy->id) {
+                // L'admin può farlo sempre, il rettore, il dean e il manager solo se l'accademia è no academy
+                if($authRole !== 'admin' && $athlete->academyAthletes()->first()->id !== 1) {
+                    return redirect()->route('dashboard')->with('error', 'Not authorized.');
+                }
                 // L'atleta può avere solo un'accademia associata
                 $athlete->removeAcademiesAthleteAssociations();
             }
