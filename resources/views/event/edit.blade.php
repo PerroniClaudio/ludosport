@@ -113,7 +113,8 @@
 
                     <x-form.input name="waiting_list_close_date" label="Waiting list close date" type="datetime-local"
                         required="{{ true }}" value="{{ $event->waiting_list_close_date }}"
-                        placeholder="{{ fake()->date() }}" disabled="{{ !!$event->is_approved }}" />
+                        placeholder="{{ fake()->date() }}" disabled="{{ !!$event->is_approved }}" 
+                        description="Prevents new registrations on the waiting list starting from the specified date. However, individuals on the waiting list will still be able to complete their purchases when it's their turn." />
 
                     <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
                         selected="{{ $event->type->id }}" disabled="{{ !!$event->is_approved }}" />
@@ -128,11 +129,13 @@
 
                     <x-form.checkbox id="internal_shop" name="internal_shop" label="Internal Shop"
                             isChecked="{{ $event->internal_shop }}" 
-                            disabled="{{ !!$event->is_approved }}" />
+                            disabled="{{ !!$event->is_approved }}"
+                            description="If enabled, users can register for the event from the shop. Disable if registrations should be handled only by academies." />
 
                     <x-form.checkbox id="block_subscriptions" name="block_subscriptions"
                         label="Block subscriptions (shop)" isChecked="{{ $event->block_subscriptions }}"
-                        disabled="{{ false }}" />
+                        disabled="{{ false }}"
+                        description="If enabled, it prevents new registrations in the shop. However, individuals on the waiting list will still be able to complete their purchases when it's their turn." />
 
                     <x-form.input name="price" label="Price (include taxes)" type="number"
                         value="{{ number_format($event->price, 2) }}" min="{{ 0 }}" step="0.01"
