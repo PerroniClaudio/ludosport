@@ -87,7 +87,10 @@
                     <x-event.dean.enabling-results :event="$event" :results="$enablingResults" />
                 @elseif ($event->resultType() === 'ranking')
                     <x-event.ranking-participants :event="$event" :results="$rankingResults" />
-                    <x-event.ranking-results :results="$rankingResults" />
+                    {{-- Vogliono i risultati solo per i tipi ranking preimpostati --}}
+                    @if(in_array($event->type->name, ["School Tournament", "Academy Tournament", "National Tournament"]))
+                        <x-event.ranking-results :results="$rankingResults" />
+                    @endif
                 @endif
             @endif
 

@@ -223,7 +223,7 @@ class EventController extends Controller {
                 $waitingList[$key]['user_id'] = $waiting->user['id'];
                 $waitingList[$key]['user_email'] = $waiting->user['email'];
                 $waitingList[$key]['status'] = $waiting->is_waiting_payment ? 'Has to pay' : 'Waiting';
-                $waitingList[$key]['payment_deadline'] = optional($waiting->payment_deadline)->format('d/m/Y H:i') ?? '';
+                $waitingList[$key]['payment_deadline'] = $waiting->payment_deadline ?? '';
             }
         }
 
@@ -599,19 +599,44 @@ class EventController extends Controller {
     }
 
     public function available(Event $event) {
-        $users = User::where('is_disabled', '0')->get();
+        // hanno chiesto per il rettore (quindi anche eventuali altri ruoli sottostanti) che nel caso l'evento fosse "School Tournament", "Academy Tournament", "National Tournament", devono essere visualizzati solo utenti con membership attiva.
+        // Poi negli "School Tournament" e "Academy Tournament" solo utenti appartenenti alla stessa accademia dell'evento e nei "National Tournament" solo quelli della nazione dell'accademia associata all'evento.
+        // Si potrebbe usare resultType() per escludere solo gli eventi enabling, ma non sappiamo se ci sono altri tipi di eventi che non devono essere inclusi.
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        if( $authRole !== "admin" && in_array($event->type->name, ["School Tournament", "Academy Tournament", "National Tournament"]) ) {
+            switch($event->type->name) {
+                case "School Tournament":
+                case "Academy Tournament":
+                    $users = $event->academy->users()->where(['is_disabled' => '0', "has_paid_fee" => '1'])->get();
+                    break;
+                case "National Tournament":
+                    $academyNation = $event->academy->nation;
+                    $users = User::whereHas('academyAthletes', function ($query) use ($academyNation) {
+                        $query->whereIn('academy_id', $academyNation->academies->pluck('id'));
+                    })->where(['is_disabled' => '0', "has_paid_fee" => '1'])->get();
+                    break;
+            }
+        } else {
+            $users = User::where('is_disabled', '0')->get();
+        }
         return response()->json($users);
     }
 
     public function availablePersonnel(Event $event) {
-        $users = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
-            $query
-                ->where('name', 'technician')
-                ->orWhere('name', 'instructor')
-                ->orWhere('name', 'manager')
-                ->orWhere('name', 'dean')
-                ->orWhere('name', 'rector');
-        })->get();
+        // Per l'evento istruttore solo tecnici (anche esterni all'accademia), per gli altri tutto il personale dell'accademia.
+        if( $event->resultType() === "enabling" ) {
+            $users = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
+                $query->where('name', 'technician');
+            })->get();
+        } else {
+            $users = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
+                $query->whereIn('name', ['technician', 'instructor', 'manager', 'dean', 'rector']);
+            })->whereHas('academies', function ($query) use ($event) {
+                $query->where('academy_id', $event->academy->id);
+            })->get();
+        }
+        
         return response()->json($users);
     }
 
