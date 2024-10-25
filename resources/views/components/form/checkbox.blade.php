@@ -1,4 +1,4 @@
-@props(['id', 'name', 'label', 'isChecked' => false, 'disabled' => false])
+@props(['id', 'name', 'label', 'isChecked' => false, 'disabled' => false, 'description' => null])
 
 <div x-data="{ isChecked: {{ $isChecked ? 'true' : 'false' }} }" class="flex items-center gap-2">
     <label for="{{ $id }}" class="toggle-switch">
@@ -7,7 +7,23 @@
         <span class="toggle-switch-slider"></span>
     </label>
 
-    <span class="block font-medium text-sm text-background-700 dark:text-background-300">{{ $label }}</span>
+    @if($description)
+        <div class="flex gap-1">
+            {{-- <x-input-label value="{{ $label }}" /> --}}
+            <span class="block font-medium text-sm text-background-700 dark:text-background-300">{{ $label }}</span>
+            <div x-data="{tooltip: false}" x-on:mouseover="tooltip = true" x-on:mouseleave="tooltip = false" >
+                <div x-show="tooltip" class="absolute bg-background-100 
+                    p-2 rounded-md text-sm text-background-800 
+                    inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
+                    {{ $description }}
+                </div>
+                <x-lucide-info class="h-4 text-background-300" />
+            </div>
+        </div>
+    @else
+        {{-- <x-input-label value="{{ $label }}" /> --}}
+        <span class="block font-medium text-sm text-background-700 dark:text-background-300">{{ $label }}</span>
+    @endif
 </div>
 <style>
     .toggle-switch {

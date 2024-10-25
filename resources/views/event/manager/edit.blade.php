@@ -67,12 +67,14 @@
 
                         <x-form.checkbox id="block_subscriptions" name="block_subscriptions" label="Block subscriptions (shop)"
                             isChecked="{{ $event->block_subscriptions }}" 
-                            disabled="{{true}}" />
+                            disabled="{{true}}" 
+                            description="If enabled, it prevents new registrations in the shop. However, individuals on the waiting list will still be able to complete their purchases when it's their turn." />
 
                         <x-form.input name="waiting_list_close_date" label="Waiting list closing date" type="datetime-local"
                             value="{{ $event->waiting_list_close_date }}"
                             placeholder="{{ fake()->date() }}" 
-                            disabled="{{true}}" />
+                            disabled="{{true}}" 
+                            description="Prevents new registrations on the waiting list starting from the specified date. However, individuals on the waiting list will still be able to complete their purchases when it's their turn." />
 
                     @endif
 
