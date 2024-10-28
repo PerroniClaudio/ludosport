@@ -185,6 +185,10 @@ class UserController extends Controller {
             'email' => 'required|email|unique:users,email',
         ]);
 
+        $roles = explode(',', $request->roles);
+        if (count($roles) < 1 || ($roles[0] === '')) {
+            return back()->with('error', 'You must assign at least one role to the user!');
+        }
 
         $nation = Nation::where('name', $request->nationality)->first();
         $user = User::create([
@@ -197,8 +201,6 @@ class UserController extends Controller {
             'nation_id' => $nation->id,
             // 'unique_code' => $unique_code,
         ]);
-
-        $roles = explode(',', $request->roles);
 
         foreach ($roles as $role) {
             if (!$authUser->canModifyRole($role)) {
@@ -251,6 +253,14 @@ class UserController extends Controller {
             'email' => 'required|email|unique:users,email',
             'surname' => 'required|string|max:255',
         ]);
+
+        // Controlla il ruolo prima di creare l'utente. se la richiesta non è di tipo atleta deve avere almeno un altro ruolo
+        if ($request->type !== "athlete") {
+            $roles = explode(',', $request->roles);
+            if (count($roles) < 1 || ($roles[0] === '')) {
+                return back()->with('error', 'You must assign at least one role to the user!');
+            }
+        }
 
 
         $code_valid = false;
@@ -324,6 +334,14 @@ class UserController extends Controller {
             'email' => 'required|email|unique:users,email',
             'surname' => 'required|string|max:255',
         ]);
+
+        // Controlla il ruolo prima di creare l'utente. se la richiesta non è di tipo atleta deve avere almeno un altro ruolo
+        if ($request->type !== "athlete") {
+            $roles = explode(',', $request->roles);
+            if (count($roles) < 1 || ($roles[0] === '')) {
+                return back()->with('error', 'You must assign at least one role to the user!');
+            }
+        }
 
         $code_valid = false;
 
@@ -401,6 +419,14 @@ class UserController extends Controller {
             'email' => 'required|email|unique:users,email',
             'surname' => 'required|string|max:255',
         ]);
+
+        // Controlla il ruolo prima di creare l'utente. se la richiesta non è di tipo atleta deve avere almeno un altro ruolo
+        if ($request->type !== "athlete") {
+            $roles = explode(',', $request->roles);
+            if (count($roles) < 1 || ($roles[0] === '')) {
+                return back()->with('error', 'You must assign at least one role to the user!');
+            }
+        }
 
         $code_valid = false;
 
@@ -670,6 +696,12 @@ class UserController extends Controller {
             'nationality' => 'required|string|exists:nations,id',
         ]);
 
+        // Controlla il ruolo prima di creare l'utente. se la richiesta non è di tipo atleta deve avere almeno un altro ruolo
+        $newRoles = explode(',', $request->roles);
+        if (count($newRoles) < 1 || ($newRoles[0] === '')) {
+            return back()->with('error', 'You must assign at least one role to the user!');
+        }
+
         // Per il log dopo la modifica
         $oldHasPaidFee = $user->has_paid_fee;
         $newHasPaidFee = $user->has_paid_fee;
@@ -732,6 +764,30 @@ class UserController extends Controller {
                     $user->roles()->syncWithoutDetaching($roleElement->id);
                 }
             }
+
+            // Se è stato aggiunto il ruolo da utente si deve assegnare l'accademia primaria da atleta
+            // Se ce l'ha ok, altrimenti si mette come primaria la prima accademia a cui è associato (solo una per atleta), altrimenti si assegna no academy
+            if (in_array('athlete', $rolesToAdd)) {
+                if (!$user->primaryAcademyAthlete()){
+                    if($user->academyAthletes()->first()){
+                        $academy = $user->academyAthletes()->first();
+                        $user->setPrimaryAcademyAthlete($academy->id);
+                    } else {
+                        $user->academyAthletes()->syncWithoutDetaching(1);
+                        $user->setPrimaryAcademyAthlete(1);
+                    }
+                }
+            }
+
+            // Se ha un ruolo da personale deve avere almeno un'accademia associata (anche se non primaria), altrimenti si associa a no academy
+            if (array_intersect($rolesToAdd, ['rector', 'dean', 'manager', 'instructor', 'technician'])) {
+                if (!$user->primaryAcademy()) {
+                    if(!$user->academies()->first()){
+                        $user->academies()->syncWithoutDetaching(1);
+                        $user->setPrimaryAcademy(1);
+                    }
+                }
+            }
         }
 
         // Check if $rolesToRemove has any items
@@ -741,6 +797,47 @@ class UserController extends Controller {
                 $roleElement = Role::where('label', $roleLabel)->first();
                 if ($roleElement && $authUser->canModifyRole($roleLabel)) {
                     $user->roles()->detach($roleElement->id);
+                }
+            }
+
+            // Se è stato rimosso il ruolo da atleta si deve rimuovere l'accademia da atleta (anche primaria), così come tutti i collegamenti con corsi e scuole
+            if (in_array('athlete', $rolesToRemove)) {
+                $removedCourses = $user->clans()->get();
+                $removedSchools = $user->schoolAthletes()->get();
+                $removedAcademies = $user->academyAthletes()->get();
+
+                $user->clans()->detach(); // I clan da atleta si prendono con clans e gli altri con clansPersonnel
+                $user->schoolAthletes()->detach();
+                $user->academyAthletes()->detach();
+
+                Log::channel('user')->info('Removed athlete associations', [
+                    'made_by' => $authUser->id,
+                    'athlete' => $user->id,
+                    'academies' => $removedAcademies->pluck('id')->toArray(),
+                    'schools' => $removedSchools->pluck('id')->toArray(),
+                    'courses' => $removedCourses->pluck('id')->toArray(),
+                ]);
+
+            }
+
+            // Se è stato rimosso il ruolo da personale e non ha più nessun altro ruolo tale, si deve rimuovere l'accademia da personale (anche primaria), così come tutti i collegamenti con corsi e scuole
+            if (array_intersect($rolesToRemove, ['rector', 'dean', 'manager', 'instructor', 'technician'])) {
+                if(!array_intersect($newRoles, ['rector', 'dean', 'manager', 'instructor', 'technician'])){
+                    $removedCourses = $user->clansPersonnel()->get();
+                    $removedSchools = $user->schools()->get();
+                    $removedAcademies = $user->academies()->get();
+
+                    $user->clansPersonnel()->detach();
+                    $user->schools()->detach();
+                    $user->academies()->detach();
+
+                    Log::channel('user')->info('Removed personnel associations', [
+                        'made_by' => $authUser->id,
+                        'personnel' => $user->id,
+                        'academies' => $removedAcademies->pluck('id')->toArray(),
+                        'schools' => $removedSchools->pluck('id')->toArray(),
+                        'courses' => $removedCourses->pluck('id')->toArray(),
+                    ]);
                 }
             }
         }
