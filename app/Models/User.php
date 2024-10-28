@@ -579,7 +579,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return true;
                 break;
             case 'instructor':
-                $primary = $user->clans()->count() > 0;
+                $primary = $user->clansPersonnel()->count() > 0;
                 if (!$primary) {
                     return false;
                 }

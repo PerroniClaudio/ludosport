@@ -669,8 +669,14 @@ class SchoolController extends Controller {
         // Se l'utente è un istruttore, si filtrano le scuole per quelle a cui è associato
         $instructorSchools = $authUser->schools->pluck('id')->toArray();
 
+        // Se l'utente è dean o manager si restituisce solo la sua scuola (se nell'accademia selezionata, che dovrebbe essere solo la sua)
+        $primarySchool = $authUser->primarySchool();
+
         foreach ($schools as $key => $school) {
             if ($authRole === 'instructor' && !in_array($school->id, $instructorSchools)) {
+                continue;
+            }
+            if (in_array($authRole, ['dean', 'manager']) && $school->id !== $primarySchool->id) {
                 continue;
             }
             $formatted_schools[] = [

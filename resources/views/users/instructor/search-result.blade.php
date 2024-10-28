@@ -4,9 +4,9 @@
             <h2 class="font-semibold text-xl text-background-800 dark:text-background-200 leading-tight">
                 {{ __('users.search_result') }}
             </h2>
-            <div>
+            {{-- <div>
                 <x-create-new-button :href="route('instructor.users.create')" />
-            </div>
+            </div> --}}
         </div>
     </x-slot>
 

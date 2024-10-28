@@ -83,7 +83,10 @@ class UserController extends Controller {
                         }
                         break;
                     case 'instructor':
-                        $authSchools = $authUser->schools->pluck('id')->toArray();
+                        $authSchools = $authUser->clansPersonnel->map(function ($clan) {
+                            return $clan->school->id;
+                        })->toArray();
+
                         if (
                             $user->schools->whereIn('id', $authSchools)->isEmpty()
                             && $user->schoolAthletes->whereIn('id', $authSchools)->isEmpty()
@@ -780,30 +783,80 @@ class UserController extends Controller {
 
         // Installare meilisearch e continuare aggiungendo le condizionni per rector, dean, manager ecc.
 
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
 
-        if (in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'technician'])) {
-            $users = User::query()
+        switch($authRole) {
+            case 'admin':
+            case 'technician':
+                $users = User::query()
                 ->when($request->search, function (Builder $q, $value) {
                     /** 
                      * @disregard Intelephense non rileva il metodo whereIn
                      */
                     return $q->whereIn('id', User::search($value)->keys());
                 })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
-        } else if ($authRole == 'instructor') {
-            $users = User::query()
+                break;
+            case 'rector':
+                if(!$authUser->primaryAcademy()) {
+                    return back()->with('error', 'You are not authorized to access this page!');
+                }
+                $users = User::query()
                 ->when($request->search, function (Builder $q, $value) {
                     /** 
                      * @disregard Intelephense non rileva il metodo whereIn
                      */
-                    return $q->whereIn('users.id', User::search($value)->keys());
-                })->where(function ($query) {
-                    $query->whereHas('schools', function ($q) {
-                        return $q->whereIn('schools.id', auth()->user()->schools->pluck('id'));
-                    })->orWhereHas('schoolAthletes', function ($q) {
-                        return $q->whereIn('schools.id', auth()->user()->schools->pluck('id'));
+                    return $q->whereIn('id', User::search($value)->keys());
+                })->where(function ($query) use ($authUser) {
+                    $query->whereHas('academies', function ($q) use ($authUser) {
+                        return $q->where('academies.id', $authUser->primaryAcademy()->id);
+                    })->orWhereHas('academyAthletes', function ($q) use ($authUser) {
+                        return $q->where('academies.id', $authUser->primaryAcademy()->id);
                     });
                 })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                break;
+            case 'dean':
+            case 'manager':
+                if(!$authUser->primarySchool()) {
+                    return back()->with('error', 'You are not authorized to access this page!');
+                }
+                $users = User::query()
+                ->when($request->search, function (Builder $q, $value) {
+                    /** 
+                     * @disregard Intelephense non rileva il metodo whereIn
+                     */
+                    return $q->whereIn('id', User::search($value)->keys());
+                })->where(function ($query) use ($authUser) {
+                    $query->whereHas('schools', function ($q) use ($authUser) {
+                        return $q->where('schools.id', $authUser->primarySchool()->id);
+                    })->orWhereHas('schoolAthletes', function ($q) use ($authUser) {
+                        return $q->where('schools.id', $authUser->primarySchool()->id);
+                    });
+                })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                break;
+            case 'instructor':
+                if(!$authUser->primarySchool()) {
+                    return back()->with('error', 'You are not authorized to access this page!');
+                }
+                $schoolsIds = $authUser->clansPersonnel->map(function ($clan) {
+                    return $clan->school->id;
+                })->toArray();
+                $users = User::query()
+                ->when($request->search, function (Builder $q, $value) {
+                    /** 
+                     * @disregard Intelephense non rileva il metodo whereIn
+                     */
+                    return $q->whereIn('id', User::search($value)->keys());
+                })->where(function ($query) use ($schoolsIds) {
+                    $query->whereHas('schools', function ($q) use ($schoolsIds) {
+                        return $q->whereIn('schools.id', $schoolsIds);
+                    })->orWhereHas('schoolAthletes', function ($q) use ($schoolsIds) {
+                        return $q->whereIn('schools.id', $schoolsIds);
+                    });
+                })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                break;
+            default:
+                return back()->with('error', 'You are not authorized to access this page!');
         }
 
         $viewPath = $authRole === 'admin' ? 'users.search-result' :  'users.' . $authRole . '.search-result';
@@ -835,22 +888,22 @@ class UserController extends Controller {
 
         switch ($authRole) {
             case 'admin':
-            case 'rector':
-            case 'dean':
-            case 'manager':
             case 'technician':
+            // case 'rector':
+            // case 'dean':
+            // case 'manager':
                 $academies = Academy::where('is_disabled', false)->with('nation')->get();
                 break;
-                // case 'rector':
-                //     $academies = auth()->user()->academies;
-                //     break;
-                // case 'dean':
-                // case 'manager':
-                //     $academies = collect((auth()->user()->primarySchool()->academy ?? null) ? [auth()->user()->primarySchool()->academy] : []);
-                //     break;
-                // case 'technician':
-                //     $academies = Academy::where('is_disabled', false)->with('nation')->get();
-                //     break;
+            case 'rector':
+                $academies = collect([$authUser->primaryAcademy()]);
+                break;
+            case 'dean':
+            case 'manager':
+                $academies = collect(($authUser->primarySchool()->academy ?? null) ? [$authUser->primarySchool()->academy] : []);
+                break;
+            // case 'technician':
+            //     $academies = Academy::where('is_disabled', false)->with('nation')->get();
+            //     break;
             case 'instructor':
                 $academies = collect([$authUser->primaryAcademy()]);
                 break;
@@ -933,6 +986,9 @@ class UserController extends Controller {
         // Serve solo per l'istruttore. elenco delle scuole in cui ha un corso.
         $authSchools = $authUser->schools->pluck('id')->toArray();
 
+        // Serve solo per dean e manager. scuola in cui lavora.
+        $authPrimarySchool = $authUser->primarySchool();
+
         $filteredUsers = [];
 
         foreach ($users as $user) {
@@ -943,6 +999,16 @@ class UserController extends Controller {
                 if (
                     $user->schools->whereIn('id', $authSchools)->isEmpty()
                     && $user->schoolAthletes->whereIn('id', $authSchools)->isEmpty()
+                ) {
+                    $shouldAdd = false;
+                }
+            }
+
+            // Il dean e il manager possono vedere solo gli utenti della loro scuola.
+            if (in_array($authUserRole, ['dean', 'manager'])) {
+                if (
+                    $user->schools->where('id', $authPrimarySchool->id)->isEmpty()
+                    && $user->schoolAthletes->where('id', $authPrimarySchool->id)->isEmpty()
                 ) {
                     $shouldAdd = false;
                 }

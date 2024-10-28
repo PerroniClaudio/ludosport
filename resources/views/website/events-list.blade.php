@@ -11,7 +11,7 @@
 
             <div class="w-full flex items-end" x-data="{
                 nationFilter: '{{ $nationFilter }}'
-            }" x-init="$watch('nationFilter', (value) => window.location.href = `{{ env('APP_URL') }}events-list?nation=${value}`)">
+            }" x-init="$watch('nationFilter', (value) => window.location.href = `{{ env('APP_URL') }}/events-list?nation=${value}`)">
                 <div class="flex-1">
                     <x-form.select name="country" label="{{ __('website.academies_map_nations') }}" x-model="nationFilter"
                         shouldHaveEmptyOption="false" :options="$continents" />

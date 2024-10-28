@@ -3,15 +3,18 @@
         $authRole = auth()->user()->getRole();
         $createRoute = $authRole === 'admin' ? 'users.create' : $authRole . '.users.create';
         $editRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
+        $canCreate = in_array($authRole, ['admin', 'rector', 'dean', 'manager']);
     @endphp
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-background-800 dark:text-background-200 leading-tight">
                 {{ __('users.search_result') }}
             </h2>
-            <div>
-                <x-create-new-button :href="route($createRoute)" />
-            </div>
+            @if ($canCreate)
+                <div>
+                    <x-create-new-button :href="route($createRoute)" />
+                </div>
+            @endif
         </div>
     </x-slot>
 
