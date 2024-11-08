@@ -43,7 +43,9 @@
         <p class="text-white font-bold">LudoSport</p>
         <p class="font-bold">
             <span class="text-primary-500 ">{{ __('school.school') }}:</span>
-            <span class="text-white">{{ $user->primarySchoolAthlete()->name }}</span>
+            @if ($user->primarySchoolAthlete())
+                <span class="text-white">{{ $user->primarySchoolAthlete()->name }}</span>
+            @endif
         </p>
     </div>
 </section>
