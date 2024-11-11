@@ -49,8 +49,13 @@ class ClanController extends Controller {
                 $academies = $authUser->academies;
                 $clans = [];
 
-                foreach ($academies as $key => $academy) {
-                    array_merge($clans, $academy->schools->pluck('id'));
+                foreach ($academies as $academy) {
+                    $schools = $academy->schools;
+                    foreach ($schools as $school) {
+                        foreach ($school->clan as $clan) {
+                            $clans[] = $clan;
+                        }
+                    }
                 }
 
 
@@ -59,6 +64,7 @@ class ClanController extends Controller {
                 $clans = [];
                 break;
         }
+
 
         foreach ($clans as $key => $clan) {
             $clans[$key]->school_name = $clan->school->name;
