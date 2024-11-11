@@ -21,9 +21,14 @@ class ClanController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
+        /*
+        ! Controllo da reworkare
+
         if (!$authUser->validatePrimaryInstitutionPersonnel()) {
-            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+            return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
         }
+            
+        */
 
         switch ($authRole) {
             case 'admin':
@@ -279,9 +284,9 @@ class ClanController extends Controller {
         $instructors = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
             $query->where('label', 'instructor');
         })->whereNotIn('id', $clan->personnel->pluck('id'))->get();
-        
+
         $athletes = [];
-        
+
         // Admin (tutti), rector (della sua accademia), dean (della sua scuola), manager (della sua scuola)
         // Poi se mancano delle associazioni con scuola e accademia, si aggiungono.
         switch ($authRole) {
@@ -471,10 +476,10 @@ class ClanController extends Controller {
         $school = School::find($clan->school_id);
         $academy = Academy::find($school->academy_id);
 
-        if(!$user->clans()->where('clan_id', $clan->id)->exists()){
-            if($user->academyAthletes()->first()->id != $academy->id) {
+        if (!$user->clans()->where('clan_id', $clan->id)->exists()) {
+            if ($user->academyAthletes()->first()->id != $academy->id) {
                 // L'admin può farlo sempre, il rettore, il dean e il manager solo se l'accademia è no academy
-                if($authRole !== 'admin' && $user->academyAthletes()->first()->id !== 1) {
+                if ($authRole !== 'admin' && $user->academyAthletes()->first()->id !== 1) {
                     return redirect()->route('dashboard')->with('error', 'Not authorized.');
                 }
                 // L'atleta può avere solo un'accademia associata

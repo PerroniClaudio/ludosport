@@ -29,8 +29,6 @@ use Illuminate\Support\Facades\Password;
 class UserController extends Controller {
 
     public function index() {
-        // Qui si dovrebbero filtrare gli utenti visualizzabili in base al ruolo dell'utente loggato.
-        // Es. tutti vedono tutto tranne gli istruttori che sono limitati alle scuole in cui hanno un corso
         $authUser = User::find(auth()->user()->id);
         $authUserRole = $authUser->getRole();
 
@@ -38,101 +36,69 @@ class UserController extends Controller {
             return redirect()->route("dashboard")->with('error', 'You do not have the required role to access this page!');
         }
 
-        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
-            return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
-        }
-
         $roles = Role::all();
         $users_sorted_by_role = [];
-        foreach ($roles as $role) {
+        $users = [];
 
-            $users = [];
+        switch ($authUserRole) {
+            case 'admin':
+            case 'technician':
 
-            foreach ($role->users as $user) {
-                if ($user->is_disabled) {
-                    continue;
-                }
+                // Tutti gli utenti
 
-                // utenti visualizzabili (sia athlete che personnel): 
-                // admin e technician (tutti), 
-                // rector (quelli nell'accademia, athlete e personnel), 
-                // dean e manager (quelli nella scuola, athlete e personnel)
-                // instructor (quelli delle scuole in cui ha corsi in cui è associato come personale, solo athlete).
-                $skipUser = false;
-                switch ($authUserRole) {
-                    case 'admin':
-                    case 'technician':
-                        break;
-                    case 'rector':
-                        if (!in_array(
-                            $authUser->primaryAcademy()->id,
-                            array_merge(
-                                $user->academies()->pluck('academy_id')->toArray(),
-                                [$user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->id : null]
-                            )
-                        )) {
-                            $skipUser = true;
-                        }
-                        break;
-                    case 'dean':
-                    case 'manager':
-                        if (!in_array(
-                            $authUser->primarySchool()->id,
-                            array_merge(
-                                $user->schools()->pluck('school_id')->toArray(),
-                                [$user->primarySchoolAthlete() ? $user->primarySchoolAthlete()->id : null]
-                            )
-                        )) {
-                            $skipUser = true;
-                        }
-                        break;
-                    case 'instructor':
-                        $authSchools = $authUser->clansPersonnel->map(function ($clan) {
-                            return $clan->school->id;
-                        })->toArray();
+                $users = User::all()->where('is_disabled', false);
 
-                        if (
-                            $user->schools->whereIn('id', $authSchools)->isEmpty()
-                            && $user->schoolAthletes->whereIn('id', $authSchools)->isEmpty()
-                        ) {
-                            $skipUser = true;
-                        }
-                        break;
-                    default:
-                        return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
-                }
+                break;
+            case 'rector':
+            case 'instructor':
 
-                if ($skipUser) {
-                    continue;
-                }
+                // Utenti di una determinata accademia
 
-                if ($role->label === 'athlete') {
-                    $user->academy = $user->primaryAcademyAthlete();
-                    $user->school = $user->primarySchoolAthlete();
-                    if ($user->academy) {
-                        $user->nation = $user->academy->nation->name;
-                    } else {
+                $academy_id = $authUser->primaryAcademy()->id;
 
-                        if ($user->nation_id === null) {
-                            $user->nation = "Not set";
-                        } else {
-                            $nation = Nation::find($user->nation_id);
-                            $user->nation = $nation->name;
-                        }
-                    }
-                }
+                $users = User::whereHas('academies', function (Builder $query) use ($academy_id) {
+                    $query->where('academy_id', $academy_id);
+                })->orWhereHas('academyAthletes', function (Builder $query) use ($academy_id) {
+                    $query->where('academy_id', $academy_id);
+                })->where('is_disabled', false)->get();
 
-                if ($role->label === 'technician' || $role->label === 'instructor') {
-                    $user->weapon_forms_formatted = $user->weaponFormsPersonnel()->pluck('name')->toArray();
-                }
+                break;
 
-                $users[] = $user;
-            }
+            case 'dean':
+            case 'manager':
 
-            $users_sorted_by_role[$role->label] = $users;
+                // Utenti di una determinata scuola
+
+                $school_id = $authUser->primarySchool()->id;
+
+                $users = User::whereHas('schools', function (Builder $query) use ($school_id) {
+                    $query->where('school_id', $school_id);
+                })->orWhereHas('schoolAthletes', function (Builder $query) use ($school_id) {
+                    $query->where('school_id', $school_id);
+                })->where('is_disabled', false)->get();
+
+
+                break;
+            default:
+                return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
+                break;
         }
 
         $viewPath = $authUserRole === 'admin' ? 'users.index' : 'users.' . $authUserRole . '.index';
+
+        foreach ($roles as $role) {
+            $filtered = $users->filter(function ($user) use ($role) {
+                return $user->hasRole($role->label);
+            });
+
+            if ($filtered->isEmpty()) {
+                $users_sorted_by_role[$role->label] = [];
+            } else {
+                foreach ($filtered as $user) {
+                    $users_sorted_by_role[$role->label][] = $user;
+                }
+            }
+        }
 
         return view($viewPath, [
             'users' => $users_sorted_by_role,
