@@ -45,7 +45,15 @@ class ClanController extends Controller {
             case 'instructor':
                 // Gli istruttori possono vedere tutti i corsi delle scuole a cui sono associati
                 // $clans = $authUser->clansPersonnel;
-                $clans = $authUser->schools->pluck('clan')->flatten();
+
+                $academies = $authUser->academies;
+                $clans = [];
+
+                foreach ($academies as $key => $academy) {
+                    array_merge($clans, $academy->schools->pluck('id'));
+                }
+
+
                 break;
             default:
                 $clans = [];
