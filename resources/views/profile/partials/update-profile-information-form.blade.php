@@ -23,14 +23,14 @@
                 required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
-        
+
         <div>
             <x-input-label for="surname" :value="__('Surname')" />
             <x-text-input id="surname" name="surname" type="text" class="mt-1 block w-full" :value="old('surname', $user->surname)"
                 required autofocus autocomplete="surname" />
             <x-input-error class="mt-2" :messages="$errors->get('surname')" />
         </div>
-        
+
         <div>
             <x-input-label for="battle_name" :value="__('Battle name')" />
             <x-text-input id="battle_name" name="battle_name" type="text" class="mt-1 block w-full" :value="old('battle_name', $user->battle_name)"
@@ -65,11 +65,20 @@
         </div>
 
 
-        <x-form.input name="instagram" label="Instagram" type="text" required="{{ false }}" :value="$user->instagram"
-            placeholder="{{ fake()->username() }}" />
+        <x-form.input name="instagram" label="Instagram" type="text" required="{{ false }}"
+            :value="$user->instagram" placeholder="{{ fake()->username() }}" />
 
-        <x-form.input name="telegram" label="Telegram handle" type="text" required="{{ false }}" :value="$user->telegram"
-            placeholder="@username" />
+        <x-form.input name="telegram" label="Telegram handle" type="text" required="{{ false }}"
+            :value="$user->telegram" placeholder="@username" />
+
+
+        @if ($user->primaryAcademyAthlete())
+            <div>
+                <x-form.input name="academy" disabled="true" label="{{ __('academies.academy') }}"
+                    value="{{ $user->primaryAcademyAthlete()->name }}" />
+
+            </div>
+        @endif
 
         <x-form.textarea name="bio" label="Bio" required="{{ false }}" :value="$user->bio" />
 

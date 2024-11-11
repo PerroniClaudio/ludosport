@@ -140,7 +140,14 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     // Restituisce l'accademia principale (per gli atleti)
     public function primaryAcademyAthlete() {
-        return $this->academyAthletes()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
+
+        $academy = $this->academyAthletes()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
+
+        if (!$academy) {
+            $academy = $this->academyAthletes()->where('is_disabled', false)->first();
+        }
+
+        return $academy;
     }
 
     // Imposta accademia primaria (per gli atleti)
@@ -633,7 +640,7 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     // Rimuove l'associazione del personnel con l'accademia indicata e le rispettive scuole e corsi associati
     public function removeAcademyPersonnelAssociations($academyToRemove = null) {
-        if($academyToRemove == null) {
+        if ($academyToRemove == null) {
             return;
         }
         $authUser = User::find(auth()->user()->id);
@@ -692,7 +699,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Rimuove l'associazione dell'atleta con la scuola indicata e i rispettivi corsi
-    public function removeSchoolAthleteAssociations($schoolToRemove = null){
+    public function removeSchoolAthleteAssociations($schoolToRemove = null) {
         $authUser = User::find(auth()->user()->id);
         // Chi usa la funzione ha già il controllo sull'autorizzazione
         // $authRole = $authUser->getRole();
@@ -717,12 +724,24 @@ class User extends Authenticatable implements MustVerifyEmail {
     // Usatp negli import per capire l'autorizzazione per associazioni di atleti ad accademie, scuole e corsi. la parte di istruttore e tecnico non mi interessa per ora
     public function getHighestRole() {
         $highestRole = null;
-        if($this->hasRole('admin')){ $highestRole = 'admin'; }
-        if(!$highestRole && $this->hasRole('rector')){ $highestRole = 'rector'; }
-        if(!$highestRole && $this->hasRole('dean')){ $highestRole = 'dean'; }
-        if(!$highestRole && $this->hasRole('manager')){ $highestRole = 'manager'; }
-        if(!$highestRole && $this->hasRole('instructor')){ $highestRole = 'instructor'; }
-        if(!$highestRole && $this->hasRole('technician')){ $highestRole = 'technician'; }
+        if ($this->hasRole('admin')) {
+            $highestRole = 'admin';
+        }
+        if (!$highestRole && $this->hasRole('rector')) {
+            $highestRole = 'rector';
+        }
+        if (!$highestRole && $this->hasRole('dean')) {
+            $highestRole = 'dean';
+        }
+        if (!$highestRole && $this->hasRole('manager')) {
+            $highestRole = 'manager';
+        }
+        if (!$highestRole && $this->hasRole('instructor')) {
+            $highestRole = 'instructor';
+        }
+        if (!$highestRole && $this->hasRole('technician')) {
+            $highestRole = 'technician';
+        }
         return $highestRole;
     }
 }

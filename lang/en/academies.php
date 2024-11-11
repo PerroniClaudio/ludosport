@@ -2,6 +2,7 @@
 
 return [
     'title' => 'Academies',
+    'academy' => 'Academy',
     'new' => 'New Academy',
     'create' => 'Create Academy',
     'edit' => 'Edit Academy',
