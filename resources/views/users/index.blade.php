@@ -149,8 +149,50 @@
                                         </x-slot>
 
                                     </x-table>
+                                @elseif ($key == 'instructor' || $key == 'technician')
+                                    <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                        {{ __('users.' . $key . '_role') }}
+                                    </h3>
+                                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                                    <x-table striped="false" :columns="[
+                                        [
+                                            'name' => 'Name',
+                                            'field' => 'name',
+                                            'columnClasses' => '',
+                                            'rowClasses' => '',
+                                        ],
+                                        [
+                                            'name' => 'Email',
+                                            'field' => 'email',
+                                            'columnClasses' => '',
+                                            'rowClasses' => '',
+                                        ],
+                                        [
+                                            'name' => 'Weapon Forms',
+                                            'field' => 'weapon_forms_formatted',
+                                            'columnClasses' => '',
+                                            'rowClasses' => '',
+                                        ],
+                                    ]" :rows="$role">
+                                        <x-slot name="tableRows">
+                                            <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                                                x-text="row.name + ' ' + row.surname"></td>
+                                            <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                                                x-text="row.email"></td>
+                                            <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                                                x-text="row.weapon_forms_formatted"></td>
+                                            <td
+                                                class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
+                                                <a x-bind:href="'/users/' + row.id">
+                                                    <x-lucide-pencil
+                                                        class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                                                </a>
+                                            </td>
+                                        </x-slot>
+                                    </x-table>
                                 @else
                                     <h3 class="text-background-800 dark:text-background-200 text-2xl">
+
                                         {{ __('users.' . $key . '_role') }}
                                     </h3>
                                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>

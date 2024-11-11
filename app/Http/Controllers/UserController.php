@@ -64,21 +64,25 @@ class UserController extends Controller {
                     case 'technician':
                         break;
                     case 'rector':
-                        if (!in_array($authUser->primaryAcademy()->id, 
-                                array_merge(
-                                    $user->academies()->pluck('academy_id')->toArray(), 
-                                    [$user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->id : null]
-                            ))) {
+                        if (!in_array(
+                            $authUser->primaryAcademy()->id,
+                            array_merge(
+                                $user->academies()->pluck('academy_id')->toArray(),
+                                [$user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->id : null]
+                            )
+                        )) {
                             $skipUser = true;
                         }
                         break;
                     case 'dean':
                     case 'manager':
-                        if(!in_array($authUser->primarySchool()->id, 
-                                array_merge(
-                                    $user->schools()->pluck('school_id')->toArray(), 
-                                    [$user->primarySchoolAthlete() ? $user->primarySchoolAthlete()->id : null]
-                            ))) {
+                        if (!in_array(
+                            $authUser->primarySchool()->id,
+                            array_merge(
+                                $user->schools()->pluck('school_id')->toArray(),
+                                [$user->primarySchoolAthlete() ? $user->primarySchoolAthlete()->id : null]
+                            )
+                        )) {
                             $skipUser = true;
                         }
                         break;
@@ -116,6 +120,10 @@ class UserController extends Controller {
                             $user->nation = $nation->name;
                         }
                     }
+                }
+
+                if ($role->label === 'technician' || $role->label === 'instructor') {
+                    $user->weapon_forms_formatted = $user->weaponFormsPersonnel()->pluck('name')->toArray();
                 }
 
                 $users[] = $user;
@@ -501,9 +509,9 @@ class UserController extends Controller {
         }
 
         // Possono vedere solo le persone associate alla loro accademia/scuola come atleti o come personale
-        if(($authRole === "rector" && (!in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray()) && !in_array($authUser->primaryAcademy()->id, $user->academies->pluck('id')->toArray())))
+        if (($authRole === "rector" && (!in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray()) && !in_array($authUser->primaryAcademy()->id, $user->academies->pluck('id')->toArray())))
             || (in_array($authRole, ['dean', 'manager']) && (!in_array($authUser->primarySchool()->id, $user->schoolAthletes()->pluck('school_id')->toArray()) && !in_array($authUser->primarySchool()->id, $user->schools()->pluck('school_id')->toArray())))
-        ){
+        ) {
             return back()->with('error', 'You are not authorized to access this page!');
         }
 
@@ -664,21 +672,25 @@ class UserController extends Controller {
             case 'admin':
                 break;
             case 'rector':
-                if (!in_array($authUser->primaryAcademy()->id, 
+                if (!in_array(
+                    $authUser->primaryAcademy()->id,
                     array_merge(
-                        $user->academies()->pluck('academy_id')->toArray(), 
+                        $user->academies()->pluck('academy_id')->toArray(),
                         [$user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->id : null]
-                ))) {
+                    )
+                )) {
                     $canUpdate = false;
                 }
                 break;
             case 'dean':
             case 'manager':
-                if(!in_array($authUser->primarySchool()->id, 
-                        array_merge(
-                            $user->schools()->pluck('school_id')->toArray(), 
-                            [$user->primarySchoolAthlete() ? $user->primarySchoolAthlete()->id : null]
-                    ))) {
+                if (!in_array(
+                    $authUser->primarySchool()->id,
+                    array_merge(
+                        $user->schools()->pluck('school_id')->toArray(),
+                        [$user->primarySchoolAthlete() ? $user->primarySchoolAthlete()->id : null]
+                    )
+                )) {
                     $canUpdate = false;
                 }
                 break;
@@ -768,8 +780,8 @@ class UserController extends Controller {
             // Se è stato aggiunto il ruolo da utente si deve assegnare l'accademia primaria da atleta
             // Se ce l'ha ok, altrimenti si mette come primaria la prima accademia a cui è associato (solo una per atleta), altrimenti si assegna no academy
             if (in_array('athlete', $rolesToAdd)) {
-                if (!$user->primaryAcademyAthlete()){
-                    if($user->academyAthletes()->first()){
+                if (!$user->primaryAcademyAthlete()) {
+                    if ($user->academyAthletes()->first()) {
                         $academy = $user->academyAthletes()->first();
                         $user->setPrimaryAcademyAthlete($academy->id);
                     } else {
@@ -782,7 +794,7 @@ class UserController extends Controller {
             // Se ha un ruolo da personale deve avere almeno un'accademia associata (anche se non primaria), altrimenti si associa a no academy
             if (array_intersect($rolesToAdd, ['rector', 'dean', 'manager', 'instructor', 'technician'])) {
                 if (!$user->primaryAcademy()) {
-                    if(!$user->academies()->first()){
+                    if (!$user->academies()->first()) {
                         $user->academies()->syncWithoutDetaching(1);
                         $user->setPrimaryAcademy(1);
                     }
@@ -817,12 +829,11 @@ class UserController extends Controller {
                     'schools' => $removedSchools->pluck('id')->toArray(),
                     'courses' => $removedCourses->pluck('id')->toArray(),
                 ]);
-
             }
 
             // Se è stato rimosso il ruolo da personale e non ha più nessun altro ruolo tale, si deve rimuovere l'accademia da personale (anche primaria), così come tutti i collegamenti con corsi e scuole
             if (array_intersect($rolesToRemove, ['rector', 'dean', 'manager', 'instructor', 'technician'])) {
-                if(!array_intersect($newRoles, ['rector', 'dean', 'manager', 'instructor', 'technician'])){
+                if (!array_intersect($newRoles, ['rector', 'dean', 'manager', 'instructor', 'technician'])) {
                     $removedCourses = $user->clansPersonnel()->get();
                     $removedSchools = $user->schools()->get();
                     $removedAcademies = $user->academies()->get();
@@ -883,74 +894,74 @@ class UserController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        switch($authRole) {
+        switch ($authRole) {
             case 'admin':
             case 'technician':
                 $users = User::query()
-                ->when($request->search, function (Builder $q, $value) {
-                    /** 
-                     * @disregard Intelephense non rileva il metodo whereIn
-                     */
-                    return $q->whereIn('id', User::search($value)->keys());
-                })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                    ->when($request->search, function (Builder $q, $value) {
+                        /** 
+                         * @disregard Intelephense non rileva il metodo whereIn
+                         */
+                        return $q->whereIn('id', User::search($value)->keys());
+                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
                 break;
             case 'rector':
-                if(!$authUser->primaryAcademy()) {
+                if (!$authUser->primaryAcademy()) {
                     return back()->with('error', 'You are not authorized to access this page!');
                 }
                 $users = User::query()
-                ->when($request->search, function (Builder $q, $value) {
-                    /** 
-                     * @disregard Intelephense non rileva il metodo whereIn
-                     */
-                    return $q->whereIn('id', User::search($value)->keys());
-                })->where(function ($query) use ($authUser) {
-                    $query->whereHas('academies', function ($q) use ($authUser) {
-                        return $q->where('academies.id', $authUser->primaryAcademy()->id);
-                    })->orWhereHas('academyAthletes', function ($q) use ($authUser) {
-                        return $q->where('academies.id', $authUser->primaryAcademy()->id);
-                    });
-                })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                    ->when($request->search, function (Builder $q, $value) {
+                        /** 
+                         * @disregard Intelephense non rileva il metodo whereIn
+                         */
+                        return $q->whereIn('id', User::search($value)->keys());
+                    })->where(function ($query) use ($authUser) {
+                        $query->whereHas('academies', function ($q) use ($authUser) {
+                            return $q->where('academies.id', $authUser->primaryAcademy()->id);
+                        })->orWhereHas('academyAthletes', function ($q) use ($authUser) {
+                            return $q->where('academies.id', $authUser->primaryAcademy()->id);
+                        });
+                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
                 break;
             case 'dean':
             case 'manager':
-                if(!$authUser->primarySchool()) {
+                if (!$authUser->primarySchool()) {
                     return back()->with('error', 'You are not authorized to access this page!');
                 }
                 $users = User::query()
-                ->when($request->search, function (Builder $q, $value) {
-                    /** 
-                     * @disregard Intelephense non rileva il metodo whereIn
-                     */
-                    return $q->whereIn('id', User::search($value)->keys());
-                })->where(function ($query) use ($authUser) {
-                    $query->whereHas('schools', function ($q) use ($authUser) {
-                        return $q->where('schools.id', $authUser->primarySchool()->id);
-                    })->orWhereHas('schoolAthletes', function ($q) use ($authUser) {
-                        return $q->where('schools.id', $authUser->primarySchool()->id);
-                    });
-                })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                    ->when($request->search, function (Builder $q, $value) {
+                        /** 
+                         * @disregard Intelephense non rileva il metodo whereIn
+                         */
+                        return $q->whereIn('id', User::search($value)->keys());
+                    })->where(function ($query) use ($authUser) {
+                        $query->whereHas('schools', function ($q) use ($authUser) {
+                            return $q->where('schools.id', $authUser->primarySchool()->id);
+                        })->orWhereHas('schoolAthletes', function ($q) use ($authUser) {
+                            return $q->where('schools.id', $authUser->primarySchool()->id);
+                        });
+                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
                 break;
             case 'instructor':
-                if(!$authUser->primarySchool()) {
+                if (!$authUser->primarySchool()) {
                     return back()->with('error', 'You are not authorized to access this page!');
                 }
                 $schoolsIds = $authUser->clansPersonnel->map(function ($clan) {
                     return $clan->school->id;
                 })->toArray();
                 $users = User::query()
-                ->when($request->search, function (Builder $q, $value) {
-                    /** 
-                     * @disregard Intelephense non rileva il metodo whereIn
-                     */
-                    return $q->whereIn('id', User::search($value)->keys());
-                })->where(function ($query) use ($schoolsIds) {
-                    $query->whereHas('schools', function ($q) use ($schoolsIds) {
-                        return $q->whereIn('schools.id', $schoolsIds);
-                    })->orWhereHas('schoolAthletes', function ($q) use ($schoolsIds) {
-                        return $q->whereIn('schools.id', $schoolsIds);
-                    });
-                })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                    ->when($request->search, function (Builder $q, $value) {
+                        /** 
+                         * @disregard Intelephense non rileva il metodo whereIn
+                         */
+                        return $q->whereIn('id', User::search($value)->keys());
+                    })->where(function ($query) use ($schoolsIds) {
+                        $query->whereHas('schools', function ($q) use ($schoolsIds) {
+                            return $q->whereIn('schools.id', $schoolsIds);
+                        })->orWhereHas('schoolAthletes', function ($q) use ($schoolsIds) {
+                            return $q->whereIn('schools.id', $schoolsIds);
+                        });
+                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
                 break;
             default:
                 return back()->with('error', 'You are not authorized to access this page!');
@@ -986,9 +997,9 @@ class UserController extends Controller {
         switch ($authRole) {
             case 'admin':
             case 'technician':
-            // case 'rector':
-            // case 'dean':
-            // case 'manager':
+                // case 'rector':
+                // case 'dean':
+                // case 'manager':
                 $academies = Academy::where('is_disabled', false)->with('nation')->get();
                 break;
             case 'rector':
@@ -998,9 +1009,9 @@ class UserController extends Controller {
             case 'manager':
                 $academies = collect(($authUser->primarySchool()->academy ?? null) ? [$authUser->primarySchool()->academy] : []);
                 break;
-            // case 'technician':
-            //     $academies = Academy::where('is_disabled', false)->with('nation')->get();
-            //     break;
+                // case 'technician':
+                //     $academies = Academy::where('is_disabled', false)->with('nation')->get();
+                //     break;
             case 'instructor':
                 $academies = collect([$authUser->primaryAcademy()]);
                 break;
@@ -1816,13 +1827,13 @@ class UserController extends Controller {
                 'academy_id' => $academy->id,
                 'made_by' => $authUser->id,
             ]);
-            if($user->academies->where('id', 1)->count() > 0){
+            if ($user->academies->where('id', 1)->count() > 0) {
                 // Se è associato a no academy viene rimosso
                 $user->academies()->detach(1);
                 $user->setPrimaryAcademy($academy->id);
             }
             // Se ha una sola associazione ad accademie, la rende primaria
-            if($user->academies->count() == 1){
+            if ($user->academies->count() == 1) {
                 $user->setPrimaryAcademy($academy->id);
             }
         } else if ($request->type == 'athlete') {
@@ -1841,7 +1852,7 @@ class UserController extends Controller {
             $user->setPrimaryAcademyAthlete($academy->id);
 
             // Fallback se l'associazione non è andata a buon fine
-            if($user->academyAthletes->count() == 0){
+            if ($user->academyAthletes->count() == 0) {
                 // Se non ha accademie come atleta viene assegnato a No academy
                 $user->academyAthletes()->syncWithoutDetaching(1);
                 $user->setPrimaryAcademyAthlete(1);
@@ -1865,7 +1876,7 @@ class UserController extends Controller {
     public function associateSchool(Request $request) {
         $authUser = User::find(auth()->user()->id);
         $authUserRole = $authUser->getRole();
-        
+
         $user = User::find($request->user_id);
         $school = School::find($request->school_id);
 
@@ -1883,10 +1894,9 @@ class UserController extends Controller {
                 'made_by' => $authUser->id,
             ]);
             // Se l'atleta non ha la scuola principale, la assegna
-            if(!$user->primarySchool()){
+            if (!$user->primarySchool()) {
                 $user->setPrimarySchool($school->id);
             }
-
         } else if ($request->type == 'athlete') {
             $user->schoolAthletes()->syncWithoutDetaching($school->id);
             Log::channel('school')->info('Athlete associated with school', [
@@ -1895,7 +1905,7 @@ class UserController extends Controller {
                 'made_by' => $authUser->id,
             ]);
             // Se l'atleta non ha la scuola principale, la assegna
-            if(!$user->primarySchoolAthlete()){
+            if (!$user->primarySchoolAthlete()) {
                 $user->setPrimarySchoolAthlete($school->id);
             }
         } else {
@@ -1933,7 +1943,7 @@ class UserController extends Controller {
             // Rimuove tutte le associazioni a corsi, scuole e accademia indicata e crea i log
             $user->removeAcademyPersonnelAssociations($academy);
 
-            if ($user->academies()->count() == 0){
+            if ($user->academies()->count() == 0) {
                 // Se non ha accademie come personnel viene assegnato a No academy. Se si usa il codice più giù, si può rimuovere questo
                 $user->academies()->syncWithoutDetaching(1);
                 $user->setPrimaryAcademy(1);
@@ -1971,16 +1981,16 @@ class UserController extends Controller {
             $user->removeAcademiesAthleteAssociations();
 
             // Nel caso dell'atleta non si fa nessun danno ad associarlo in automatico se non ha l'istituzione primaria
-            if($user->primaryAcademyAthlete() == null){
+            if ($user->primaryAcademyAthlete() == null) {
                 $newAcademy = $user->academyAthletes->first();
-                if($newAcademy){
+                if ($newAcademy) {
                     $user->setPrimaryAcademyAthlete($newAcademy->id);
                     Log::channel('academy')->info('Athlete associated with academy', [
                         'user_id' => $user->id,
                         'academy_id' => 1,
                         'made_by' => $authUser->id,
-                    ]);               
-                } else if($user->academyAthletes->count() == 0){
+                    ]);
+                } else if ($user->academyAthletes->count() == 0) {
                     // Se non ha accademie come atleta viene assegnato a No academy
                     $user->academyAthletes()->syncWithoutDetaching(1);
                     $user->setPrimaryAcademyAthlete(1);
@@ -1988,9 +1998,9 @@ class UserController extends Controller {
                         'user_id' => $user->id,
                         'academy_id' => 1,
                         'made_by' => $authUser->id,
-                    ]);               
+                    ]);
                 }
-            } 
+            }
         } else {
             return response()->json([
                 'error' => 'Invalid type!',
@@ -2008,7 +2018,7 @@ class UserController extends Controller {
 
         $user = User::find($request->user_id);
         $school = School::find($request->school_id);
-        
+
         if ($authUserRole !== 'admin' && !($authUserRole === "rector" && ($authUser->primaryAcademy()->id === $school->academy->id))) {
             return response()->json([
                 'error' => 'You are not authorized to remove this user from this school!',
@@ -2037,9 +2047,9 @@ class UserController extends Controller {
             $user->removeSchoolAthleteAssociations($school);
 
             // Nel caso dell'atleta non si fa nessun danno ad associarlo in automatico se non ha l'istituzione primaria
-            if($user->primarySchoolAthlete() == null){
+            if ($user->primarySchoolAthlete() == null) {
                 $newSchool = $user->schoolAthletes->first();
-                if($newSchool){
+                if ($newSchool) {
                     $user->setPrimarySchoolAthlete($newSchool->id);
                 }
             }
@@ -2053,5 +2063,4 @@ class UserController extends Controller {
             'success' => true,
         ]);
     }
-        
 }

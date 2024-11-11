@@ -27,7 +27,7 @@
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-background-900 dark:text-background-100">
                     @foreach ($users as $user)
-                        <div class="flex items-center gap-2 mb-4 border rounded p-4">
+                        <div class="flex items-center gap-2 mb-4 border dark:border-background-700 rounded p-4">
                             <div class="flex-1 flex flex-col gap-2">
                                 <div class="text-xl">{{ $user->name }} {{ $user->surname }}</div>
                                 <div class="text-sm text-background-500 dark:text-background-400">
@@ -48,7 +48,7 @@
                                         <span class="text-sm">
                                             @if (count($user->academies) > 0)
                                                 @foreach ($user->academies as $index => $academy)
-                                                    {{ $academy->name . ($index < (count($user->academies) - 1) ? ', ' : '') }}
+                                                    {{ $academy->name . ($index < count($user->academies) - 1 ? ', ' : '') }}
                                                 @endforeach
                                             @else
                                                 {{ __('users.no_academies') }}
@@ -63,7 +63,7 @@
                                             <span class="text-sm">
                                                 @if (count($user->academyAthletes) > 0)
                                                     @foreach ($user->academyAthletes as $index => $academy)
-                                                        {{ $academy->name . ($index < (count($user->academyAthletes) - 1) ? ', ' : '') }}
+                                                        {{ $academy->name . ($index < count($user->academyAthletes) - 1 ? ', ' : '') }}
                                                     @endforeach
                                                 @else
                                                     {{ __('users.no_academies') }}
@@ -84,7 +84,7 @@
 
                             <a href="{{ route($editRoute, $user->id) }}">
                                 <x-secondary-button>
-                                    <x-lucide-edit class="h-5 w-5 text-white" />
+                                    <x-lucide-edit class="h-5 w-5 text-white dark:text-background-200" />
                                 </x-secondary-button>
                             </a>
 
