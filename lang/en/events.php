@@ -77,4 +77,7 @@ return [
     'result_stage_confirmed' => 'Confirmed',
     'max_participants_placeholder' => 'Maximum number of participants (0 means unlimited)',
     'waiting_list' => 'Waiting List',
+    'disable_event' => 'Disable Event',
+    'disable_event_confirmation' => 'Are you sure you want to disable this event?',
+    'disable_event_message' => 'This action will disable the event, you cannot enable it again.',
 ];

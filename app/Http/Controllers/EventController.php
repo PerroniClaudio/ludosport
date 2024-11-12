@@ -52,15 +52,16 @@ class EventController extends Controller {
 
                 $events = Event::where('academy_id', $academy_id)
                     ->where('start_date', '>=', Carbon::now()->format('Y-m-d'))
+                    ->where('is_disabled', false)
                     ->get();
                 break;
             case 'technician':
                 $events = Event::whereHas('personnel', function ($query) use ($authUser) {
                     $query->where('user_id', $authUser->id);
-                })->where('start_date', '>=', Carbon::now()->format('Y-m-d'))->get();
+                })->where('start_date', '>=', Carbon::now()->format('Y-m-d'))->where('is_disabled', false)->get();
                 break;
             default:
-                $events = Event::where('start_date', '>=', Carbon::now()->format('Y-m-d'))->get();
+                $events = Event::where('start_date', '>=', Carbon::now()->format('Y-m-d'))->where('is_disabled', false)->get();
                 break;
         }
 
@@ -423,6 +424,11 @@ class EventController extends Controller {
      */
     public function destroy(Event $event) {
         //
+
+        $event->is_disabled = true;
+        $event->save();
+
+        return redirect()->route('events.index')->with('success', 'Event deleted successfully');
     }
 
     public function getLocationData(Request $request) {
@@ -497,6 +503,7 @@ class EventController extends Controller {
             case 'admin':
                 $events = Event::where('start_date', '>=', $request->start)
                     ->where('end_date', '<=', $request->end)
+                    ->where('is_disabled', false)
                     ->with('user')
                     ->get();
                 break;
@@ -507,6 +514,7 @@ class EventController extends Controller {
                 $events = Event::where('academy_id', ($primaryAcademy ? $primaryAcademy->id : null))
                     ->where('start_date', '>=', $request->start)
                     ->where('end_date', '<=', $request->end)
+                    ->where('is_disabled', false)
                     ->with('user')
                     ->get();
                 break;
@@ -515,12 +523,14 @@ class EventController extends Controller {
                     $query->where('user_id', $authUser->id);
                 })->where('start_date', '>=', $request->start)
                     ->where('end_date', '<=', $request->end)
+                    ->where('is_disabled', false)
                     ->with('user')
                     ->get();
                 break;
             default:
                 $events = Event::where('start_date', '>=', $request->start)
                     ->where('end_date', '<=', $request->end)
+                    ->where('is_disabled', false)
                     ->with('user')
                     ->get();
                 break;
@@ -929,23 +939,33 @@ class EventController extends Controller {
                 ['is_published', '=', 1],
                 ['end_date', '>=', $date->format('Y-m-d')],
                 ['nation_id', '=', $request->nation],
+                ['is_disabled', '=', 0],
             ])->get();
         } else {
             $events = Event::where([
                 ['is_approved', '=', 1],
                 ['is_published', '=', 1],
                 ['end_date', '>=', $date->format('Y-m-d')],
+                ['is_disabled', '=', 0],
             ])->get();
         }
 
         $nations = [];
+        $nations_ids = [];
 
         foreach ($events as $key => $value) {
+
+            if (in_array($value['nation']['id'], $nations_ids)) {
+                continue;
+            }
+
             $events[$key]['full_address'] = $value['address'] . ", " .  $value['postal_code'] . ", " .  $value['city'] . ", " .  $value['nation']['name'];
             $nations[] = [
                 'label' => $value['nation']['name'],
                 'value' => $value['nation']['id']
             ];
+
+            $nations_ids[] = $value['nation']['id'];
         }
 
 
@@ -964,6 +984,7 @@ class EventController extends Controller {
             ['is_approved', '=', 1],
             ['is_published', '=', 1],
             ['end_date', '<=', $date->format('Y-m-d')],
+            ['is_disabled', '=', 0],
         ])->get();
 
 
@@ -973,7 +994,7 @@ class EventController extends Controller {
     public function general(Request $request) {
 
         $date = Carbon::parse($request->date);
-        $events = Event::where('end_date', '<', $date->format('Y-m-d'))->get();
+        $events = Event::where('end_date', '<', $date->format('Y-m-d'))->where('is_disabled', false)->get();
 
         $results = [];
 
@@ -1015,7 +1036,7 @@ class EventController extends Controller {
     public function nation(Request $request) {
 
         $date = Carbon::parse($request->date);
-        $events = Event::where('end_date', '<', $date->format('Y-m-d'))->get();
+        $events = Event::where('end_date', '<', $date->format('Y-m-d'))->where('is_disabled', false)->get();
 
         $results = [];
 
