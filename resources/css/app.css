@@ -389,6 +389,13 @@ hr {
     transition: flex 1s ease-in-out;
 }
 
+#bollino {
+    height: 50px;
+    width: 50px;
+    top: 38%;
+    right: -25px;
+}
+
 .reduce {
     flex: 0 0 0% !important;
 }

@@ -2,7 +2,7 @@
 
     <div class="flex">
         <div id="bigone" class="relative bg-background-400 dark:bg-background-900">
-            <div class="hidden lg:block absolute" style="top: 38%; right: -2%">
+            <div class="hidden lg:block absolute" id="bollino">
                 <img src="{{ route('bollino') }}" alt="">
             </div>
             <div class="flex flex-col items-center justify-center h-full lg:max-w-[50vw]">
