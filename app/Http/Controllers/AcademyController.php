@@ -176,7 +176,7 @@ class AcademyController extends Controller {
             if ($athlete->primarySchoolAthlete()) {
                 $athlete->school = $athlete->primarySchoolAthlete()->name;
             } else {
-                $athlete->school = 'Not assigned';
+                $athlete->school = 'No school';
             }
         }
 
@@ -412,6 +412,13 @@ class AcademyController extends Controller {
             $athlete->setPrimaryAcademyAthlete($schoolAcademy ? $schoolAcademy->id : $academy->id);
         }
 
+        // Se l'atleta non ha una scuola assegnata, assegna No school
+        if ($athlete->schoolAthletes()->count() == 0) {
+            $noSchool = School::where('slug', 'no-school')->first();
+            if($noSchool) {
+                $athlete->schoolAthletes()->syncWithoutDetaching($noSchool->id);
+            }
+        }
         
         return redirect()->route($redirectRoute, $academy)->with('success', 'Athlete added successfully!');
     }

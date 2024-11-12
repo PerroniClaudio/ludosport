@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\Academy;
 use App\Models\Nation;
+use App\Models\School;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Collection;
@@ -43,6 +44,8 @@ class UsersImport implements ToCollection {
                     }
                 }
                 $academy = Academy::where('id', $row[4])->first();
+
+                $noSchool = School::where('slug', 'no-school')->first();
                 
                 if (User::where('email', $row[2])->exists()) {
                     $this->log[] = "['Error: User email already exists. Email: " . $row[2] . "']";
@@ -65,6 +68,8 @@ class UsersImport implements ToCollection {
                 }
                 $user->roles()->syncWithoutDetaching(7);
                 $user->academyAthletes()->syncWithoutDetaching($academy ? $academy->id : $noAcademy->id);
+
+                $user->schoolAthletes()->syncWithoutDetaching($noSchool ? $noSchool->id : 1);
 
                 if(!$user->primaryAcademyAthlete()) {
                     $user->setPrimaryAcademyAthlete($academy ? $academy->id : $noAcademy->id);

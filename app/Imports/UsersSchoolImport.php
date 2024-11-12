@@ -35,6 +35,8 @@ class UsersSchoolImport implements ToCollection {
             }
 
             try {
+                $noSchool = School::where('slug', 'no-school')->first();
+
                 $user = User::where('email', $row[0])->first();
                 $school = School::where('id', $row[1])->first();
 
@@ -48,6 +50,10 @@ class UsersSchoolImport implements ToCollection {
                     $this->log[] = "['Error: School not found. ID: " . $row[1] . "']";
                     $this->is_partial = true;
                     continue;
+                }
+                
+                if($noSchool && ($school->id != $noSchool->id)) {
+                    $user->schoolAthletes()->detach($noSchool->id);
                 }
 
                 if(!$user->schoolAthletes()->where('school_id', $school->id)->exists()) {

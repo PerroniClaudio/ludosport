@@ -635,6 +635,14 @@ class SchoolController extends Controller {
             $athlete->setPrimarySchoolAthlete($school->id);
         }
 
+        // Se l'atleta ha una scuola assegnata diversa da No School, toglie No School
+        $noSchool = School::where('slug', 'no-school')->first();
+        if($noSchool) {
+            if ($athlete->schoolAthletes()->whereNot('school_id', $noSchool->id)->count() > 0) {
+                $athlete->schoolAthletes()->detach($noSchool->id);
+            }
+        }
+            
         $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
 

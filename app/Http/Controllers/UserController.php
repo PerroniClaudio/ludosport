@@ -213,6 +213,11 @@ class UserController extends Controller {
         if ($user->hasRole('athlete')) {
             $academy->athletes()->syncWithoutDetaching($user->id);
             $user->setPrimaryAcademyAthlete($academy->id);
+            // Un atelta senza scuola è associato alla scuola No school
+            $noSchool = School::where('slug', 'no-school')->first();
+            if($noSchool) {
+            	$user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
+            }
         } else {
             $academy->personnel()->syncWithoutDetaching($user->id);
             $user->setPrimaryAcademy($academy->id);
@@ -285,6 +290,11 @@ class UserController extends Controller {
             $user->roles()->syncWithoutDetaching($role->id);
             $academy->athletes()->syncWithoutDetaching($user->id);
             $user->setPrimaryAcademyAthlete($academy->id);
+            // Un atelta senza scuola è associato alla scuola No school
+            $noSchool = School::where('slug', 'no-school')->first();
+            if($noSchool) {
+            	$user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
+            }
         } else {
 
             $roles = explode(',', $request->roles);
@@ -1838,6 +1848,12 @@ class UserController extends Controller {
             $user->academyAthletes()->syncWithoutDetaching($academy->id);
             $user->setPrimaryAcademyAthlete($academy->id);
 
+            // Se l'atleta non ha scuole come atleta viene assegnato a No school
+            $noSchool = School::where('slug', 'no-school')->first();
+            if ($user->schoolAthletes()->count() == 0) {
+                $user->schoolAthletes()->syncWithoutDetaching($noSchool ? $noSchool->id : 1);
+            }
+
             // Fallback se l'associazione non è andata a buon fine
             if ($user->academyAthletes->count() == 0) {
                 // Se non ha accademie come atleta viene assegnato a No academy
@@ -1895,6 +1911,12 @@ class UserController extends Controller {
             if (!$user->primarySchoolAthlete()) {
                 $user->setPrimarySchoolAthlete($school->id);
             }
+            // Se ha un'associazione con una scuola diversa da No school, rimuove quella con No school
+            $noSchool = School::where('slug', 'no-school')->first();
+            if ($noSchool && ($user->schoolAthletes()->whereNot('school_id', $noSchool->id)->count() > 0)) {
+                $user->schoolAthletes()->detach($noSchool->id);
+            }
+
         } else {
             return response()->json([
                 'error' => 'Invalid type!',
@@ -1988,6 +2010,16 @@ class UserController extends Controller {
                     ]);
                 }
             }
+            // Se ha un'associazione con una scuola diversa da No school, rimuove quella con No school, altimenti la aggiunge
+            $noSchool = School::where('slug', 'no-school')->first();
+            if ($noSchool) {
+                if($user->schoolAthletes()->whereNot('school_id', $noSchool->id)->count() > 0){
+                    $user->schoolAthletes()->detach($noSchool->id);
+                } else {
+                    $user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
+                }
+
+            }
         } else {
             return response()->json([
                 'error' => 'Invalid type!',
@@ -2035,8 +2067,16 @@ class UserController extends Controller {
 
             // Nel caso dell'atleta non si fa nessun danno ad associarlo in automatico se non ha l'istituzione primaria
             if ($user->primarySchoolAthlete() == null) {
+                $noSchool = School::where('slug', 'no-school')->first();
+                if ($noSchool) {
+                    if ($user->schoolAthletes()->whereNot('school_id', $noSchool->id)->count() > 0){
+                        $user->schoolAthletes()->detach($noSchool->id);
+                    } else {
+                        $user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
+                    }
+                }
                 $newSchool = $user->schoolAthletes->first();
-                if ($newSchool) {
+                if ($newSchool && $newSchool->id != $noSchool->id) {
                     $user->setPrimarySchoolAthlete($newSchool->id);
                 }
             }

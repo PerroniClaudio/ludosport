@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Academy;
 use App\Models\Nation;
+use App\Models\School;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -216,6 +217,10 @@ class DatabaseSeeder extends Seeder {
         // Academies ---------------------------------------------------------------------------------
 
         $this->populateAcademies();
+
+        // Schools ---------------------------------------------------------------------------------
+
+        $this->populateSchools();
 
         // Users ---------------------------------------------------------------------------------
 
@@ -575,6 +580,19 @@ class DatabaseSeeder extends Seeder {
 
         }
 
+    }
+
+    // Schools ---------------------------------------------------------------------------------
+
+    private function populateSchools(){
+        if(!School::where('slug', 'no-school')->exists()) {
+            School::create([
+                'name' => 'No school',
+                'slug' => 'no-school',
+                "academy_id" => 1,
+                'nation_id' => 1,
+            ]);
+        }
     }
 
     // Get Location ---------------------------------------------------------------------------------

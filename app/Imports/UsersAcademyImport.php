@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Academy;
+use App\Models\School;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -33,6 +34,8 @@ class UsersAcademyImport implements ToCollection {
             }
 
             try {
+                $noSchool = School::where('slug', 'no-school')->first();
+
                 $user = User::where('email', $row[0])->first();
                 $academy = Academy::where('id', $row[1])->first();
 
@@ -67,6 +70,10 @@ class UsersAcademyImport implements ToCollection {
                         $schoolAcademy = $user->primarySchoolAthlete()->academy;
                     }
                     $user->setPrimaryAcademyAthlete($schoolAcademy ? $schoolAcademy->id : $academy->id);
+                }
+
+                if($user->schoolAthletes()->count() == 0) {
+                    $user->schoolAthletes()->syncWithoutDetaching([$noSchool ? $noSchool->id : 1]);
                 }
                 
             } catch (\Exception $e) {
