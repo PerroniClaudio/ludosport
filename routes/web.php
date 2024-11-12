@@ -261,7 +261,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/rankings', [App\Http\Controllers\ChartController::class, 'index'])->name('rankings.index');
-    Route::get('/rankings/paginate', [App\Http\Controllers\ChartController::class, 'paginate'])->name('rankings.paginate');
+    Route::get('/rankings/create', [App\Http\Controllers\ChartController::class, 'updatedChart'])->name('rankings.create');
 });
 
 /** Ranks requests */
