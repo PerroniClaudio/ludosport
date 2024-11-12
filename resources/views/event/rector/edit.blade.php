@@ -38,7 +38,7 @@
         }">
 
 
-            <form id="eventForm" method="POST" action={{ route('events.update', $event->id) }}
+            <form id="eventForm" method="POST" action={{ route('rector.events.update', $event->id) }}
                 @submit.prevent="handleSubmit"
                 class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 @csrf

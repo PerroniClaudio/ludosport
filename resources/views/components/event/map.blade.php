@@ -133,8 +133,6 @@
         </form>
 
         <div>
-            <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.preview_map') }}</h3>
-            <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
             <x-maps-google id="eventGoogleMap" style="height: 400px"></x-maps-google>
         </div>
     </div>

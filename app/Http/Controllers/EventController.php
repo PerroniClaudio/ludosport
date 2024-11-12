@@ -39,15 +39,18 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
-            return redirect()->route('dashboard')->with('error', 'You are not authorized to view this page');
-        }
+        // if (!$authUser->validatePrimaryInstitutionPersonnel()) {
+        //     return redirect()->route('dashboard')->with('error', 'You are not authorized to view this page');
+        // }
 
         switch ($authRole) {
             case 'rector':
             case 'dean':
             case 'manager':
-                $events = Event::where('academy_id', $authUser->primaryAcademy())
+
+                $academy_id = $authUser->primaryAcademy() ? $authUser->primaryAcademy()->id : null;
+
+                $events = Event::where('academy_id', $academy_id)
                     ->where('start_date', '>=', Carbon::now()->format('Y-m-d'))
                     ->get();
                 break;
@@ -63,6 +66,7 @@ class EventController extends Controller {
 
         $approved = [];
         $pending = [];
+
 
         foreach ($events as $key => $event) {
 
@@ -598,8 +602,8 @@ class EventController extends Controller {
         // Si potrebbe usare resultType() per escludere solo gli eventi enabling, ma non sappiamo se ci sono altri tipi di eventi che non devono essere inclusi.
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
-        if( $authRole !== "admin" && in_array($event->type->name, ["School Tournament", "Academy Tournament", "National Tournament"]) ) {
-            switch($event->type->name) {
+        if ($authRole !== "admin" && in_array($event->type->name, ["School Tournament", "Academy Tournament", "National Tournament"])) {
+            switch ($event->type->name) {
                 case "School Tournament":
                 case "Academy Tournament":
                     $users = $event->academy->users()->where(['is_disabled' => '0', "has_paid_fee" => '1'])->get();
@@ -619,7 +623,7 @@ class EventController extends Controller {
 
     public function availablePersonnel(Event $event) {
         // Per l'evento istruttore solo tecnici (anche esterni all'accademia), per gli altri tutto il personale dell'accademia.
-        if( $event->resultType() === "enabling" ) {
+        if ($event->resultType() === "enabling") {
             $users = User::where('is_disabled', '0')->whereHas('roles', function ($query) {
                 $query->where('name', 'technician');
             })->get();
@@ -630,7 +634,7 @@ class EventController extends Controller {
                 $query->where('academy_id', $event->academy->id);
             })->get();
         }
-        
+
         return response()->json($users);
     }
 
