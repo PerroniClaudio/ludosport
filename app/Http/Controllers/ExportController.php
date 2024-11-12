@@ -28,7 +28,7 @@ class ExportController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
         }
 
@@ -59,7 +59,7 @@ class ExportController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
         }
 
@@ -267,7 +267,7 @@ class ExportController extends Controller {
                         $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
                     case 'event_war':
-                        $log[] = "['Exporting event war points']";
+                        $log[] = "['Exporting event arena points']";
                         $file_path = 'exports/' . $export->id . '/event_war_points.xlsx';
                         Excel::store(new EventsWarExport($export), $file_path, 'gcs');
                         $export->file = $file_path;

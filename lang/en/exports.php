@@ -9,7 +9,7 @@ return [
     'users_academy' => 'Export users by academy',
     'users_school' => 'Export users by school',
     'event_participants' => 'Export event participants',
-    'event_war' => 'Export event war points ranking',
+    'event_war' => 'Export event arena points ranking',
     'event_style' => 'Export event style points ranking',
     'event_instructor_participants' => 'Export instructor event participants',
     'instructor_event_results' => 'Export instructor event results',

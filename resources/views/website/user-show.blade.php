@@ -214,7 +214,7 @@
                         'rowClasses' => '', // classes to style table td
                     ],
                     [
-                        'name' => 'War Points',
+                        'name' => 'Arena Points',
                         'field' => 'war_points',
                         'columnClasses' => '', // classes to style table th
                         'rowClasses' => '', // classes to style table td

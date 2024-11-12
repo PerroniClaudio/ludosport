@@ -79,6 +79,7 @@ export const rankingschart = () => {
         fiterByNation: async function (nationId) {
             if (nationId == "") {
                 this.getGeneralRankings();
+                this.getEventsList();
                 return;
             }
 
