@@ -45,7 +45,7 @@ class Import extends Model {
             case 'manager':
                 return ['new_users', 'users_course', 'users_school'];
             case 'technician':
-                return ['event_war', 'event_style', 'event_instructor_results'];
+                return ['event_instructor_results'];
             default:
                 return [];
         }

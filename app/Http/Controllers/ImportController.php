@@ -16,17 +16,20 @@ use App\Models\Import;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class ImportController extends Controller {
     /**
      * Display a listing of the resource.
      */
+
     public function index() {
         // new_users,users_course,users_academy,users_school,event_participants,event_war,event_style
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
         }
 
@@ -37,11 +40,24 @@ class ImportController extends Controller {
             $imports[$key]->status = __('imports.' . $import->status);
             $imports[$key]->author = $import->user->name . ' ' . ($import->user->surname ?? '');
             $imports[$key]->created_at_formatted = $import->created_at->format('d/m/Y H:i');
+            $imports[$key]->log = $this->cleanLogs($import->log);
         }
 
         return view('import.index', [
             'imports' => $imports
         ]);
+    }
+
+    private function cleanLogs($logs) {
+        $log = str_replace('"', '', $logs);
+        $logs = explode('],', $log);
+
+        foreach ($logs as $k => $v) {
+            $logs[$k] = preg_replace('/[\[\]\']/', '', $v);
+            $logs[$k] = str_replace('\\', '\'', $logs[$k]);
+        }
+
+        return json_encode($logs);
     }
 
     /**
@@ -52,7 +68,7 @@ class ImportController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if(!$authUser->validatePrimaryInstitutionPersonnel()){
+        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
         }
 
@@ -106,7 +122,7 @@ class ImportController extends Controller {
             'type' => 'required|in:new_users,users_course,users_academy,users_school,event_participants,event_war,event_style,event_instructor_results',
         ]);
 
-        if($authRole == 'technician' && ($request->type == 'event_participants')){
+        if ($authRole == 'technician' && ($request->type == 'event_participants')) {
             $redirectRoute = $authRole == 'admin' ? 'imports.create' : $authRole . '.imports.create';
             return redirect()->route($redirectRoute)->with('error', 'Unauthorized');
         }
@@ -195,7 +211,7 @@ class ImportController extends Controller {
                         $usersImport = new UsersImport($import->user);
                         Excel::import($usersImport, $import->file, 'gcs');
                         $usersImportLog = $usersImport->getLogArray();
-                        if(count($usersImportLog) > 0) {
+                        if (count($usersImportLog) > 0) {
                             array_push($log, ...$usersImportLog);
                         }
                         $is_partial = $usersImport->getIsPartial();
@@ -207,7 +223,7 @@ class ImportController extends Controller {
                         $usersCourseImport = new UsersCourseImport($import->user);
                         Excel::import($usersCourseImport, $import->file, 'gcs');
                         $usersCourseImportLog = $usersCourseImport->getLogArray();
-                        if(count($usersCourseImportLog) > 0) {
+                        if (count($usersCourseImportLog) > 0) {
                             array_push($log, ...$usersCourseImportLog);
                         }
                         $is_partial = $usersCourseImport->getIsPartial();
@@ -219,7 +235,7 @@ class ImportController extends Controller {
                         $usersAcademyImport = new UsersAcademyImport($import->user);
                         Excel::import($usersAcademyImport, $import->file, 'gcs');
                         $usersAcademyImportLog = $usersAcademyImport->getLogArray();
-                        if(count($usersAcademyImportLog) > 0) {
+                        if (count($usersAcademyImportLog) > 0) {
                             array_push($log, ...$usersAcademyImportLog);
                         }
                         $is_partial = $usersAcademyImport->getIsPartial();
@@ -231,7 +247,7 @@ class ImportController extends Controller {
                         $usersSchoolImport = new UsersSchoolImport($import->user);
                         Excel::import($usersSchoolImport, $import->file, 'gcs');
                         $usersSchoolImportLog = $usersSchoolImport->getLogArray();
-                        if(count($usersSchoolImportLog) > 0) {
+                        if (count($usersSchoolImportLog) > 0) {
                             array_push($log, ...$usersSchoolImportLog);
                         }
                         $is_partial = $usersSchoolImport->getIsPartial();
@@ -242,7 +258,7 @@ class ImportController extends Controller {
                         $userEventImport = new UsersEventImport($import->user);
                         Excel::import($userEventImport, $import->file, 'gcs');
                         $userEventImportLog = $userEventImport->getLogArray();
-                        if(count($userEventImportLog) > 0) {
+                        if (count($userEventImportLog) > 0) {
                             array_push($log, ...$userEventImportLog);
                         }
                         $is_partial = $userEventImport->getIsPartial();
@@ -253,7 +269,7 @@ class ImportController extends Controller {
                         $EventWarImport = new EventWarImport($import->user);
                         Excel::import($EventWarImport, $import->file, 'gcs');
                         $EventWarImportLog = $EventWarImport->getLogArray();
-                        if(count($EventWarImportLog) > 0) {
+                        if (count($EventWarImportLog) > 0) {
                             array_push($log, ...$EventWarImportLog);
                         }
                         $is_partial = $EventWarImport->getIsPartial();
@@ -264,7 +280,7 @@ class ImportController extends Controller {
                         $eventStyleImport = new EventStyleImport($import->user);
                         Excel::import($eventStyleImport, $import->file, 'gcs');
                         $eventStyleImportLog = $eventStyleImport->getLogArray();
-                        if(count($eventStyleImportLog) > 0) {
+                        if (count($eventStyleImportLog) > 0) {
                             array_push($log, ...$eventStyleImportLog);
                         }
                         $is_partial = $eventStyleImport->getIsPartial();
@@ -275,7 +291,7 @@ class ImportController extends Controller {
                         $eventInstructorImport = new EventInstructorImport($import->user);
                         Excel::import($eventInstructorImport, $import->file, 'gcs');
                         $eventInstructorImportLog = $eventInstructorImport->getLogArray();
-                        if(count($eventInstructorImportLog) > 0) {
+                        if (count($eventInstructorImportLog) > 0) {
                             array_push($log, ...$eventInstructorImportLog);
                         }
                         $is_partial = $eventInstructorImport->getIsPartial();
@@ -298,5 +314,29 @@ class ImportController extends Controller {
                 $import->save();
             }
         }
+    }
+
+    public function download(Import $import) {
+        /** 
+         * @disregard Intelephense non rileva il metodo temporaryurl
+         * 
+         * @see https://github.com/spatie/laravel-google-cloud-storage
+         */
+
+
+        $url = Storage::disk('gcs')->temporaryUrl(
+            $import->file,
+            now()->addMinutes(5)
+        );
+
+        $response = Http::get($url);
+        $file = $response->body();
+
+        $headers = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Length' => strlen($file),
+        ];
+
+        return response($file, 200, $headers);
     }
 }

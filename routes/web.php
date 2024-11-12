@@ -32,6 +32,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/invoices/store', [App\Http\Controllers\UserController::class, 'saveInvoice'])->name('users.invoices.store');
     Route::post('/invoices/update', [App\Http\Controllers\UserController::class, 'updateInvoice'])->name('users.invoices.update');
+
+    Route::get('/imports/download/{import}', [App\Http\Controllers\ImportController::class, 'download'])->name('imports.download');
 });
 
 /** Eliminati */
