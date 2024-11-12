@@ -10,7 +10,62 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-background-900 dark:text-background-100">
-                    <x-charts.ranking-table :data="$chart_data" />
+
+                    <x-table striped="false" :columns="[
+                        [
+                            'name' => 'Name',
+                            'field' => 'user_name',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
+                            'name' => 'Academy',
+                            'field' => 'user_academy',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
+                            'name' => 'School',
+                            'field' => 'user_school',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
+                            'name' => 'Nation',
+                            'field' => 'nation',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
+                            'name' => 'Arena points',
+                            'field' => 'total_war_points',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
+                            'name' => 'Style points',
+                            'field' => 'total_style_points',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                    ]" :rows="$chart_data" />
+
+                    <div class="mt-4 flex justify-between">
+                        <p class="text-lg">
+                            {{ __('events.chart_generated_at', [
+                                'date' => \Carbon\Carbon::parse($chart['created_at'])->format('d/m/Y'),
+                            ]) }}
+                        </p>
+
+                        <a href="{{ route('rankings.create') }}">
+                            <x-primary-button>
+                                <span>{{ __('events.chart_generate_new') }}</span>
+                            </x-primary-button>
+                        </a>
+
+                    </div>
+
+
                 </div>
             </div>
         </div>

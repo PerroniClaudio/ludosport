@@ -80,4 +80,6 @@ return [
     'disable_event' => 'Disable Event',
     'disable_event_confirmation' => 'Are you sure you want to disable this event?',
     'disable_event_message' => 'This action will disable the event, you cannot enable it again.',
+    'chart_generated_at' => 'This chart was generated on :date',
+    'chart_generate_new' => 'Generate an updated chart',
 ];
