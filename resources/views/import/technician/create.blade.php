@@ -15,6 +15,11 @@
                         x-data="{
                             selectedType: null,
                             hasSubmittedFile: false,
+                            file: null,
+                            handleSubmittedFile: function(e) {
+                                this.file = e.target.files[0];
+                                this.hasSubmittedFile = true;
+                            },
                             downloadTemplate: function() {
                                 if (this.selectedType != null) {
                                     window.location.href = '/technician/imports/template?type=' + this.selectedType;
@@ -33,11 +38,29 @@
                             </a>
 
 
-                            <input type="file" name="file" id="import-file" class="hidden" accept=".xlsx, .xls"
-                                x-on:change="hasSubmittedFile = true" />
-                            <x-primary-button type="button" onclick="document.getElementById('import-file').click()">
-                                {{ __('imports.choose_file') }}
-                            </x-primary-button>
+                            <div x-show="selectedType != null && (!['event_war', 'event_style', 'event_instructor_results'].includes(selectedType) || (selectedEvent != null))"
+                                class="w-full flex flex-col gap-2">
+
+                                <input type="file" name="file" id="import-file" class="hidden"
+                                    accept=".xlsx, .xls" x-on:change="handleSubmittedFile($event)" />
+                                <x-primary-button type="button" class="w-full"
+                                    onclick="document.getElementById('import-file').click()">
+                                    {{ __('imports.choose_file') }}
+                                </x-primary-button>
+
+                                <div x-show="file != null">
+                                    <div
+                                        class="border border-primary-500 rounded p-2 text-primary-500 flex gap-1 justify-between">
+                                        <x-lucide-file class="w-6 h-6" />
+                                        <span class="flex-1" x-text="file.name"></span>
+                                        <div>
+                                            <x-lucide-x-circle class="w-6 h-6 cursor-pointer"
+                                                x-on:click="file = null; hasSubmittedFile = false" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
 
                             <div class="flex justify-end mt-4">
                                 <button type="submit" :disabled="!hasSubmittedFile"
