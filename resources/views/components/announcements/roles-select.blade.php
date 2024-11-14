@@ -39,7 +39,7 @@
 
     <ul class="mt-1 list-disc">
         <template x-for="role in selected" :key="role.id">
-            <li class="text-white " x-text="role.name"></li>
+            <li class="text-background-900 dark:text-background-100" x-text="role.name"></li>
         </template>
     </ul>
 
