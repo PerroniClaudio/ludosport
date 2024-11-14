@@ -246,13 +246,23 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function weaponForms() {
         return $this->belongsToMany(WeaponForm::class, 'weapon_forms_users', 'user_id', 'weapon_form_id')
-            ->withPivot('created_at as awarded_at');
+            // ->withPivot('created_at as awarded_at');
+            ->withPivot('awarded_at as awarded_at');
     }
 
     // Solo le richieste approvate. Le altre le vedono gli admin partendo da weaponForms
+    // Weapon forms personnel è per gli istruttori
     public function weaponFormsPersonnel() {
         return $this->belongsToMany(WeaponForm::class, 'weapon_forms_personnel', 'user_id', 'weapon_form_id')
-            ->withPivot('created_at as awarded_at');
+            // ->withPivot('created_at as awarded_at');
+            ->withPivot('awarded_at as awarded_at');
+    }
+
+    // Weapon forms technicians è per i tecnici
+    public function weaponFormsTechnician() {
+        return $this->belongsToMany(WeaponForm::class, 'weapon_forms_technicians', 'user_id', 'weapon_form_id')
+            // ->withPivot('created_at as awarded_at');
+            ->withPivot('awarded_at as awarded_at');
     }
 
     public function languages() {

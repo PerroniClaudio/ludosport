@@ -236,9 +236,12 @@
 
             <div class="grid grid-cols-2 gap-4 my-4">
                 @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
-                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponForms" />
-                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsPersonnel"
-                        isPersonnel="{{ true }}" />
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponForms->map(function ($form) {$form->awarded_at = explode(' ', $form->awarded_at)[0]; return $form; })" 
+                        type="athlete" />
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsPersonnel->map(function ($form) {$form->awarded_at = explode(' ', $form->awarded_at)[0]; return $form; })"
+                        type="personnel" />
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsTechnician->map(function ($form) {$form->awarded_at = explode(' ', $form->awarded_at)[0]; return $form; })"
+                        type="technician" />
                     <x-user.languages :languages="$user->languages" :user="$user->id" :availableLanguages="collect($languages)" />
                 @endif
                 <div @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete')) class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8"

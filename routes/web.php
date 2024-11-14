@@ -72,8 +72,10 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
     Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('users.picture.update');
 
+    Route::post('/users/{user}/weapon-forms-technician', [App\Http\Controllers\UserController::class, 'editWeaponFormsTechnician'])->name('user.weapon-forms-technician.store');
     Route::post('/users/{user}/weapon-forms-personnel', [App\Http\Controllers\UserController::class, 'editWeaponFormsPersonnel'])->name('user.weapon-forms-personnel.store');
     Route::post('/users/{user}/weapon-forms-athlete', [App\Http\Controllers\UserController::class, 'editWeaponFormsAthlete'])->name('user.weapon-forms-athlete.store');
+    Route::post('/users/{user}/weapon-forms-edit-date', [App\Http\Controllers\UserController::class, 'editWeaponFormsAwardingDate'])->name('user.weapon-forms-edit-date');
 
     Route::post('/user/{user}/reset-password', [App\Http\Controllers\UserController::class, 'resetPassword'])->name('users.reset-password');
 });
@@ -347,6 +349,12 @@ require __DIR__ . '/script.php';
 
 Route::group([], function () {
     Route::get('/healthcheck', function () {
+
+        // $user = \App\Models\User::find(16);
+        
+        // $user->weaponFormsTechnician()->updateExistingPivot(14, ['awarded_at' => Carbon\Carbon::now()]);
+
+        dump(\App\Models\User::find(16)->weaponFormsTechnician);
         return 'healthcheck';
     })->name('healthcheck');
 });

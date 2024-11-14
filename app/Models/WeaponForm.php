@@ -18,8 +18,15 @@ class WeaponForm extends Model {
     }
 
 
+    // Weapon forms personnel è per gli istruttori
     public function personnel() {
         return $this->belongsToMany(User::class, 'weapon_forms_personnel', 'weapon_form_id', 'user_id')
+            ->withTimestamps();
+    }
+
+    // Weapon forms technicians è per i tecnici
+    public function technicians() {
+        return $this->belongsToMany(User::class, 'weapon_forms_technicians', 'weapon_form_id', 'user_id')
             ->withTimestamps();
     }
 

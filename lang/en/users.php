@@ -79,6 +79,7 @@ return [
     'custom_role_select' => 'Select Custom Role',
     'weapons_forms' => 'Weapon Forms',
     'weapons_forms_personnel' => 'Weapon Forms Personnel',
+    'weapons_forms_technician' => 'Weapon Forms Tecnico',
     'languages' => 'Languages',
     'languages_add' => 'Add Language',
     'languages_edit' => 'Edit Languages',

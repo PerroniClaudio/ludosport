@@ -112,8 +112,12 @@ class UserController extends Controller {
                         }
                     }
 
-                    if ($role->label === 'technician' || $role->label === 'instructor') {
+                    if ($role->label === 'instructor') {
                         $user->weapon_forms_formatted = $user->weaponFormsPersonnel()->pluck('name')->toArray();
+                    }
+                    
+                    if ($role->label === 'technician') {
+                        $user->weapon_forms_formatted = $user->weaponFormsTechnician()->pluck('name')->toArray();
                     }
 
                     $users_sorted_by_role[$role->label][] = $user;
@@ -1783,6 +1787,78 @@ class UserController extends Controller {
         return response()->json([
             'success' => true,
         ]);
+    }
+    
+    public function editWeaponFormsTechnician(Request $request, User $user) {
+        $authUser = User::find(auth()->user()->id);
+        $authUserRole = $authUser->getRole();
+        if ($authUserRole !== 'admin') {
+            return response()->json([
+                'error' => 'You are not authorized to edit user\'s weapon forms!',
+            ]);
+        }
+        $previousForms = $user->weaponFormsTechnician;
+        $requestForms = explode(',', $request->weapon_forms);
+
+        $toRemove = $previousForms->whereNotIn('id', $requestForms);
+        foreach ($toRemove as $form) {
+            Log::channel('weapon_form')->info('Technician weapon form removed', [
+                'user_id' => $user->id,
+                'form_id' => $form->id,
+                'made_by' => $authUser->id,
+            ]);
+            $form->technicians()->detach($user->id);
+        }
+
+        $toAdd = $previousForms ? collect($requestForms)->diff($previousForms->pluck('id')) : $requestForms;
+        foreach ($toAdd as $formId) {
+            $form = WeaponForm::find($formId);
+            if ($form) {
+                Log::channel('weapon_form')->info('Technician weapon form added', [
+                    'user_id' => $user->id,
+                    'form_id' => $form->id,
+                    'made_by' => $authUser->id,
+                ]);
+                $form->technicians()->syncWithoutDetaching([['user_id' => $user->id, 'admin_id' => $authUser->id]]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    public function editWeaponFormsAwardingDate(User $user, Request $request){
+        $authUser = User::find(auth()->user()->id);
+        $authUserRole = $authUser->getRole();
+        if ($authUserRole !== 'admin') {
+            return response()->json([
+                'error' => 'You are not authorized to edit user\'s weapon forms!',
+            ]);
+        }
+        Log::info("request info", ['request' => $request, 'form_id' => $request->form_id, 'awarded_at' => $request->awarded_at, 'type' => $request->type]);
+        $request->validate([
+            'form_id' => 'required|integer|exists:weapon_forms,id',
+            'awarded_at' => 'required|date',
+            'type' => 'required|string|in:athlete,personnel,technician',
+        ]);
+
+        switch($request->type){
+            case 'athlete':
+                $user->weaponForms()->updateExistingPivot($request->form_id, ['awarded_at' =>  \Carbon\Carbon::parse($request->awarded_at)]);
+                break;
+            case 'personnel':
+                $user->weaponFormsPersonnel()->updateExistingPivot($request->form_id, ['awarded_at' => \Carbon\Carbon::parse($request->awarded_at)]);
+                break;
+            case 'technician':
+                $user->weaponFormsTechnician()->updateExistingPivot($request->form_id, ['awarded_at' => \Carbon\Carbon::parse($request->awarded_at)]);
+                break;
+        }
+
+        return back()->with('success', 'Awarding date updated successfully!');
+        // return response()->json([
+        //     'success' => true,
+        // ]);
     }
 
     public function resetPassword(User $user) {

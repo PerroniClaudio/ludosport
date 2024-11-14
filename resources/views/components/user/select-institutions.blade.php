@@ -196,7 +196,7 @@
                           ],
                         ]" :rows="$schools">
                           <x-slot name="tableActions">
-                                <x-primary-button x-bind:disabled="{{$authRole != 'admin' ? 'row.academy_id != ' . $authUser->primaryAcademy()->id : false}}" type="button" x-on:click="addSchool(row.id)">
+                                <x-primary-button x-bind:disabled="{{$authRole != 'admin' ? 'row.academy_id != ' . $authUser->primaryAcademy()->id : 'false'}}" type="button" x-on:click="()=>addSchool(row.id)">
                                   <span>{{ __('users.add') }}</span>
                                 </x-primary-button>
                           </x-slot>
@@ -216,7 +216,7 @@
                           ],
                         ]" :rows="$selectedSchools">
                           <x-slot name="tableActions">
-                              <x-primary-button x-bind:disabled="{{$authRole != 'admin' ? 'row.academy_id != ' . $authUser->primaryAcademy()->id : false}}" type="button" x-on:click="removeSchool(row.id)">
+                              <x-primary-button x-bind:disabled="{{$authRole != 'admin' ? 'row.academy_id != ' . $authUser->primaryAcademy()->id : 'false'}}" type="button" x-on:click="()=>removeSchool(row.id)">
                                 <span>{{ __('users.remove') }}</span>
                               </x-primary-button>
                           </x-slot>
@@ -224,14 +224,6 @@
                     @endif
                 </div>
 
-            </div>
-
-            <div class="mt-4" x-show="selectedWeaponForms.length > 0">
-              <h4 class="text-md font-medium text-background-900 dark:text-background-100">
-                {{ __('users.selected_institutions-' . $type) }}</h4>
-
-                <div class="grid grid-cols-4 gap-2">
-                </div>
             </div>
             
         </div>
