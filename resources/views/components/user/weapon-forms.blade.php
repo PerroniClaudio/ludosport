@@ -12,7 +12,6 @@
     updateWeaponFormId: '',
     updateWeaponFormDate: '',
     openEditWeaponFormModal(type, id, date) {
-        console.log(date);
         this.updateWeaponFormDate = date.split(' ')[0];
         this.updateWeaponFormId = id;
         $dispatch('open-modal', 'edit-' + type + '-weapon-form-date-modal');
@@ -32,15 +31,15 @@
         @if ($authRole === 'admin')
             @if($type === 'technician')
                 <x-primary-button type="button" class="h-fit" x-on:click.prevent="$dispatch('open-modal', 'add-weapon-form-technician-modal')">
-                    <x-lucide-plus class="w-5 h-5 text-white" />
+                    <x-lucide-plus class="w-5 h-5" />
                 </x-primary-button>
             @elseif($type === 'personnel')
                 <x-primary-button type="button" class="h-fit" x-on:click.prevent="$dispatch('open-modal', 'add-weapon-form-personnel-modal')">
-                    <x-lucide-plus class="w-5 h-5 text-white" />
+                    <x-lucide-plus class="w-5 h-5" />
                 </x-primary-button>
             @else
                 <x-primary-button type="button" class="h-fit" x-on:click.prevent="$dispatch('open-modal', 'add-weapon-form-modal')">
-                    <x-lucide-plus class="w-5 h-5 text-white" />
+                    <x-lucide-plus class="w-5 h-5" />
                 </x-primary-button>
             @endif
         @endif
@@ -309,18 +308,10 @@
             @csrf
             <input type="text" name="type" id="type" x-bind:value="'{{$type}}'" hidden>
             <input type="text" name="form_id" id="form_id" x-bind:value="updateWeaponFormId" hidden>
-            {{-- <input type="datetime-local" name="awarded_at" id="awarded_at"> --}}
             <x-input-label value="Awarded on" for="{{$type}}-awarded-at" />
-            {{-- <input type="datetime-local" name="awarded_at" id="{{$type}}-awarded-at" x-bind:value="updateWeaponFormDate"
-                class="disabled:cursor-not-allowed w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm"
-            > --}}
             <input type="date" name="awarded_at" id="{{$type}}-awarded-at" x-bind:value="updateWeaponFormDate"
                 class="disabled:cursor-not-allowed w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm"
             >
-            
-
-            {{-- <x-form.input name="name" label="Awarded on" type="datetime-local" required="{{ true }}" disabled="{{ false }}"
-                x-bind:value="$updateWeaponFormDate" placeholder="{{ fake()->company() }}" /> --}}
 
             <div class="flex justify-end">
                 <x-primary-button type="submit">

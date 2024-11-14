@@ -4,7 +4,6 @@ namespace App\Exports;
 
 use App\Models\EventInstructorResult;
 use App\Models\EventResult;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromArray;
 
 class EventParticipantsExport implements FromArray {

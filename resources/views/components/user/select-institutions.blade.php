@@ -110,7 +110,7 @@
       <x-primary-button type="button" x-on:click.prevent="$dispatch('open-modal', '{{ $modalName }}')"
         :disabled="$isDisabled"
       >
-          <x-lucide-edit class="w-5 h-5 text-white" />
+          <x-lucide-edit class="w-5 h-5" />
       </x-primary-button>
     </div>
     

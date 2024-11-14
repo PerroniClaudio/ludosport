@@ -326,6 +326,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/weapon-forms/create', [App\Http\Controllers\WeaponFormController::class, 'create'])->name('weapon-forms.create');
     Route::get('/weapon-forms/{weaponForm}', [App\Http\Controllers\WeaponFormController::class, 'edit'])->name('weapon-forms.edit');
     Route::post('/weapon-forms', [App\Http\Controllers\WeaponFormController::class, 'store'])->name('weapon-forms.store');
+    Route::post('/weapon-forms/{weaponForm}/technicians', [App\Http\Controllers\WeaponFormController::class, 'addTechnicians'])->name('weapon-forms.technicians.store');
     Route::post('/weapon-forms/{weaponForm}/personnel', [App\Http\Controllers\WeaponFormController::class, 'addPersonnel'])->name('weapon-forms.personnel.store');
     Route::post('/weapon-forms/{weaponForm}/athletes', [App\Http\Controllers\WeaponFormController::class, 'addAthletes'])->name('weapon-forms.athletes.store');
     Route::post('/weapon-forms/{weaponForm}', [App\Http\Controllers\WeaponFormController::class, 'update'])->name('weapon-forms.update');

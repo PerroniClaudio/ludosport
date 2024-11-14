@@ -1836,7 +1836,6 @@ class UserController extends Controller {
                 'error' => 'You are not authorized to edit user\'s weapon forms!',
             ]);
         }
-        Log::info("request info", ['request' => $request, 'form_id' => $request->form_id, 'awarded_at' => $request->awarded_at, 'type' => $request->type]);
         $request->validate([
             'form_id' => 'required|integer|exists:weapon_forms,id',
             'awarded_at' => 'required|date',

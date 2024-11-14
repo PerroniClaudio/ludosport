@@ -2,7 +2,6 @@
 namespace App\Exports;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromArray;
 
 class UsersRoleExport implements FromArray {
