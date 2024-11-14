@@ -123,6 +123,11 @@ return [
     'replace' => 'Replace',
     'select' => 'Select',
     'since_to' => 'Since :since to :to',
+    'since' => 'Since',
     'uninque_id_card' => 'ID :',
     'send_password_reset' => 'Send Password Reset',
+    'rank_and_forms' => 'Rank and Forms',
+    'battle_name' => 'Battle Name',
+    'status' => 'Status',
+    'active' => 'Active',
 ];
