@@ -42,7 +42,7 @@
 
     <ul class="mt-1 list-disc">
         <template x-for="academy in selected" :key="academy.id">
-            <li class="text-white " x-text="academy.name"></li>
+            <li class="text-background-900 dark:text-background-100" x-text="academy.name"></li>
         </template>
     </ul>
 

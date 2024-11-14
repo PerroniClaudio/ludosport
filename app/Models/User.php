@@ -458,6 +458,11 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'active' => 'clans.*',
                         'name' => 'instructor.clans.index',
                     ],
+                    (object)[
+                        'label' => 'announcements',
+                        'active' => 'announcements.*',
+                        'name' => 'instructor.announcements.index',
+                    ],
                 ]);
             default:
                 return collect([]);

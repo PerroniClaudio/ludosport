@@ -16,7 +16,6 @@
                     selectedAnnouncement: {{ $active_announcement }},
                     csrf: '{{ csrf_token() }}',
                     shouldShowAsNew: function(announcement) {
-                        console.log(this.seenAnnouncements)
                 
                         //Return true if announcement is not in seenAnnouncements
                 
@@ -47,12 +46,15 @@
                         }
                 
                         return false;
+                    },
+                    init() {
+                        this.announcements = (Object.values(this.announcements));
                     }
                 
                 }">
-                    <div class="col-span-4 border-r dark:border-background-700 flex flex-col pb-4">
+                    <div class="col-span-4 border-r dark:border-background-700 flex flex-col py-2">
                         @if ($announcements->isEmpty())
-                            <div class="text-center p-4">
+                            <div class="text-center p-4 text-background-800 dark:text-background-200">
                                 <p>{{ __('announcements.no_announcements') }}</p>
                             </div>
                         @else

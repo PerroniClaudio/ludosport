@@ -76,7 +76,13 @@
             <div>
                 <x-form.input name="academy" disabled="true" label="{{ __('academies.academy') }}"
                     value="{{ $user->primaryAcademyAthlete()->name }}" />
+            </div>
+        @endif
 
+        @if ($user->primaryAcademy())
+            <div>
+                <x-form.input name="academy" disabled="true" label="{{ __('academies.academy') }}"
+                    value="{{ $user->primaryAcademy()->name }}" />
             </div>
         @endif
 

@@ -41,7 +41,7 @@
 
     <ul class="mt-1 list-disc">
         <template x-for="nation in selected" :key="nation.id">
-            <li class=" text-white " x-text="nation.name"></li>
+            <li class="text-background-900 dark:text-background-100" x-text="nation.name"></li>
         </template>
     </ul>
 

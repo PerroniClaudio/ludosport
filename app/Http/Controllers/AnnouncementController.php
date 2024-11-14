@@ -318,15 +318,17 @@ class AnnouncementController extends Controller {
         $user = User::find($auth->id);
 
         $seen_announcements = $user->seenAnnouncements()->get();
-        $announcements = Announcement::where('is_deleted', false)->whereIn('role_id', $user->roles->pluck('id'))->where('type', '!=', '4')->orderBy('created_at', 'desc')->get();
+        $announcements = Announcement::where('is_deleted', false)->where('type', '!=', '4')->orderBy('created_at', 'desc')->get();
         $direct_messages = Announcement::where([['is_deleted', false], ['type', '4'], ['user_id', $user->id]])->orderBy('created_at', 'desc')->get();
         $announcements = $announcements->merge($direct_messages);
 
         // Verifica se sei della nazione giusta ed accademia giusta per visualizzare l'annuncio
 
         $announcements = $announcements->filter(function ($announcement) use ($user) {
-            $nations = json_decode($announcement->nations);
-            $academies = json_decode($announcement->academies);
+
+            $nations = $announcement->nations != null ? json_decode($announcement->nations) : null;
+            $academies = $announcement->academies != null ? $academies = json_decode($announcement->academies) : null;
+            $allowed_roles = $announcement->roles != null ? json_decode($announcement->roles) : null;
 
             if ($nations != null) {
                 if (!in_array($user->nation_id, $nations)) {
@@ -336,6 +338,12 @@ class AnnouncementController extends Controller {
 
             if ($academies != null) {
                 if (!in_array($user->academy_id, $academies)) {
+                    return false;
+                }
+            }
+
+            if ($allowed_roles != null) {
+                if (!array_intersect($user->roles->pluck('id')->toArray(), $allowed_roles)) {
                     return false;
                 }
             }
@@ -358,8 +366,6 @@ class AnnouncementController extends Controller {
         } else {
             $first_announcement = "";
         }
-
-
 
         return view('announcements.allroles', [
             'seen_announcements' => $seen_announcements,

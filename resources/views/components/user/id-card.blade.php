@@ -46,6 +46,9 @@
             @if ($user->primaryAcademyAthlete())
                 <span class="text-white">{{ $user->primaryAcademyAthlete()->name }}</span>
             @endif
+            @if ($user->primaryAcademy())
+                <span class="text-white">{{ $user->primaryAcademy()->name }}</span>
+            @endif
         </p>
     </div>
 </section>
