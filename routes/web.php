@@ -20,6 +20,7 @@ Route::get('/nation/{nation}/flag', [App\Http\Controllers\AssetController::class
 Route::get('/ranks/{rank}/image', [App\Http\Controllers\AssetController::class, 'rankImage'])->name('rank-image');
 Route::get('/weapon-form/{weapon:id}/image', [App\Http\Controllers\AssetController::class, 'weaponFormImage'])->name('weapon-form-image');
 Route::get('/favicon', [App\Http\Controllers\AssetController::class, 'favicon'])->name('favicon');
+Route::get('/logoex', [App\Http\Controllers\AssetController::class, 'logoex'])->name('logoex');
 Route::get('/user/{user}/profile-picture', [App\Http\Controllers\UserController::class, 'propic'])->name('user.profile-picture-show');
 
 

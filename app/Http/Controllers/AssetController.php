@@ -38,6 +38,17 @@ class AssetController extends Controller {
         return response($image, 200, $headers);
     }
 
+    public function logoex() {
+        $url = $this->retrieveAsset('/assets/logo_ex2.png');
+        $response = Http::get($url);
+        $image = $response->body();
+        $headers = [
+            'Content-Type' => 'image/png',
+            'Content-Length' => strlen($image),
+        ];
+        return response($image, 200, $headers);
+    }
+
     public function logoSaber() {
         $url = $this->retrieveAsset("/assets/saber.png");
         $response = Http::get($url);
