@@ -12,7 +12,9 @@
             {{-- <x-input-label value="{{ $label }}" /> --}}
             <span class="block font-medium text-sm text-background-700 dark:text-background-300">{{ $label }}</span>
             <div x-data="{tooltip: false}" x-on:mouseover="tooltip = true" x-on:mouseleave="tooltip = false" >
-                <div x-show="tooltip" class="absolute bg-background-100 
+                <div x-show="tooltip" 
+                    x-cloak
+                    class="absolute bg-background-100 
                     p-2 rounded-md text-sm text-background-800 
                     inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
                     {{ $description }}

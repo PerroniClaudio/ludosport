@@ -35,8 +35,11 @@ class TemplateExport implements FromArray {
                             $result->weapon_form_id ? $result->weapon_form_id : $event->weapon_form_id,
                             '',
                             '',
-                            $result->user->battle_name,
-                            $result->user->name . ' ' . $result->user->surname ?? ''
+                            '',
+                            '',
+                            '',
+                            $result->user->name ?? '',
+                            $result->user->surname ?? ''
                         ];
                     })->toArray();
                 } else {
@@ -140,14 +143,27 @@ class TemplateExport implements FromArray {
                 break;
             case 'event_instructor_results':
                 
+                // return [
+                //     "Event ID *",
+                //     "User Email *",
+                //     "Weapon Form ID (If missing, is set to event's weapon form)",
+                //     "Result (passed/review/failed) *",
+                //     "Notes (max 100 chars)",
+                //     "Battle name",
+                //     "Full name",
+                // ];
+
                 return [
                     "Event ID *",
                     "User Email *",
-                    "Weapon Form ID (If missing, is set to event's weapon form)",
-                    "Result (passed/review/failed) *",
+                    "Weapon Form ID (If missing, is set to event's Weapon Form)",
+                    "Result (Green/Yellow/Red) *",
+                    "Internship Duration (* If result is Yellow)",
+                    "Notes on the Internship (* If result is Yellow, max 100 chars)",
+                    "Retake Exam / Retake Course (* If result is Red)",
                     "Notes (max 100 chars)",
-                    "Battle name",
-                    "Full name",
+                    "Name",
+                    "Surname",
                 ];
 
                 break;

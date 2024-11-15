@@ -212,6 +212,10 @@ class EventController extends Controller {
             $enablingResults[$key]['user_fullname'] = $result->user['name'] . ' ' . $result->user['surname'];
             $enablingResults[$key]['weapon_form_name'] = ($result->weaponForm ? $result->weaponForm['name'] : '');
             $enablingResults[$key]['notes'] = $result->notes ? $result->notes : '';
+
+            $enablingResults[$key]['internship_duration'] = $result->internship_duration ? $result->internship_duration : '';
+            $enablingResults[$key]['internship_notes'] = $result->internship_notes ? $result->internship_notes : '';
+            $enablingResults[$key]['retake'] = $result->retake ? $result->retake : '';
         }
 
         if ($authRole === 'technician') {
@@ -783,6 +787,23 @@ class EventController extends Controller {
         $result = $event->instructorResults()->find($request->result_id);
         if (!$result) {
             return response()->json(['error' => 'Result not related to this event']);
+        }
+
+        if ($request->result === 'failed') {
+            if(!$request->retake || !in_array($request->retake, ['course', 'exam'])){
+                return response()->json(['error' => 'Retake must be specified for "Red" result']);
+            }
+
+            switch(strtolower($request->retake)) {
+                case 'course':
+                    $result->retake = 'course';
+                    break;
+                case 'exam':
+                    $result->retake = 'exam';
+                    break;
+                default:
+                    break;
+            }
         }
 
         $result->result = $request->result;

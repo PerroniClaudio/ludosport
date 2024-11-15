@@ -55,16 +55,26 @@ class EventInstructorImport implements ToCollection {
                 $this->event = Event::find($row[0]);
             }
 
-            if(!$this->event || $this->event->resultType() != 'enabling') {
+            if(!$this->event) {
+                $this->is_partial = true;
+                $this->log[] = "Error: Event not found - User: " . $row[1] .  " - Event ID: " . $row[0];
                 continue;
             }
-
+            
+            if($this->event->resultType() != 'enabling') {
+                $this->is_partial = true;
+                $this->log[] = "Error: Wrong event type - User: " . $row[1] .  " - Event ID: " . $row[0];
+                continue;
+            }
+            
             $user = User::where('email', $row[1])->first();
-
+            
             if(!$user) {
+                $this->is_partial = true;
+                $this->log[] = "Error: User not found - User: " . $row[1];
                 continue;
             }
-
+            
             $participation = EventInstructorResult::where('event_id', $this->event->id)->where('user_id', $user->id)->first();
             
             if (!$participation) {
@@ -88,8 +98,85 @@ class EventInstructorImport implements ToCollection {
             // Aggiorna i valori e poi salva
             $weaponForm = WeaponForm::find($row[2]) ?? null;
             $result = $row[3] ?? null;
-            $notes = $row[4] ?? null;
+            $notes = $row[7] ?? null;
 
+            if(!$result || !in_array(strtolower($result), ['green', 'yellow', 'red'])) {
+                $this->is_partial = true;
+                $this->log[] = "Error: Result is missing or invalid. User: " . $user->email . " - Event ID: " . $row[0] . " - Result: " . $result;
+                continue;
+            }
+            
+            // Si traducono perchè loro vogliono usare i colori ma erano stati implementati passed, review e failed
+            switch(strtolower($result)){
+                case 'green':
+                    $result = 'passed';
+                    break;
+                case 'yellow':
+                    $result = 'review';
+                    break;
+                case 'red':
+                    $result = 'failed';
+                    break;
+                default:
+                    break;
+            }
+
+            // Aggiungere i campi alla tabella internship_duration(max 100 chars) internship_notes(max 100 chars) e retake(exam, course)
+            // Aggiungere controlli in base al risultato per internship duration notes on the internship e retake exam / retake course. 
+            // Aggiungere i valori al risultato
+            // Aggiungere i valori alla tabeklla dei risultati visualizzata in admin e modificare nella tabella i risultati con green, yellow e red
+
+            if($result == 'review') {
+                $internshipDuration = $row[4] ?? null;
+                $internshipNotes = $row[5] ?? null;
+
+                if(!$internshipDuration) {
+                    $this->is_partial = true;
+                    $this->log[] = "Error: Internship duration is missing. User: " . $user->email . " - Event ID: " . $row[0];
+                    continue;
+                }
+
+                if(!$internshipNotes) {
+                    $this->is_partial = true;
+                    $this->log[] = "Error: Internship notes are missing. User: " . $user->email . " - Event ID: " . $row[0];
+                    continue;
+                }
+
+                $participation->internship_duration = $internshipDuration;
+                $participation->internship_notes = $internshipNotes;
+            } 
+            
+            if($result == 'failed') {
+                $retake = $row[6] ?? null;
+
+                if(!$retake) {
+                    $this->is_partial = true;
+                    $this->log[] = "Error: Retake is missing. User: " . $user->email . " - Event ID: " . $row[0];
+                    continue;
+                }
+
+                if(!in_array(strtolower($retake), ['retake exam', 'retake course', 'exam', 'course'])) {
+                    $this->is_partial = true;
+                    $this->log[] = "Error: Retake is invalid. User: " . $user->email . " - Event ID: " . $row[0] . " - Retake: " . $retake;
+                    continue;
+                }
+
+                switch(strtolower($retake)){
+                    case 'exam':
+                    case 'retake exam':
+                        $retake = 'exam';
+                        break;
+                    case 'course':
+                    case 'retake course':
+                        $retake = 'course';
+                        break;
+                    default:
+                        break;
+                }
+
+                $participation->retake = $retake;
+            }
+            
             $eventWeaponForm = $this->event->weaponForm;
 
             $participationWeaponForm = $weaponForm ?? ($eventWeaponForm ?? null);

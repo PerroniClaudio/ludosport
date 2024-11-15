@@ -19,6 +19,9 @@ class EventInstructorResult extends Model {
         'notes',
         'stage',
         'weapon_form_id',
+        'internship_duration',
+        'internship_notes',
+        'retake'
     ];
 
     public function event() {

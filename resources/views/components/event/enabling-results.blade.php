@@ -61,7 +61,7 @@
                         
                         <div x-show="column.field == 'result'" :class="`${column.field == 'result' ? (row[column.field] == 'passed' ? 'bg-success-500' : (row[column.field] == 'review' ? 'bg-warning-500' : (row[column.field] == 'failed' ? 'bg-error-500' : 'bg-background-500'))) + ' px-1 rounded text-white' : ''}`">
                             <div x-show="row[column.field] == 'passed'" x-text="'{{ __('events.result_passed') }}'"></div>
-                            <div x-show="row[column.field] == 'failed'" x-text="'{{ __('events.result_failed') }}'"></div>
+                            <div x-show="row[column.field] == 'failed'" x-text="'{{ __('events.result_failed') }}' + (row['retake'] ? (row['retake'] == 'course' ? ' ({{ __('events.result_retake_course_short')}})' : (row['retake'] == 'exam' ? ' ({{ __('events.result_retake_exam_short')}})' : '')) : '')"></div>
                             <div x-show="row[column.field] == 'review'" x-text="'{{ __('events.result_review') }}'"></div>
                             <div x-show="row[column.field] == 'pending'" x-text="'{{ __('events.result_pending') }}'"></div>
                             <div x-show="row[column.field] == null" x-text="'{{ __('events.result_null') }}'"></div>
@@ -82,15 +82,20 @@
                     <button @click="submitEnablingResult(row.id, 'passed')" 
                         :disabled="row.stage === 'confirmed'"
                         class="inline-flex items-center px-4 py-2 bg-success-500 rounded-md font-semibold text-xs text-white uppercase tracking-widest shadow-sm hover:bg-background-50 hover:text-background-700 dark:hover:bg-background-700 focus:outline-none disabled:opacity-25 transition ease-in-out duration-150">
-                        Passed
+                        Green
                     </button>
-                    <button @click="submitEnablingResult(row.id, 'failed')"
+                    <button @click="submitEnablingResult(row.id, 'failed', 'exam')"
                         :disabled="row.stage === 'confirmed'"
                         class="inline-flex items-center px-4 py-2 bg-error-500 rounded-md font-semibold text-xs text-white uppercase tracking-widest shadow-sm hover:bg-background-50 hover:text-background-700 dark:hover:bg-background-700 focus:outline-none disabled:opacity-25 transition ease-in-out duration-150">
-                        Failed
+                        Exam
                     </button>
-                    <button @click="openNotesModal(row.user.id, row.notes); $dispatch('open-modal', 'result-notes-modal')"
-                        :disabled="!row.notes"
+                    <button @click="submitEnablingResult(row.id, 'failed', 'course')"
+                        :disabled="row.stage === 'confirmed'"
+                        class="inline-flex items-center px-4 py-2 bg-error-500 rounded-md font-semibold text-xs text-white uppercase tracking-widest shadow-sm hover:bg-background-50 hover:text-background-700 dark:hover:bg-background-700 focus:outline-none disabled:opacity-25 transition ease-in-out duration-150">
+                        Course
+                    </button>
+                    <button @click="openNotesModal(row.user.id, row.notes, row.internship_duration, row.internship_notes, row.retake); $dispatch('open-modal', 'result-notes-modal')"
+                        :disabled="!(row.notes || row.internship_duration || row.internship_notes || row.retake)"
                         class="inline-flex items-center px-4 py-2 bg-info-500 rounded-md font-semibold text-xs text-white uppercase tracking-widest shadow-sm hover:bg-background-50 hover:text-background-700 dark:hover:bg-background-700 focus:outline-none disabled:opacity-25 transition ease-in-out duration-150">
                         Notes
                     </button>
@@ -105,7 +110,30 @@
         <div class="p-6">
             <h2  class="text-lg font-medium text-background-900 dark:text-background-100" x-text="'Result notes for user ' + notesModal.resultid"></h2>
             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-            <span x-text="notesModal.notes"></span>
+            <template x-if="notesModal.internshipDuration">
+                <div >
+                    <h3 class="font-semibold">Internship duration</h3>
+                    <span x-text="notesModal.internshipDuration"></span>
+                </div>
+            </template>
+            <template x-if="notesModal.internshipNotes">
+                <div >
+                    <h3 class="font-semibold">Internship notes</h3>
+                    <span x-text="notesModal.internshipNotes"></span>
+                </div>
+            </template>
+            <template x-if="notesModal.retake">
+                <div >
+                    <h3 class="font-semibold">Retake</h3>
+                    <span x-text="notesModal.retake"></span>
+                </div>
+            </template>
+            <template x-if="notesModal.notes">
+                <div >
+                    <h3 class="font-semibold">Notes</h3>
+                    <span x-text="notesModal.notes"></span>
+                </div>
+            </template>
         </div>
     </x-modal>
 

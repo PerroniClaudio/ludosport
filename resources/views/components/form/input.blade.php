@@ -21,6 +21,7 @@
                 <x-input-label value="{{ $label }}" />
                 <div x-data="{ tooltip: false }" x-on:mouseover="tooltip = true" x-on:mouseleave="tooltip = false">
                     <div x-show="tooltip"
+                        x-cloak
                         class="absolute bg-background-100 
                         p-2 rounded-md text-sm text-background-800 
                         inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
