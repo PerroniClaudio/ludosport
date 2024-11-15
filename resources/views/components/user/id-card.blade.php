@@ -2,7 +2,8 @@
     'user' => null,
 ])
 
-<section class="w-full p-2 text-background-800 dark:text-white ">
+<section
+    class="w-full dark:bg-background-700 border-8 border-primary-500 p-2 text-background-800 dark:text-white lg:w-1/2">
     <div class="flex justify-between items-center">
         <div>
             <div class="flex items-center gap-1">
@@ -109,6 +110,12 @@
             @if ($user->has_paid_fee)
                 <div class="flex items-center justify-center gap-1">
                     <x-lucide-circle class="h-6 w-6 text-green-500" /> <span>{{ __('users.active') }}</span>
+                </div>
+            @endif
+
+            @if (!$user->has_paid_fee)
+                <div class="flex items-center justify-center gap-1">
+                    <x-lucide-circle class="h-6 w-6 text-red-500" /> <span>{{ __('users.inactive') }}</span>
                 </div>
             @endif
 

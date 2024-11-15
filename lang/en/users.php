@@ -130,4 +130,5 @@ return [
     'battle_name' => 'Battle Name',
     'status' => 'Status',
     'active' => 'Active',
+    'inactive' => 'Inactive',
 ];
