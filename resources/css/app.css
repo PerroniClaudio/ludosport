@@ -392,8 +392,12 @@ hr {
 #bollino {
     height: 50px;
     width: 50px;
-    top: 38%;
-    right: -25px;
+    /* top: 38%; */
+    /* right: -25px; */
+    position: absolute;
+    right: 0;
+    top: calc((100svh - 64px) / 2);
+    transform: translateX(50%) translateY(-50%);
 }
 
 .reduce {
