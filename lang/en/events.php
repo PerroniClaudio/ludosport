@@ -71,6 +71,8 @@ return [
     'result_failed' => 'Red',
     'result_review' => 'Yellow',
     'result_pending' => 'Pending',
+    'result_retake_exam' => 'Exam',
+    'result_retake_course' => 'Course',
     'result_retake_exam_short' => 'E',
     'result_retake_course_short' => 'C',
     'result_null' => 'Pending',

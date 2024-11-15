@@ -72,7 +72,7 @@ return [
     'events_pay_fee_before' => 'Events participations are only available to active members. Please pay the membership fee before proceeding.',
     'events_list_no_events' => 'There are no upcoming events.',
     'events_general_points' => 'Points',
-    'events_war_points' => 'War Points',
+    'events_war_points' => 'Arena Points',
     'events_style_points' => 'Style Points',
     'must_pay_fee' => 'You must pay the membership fee to participate in this event.',
     'event_free' => 'You cannot register for this event online. Contact a school for details.',

@@ -61,7 +61,11 @@
                         
                         <div x-show="column.field == 'result'" :class="`${column.field == 'result' ? (row[column.field] == 'passed' ? 'bg-success-500' : (row[column.field] == 'review' ? 'bg-warning-500' : (row[column.field] == 'failed' ? 'bg-error-500' : 'bg-background-500'))) + ' px-1 rounded text-white' : ''}`">
                             <div x-show="row[column.field] == 'passed'" x-text="'{{ __('events.result_passed') }}'"></div>
-                            <div x-show="row[column.field] == 'failed'" x-text="'{{ __('events.result_failed') }}' + (row['retake'] ? (row['retake'] == 'course' ? ' ({{ __('events.result_retake_course_short')}})' : (row['retake'] == 'exam' ? ' ({{ __('events.result_retake_exam_short')}})' : '')) : '')"></div>
+                            @if ($authRole === 'admin')
+                                <div x-show="row[column.field] == 'failed'" x-text="'{{ __('events.result_failed') }}' + (row['retake'] ? (row['retake'] == 'course' ? ' ({{ __('events.result_retake_course_short')}})' : (row['retake'] == 'exam' ? ' ({{ __('events.result_retake_exam_short')}})' : '')) : '')"></div>
+                            @else
+                                <div x-show="row[column.field] == 'failed'" x-text="'{{ __('events.result_failed') }}' + (row['retake'] ? (row['retake'] == 'course' ? ' ({{ __('events.result_retake_course')}})' : (row['retake'] == 'exam' ? ' ({{ __('events.result_retake_exam')}})' : '')) : '')"></div>
+                            @endif
                             <div x-show="row[column.field] == 'review'" x-text="'{{ __('events.result_review') }}'"></div>
                             <div x-show="row[column.field] == 'pending'" x-text="'{{ __('events.result_pending') }}'"></div>
                             <div x-show="row[column.field] == null" x-text="'{{ __('events.result_null') }}'"></div>
