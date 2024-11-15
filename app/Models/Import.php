@@ -14,6 +14,7 @@ class Import extends Model {
         'type',
         'log',
         'user_id',
+        'event_id',
     ];
 
     private $import_types = [

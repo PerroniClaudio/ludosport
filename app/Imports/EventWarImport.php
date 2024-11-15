@@ -8,40 +8,37 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
-class EventWarImport implements ToCollection
-{
+class EventWarImport implements ToCollection {
     private $event = null;
     private $importingUser = null;
     private $log = [];
     private $is_partial = false;
 
-    public function __construct($user)
-    {
+    public function __construct($user) {
         $this->importingUser = $user;
     }
-    
+
     /**
-    * @param Collection $collection
-    */
-    public function collection(Collection $collection)
-    {
+     * @param Collection $collection
+     */
+    public function collection(Collection $collection) {
         //
 
         $usersCount = count($collection);
 
         // Check if the number of participants in the file matches the number of participants in the event
-        if(($usersCount - 1) != EventResult::where('event_id', $collection[1][0])->count()) {
+        if (($usersCount - 1) != EventResult::where('event_id', $collection[1][0])->count()) {
             $this->log[] = "['Number of participants in the file does not match the number of participants in the event. event ID: " . $collection[1][0] . "']";
             throw new \Exception('Number of participants in the file does not match the number of participants in the event.');
             return;
         }
-        
+
         // Check if all rows belong to the same event and to real participants
         $this->event = Event::find($collection[1][0]);
         $eventParticipantsIds = EventResult::where('event_id', $collection[1][0])->pluck('user_id');
         $eventParticipantEmails = User::whereIn('id', $eventParticipantsIds)->pluck('email')->toArray();
         $eventId = $collection[1][0];
-        $invalidEventIds = $collection->filter(function($row, $index) use ($eventId, $eventParticipantEmails) {
+        $invalidEventIds = $collection->filter(function ($row, $index) use ($eventId, $eventParticipantEmails) {
             if ($index == 0) {
                 return false;
             }
@@ -54,7 +51,7 @@ class EventWarImport implements ToCollection
         }
 
         // Check if all rows have a position value
-        $invalidPositions = $collection->filter(function($row, $index) {
+        $invalidPositions = $collection->filter(function ($row, $index) {
             if ($index == 0) {
                 return false;
             }
@@ -81,20 +78,20 @@ class EventWarImport implements ToCollection
             }
 
             $userPosition = $row[2];
-            
+
             if ($this->event == null) {
                 $this->event = Event::find($row[0]);
             } else if ($this->event->id != $row[0]) {
                 $this->event = Event::find($row[0]);
             }
 
-            if(!$this->event || $this->event->resultType() != 'ranking') {
+            if (!$this->event || $this->event->resultType() != 'ranking') {
                 continue;
             }
 
             $user = User::where('email', $row[1])->first();
 
-            if(!$user) {
+            if (!$user) {
                 continue;
             }
 
@@ -124,7 +121,6 @@ class EventWarImport implements ToCollection
 
             $participation->total_war_points = $participation->war_points + $participation->bonus_war_points;
             $participation->save();
-
         }
     }
 
@@ -133,5 +129,9 @@ class EventWarImport implements ToCollection
     }
     public function getIsPartial() {
         return $this->is_partial;
+    }
+
+    public function getEventId() {
+        return $this->event->id;
     }
 }

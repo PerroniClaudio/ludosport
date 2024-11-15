@@ -274,6 +274,7 @@ class ImportController extends Controller {
                         }
                         $is_partial = $EventWarImport->getIsPartial();
                         $log[] = "['Event war imported at " . now()->format('Y-m-d H:i:s') . "']";
+                        $import->event_id = $EventWarImport->getEventId();
                         break;
                     case 'event_style':
                         $log[] = "['Processing event style']";
@@ -285,6 +286,7 @@ class ImportController extends Controller {
                         }
                         $is_partial = $eventStyleImport->getIsPartial();
                         $log[] = "['Event style imported at " . now()->format('Y-m-d H:i:s') . "']";
+                        $import->event_id = $eventStyleImport->getEventId();
                         break;
                     case 'event_instructor_results':
                         $log[] = "['Processing event instructor']";
@@ -296,6 +298,8 @@ class ImportController extends Controller {
                         }
                         $is_partial = $eventInstructorImport->getIsPartial();
                         $log[] = "['Event instructor imported at " . now()->format('Y-m-d H:i:s') . "']";
+                        $import->event_id = $eventInstructorImport->getEventId();
+
                         break;
 
                     default:
