@@ -16,11 +16,10 @@ class EventInstructorImport implements ToCollection {
     private $log = [];
     private $is_partial = false;
 
-    public function __construct($user)
-    {
+    public function __construct($user) {
         $this->importingUser = $user;
     }
-    
+
     /**
      * @param Collection $collection
      */
@@ -76,25 +75,25 @@ class EventInstructorImport implements ToCollection {
             }
             
             $participation = EventInstructorResult::where('event_id', $this->event->id)->where('user_id', $user->id)->first();
-            
+
             if (!$participation) {
                 $this->is_partial = true;
                 $this->log[] = "Error: User not registered for this event. User: " . $user->email . " - Event ID: " . $row[0];
                 continue;
             }
 
-            if($participation->stage == 'confirmed') {
+            if ($participation->stage == 'confirmed') {
                 $this->is_partial = true;
                 $this->log[] = "Error: Result already confirmed. User: " . $user->email . " - Event ID: " . $row[0];
                 continue;
             }
 
-            if($participation->stage == 'confirmed') {
+            if ($participation->stage == 'confirmed') {
                 $this->is_partial = true;
                 $this->log[] = "Error: Result already confirmed. User: " . $user->email . " - Event ID: " . $row[0];
                 continue;
             }
-            
+
             // Aggiorna i valori e poi salva
             $weaponForm = WeaponForm::find($row[2]) ?? null;
             $result = $row[3] ?? null;
@@ -201,7 +200,6 @@ class EventInstructorImport implements ToCollection {
 
                 $participation->save();
             }
-            
         }
     }
 
@@ -210,5 +208,8 @@ class EventInstructorImport implements ToCollection {
     }
     public function getIsPartial() {
         return $this->is_partial;
+    }
+    public function getEventId() {
+        return $this->event->id;
     }
 }
