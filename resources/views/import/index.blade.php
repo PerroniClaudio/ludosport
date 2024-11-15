@@ -75,6 +75,11 @@
                                     <x-lucide-download class="w-5 h-5 cursor-pointer" />
                                 </a>
                             </x-primary-button>
+                            <x-primary-button x-show="row.event_id != null">
+                                <a x-bind:href="'/events/' + row.event_id">
+                                    <x-lucide-eye class="w-5 h-5 cursor-pointer" />
+                                </a>
+                            </x-primary-button>
                         </x-slot>
                     </x-table>
                     <x-modal name="import-log-modal" :show="$errors->userId->isNotEmpty()" focusable x-model="logsModal">

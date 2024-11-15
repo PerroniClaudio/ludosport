@@ -24,8 +24,10 @@
 
         </div>
         <div>
-            <img class="w-24 aspect-square" src="/academy-image/{{ $user->primaryAcademyAthlete()->id }}"
-                alt="xxdd">
+            @if ($user->primaryAcademyAthlete())
+                <img class="w-24 aspect-square" src="/academy-image/{{ $user->primaryAcademyAthlete()->id }}"
+                    alt="{{ $user->primaryAcademyAthlete()->name }}">
+            @endif
         </div>
     </div>
 
