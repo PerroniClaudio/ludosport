@@ -3,9 +3,9 @@
 ])
 
 <section
-    class="w-full bg-background-700 border-8 border-primary-500 p-2 text-background-800 text-white lg:w-1/2">
-    <div class="flex justify-between items-center">
-        <div>
+    class="w-full dark:bg-background-600 bg-white border-8 border-primary-500 text-background-800 dark:text-white lg:w-1/2">
+    <div class="flex">
+        <div class="w-[45%] p-2">
             <div class="flex items-center gap-1">
                 <div class="flex-[1_1_0]">
                     <img class="w-12" src="{{ route('nation-flag', $user->nation->id) }}"
@@ -20,10 +20,10 @@
                 {{ __('users.since') }} <span class="text-primary-500">{{ $user->subscription_year }}</span>
             </p>
         </div>
-        <div>
+        <div class="w-[10%] bg-primary-500">
 
         </div>
-        <div>
+        <div class="flex flex-row justify-end w-[45%] p-2">
             @if ($user->primaryAcademyAthlete())
                 <img class="w-24 aspect-square" src="/academy-image/{{ $user->primaryAcademyAthlete()->id }}"
                     alt="{{ $user->primaryAcademyAthlete()->name }}">
@@ -31,25 +31,42 @@
         </div>
     </div>
 
-    <div class="flex flex-col items-center justify-center">
-        <div class="border-8 border-primary-500 rounded-full">
-            <div class="border-8 border-black rounded-full p-2 bg-cover bg-center bg-no-repeat w-52 h-52"
-                style="background-image: url('{{ route('profile-picture', $user->id) }}')">
+    <div class="flex relative h-64">
+        <div class="w-[45%]"></div>
+        <div class="w-[10%] bg-primary-500"></div>
+        <div class="w-[45%]"></div>
+
+        <div class="flex flex-col items-center justify-center absolute inset-0">
+            <div class="border-8 border-primary-500 rounded-full">
+                <div class="border-8 border-black rounded-full p-2 bg-cover bg-center bg-no-repeat w-52 h-52"
+                    style="background-image: url('{{ route('profile-picture', $user->id) }}')">
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="flex flex-col items-center justify-center">
-        <img src="{{ route('logoex') }}" alt="ludosport international">
+    <div class="flex relative h-64">
+        <div class="w-[45%]"></div>
+        <div class="w-[10%] bg-primary-500"></div>
+        <div class="w-[45%]"></div>
+
+        <div class="flex flex-col gap-8 items-center justify-center absolute inset-0">
+
+            <div class="flex flex-col items-center justify-center dark:bg-background-600 bg-white">
+                <img src="{{ route('logoex') }}" alt="ludosport international">
+            </div>
+
+            <p class="text-center w-full text-lg mt-4 dark:bg-background-600 bg-white">
+                <span class="text-primary-500">ID</span>
+                {{ $user->unique_code }}
+            </p>
+
+        </div>
+
     </div>
 
-    <p class="text-center w-full text-lg mt-4">
-        <span class="text-primary-500">ID</span>
-        {{ $user->unique_code }}
-    </p>
-
-    <div class="w-full  grid grid-cols-5 mt-4 p-2">
-        <div class="col-span-2">
+    <div class="flex">
+        <div class="w-[45%] p-2">
             @php
                 use App\Models\WeaponForm;
                 $weapon_forms = WeaponForm::all();
@@ -71,7 +88,7 @@
                         class="flex items-center justify-center col-span-3  {{ in_array($weapon_form->id, $user_forms) ? '' : 'opacity-30' }}">
 
                         <img src="{{ route('weapon-form-image', $weapon_form->id) }}" alt="{{ $weapon_form->name }}"
-                            class="w-8 h-8 invert" style="">
+                            class="w-8 h-8 dark:invert" style="">
 
                     </div>
                 @endforeach
@@ -87,7 +104,7 @@
                         <div
                             class="{{ (strpos($weapon_form->name, '6') || strpos($weapon_form->name, '7')) ? 'hidden' : '' }}">
                             <img src="{{ route('weapon-form-image', $weapon_form->id) }}"
-                                alt="{{ $weapon_form->name }}" class="w-8 h-8 invert">
+                                alt="{{ $weapon_form->name }}" class="w-8 h-8 dark:invert">
                         </div>
                     </div>
                 @endforeach
@@ -95,8 +112,8 @@
             </div>
 
         </div>
-        <div></div>
-        <div class="col-span-2 flex flex-col gap-4">
+        <div class="w-[10%] bg-primary-500"></div>
+        <div class="w-[45%] p-2 flex flex-col gap-4">
             <p class="text-primary-500 font-bold text-xl text-center">
                 {{ __('users.battle_name') }}
             </p>
