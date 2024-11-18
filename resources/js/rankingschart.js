@@ -8,8 +8,8 @@ export const rankingschart = () => {
         athletesData: [],
         nationFilter: "",
         eventName: "General Rankings",
-        getEventsList: async function () {
-            const url = `/website-rankings/events/list?date=${today.toISOString()}`;
+        getEventsList: async function (nationId = null) {
+            const url = `/website-rankings/events/list?date=${today.toISOString()}${nationId ? '&nation=' + nationId : ""}`;
             const response = await fetch(url);
 
             if (response.ok) {
@@ -83,6 +83,7 @@ export const rankingschart = () => {
                 return;
             }
 
+            this.getEventsList(nationId);
             this.events = this.events.filter((a) => a.nation_id == nationId);
             this.athletesData = [];
 

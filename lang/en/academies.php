@@ -3,6 +3,8 @@
 return [
     'title' => 'Academies',
     'academy' => 'Academy',
+    'academy_athlete' => 'Academy (athlete)',
+    'academy_personnel' => 'Academy (personnel)',
     'new' => 'New Academy',
     'create' => 'Create Academy',
     'edit' => 'Edit Academy',

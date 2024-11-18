@@ -3,7 +3,7 @@
 ])
 
 <section
-    class="w-full dark:bg-background-700 border-8 border-primary-500 p-2 text-background-800 dark:text-white lg:w-1/2">
+    class="w-full bg-background-700 border-8 border-primary-500 p-2 text-background-800 text-white lg:w-1/2">
     <div class="flex justify-between items-center">
         <div>
             <div class="flex items-center gap-1">
@@ -85,10 +85,9 @@
                     <div
                         class="my-2 mx-2  {{ in_array($weapon_form->id, $user_forms) ? '' : 'opacity-30' }} flex flex-col items-center justify-center">
                         <div
-                            class="{{ strpos($weapon_form->name, '6') !== false || strpos($weapon_form->name, '7') !== false ? 'hidden' : '' }}">
+                            class="{{ (strpos($weapon_form->name, '6') || strpos($weapon_form->name, '7')) ? 'hidden' : '' }}">
                             <img src="{{ route('weapon-form-image', $weapon_form->id) }}"
                                 alt="{{ $weapon_form->name }}" class="w-8 h-8 invert">
-
                         </div>
                     </div>
                 @endforeach
@@ -101,7 +100,7 @@
             <p class="text-primary-500 font-bold text-xl text-center">
                 {{ __('users.battle_name') }}
             </p>
-            <p class="text-white font-bold text-xl text-center">
+            <p class="font-bold text-xl text-center">
                 {{ $user->battle_name }}
             </p>
 
@@ -127,7 +126,11 @@
 
             <p class="font-bold text-xl text-center">
                 @if ($user->primarySchool())
-                    <span class="text-white">{{ $user->primarySchool()->name }}</span>
+                    <span class="">{{ $user->primarySchool()->name }}</span>
+                @elseif ($user->primarySchoolAthlete())
+                    <span class="">{{ $user->primarySchoolAthlete()->name }}</span>
+                @else
+                    <span class="">{{ __('users.no_school') }}</span>
                 @endif
             </p>
         </div>

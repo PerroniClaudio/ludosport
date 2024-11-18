@@ -1001,6 +1001,23 @@ class EventController extends Controller {
 
         $date = Carbon::parse($request->date);
 
+        if($request->nation){
+            $nation = Nation::find($request->nation);
+            if($nation){
+                Log::info("nation esiste", ['nation' => $nation]);
+                $events = Event::where([
+                    ['is_approved', '=', 1],
+                    ['is_published', '=', 1],
+                    ['end_date', '<=', $date->format('Y-m-d')],
+                    ['nation_id', '=', $nation->id],
+                    ['is_disabled', '=', 0],
+                ])->get();
+
+                Log:info("events", ['events' => $events]);
+                return response()->json($events);
+            }
+        }
+
         $events = Event::where([
             ['is_approved', '=', 1],
             ['is_published', '=', 1],
@@ -1031,7 +1048,6 @@ class EventController extends Controller {
                     $results[$value->user_id] = [
                         'user_id' => $value->user_id,
                         'user_name' => $value->user->name . ' ' . $value->user->surname,
-                        'user_battle_name' => $value->user->battle_name,
                         'user_battle_name' => $value->user->battle_name,
                         'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
                         'user_school' => $value->user->primarySchoolAthlete()->name ?? '',

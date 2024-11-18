@@ -74,14 +74,14 @@
 
         @if ($user->primaryAcademyAthlete())
             <div>
-                <x-form.input name="academy" disabled="true" label="{{ __('academies.academy') }}"
+                <x-form.input name="academy" disabled="true" label="{{ __('academies.academy_athlete') }}"
                     value="{{ $user->primaryAcademyAthlete()->name }}" />
             </div>
         @endif
 
         @if ($user->primaryAcademy())
             <div>
-                <x-form.input name="academy" disabled="true" label="{{ __('academies.academy') }}"
+                <x-form.input name="academy" disabled="true" label="{{ __('academies.academy_personnel') }}"
                     value="{{ $user->primaryAcademy()->name }}" />
             </div>
         @endif

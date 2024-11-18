@@ -38,6 +38,7 @@ return [
     'actions' => 'Actions',
     'select' => 'Select',
     'school' => 'School',
+    'no_school' => 'No school',
     'schools' => 'Schools',
     'disable_user' => 'Disable User',
     'disable_user_message' => 'Once an user is disabled, he/she will not be able to login to the system, participate at any event nor enroll in new courses.',
