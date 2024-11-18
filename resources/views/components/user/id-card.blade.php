@@ -2,7 +2,8 @@
     'user' => null,
 ])
 
-<section class="w-full dark:bg-background-600 border-8 border-primary-500 text-background-800 dark:text-white lg:w-1/2">
+<section
+    class="w-full dark:bg-background-600 bg-white border-8 border-primary-500 text-background-800 dark:text-white lg:w-1/2">
     <div class="flex">
         <div class="w-[45%] p-2">
             <div class="flex items-center gap-1">
@@ -87,7 +88,7 @@
                         class="flex items-center justify-center col-span-3  {{ in_array($weapon_form->id, $user_forms) ? '' : 'opacity-30' }}">
 
                         <img src="{{ route('weapon-form-image', $weapon_form->id) }}" alt="{{ $weapon_form->name }}"
-                            class="w-8 h-8 invert" style="">
+                            class="w-8 h-8 dark:invert" style="">
 
                     </div>
                 @endforeach
@@ -103,7 +104,7 @@
                         <div
                             class="{{ strpos($weapon_form->name, '6') !== false || strpos($weapon_form->name, '7') !== false ? 'hidden' : '' }}">
                             <img src="{{ route('weapon-form-image', $weapon_form->id) }}"
-                                alt="{{ $weapon_form->name }}" class="w-8 h-8 invert">
+                                alt="{{ $weapon_form->name }}" class="w-8 h-8 dark:invert">
 
                         </div>
                     </div>
@@ -117,7 +118,7 @@
             <p class="text-primary-500 font-bold text-xl text-center">
                 {{ __('users.battle_name') }}
             </p>
-            <p class="text-white font-bold text-xl text-center">
+            <p class="font-bold text-xl text-center">
                 {{ $user->battle_name }}
             </p>
 
@@ -143,7 +144,7 @@
 
             <p class="font-bold text-xl text-center">
                 @if ($user->primarySchool())
-                    <span class="text-white">{{ $user->primarySchool()->name }}</span>
+                    <span class="">{{ $user->primarySchool()->name }}</span>
                 @endif
             </p>
         </div>
