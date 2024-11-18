@@ -119,17 +119,16 @@
                                                                         <div x-text="`${row[column.field]}`"
                                                                             class="truncate">
                                                                         </div>
-                                                                        <template x-if="column.field === 'name' && (row.battle_name !== null)">
+                                                                        <template x-if="column.field === 'name' && (row.battle_name !== null) && (row.battle_name !== '')">
                                                                             <a
                                                                                 x-bind:href="'/website-users/' + row.battle_name">
                                                                                 <x-lucide-arrow-right
                                                                                     class="w-4 h-4 text-primary-500 dark:text-primary-400 cursor-pointer hover:opacity-70" />
                                                                             </a>
                                                                         </template>
-                                                                        <template x-if="column.field === 'school' && (row.school_slug !== null)">
-
+                                                                        <template x-if="column.field === 'school' && (row.school_slug !== null) && (row.school_slug !== '')">
                                                                             <a x-bind:href="'/school-profile/' + row.school_slug"
-                                                                                x-show="row.school_slug != ''">
+                                                                                >
                                                                                 <x-lucide-arrow-right
                                                                                     class="w-4 h-4 text-primary-500 dark:text-primary-400 cursor-pointer hover:opacity-70" />
                                                                             </a>
