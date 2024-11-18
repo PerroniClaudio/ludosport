@@ -8,16 +8,28 @@ scrape_configs:
 
   - job_name: "laravel_app"
     static_configs:
-      - targets: ["app:9000"] # Porta FPM di default
+      - targets:
+          - app:9000 # Porta FPM di default
 
   - job_name: "nginx"
+    metrics_path: /metrics
     static_configs:
-      - targets: ["nginx:80"]
+      - targets:
+          - nginx-exporter:9113
 
   - job_name: "redis"
     static_configs:
-      - targets: ["redis:6379"]
+      - targets:
+          - redis-exporter:9121
 
   - job_name: "meilisearch"
     static_configs:
-      - targets: ["meilisearch:7700"]
+      - targets:
+          - meilisearch:7700
+    authorization:
+      credentials: "${MEILISEARCH_KEY}"
+
+  - job_name: "cadvisor"
+    static_configs:
+      - targets:
+          - cadvisor:8080
