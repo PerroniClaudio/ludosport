@@ -34,7 +34,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/invoices/store', [App\Http\Controllers\UserController::class, 'saveInvoice'])->name('users.invoices.store');
     Route::post('/invoices/update', [App\Http\Controllers\UserController::class, 'updateInvoice'])->name('users.invoices.update');
 
-    Route::get('/imports/download/{import}', [App\Http\Controllers\ImportController::class, 'download'])->name('imports.download');
 });
 
 /** Eliminati */
@@ -241,7 +240,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('imports.store');
     Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('imports.update');
-    Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('imports.download');
+    Route::get('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('imports.download');
 
     Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('imports.template');
 });

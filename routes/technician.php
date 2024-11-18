@@ -78,7 +78,7 @@ Route::prefix('technician')->middleware('auth')->middleware('role:admin,technici
 
         Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('technician.imports.store');
         Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('technician.imports.update');
-        Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('technician.imports.download');
+        Route::get('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('technician.imports.download');
 
         Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('technician.imports.template');
     });

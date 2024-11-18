@@ -128,7 +128,7 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
 
     Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('manager.imports.store');
     Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('manager.imports.update');
-    Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('manager.imports.download');
+    Route::get('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('manager.imports.download');
 
     Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('manager.imports.template');
   });

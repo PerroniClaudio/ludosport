@@ -122,7 +122,7 @@ Route::prefix('dean')->middleware('auth')->middleware('role:admin,dean')->group(
 
     Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('dean.imports.store');
     Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('dean.imports.update');
-    Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('dean.imports.download');
+    Route::get('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('dean.imports.download');
 
     Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('dean.imports.template');
   });

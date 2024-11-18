@@ -170,7 +170,7 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
 
     Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('rector.imports.store');
     Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('rector.imports.update');
-    Route::post('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('rector.imports.download');
+    Route::get('/imports/{import}/download', [App\Http\Controllers\ImportController::class, 'download'])->name('rector.imports.download');
 
     Route::get('/imports/template', [App\Http\Controllers\ImportController::class, 'template'])->name('rector.imports.template');
   });

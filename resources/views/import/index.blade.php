@@ -71,7 +71,7 @@
                                 </x-primary-button>
                             </template>
                             <x-primary-button>
-                                <a x-bind:href="'/imports/download/' + row.id">
+                                <a x-bind:href="'/imports/' + row.id + '/download'">
                                     <x-lucide-download class="w-5 h-5 cursor-pointer" />
                                 </a>
                             </x-primary-button>
