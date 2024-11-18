@@ -23,4 +23,4 @@ jobs:
 
       - name: Connect to VM and pull changes
         run: |
-          gcloud compute ssh ${{ secrets.VM_INSTANCE_NAME }} --zone ${{ secrets.VM_ZONE }} --command="git config --global --add safe.directory /server/site/ludosport && cd /server/site/ludosport && git pull origin main && sh /server/site/ludosport/start.sh"
+          gcloud compute ssh ${{ secrets.VM_INSTANCE_NAME }} --zone ${{ secrets.VM_ZONE }} --command="sudo git config --global --add safe.directory /server/site/ludosport && cd /server/site/ludosport && sudo git pull origin main && sh /server/site/ludosport/start.sh"

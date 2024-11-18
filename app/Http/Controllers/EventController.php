@@ -648,7 +648,6 @@ class EventController extends Controller {
                 $query->where('academy_id', $event->academy->id);
             })->get();
         }
-
         return response()->json($users);
     }
 
