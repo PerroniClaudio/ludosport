@@ -102,6 +102,7 @@ export const rankingschart = () => {
                     battle_name: value.user_battle_name,
                     academy: value.user_academy,
                     school: value.user_school,
+                    school_slug: value.school_slug,
                     nation: value.nation,
                     war_points: value.total_war_points,
                     style_points: value.total_style_points,
