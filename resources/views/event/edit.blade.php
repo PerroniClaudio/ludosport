@@ -5,7 +5,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-background-800 dark:text-background-200 leading-tight">
-                {{ __('events.edit') }}
+                {{ __('events.edit', [ 'id' => $event->id]) }}
             </h2>
         </div>
     </x-slot>

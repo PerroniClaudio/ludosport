@@ -11,7 +11,7 @@ return [
     'approved' => 'Approved',
     'create' => 'Create Event',
     'new' => 'New Event',
-    'edit' => 'Edit Event',
+    'edit' => 'Edit Event #:id',
     'info' => 'Event Information',
     'location' => 'Location',
     'thumbnail' => 'Thumbnail',
