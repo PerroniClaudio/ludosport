@@ -49,7 +49,7 @@ class Export extends Model {
             case 'manager':
                 return ['users', 'user_roles', 'users_course', 'users_school', 'event_participants'];
             case 'technician':
-                return ['event_participants', 'instructor_event_results', 'event_war', 'event_style'];
+                return ['event_participants', 'instructor_event_results'];
             default:
                 return [];
         }
