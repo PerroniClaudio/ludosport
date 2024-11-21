@@ -264,18 +264,6 @@ class ClanController extends Controller {
                 $schools = $authUser->schools->where('id', ($authUser->primarySchool()->id ?? null));
                 break;
             case 'instructor':
-                // // Controlla se la scuola del corso è tra le scuole delle accademie in cui l'istruttore ha un corso.
-                // // Ottieni i clan dell'utente
-                // $clans = $authUser->clansPersonnel()->get();
-                // // Carica le relazioni necessarie
-                // $clans->load('school.academy.schools.clan');
-                // // Mappa e ottieni tutti i clan unici
-                // $allClans = $clans->map(function ($clan) {
-                //     return $clan->school->academy->schools->map(function ($school) {
-                //         return $school->clan;
-                //     });
-                // })->flatten()->unique('id');
-
                 $academies = $authUser->academies;
                 $clans = [];
 
