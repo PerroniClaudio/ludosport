@@ -18,7 +18,7 @@
                         <x-form.select name="school_id" label="School" required="{{ true }}" :options="$schools"
                             value="{{ old('school_id') }}" /> --}}
 
-                        <x-clan.rector.school />
+                        <x-clan.rector.school isCreating="{{true}}" />
                         <x-clan.weapon-form :available_weapons=$weaponForms />
 
                     </div>
