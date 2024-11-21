@@ -42,7 +42,12 @@ class Clan extends Model {
     }
 
     public function academy() {
-        return $this->school->belongsTo(Academy::class);
+        // return $this->school->belongsTo(Academy::class);
+        return $this->school ? $this->school->belongsTo(Academy::class) : null;
+
+        // Questa soluzione richiede un pacchetto aggiuntivo: composer require staudenmeir/eloquent-has-many-deep
+        // E questo codice nel modello: use Staudenmeir\EloquentHasManyDeep\HasRelationships;    class Clan extends Model { use HasRelationships;
+        // return $this->belongsToThrough(Academy::class, School::class, 'school_id', 'id', 'school_id', 'academy_id');
     }
 
     public function weaponForm() {

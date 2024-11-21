@@ -43,7 +43,7 @@ class ClanController extends Controller {
                 $clans = $authUser->primarySchool() ? $authUser->primarySchool()->clan : [];
                 break;
             case 'instructor':
-                // Gli istruttori possono vedere tutti i corsi delle scuole a cui sono associati
+                // Gli istruttori possono vedere tutti i corsi delle accademie a cui sono associati
                 // $clans = $authUser->clansPersonnel;
 
                 $academies = $authUser->academies;
@@ -264,12 +264,34 @@ class ClanController extends Controller {
                 $schools = $authUser->schools->where('id', ($authUser->primarySchool()->id ?? null));
                 break;
             case 'instructor':
-                if ($clan->personnel->where('id', $authUser->id)->count() === 0 && !in_array($clan->school_id, $authUser->schools->pluck('id')->toArray())) {
+                // // Controlla se la scuola del corso è tra le scuole delle accademie in cui l'istruttore ha un corso.
+                // // Ottieni i clan dell'utente
+                // $clans = $authUser->clansPersonnel()->get();
+                // // Carica le relazioni necessarie
+                // $clans->load('school.academy.schools.clan');
+                // // Mappa e ottieni tutti i clan unici
+                // $allClans = $clans->map(function ($clan) {
+                //     return $clan->school->academy->schools->map(function ($school) {
+                //         return $school->clan;
+                //     });
+                // })->flatten()->unique('id');
+
+                $academies = $authUser->academies;
+                $clans = [];
+
+                foreach ($academies as $academy) {
+                    $schools = $academy->schools;
+                    foreach ($schools as $school) {
+                        foreach ($school->clan as $clan) {
+                            $clans[] = $clan->id;
+                        }
+                    }
+                }
+
+                if ($clan->personnel->where('id', $authUser->id)->count() === 0 && !in_array($clan->id, $clans)) {
                     return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
                 }
-                // if($clan->personnel->where('id', $authUser->id)->count() === 0 && in_array($clan->school_id, $authUser->schools->pluck('id')->toArray())){
-                // Qui si può decidere cosa fare in caso di istruttore che non è associato al corso ma è associato alla scuola 
-                // }
+
                 $schools = $authUser->primaryAcademy() ? $authUser->primaryAcademy()->schools : [];
                 break;
             default:
