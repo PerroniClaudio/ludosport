@@ -24,6 +24,7 @@
     init() {
         console.log(this.roles);
         this.selected = this.selectedIds.map(id => this.roles.find(role => role.id === id));
+        this.selectedIdsJson = JSON.stringify(this.selectedIds);
     }
 }">
     <div class="flex items-center w-full">
