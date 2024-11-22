@@ -52,11 +52,11 @@
                 <form>
         @endif
         @csrf
-        @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
+        {{-- @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
             <x-primary-button type="sumbit">
                 <x-lucide-save class="w-5 h-5 text-white" />
             </x-primary-button>
-        @endif
+        @endif --}}
         <input type="hidden" name="description" value="{{ $value }}" id="editor-content">
         </form>
     </div>

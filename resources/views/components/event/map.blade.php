@@ -103,13 +103,13 @@
                                 class="w-5 h-5 text-white" /></div>
                     </x-primary-button>
                 </div>
-                <div class="flex-1">
+                {{-- <div class="flex-1">
                     <input type="hidden" name="location" id="eventLocationCoordinates" x-model="location">
                     <x-primary-button class="w-full">
                         <div class="flex flex-col items-center justify-center w-full"><x-lucide-save
                                 class="w-5 h-5 text-white" /></div>
                     </x-primary-button>
-                </div>
+                </div> --}}
             </div>
         @else
             @if (!$event->is_approved && $authRole === 'rector')
@@ -120,13 +120,13 @@
                                     class="w-5 h-5 text-white" /></div>
                         </x-primary-button>
                     </div>
-                    <div class="flex-1">
+                    {{-- <div class="flex-1">
                         <input type="hidden" name="location" id="eventLocationCoordinates" x-model="location">
                         <x-primary-button class="w-full">
                             <div class="flex flex-col items-center justify-center w-full"><x-lucide-save
                                     class="w-5 h-5 text-white" /></div>
                         </x-primary-button>
-                    </div>
+                    </div> --}}
                 </div>
             @endif
         @endif
