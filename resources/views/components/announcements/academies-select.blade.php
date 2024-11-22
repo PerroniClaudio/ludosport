@@ -24,6 +24,7 @@
     init() {
         console.log(this.selectedIds);
         this.selected = this.selectedIds.map(id => this.academies.find(academy => academy.id === id));
+        this.selectedIdsJson = JSON.stringify(this.selectedIds);
     }
 }">
 

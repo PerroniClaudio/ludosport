@@ -23,6 +23,7 @@
     },
     init() {
         this.selected = this.selectedIds.map(id => this.nations.find(nation => nation.id === id));
+        this.selectedIdsJson = JSON.stringify(this.selectedIds);
     }
 }">
 
