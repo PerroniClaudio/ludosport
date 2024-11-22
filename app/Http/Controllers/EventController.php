@@ -70,7 +70,7 @@ class EventController extends Controller {
 
 
         foreach ($events as $key => $event) {
-            
+
             $event['e_start_date'] = Carbon::parse($event->start_date)->format('d/m/Y H:i');
             $event['e_end_date'] = Carbon::parse($event->end_date)->format('d/m/Y H:i');
 
@@ -175,7 +175,6 @@ class EventController extends Controller {
      */
     public function edit(Event $event) {
         //
-
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
@@ -311,6 +310,8 @@ class EventController extends Controller {
      */
 
     public function update(Request $request, Event $event) {
+
+
 
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
@@ -792,11 +793,11 @@ class EventController extends Controller {
         }
 
         if ($request->result === 'failed') {
-            if(!$request->retake || !in_array($request->retake, ['course', 'exam'])){
+            if (!$request->retake || !in_array($request->retake, ['course', 'exam'])) {
                 return response()->json(['error' => 'Retake must be specified for "Red" result']);
             }
 
-            switch(strtolower($request->retake)) {
+            switch (strtolower($request->retake)) {
                 case 'course':
                     $result->retake = 'course';
                     break;
@@ -1003,9 +1004,9 @@ class EventController extends Controller {
 
         $date = Carbon::parse($request->date);
 
-        if($request->nation){
+        if ($request->nation) {
             $nation = Nation::find($request->nation);
-            if($nation){
+            if ($nation) {
                 Log::info("nation esiste", ['nation' => $nation]);
                 $events = Event::where([
                     ['is_approved', '=', 1],
@@ -1015,7 +1016,8 @@ class EventController extends Controller {
                     ['is_disabled', '=', 0],
                 ])->get();
 
-                Log:info("events", ['events' => $events]);
+                Log:
+                info("events", ['events' => $events]);
                 return response()->json($events);
             }
         }

@@ -7,7 +7,9 @@
 <script>
     async function saveMapContent() {
         @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
-            const location = document.getElementById('eventGoogleMap').getAttribute('location');
+            const location = document.getElementById('eventLocationCoordinates').value;
+
+
             const city = document.getElementById('eventCity').value;
             const address = document.getElementById('eventAddress').value;
             const postalCode = document.getElementById('eventPostalCode').value;
@@ -102,7 +104,7 @@
                     </x-primary-button>
                 </div>
                 <div class="flex-1">
-                    <input type="hidden" name="location" x-model="location">
+                    <input type="hidden" name="location" id="eventLocationCoordinates" x-model="location">
                     <x-primary-button class="w-full">
                         <div class="flex flex-col items-center justify-center w-full"><x-lucide-save
                                 class="w-5 h-5 text-white" /></div>
@@ -119,7 +121,7 @@
                         </x-primary-button>
                     </div>
                     <div class="flex-1">
-                        <input type="hidden" name="location" x-model="location">
+                        <input type="hidden" name="location" id="eventLocationCoordinates" x-model="location">
                         <x-primary-button class="w-full">
                             <div class="flex flex-col items-center justify-center w-full"><x-lucide-save
                                     class="w-5 h-5 text-white" /></div>

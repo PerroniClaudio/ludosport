@@ -24,6 +24,8 @@ export const googlemap = (location) => {
         map: null,
         marker: null,
         init() {
+            console.log(`googlemap init ${location}`);
+
             fetchLocation(this.location).then((data) => {
                 data.address_components.forEach((element) => {
                     // console.log(element);
@@ -119,6 +121,8 @@ export const googlemap = (location) => {
                     lat: data.lat,
                     lng: data.lng,
                 });
+
+                this.location = JSON.stringify(data);
             });
         },
     };
