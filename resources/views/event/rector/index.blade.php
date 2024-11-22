@@ -72,7 +72,7 @@
                                             x-text="row.academy_name"></td>
                                         <td
                                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                            <a x-bind:href="'/events/' + row.id">
+                                            <a x-bind:href="'/rector/events/' + row.id">
                                                 <x-lucide-pencil
                                                     class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                                             </a>
@@ -149,7 +149,7 @@
                                         </td>
                                         <td
                                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                            <a x-bind:href="'/events/' + row.id">
+                                            <a x-bind:href="'/rector/events/' + row.id">
                                                 <x-lucide-pencil
                                                     class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                                             </a>
