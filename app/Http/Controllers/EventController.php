@@ -70,6 +70,9 @@ class EventController extends Controller {
 
 
         foreach ($events as $key => $event) {
+            
+            $event['e_start_date'] = Carbon::parse($event->start_date)->format('d/m/Y H:i');
+            $event['e_end_date'] = Carbon::parse($event->end_date)->format('d/m/Y H:i');
 
             $event['user_name'] = $event->user->name . " " . $event->user->surname;
             $event['academy_name'] = $event->academy ? $event->academy->name : '';

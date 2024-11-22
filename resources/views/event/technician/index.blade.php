@@ -41,16 +41,6 @@
                         </div>
                     </div>
                 </div>
-                @php
-                    foreach ($pending_events as $key => $value) {
-                        $pending_events[$key]['start_date'] = date('d/m/Y H:i', strtotime($value['start_date']));
-                        $pending_events[$key]['end_date'] = date('d/m/Y H:i', strtotime($value['end_date']));
-                    }
-                    foreach ($approved_events as $key => $value) {
-                        $approved_events[$key]['start_date'] = date('d/m/Y H:i', strtotime($value['start_date']));
-                        $approved_events[$key]['end_date'] = date('d/m/Y H:i', strtotime($value['end_date']));
-                    }
-                @endphp
                 <div class="col-span-9">
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg"
                         x-show="selectedType == 'pending'" x-cloak>
@@ -68,13 +58,13 @@
                                 ],
                                 [
                                     'name' => 'Start Date',
-                                    'field' => 'start_date',
+                                    'field' => 'e_start_date',
                                     'columnClasses' => '', // classes to style table th
                                     'rowClasses' => '', // classes to style table td
                                 ],
                                 [
                                     'name' => 'End Date',
-                                    'field' => 'end_date',
+                                    'field' => 'e_end_date',
                                     'columnClasses' => '', // classes to style table th
                                     'rowClasses' => '', // classes to style table td
                                 ],
@@ -109,13 +99,13 @@
                                 ],
                                 [
                                     'name' => 'Start Date',
-                                    'field' => 'start_date',
+                                    'field' => 'e_start_date',
                                     'columnClasses' => '', // classes to style table th
                                     'rowClasses' => '', // classes to style table td
                                 ],
                                 [
                                     'name' => 'End Date',
-                                    'field' => 'end_date',
+                                    'field' => 'e_end_date',
                                     'columnClasses' => '', // classes to style table th
                                     'rowClasses' => '', // classes to style table td
                                 ],
