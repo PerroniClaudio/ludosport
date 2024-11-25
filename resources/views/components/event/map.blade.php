@@ -95,6 +95,8 @@
                 class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
         </div>
 
+        <input type="hidden" name="location" id="eventLocationCoordinates" x-model="location">
+
         @if (Auth::user()->hasRole('admin'))
             <div class="col-span-2 flex items-center gap-2 mt-8">
                 <div class="flex-1">
@@ -121,7 +123,7 @@
                         </x-primary-button>
                     </div>
                     {{-- <div class="flex-1">
-                        <input type="hidden" name="location" id="eventLocationCoordinates" x-model="location">
+                        
                         <x-primary-button class="w-full">
                             <div class="flex flex-col items-center justify-center w-full"><x-lucide-save
                                     class="w-5 h-5 text-white" /></div>
