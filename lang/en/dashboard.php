@@ -30,6 +30,7 @@ return [
     'instructor_courses' => 'Select course',
     'instructor_inactive_users' => 'Inactive users',
     'athlete_announcements' => 'Announcements',
+    'athlete_new_announcements' => 'New announcements',
     'athlete_no_announcements' => 'No announcements',
     'athlete_announcements_text' => 'You have :count new announcements to read',
     'athlete_upcoming_events' => 'Upcoming events',

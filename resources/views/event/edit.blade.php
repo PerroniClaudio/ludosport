@@ -16,8 +16,6 @@
                 const editorRequest = await saveContent();
                 const mapRequest = await saveMapContent();
         
-        
-        
                 const form = document.getElementById('eventForm');
                 const formData = new FormData(form);
         
@@ -36,9 +34,7 @@
                 } else {
                     FlashMessage.displayCustomMessage(json.message, 2000)
                 }
-        
-        
-        
+                    
             }
         }">
 

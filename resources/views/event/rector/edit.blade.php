@@ -31,9 +31,7 @@
                 } else {
                     FlashMessage.displayCustomMessage(json.message, 2000)
                 }
-        
-        
-        
+                
             }
         }">
 

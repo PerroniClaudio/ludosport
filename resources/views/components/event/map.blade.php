@@ -132,8 +132,6 @@
         @endif
         </form>
 
-        </form>
-
         <div>
             <x-maps-google id="eventGoogleMap" style="height: 400px"></x-maps-google>
         </div>
