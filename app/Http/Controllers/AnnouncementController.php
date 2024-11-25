@@ -337,8 +337,33 @@ class AnnouncementController extends Controller {
             }
 
             if ($academies != null) {
-                if (!in_array($user->academy_id, $academies)) {
-                    return false;
+
+                if ($allowed_roles == null) {
+                    $allAcademies = $user->academies->pluck('id')->merge($user->primaryAcademyAthlete() ? [$user->primaryAcademyAthlete()->id] : []);
+                    if(!array_intersect($allAcademies, $academies)) {
+                        return false;
+                    }
+                } else {
+                    $athleteRoleId = Role::where('name', 'athlete')->first()->id;
+                    $canSee = false;
+                    if(in_array($athleteRoleId, $allowed_roles)) {
+                        $primaryAcademyAthlete = $user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->id : null;
+                        if(in_array($primaryAcademyAthlete, $academies)) {
+                            $canSee = true;
+                        }
+                    }
+                    if(array_intersect($user->roles->where('id', '!=', $athleteRoleId)->pluck('id')->toArray(), $allowed_roles)){
+                        // $allAcademiesPersonnel = $user->academies->pluck('id')->toArray();
+                        $primaryAcademyPersonnel = $user->primaryAcademy() ? $user->primaryAcademy()->id : null;
+                        if(in_array($primaryAcademyPersonnel, $academies)) {
+                            $canSee = true;
+                        }
+                    }
+
+                    if(!$canSee) {
+                        return false;
+                    }
+
                 }
             }
 

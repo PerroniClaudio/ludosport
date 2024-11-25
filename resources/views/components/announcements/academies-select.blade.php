@@ -21,6 +21,16 @@
     isAcademySelected: function(academyId) {
         return this.selectedIds.includes(academyId);
     },
+    {{-- addAllAcademies: function() {
+        this.selected = this.academies;
+        this.selectedIds = this.academies.map(academy => academy.id);
+        this.selectedIdsJson = JSON.stringify(this.selectedIds);
+    },
+    removeAllAcademies: function() {
+        this.selected = [];
+        this.selectedIds = [];
+        this.selectedIdsJson = JSON.stringify(this.selectedIds);
+    }, --}}
     init() {
         console.log(this.selectedIds);
         this.selected = this.selectedIds.map(id => this.academies.find(academy => academy.id === id));
@@ -54,6 +64,14 @@
             <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
                 {{ __('announcements.select_academies') }}
             </h2>
+            {{-- <div class="flex gap-2">
+                <x-primary-button x-on:click.prevent="addAllAcademies" >
+                    <x-lucide-plus class="w-5 h-5 text-white" />
+                </x-primary-button>
+                <x-primary-button x-on:click.prevent="removeAllAcademies" x-show="selectedIds.length > 0">
+                    <x-lucide-minus class="w-5 h-5 text-white" />
+                </x-primary-button>
+            </div> --}}
 
             <div class="grid grid-cols-2 gap-4">
                 <x-table :columns="[

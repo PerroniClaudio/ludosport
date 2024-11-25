@@ -21,6 +21,16 @@
     isNationSelected: function(nationId) {
         return this.selectedIds.includes(nationId);
     },
+    {{-- addAllNations: function() {
+        this.selected = this.nations;
+        this.selectedIds = this.nations.map(nation => nation.id);
+        this.selectedIdsJson = JSON.stringify(this.selectedIds);
+    },
+    removeAllNations: function() {
+        this.selected = [];
+        this.selectedIds = [];
+        this.selectedIdsJson = JSON.stringify(this.selectedIds);
+    }, --}}
     init() {
         this.selected = this.selectedIds.map(id => this.nations.find(nation => nation.id === id));
         this.selectedIdsJson = JSON.stringify(this.selectedIds);
@@ -53,6 +63,14 @@
             <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
                 {{ __('announcements.select_nations') }}
             </h2>
+            {{-- <div class="flex gap-2">
+                <x-primary-button x-on:click.prevent="addAllNations" >
+                    <x-lucide-plus class="w-5 h-5 text-white" />
+                </x-primary-button>
+                <x-primary-button x-on:click.prevent="removeAllNations" x-show="selectedIds.length > 0">
+                    <x-lucide-minus class="w-5 h-5 text-white" />
+                </x-primary-button>
+            </div> --}}
 
             <div class="grid grid-cols-2 gap-4">
                 <x-table :columns="[

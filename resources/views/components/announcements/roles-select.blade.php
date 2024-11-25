@@ -21,6 +21,16 @@
     isRoleSelected: function(roleId) {
         return this.selectedIds.includes(roleId);
     },
+    addAllRoles: function() {
+        this.selected = this.roles;
+        this.selectedIds = this.roles.map(role => role.id);
+        this.selectedIdsJson = JSON.stringify(this.selectedIds);
+    },
+    removeAllRoles: function() {
+        this.selected = [];
+        this.selectedIds = [];
+        this.selectedIdsJson = JSON.stringify(this.selectedIds);
+    },
     init() {
         console.log(this.roles);
         this.selected = this.selectedIds.map(id => this.roles.find(role => role.id === id));
@@ -51,6 +61,14 @@
             <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
                 {{ __('announcements.select_roles') }}
             </h2>
+            <div class="flex gap-2">
+                <x-primary-button x-on:click.prevent="addAllRoles" >
+                    <x-lucide-plus class="w-5 h-5 text-white" />
+                </x-primary-button>
+                <x-primary-button x-on:click.prevent="removeAllRoles" x-show="selectedIds.length > 0">
+                    <x-lucide-minus class="w-5 h-5 text-white" />
+                </x-primary-button>
+            </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <x-table :columns="[
