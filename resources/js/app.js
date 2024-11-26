@@ -1,24 +1,14 @@
-import "./bootstrap";
+document.addEventListener("alpine:init", async () => {
+    const { usercoursegraphadmin } = await import("./usercoursegraphadmin.js");
+    const { eventsparticipantsgraph } = await import(
+        "./eventsparticipantsgraph.js"
+    );
+    const { userschoolgraph } = await import("./userschoolgraph.js");
+    const { usersclangraph } = await import("./usersclangraph.js");
+    const { rankingschart } = await import("./rankingschart.js");
+    const { eventpersonnel } = await import("./eventpersonnel.js");
+    const { enablingresults } = await import("./enablingresults.js");
 
-import Alpine from "alpinejs";
-import { chart } from "./chart.js";
-import { editor } from "./editor.js";
-import { googlemap } from "./googlemap.js";
-import { calendar } from "./calendar.js";
-import { participants } from "./participants.js";
-import { mapsearcher } from "./mapsearcher.js";
-import { usernationgraphadmin } from "./usernationgraphadmin.js";
-import { useracademygraphadmin } from "./useracademygraphadmin.js";
-import { userschoolgraphadmin } from "./userschoolgraphadmin.js";
-import { usercoursegraphadmin } from "./usercoursegraphadmin.js";
-import { eventsparticipantsgraph } from "./eventsparticipantsgraph.js";
-import { userschoolgraph } from "./userschoolgraph.js";
-import { usersclangraph } from "./usersclangraph.js";
-import { rankingschart } from "./rankingschart.js";
-import { eventpersonnel } from "./eventpersonnel.js";
-import { enablingresults } from "./enablingresults.js";
-
-document.addEventListener("alpine:init", () => {
     Alpine.data("editor", editor);
     Alpine.data("googlemap", googlemap);
     Alpine.data("calendar", calendar);

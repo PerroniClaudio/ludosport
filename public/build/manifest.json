@@ -1,13 +1,80 @@
 {
+  "_auto-Bx38Jeax.js": {
+    "file": "assets/auto-Bx38Jeax.js",
+    "name": "auto"
+  },
   "resources/css/app.css": {
     "file": "assets/app-8bkSxznT.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-B5qkUWtS.js",
+    "file": "assets/app-CSjh_r9l.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/usercoursegraphadmin.js",
+      "resources/js/eventsparticipantsgraph.js",
+      "resources/js/userschoolgraph.js",
+      "resources/js/usersclangraph.js",
+      "resources/js/rankingschart.js",
+      "resources/js/eventpersonnel.js",
+      "resources/js/enablingresults.js"
+    ]
+  },
+  "resources/js/enablingresults.js": {
+    "file": "assets/enablingresults-CpQjAD1I.js",
+    "name": "enablingresults",
+    "src": "resources/js/enablingresults.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/eventpersonnel.js": {
+    "file": "assets/eventpersonnel-DQYXpehs.js",
+    "name": "eventpersonnel",
+    "src": "resources/js/eventpersonnel.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/eventsparticipantsgraph.js": {
+    "file": "assets/eventsparticipantsgraph-g2QgYORr.js",
+    "name": "eventsparticipantsgraph",
+    "src": "resources/js/eventsparticipantsgraph.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-Bx38Jeax.js"
+    ]
+  },
+  "resources/js/rankingschart.js": {
+    "file": "assets/rankingschart-8vl7gccf.js",
+    "name": "rankingschart",
+    "src": "resources/js/rankingschart.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/usercoursegraphadmin.js": {
+    "file": "assets/usercoursegraphadmin-DVydSu1q.js",
+    "name": "usercoursegraphadmin",
+    "src": "resources/js/usercoursegraphadmin.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-Bx38Jeax.js"
+    ]
+  },
+  "resources/js/userschoolgraph.js": {
+    "file": "assets/userschoolgraph-BuBVLoLn.js",
+    "name": "userschoolgraph",
+    "src": "resources/js/userschoolgraph.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-Bx38Jeax.js"
+    ]
+  },
+  "resources/js/usersclangraph.js": {
+    "file": "assets/usersclangraph-BAvdrQix.js",
+    "name": "usersclangraph",
+    "src": "resources/js/usersclangraph.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-Bx38Jeax.js"
+    ]
   }
 }
