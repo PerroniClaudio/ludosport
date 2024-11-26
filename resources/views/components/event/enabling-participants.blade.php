@@ -3,7 +3,7 @@
     $authRole = auth()->user()->getRole();
     $exportRoute = $authRole === 'admin' ? 'events.participants.export' : $authRole . '.events.participants.export';
 @endphp
-<div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-data="participants({{ $event->id }}, '{{ $authRole }}')">
+<div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-load x-data="participants({{ $event->id }}, '{{ $authRole }}')">
     <div class="flex justify-between">
         <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.enabling_participants') }}</h3>
         <div>
@@ -23,10 +23,9 @@
                     </h4>
                 </div>
                 <div>
-                    <input x-model="searchAvailablesValue" x-on:input="searchAvailableUsers(event);"
-                        type="text" placeholder="Search..."
-                        class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'
-                    >
+                    <input x-model="searchAvailablesValue" x-on:input="searchAvailableUsers(event);" type="text"
+                        placeholder="Search..."
+                        class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'>
                     {{-- <x-text-input type="text" x-on:input="searchAvailableUsers(event);" placeholder="Search..."
                         class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" /> --}}
                 </div>
@@ -58,23 +57,23 @@
                             </td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm text-right p-1">
                                 {{-- Il tecnico non può modificare i partecipanti in nessun caso. Solo gli admin possono modificare i partecipanti di eventi a pagamento. --}}
-                                @if($authRole != 'technician' && ($event->isFree() || ($authRole == 'admin')))
-                                    <template x-if="{{$event->max_participants > 0 ? $event->max_participants : 0}} > (participants.length + {{$event->waitingList->count()}})">
+                                @if ($authRole != 'technician' && ($event->isFree() || $authRole == 'admin'))
+                                    <template
+                                        x-if="{{ $event->max_participants > 0 ? $event->max_participants : 0 }} > (participants.length + {{ $event->waitingList->count() }})">
                                         <button @click="addParticipant(row.id)">
                                             <x-lucide-plus
                                                 class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
                                         </button>
                                     </template>
-                                    <template x-if="!({{$event->max_participants > 0 ? $event->max_participants : 0}} > (participants.length + {{$event->waitingList->count()}}))">
+                                    <template
+                                        x-if="!({{ $event->max_participants > 0 ? $event->max_participants : 0 }} > (participants.length + {{ $event->waitingList->count() }}))">
                                         <button disabled>
-                                            <x-lucide-ban
-                                                class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
+                                            <x-lucide-ban class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
                                         </button>
                                     </template>
                                 @else
                                     <button disabled>
-                                        <x-lucide-ban
-                                            class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
+                                        <x-lucide-ban class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
                                     </button>
                                 @endif
                             </td>
@@ -123,10 +122,9 @@
                     </h4>
                 </div>
                 <div>
-                    <input x-model="searchParticipantsValue" x-on:input="searchParticipants($event);"
-                        type="text" placeholder="Search..."
-                        class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'
-                    >
+                    <input x-model="searchParticipantsValue" x-on:input="searchParticipants($event);" type="text"
+                        placeholder="Search..."
+                        class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'>
                     {{-- <x-text-input type="text" x-on:input="searchParticipants(event);" x-bind:value="searchParticipantsValue" placeholder="Search..."
                         class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" /> --}}
                 </div>
@@ -157,15 +155,14 @@
                                 x-text="participant.surname"></td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm text-right p-1">
                                 {{-- Il tecnico non può modificare i partecipanti in nessun caso. Solo gli admin possono modificare i partecipanti di eventi a pagamento. --}}
-                                @if($authRole != 'technician' && ($event->isFree() || ($authRole == 'admin')))
+                                @if ($authRole != 'technician' && ($event->isFree() || $authRole == 'admin'))
                                     <button @click="removeParticipant(participant.id)">
                                         <x-lucide-minus
                                             class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
                                     </button>
                                 @else
                                     <button disabled>
-                                        <x-lucide-ban
-                                            class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
+                                        <x-lucide-ban class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
                                     </button>
                                 @endif
                             </td>

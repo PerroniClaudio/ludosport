@@ -26,7 +26,8 @@
 
                         <div class="flex items-center gap-2">
                             <x-lucide-map-pin class="w-10 h-10 text-primary-500 dark:text-primary-600" />
-                            <span class="text-background-800 dark:text-background-200 font-4xl">{{ $event->address }}, {{ $event->postal_code }}
+                            <span class="text-background-800 dark:text-background-200 font-4xl">{{ $event->address }},
+                                {{ $event->postal_code }}
                                 {{ $event->city }}, {{ $event->nation->name }}</span>
                         </div>
                         <div class="flex items-center gap-2">
@@ -39,7 +40,8 @@
 
                             <x-lucide-calendar-days class="w-10 h-10 text-primary-500 dark:text-primary-600" />
                             <div class="flex flex-col gap-1">
-                                <span class="text-background-800 dark:text-background-200">{{ __('events.start_date') }}:
+                                <span
+                                    class="text-background-800 dark:text-background-200">{{ __('events.start_date') }}:
                                     {{ $start_date->format('d/m/Y H:i') }}
                                 </span>
                                 <span class="text-background-800 dark:text-background-200">{{ __('events.end_date') }}:
@@ -48,7 +50,7 @@
                             </div>
                         </div>
                     </div>
-                    <div x-data="googlemap('{{ $event->location }}')" x-ref="eventGoogleMapContainer">
+                    <div x-load x-data="googlemap('{{ $event->location }}')" x-ref="eventGoogleMapContainer">
                         <x-maps-google id="eventGoogleMap" style="height: 400px"></x-maps-google>
                     </div>
                 </section>

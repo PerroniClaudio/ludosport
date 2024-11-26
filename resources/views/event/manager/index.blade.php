@@ -12,7 +12,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            <div class="grid grid-cols-12 gap-4" x-data="calendar('{{ route('manager.events.calendar') }}')">
+            <div class="grid grid-cols-12 gap-4" x-load x-data="calendar('{{ route('manager.events.calendar') }}')">
 
                 <div class="col-span-12 md:col-span-3 flex flex-col gap-4">
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">

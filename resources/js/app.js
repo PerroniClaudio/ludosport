@@ -1,40 +1,36 @@
 import "./bootstrap";
 
 import Alpine from "alpinejs";
-import { chart } from "./chart.js";
-import { editor } from "./editor.js";
-import { googlemap } from "./googlemap.js";
-import { calendar } from "./calendar.js";
-import { participants } from "./participants.js";
-import { mapsearcher } from "./mapsearcher.js";
-import { usernationgraphadmin } from "./usernationgraphadmin.js";
-import { useracademygraphadmin } from "./useracademygraphadmin.js";
-import { userschoolgraphadmin } from "./userschoolgraphadmin.js";
-import { usercoursegraphadmin } from "./usercoursegraphadmin.js";
-import { eventsparticipantsgraph } from "./eventsparticipantsgraph.js";
-import { userschoolgraph } from "./userschoolgraph.js";
-import { usersclangraph } from "./usersclangraph.js";
-import { rankingschart } from "./rankingschart.js";
-import { eventpersonnel } from "./eventpersonnel.js";
-import { enablingresults } from "./enablingresults.js";
+import AsyncAlpine from "async-alpine";
+
+Alpine.plugin(AsyncAlpine);
 
 document.addEventListener("alpine:init", () => {
-    Alpine.data("editor", editor);
-    Alpine.data("googlemap", googlemap);
-    Alpine.data("calendar", calendar);
-    Alpine.data("chart", chart);
-    Alpine.data("participants", participants);
-    Alpine.data("eventpersonnel", eventpersonnel);
-    Alpine.data("mapsearcher", mapsearcher);
-    Alpine.data("usernationgraphadmin", usernationgraphadmin);
-    Alpine.data("useracademygraphadmin", useracademygraphadmin);
-    Alpine.data("userschoolgraphadmin", userschoolgraphadmin);
-    Alpine.data("usercoursegraphadmin", usercoursegraphadmin);
-    Alpine.data("eventsparticipantsgraph", eventsparticipantsgraph);
-    Alpine.data("userschoolgraph", userschoolgraph);
-    Alpine.data("usersclangraph", usersclangraph);
-    Alpine.data("rankingschart", rankingschart);
-    Alpine.data("enablingresults", enablingresults);
+    Alpine.asyncData("editor", () => import("./editor.js"));
+    Alpine.asyncData("googlemap", () => import("./googlemap.js"));
+    Alpine.asyncData("calendar", () => import("./calendar.js"));
+    Alpine.asyncData("participants", () => import("./participants.js"));
+    Alpine.asyncData("eventpersonnel", () => import("./eventpersonnel.js"));
+    Alpine.asyncData("mapsearcher", () => import("./mapsearcher.js"));
+    Alpine.asyncData("usernationgraphadmin", () =>
+        import("./usernationgraphadmin.js")
+    );
+    Alpine.asyncData("useracademygraphadmin", () =>
+        import("./useracademygraphadmin.js")
+    );
+    Alpine.asyncData("userschoolgraphadmin", () =>
+        import("./userschoolgraphadmin.js")
+    );
+    Alpine.asyncData("usercoursegraphadmin", () =>
+        import("./usercoursegraphadmin.js")
+    );
+    Alpine.asyncData("eventsparticipantsgraph", () =>
+        import("./eventsparticipantsgraph.js")
+    );
+    Alpine.asyncData("userschoolgraph", () => import("./userschoolgraph.js"));
+    Alpine.asyncData("usersclangraph", () => import("./usersclangraph.js"));
+    Alpine.asyncData("rankingschart", () => import("./rankingschart.js"));
+    Alpine.asyncData("enablingresults", () => import("./enablingresults.js"));
 });
 
 window.Alpine = Alpine;

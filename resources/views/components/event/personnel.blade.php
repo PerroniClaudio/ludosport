@@ -3,7 +3,7 @@
     $authRole = auth()->user()->getRole();
     // $exportRoute = $authRole === 'admin' ? 'events.participants.export' : $authRole . '.events.participants.export';
 @endphp
-<div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-data="eventpersonnel({{ $event->id }}, '{{ $authRole }}')">
+<div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-load x-data="eventpersonnel({{ $event->id }}, '{{ $authRole }}')">
     <div class="flex justify-between">
         <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.personnel') }}</h3>
         {{-- <div>
@@ -25,10 +25,9 @@
                         </h4>
                     </div>
                     <div>
-                        <input x-model="searchAvailablesValue" x-on:input="searchAvailableUsers($event);"
-                            type="text" placeholder="Search..."
-                            class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'
-                        >
+                        <input x-model="searchAvailablesValue" x-on:input="searchAvailableUsers($event);" type="text"
+                            placeholder="Search..."
+                            class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'>
                         {{-- <x-text-input type="text" x-on:input="searchAvailableUsers(event);" placeholder="Search..."
                             class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" /> --}}
                     </div>
@@ -112,10 +111,9 @@
                     </h4>
                 </div>
                 <div>
-                    <input x-model="searchPersonnelValue" x-on:input="searchPersonnel($event);"
-                        type="text" placeholder="Search..."
-                        class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'
-                    >
+                    <input x-model="searchPersonnelValue" x-on:input="searchPersonnel($event);" type="text"
+                        placeholder="Search..."
+                        class='border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm'>
                     {{-- <x-text-input type="text" x-on:input="searchPersonnel(event);" placeholder="Search..."
                         class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" /> --}}
                 </div>

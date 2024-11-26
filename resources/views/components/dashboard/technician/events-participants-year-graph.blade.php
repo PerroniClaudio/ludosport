@@ -89,7 +89,7 @@
         this.updateEvents();
     },
 }"> --}}
-<div x-data="eventsparticipantsgraph()">
+<div x-load x-data="eventsparticipantsgraph()">
 
     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 text-background-900 dark:text-background-100">
@@ -111,31 +111,33 @@
                             class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" />
                         <ul class="flex flex-col gap-2 px-0 grow">
                             <template x-for="event in paginatedEvents" :key="event.id">
-                                <li class="flex items-center gap-4" >
+                                <li class="flex items-center gap-4">
                                     <div class="grow flex justify-between">
                                         <span x-text="event.name"></span>
                                         <span x-text="event.participants"></span>
                                     </div>
                                     <div class="flex gap-2">
-                                        <x-primary-link-button-small x-bind:href="'/technician/events/' + event.id" >
+                                        <x-primary-link-button-small x-bind:href="'/technician/events/' + event.id">
                                             <x-lucide-pencil class="h-6 w-6 text-white" />
                                         </x-primary-link-button-small>
                                     </div>
                                 </li>
                             </template>
                         </ul>
-    
+
                         <div class="flex justify-between ">
                             <x-primary-button-small @click="previousPage" x-bind:disabled="currentEventsPage === 1">
                                 <x-lucide-chevron-left class="h-6 w-6 text-white" />
                             </x-primary-button-small>
-                            <span>Page <span x-text="currentEventsPage"></span> of <span x-text="totalEventsPages"></span></span>
-                            <x-primary-button-small @click="nextPage" x-bind:disabled="currentEventsPage === totalEventsPages">
+                            <span>Page <span x-text="currentEventsPage"></span> of <span
+                                    x-text="totalEventsPages"></span></span>
+                            <x-primary-button-small @click="nextPage"
+                                x-bind:disabled="currentEventsPage === totalEventsPages">
                                 <x-lucide-chevron-right class="h-6 w-6 text-white" />
                             </x-primary-button-small>
                         </div>
-    
-                        
+
+
                     </div>
                 </div>
             </div>

@@ -18,7 +18,8 @@
 
                         <div class="flex items-center gap-2">
                             <x-lucide-map-pin class="w-10 h-10 text-primary-500 dark:text-primary-600" />
-                            <span class="text-background-800 dark:text-background-200 font-4xl">{{ $event->address }}, {{ $event->postal_code }}
+                            <span class="text-background-800 dark:text-background-200 font-4xl">{{ $event->address }},
+                                {{ $event->postal_code }}
                                 {{ $event->city }}, {{ $event->nation->name }}</span>
                         </div>
                         <div class="flex items-center gap-2">
@@ -31,7 +32,8 @@
 
                             <x-lucide-calendar-days class="w-10 h-10 text-primary-500 dark:text-primary-600" />
                             <div class="flex flex-col gap-1">
-                                <span class="text-background-800 dark:text-background-200">{{ __('events.start_date') }}:
+                                <span
+                                    class="text-background-800 dark:text-background-200">{{ __('events.start_date') }}:
                                     {{ $start_date->format('d/m/Y H:i') }}
                                 </span>
                                 <span class="text-background-800 dark:text-background-200">{{ __('events.end_date') }}:
@@ -43,30 +45,30 @@
                         @if ($canpurchase)
                             <a href="{{ route('event-purchase', $event->id) }}">
                                 <x-primary-button>
-                                    @if($is_waiting_payment)
+                                    @if ($is_waiting_payment)
                                         {{ __('website.events_waiting_payment') }}
                                     @elseif($only_waiting_list)
                                         {{ __('website.events_list_waiting_list') }}
                                     @else
                                         {{ __('website.events_list_participate') }}
-                                    @endif    
+                                    @endif
                                 </x-primary-button>
                             </a>
                         @elseif (!Auth()->user()->has_paid_fee)
-                            <p>{{__('website.events_pay_fee_before')}}</p>
+                            <p>{{ __('website.events_pay_fee_before') }}</p>
                         @elseif ($is_participating)
-                            <p>{{__('website.events_participating')}}</p>
+                            <p>{{ __('website.events_participating') }}</p>
                         @elseif ($is_in_waiting_list)
                             {{-- Qui si può aggiungere il bottone per mandarlo al completamento del pagamento se ha il flag is_waiting_payment --}}
-                            <p>{{__('website.events_in_waiting_list')}}</p>
+                            <p>{{ __('website.events_in_waiting_list') }}</p>
                         @elseif ($block_subscriptions || !$event->internal_shop)
-                            <p>{{__('website.events_subscriptions_blocked')}}</p>
+                            <p>{{ __('website.events_subscriptions_blocked') }}</p>
                         @elseif ($waiting_list_closed)
-                            <p>{{__('website.event_waiting_list_closed_text')}}</p>
+                            <p>{{ __('website.event_waiting_list_closed_text') }}</p>
                         @endif
 
                     </div>
-                    <div x-data="googlemap('{{ $event->location }}')" x-ref="eventGoogleMapContainer">
+                    <div x-load x-data="googlemap('{{ $event->location }}')" x-ref="eventGoogleMapContainer">
                         <x-maps-google id="eventGoogleMap" style="height: 400px"></x-maps-google>
                     </div>
                 </section>
