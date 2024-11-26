@@ -97,7 +97,7 @@
 
         <input type="hidden" name="location" id="eventLocationCoordinates" x-model="location">
 
-        @if (Auth::user()->hasRole('admin'))
+        @if (Auth::user()->hasRole('admin') || (!$event->is_approved && ($authRole === 'rector')))
             <div class="col-span-2 flex items-center gap-2 mt-8">
                 <div class="flex-1">
                     <x-primary-button type="button" class="w-full" @click="updateMap()">
@@ -105,32 +105,7 @@
                                 class="w-5 h-5 text-white" /></div>
                     </x-primary-button>
                 </div>
-                {{-- <div class="flex-1">
-                    <input type="hidden" name="location" id="eventLocationCoordinates" x-model="location">
-                    <x-primary-button class="w-full">
-                        <div class="flex flex-col items-center justify-center w-full"><x-lucide-save
-                                class="w-5 h-5 text-white" /></div>
-                    </x-primary-button>
-                </div> --}}
             </div>
-        @else
-            @if (!$event->is_approved && $authRole === 'rector')
-                <div class="col-span-2 flex items-center gap-2 mt-8">
-                    <div class="flex-1">
-                        <x-primary-button type="button" class="w-full" @click="updateMap()">
-                            <div class="flex flex-col items-center justify-center w-full"><x-lucide-search
-                                    class="w-5 h-5 text-white" /></div>
-                        </x-primary-button>
-                    </div>
-                    {{-- <div class="flex-1">
-                        
-                        <x-primary-button class="w-full">
-                            <div class="flex flex-col items-center justify-center w-full"><x-lucide-save
-                                    class="w-5 h-5 text-white" /></div>
-                        </x-primary-button>
-                    </div> --}}
-                </div>
-            @endif
         @endif
         </form>
 

@@ -2,7 +2,7 @@
 
 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-data="{}">
     <div class="flex justify-between">
-        <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.thumbnail') }}</h3>
+        <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.thumbnail') }}  <span class="text-base lg:text-xl"> - {{ __('events.event_thumbnail_tooltip') }}</span></h3>
         <div>
             @php
                 $authRole = auth()->user()->getRole();
@@ -18,9 +18,16 @@
                         <div class="flex flex-col gap-2">
                             <input type="file" name="thumbnail" id="thumbnail" class="hidden"
                                 x-on:change="$refs.thumbform.submit()" />
-                            <x-primary-button type="button" onclick="document.getElementById('thumbnail').click()">
-                                {{ __('events.upload_thumbnail') }}
-                            </x-primary-button>
+                            <div class="flex gap-1 items-center">
+                                {{-- <div class='has-tooltip'>
+                                    <span
+                                        class='tooltip rounded shadow-lg p-1 bg-primary-500 text-white -mt-8'>{{ __('events.event_thumbnail_tooltip') }}</span>
+                                    <x-lucide-info class="w-5 h-5 text-primary-500 dark:text-primary-500 cursor-pointer" />
+                                </div> --}}
+                                <x-primary-button type="button" onclick="document.getElementById('thumbnail').click()">
+                                    {{ __('events.upload_thumbnail') }}
+                                </x-primary-button>
+                            </div>
                         </div>
                     </div>
                 </form>

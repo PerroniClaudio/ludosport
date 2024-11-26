@@ -390,19 +390,16 @@ class EventController extends Controller {
                 $event->weapon_form_id = $request->weapon_form_id;
             }
 
+            $event->max_participants = $request->max_participants ?? null;
+            $event_type = EventType::where('name', $request->event_type)->first();
+            $event->event_type = $event_type->id;
+            $event->waiting_list_close_date = $request->waiting_list_close_date ?? null;
+
             // Dati modificabli solo da admin 
 
             if ($authRole === 'admin') {
-
-                $event->max_participants = $request->max_participants ?? null;
-
-                $event_type = EventType::where('name', $request->event_type)->first();
-                $event->event_type = $event_type->id;
-
                 $event->price = $request->price ?? 0;
-
                 $event->block_subscriptions = $request->block_subscriptions == 'on' ? true : false;
-                $event->waiting_list_close_date = $request->waiting_list_close_date ?? null;
                 $event->internal_shop = $request->internal_shop == 'on' ? true : false;
             }
 
@@ -1177,6 +1174,12 @@ class EventController extends Controller {
             // Controlla il tipo di evento
             $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
             $isWaitingPayment = EventWaitingList::where(['event_id' => $event->id, 'user_id' => $user->id, 'is_waiting_payment' => true])->exists();
+            
+            if ($event->resultType() === 'enabling') {
+                $isParticipating = $event->instructorResults()->where('user_id', $user->id)->exists();
+            } else if ($event->resultType() === 'ranking') {
+                $isParticipating = $event->results()->where('user_id', $user->id)->exists();
+            }
 
             // Shop interno, attesa pagamento, iscrizioni sbloccate, non partecipa, non in waiting list (se in attesa di pagamento può), se waiting list deve essere prima della data di chiusura della waiting list
             $canpurchase = $event->internal_shop && (
@@ -1186,11 +1189,6 @@ class EventController extends Controller {
                 )
             );
 
-            if ($event->resultType() === 'enabling') {
-                $isParticipating = $event->instructorResults()->where('user_id', $user->id)->exists();
-            } else if ($event->resultType() === 'ranking') {
-                $isParticipating = $event->results()->where('user_id', $user->id)->exists();
-            }
         }
 
         return view('website.event-detail', [

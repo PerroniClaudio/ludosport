@@ -70,7 +70,7 @@
                         disabled="{{ !!$event->is_approved }}" />
 
                     <x-form.input name="waiting_list_close_date" label="Waiting list close date" type="datetime-local"
-                        required="{{ true }}" value="{{ $event->waiting_list_close_date }}"
+                        required="{{ false }}" value="{{ $event->waiting_list_close_date }}"
                         placeholder="{{ fake()->date() }}" disabled="{{ !!$event->is_approved }}"
                         description="Prevents new registrations on the waiting list starting from the specified date. However, individuals on the waiting list will still be able to complete their purchases when it's their turn." />
 
@@ -78,25 +78,25 @@
                         selected="{{ $event->type->id }}" disabled="{{ !!$event->is_approved }}" />
 
                     <x-form.input name="max_participants" label="Max Participants (0 means unlimited)" type="number"
-                        required="{{ true }}" value="{{ $event->max_participants }}"
+                        required="{{ true }}" value="{{ $event->max_participants ? $event->max_participants : 0 }}"
                         min="{{ 0 }}" placeholder="{{ __('events.max_participants_placeholder') }}"
                         disabled="{{ !!$event->is_approved }}" />
 
                     <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms"
                         disabled="{{ !!$event->is_approved }}" />
 
-                    <x-form.checkbox id="internal_shop" name="internal_shop" label="Internal Shop"
-                        isChecked="{{ $event->internal_shop }}" disabled="{{ !!$event->is_approved }}"
+                    <x-form.checkbox hidden id="internal_shop" name="internal_shop" label="Internal Shop"
+                        isChecked="{{ $event->internal_shop }}" disabled="{{ true }}"
                         description="If enabled, users can register for the event from the shop. Disable if registrations should be handled only by academies." />
 
-                    <x-form.checkbox id="block_subscriptions" name="block_subscriptions"
+                    <x-form.checkbox hidden id="block_subscriptions" name="block_subscriptions"
                         label="Block subscriptions (shop)" isChecked="{{ $event->block_subscriptions }}"
-                        disabled="{{ false }}"
+                        disabled="{{ true }}"
                         description="If enabled, it prevents new registrations in the shop. However, individuals on the waiting list will still be able to complete their purchases when it's their turn." />
 
-                    <x-form.input name="price" label="Price (include taxes)" type="number"
+                    <x-form.input hidden name="price" label="Price (include taxes)" type="number"
                         value="{{ number_format($event->price, 2) }}" min="{{ 0 }}" step="0.01"
-                        required="{{ true }}" disabled="{{ !!$event->is_approved }}" />
+                        required="{{ true }}" disabled="{{ true }}" />
 
                 </div>
             </form>
@@ -112,11 +112,11 @@
             @if ($event->is_approved)
                 @if ($event->resultType() === 'enabling')
                     <x-event.enabling-participants :event="$event" />
-                    <x-event.waiting-list :waiting_list="$waitingList" />
+                    {{-- <x-event.waiting-list :waiting_list="$waitingList" /> --}}
                     <x-event.enabling-results :event="$event" :results="$enablingResults" />
                 @elseif ($event->resultType() === 'ranking')
                     <x-event.ranking-participants :event="$event" :results="$rankingResults" />
-                    <x-event.waiting-list :event="$event" :waiting_list="$waitingList" />
+                    {{-- <x-event.waiting-list :event="$event" :waiting_list="$waitingList" /> --}}
                     {{-- Vogliono i risultati solo per i tipi ranking preimpostati --}}
                     @if (in_array($event->type->name, ['School Tournament', 'Academy Tournament', 'National Tournament']))
                         <x-event.ranking-results :results="$rankingResults" />

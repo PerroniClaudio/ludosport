@@ -113,7 +113,7 @@
                         disabled="{{ !!$event->is_approved }}" />
 
                     <x-form.input name="waiting_list_close_date" label="Waiting list close date" type="datetime-local"
-                        required="{{ true }}" value="{{ $event->waiting_list_close_date }}"
+                        required="{{ false }}" value="{{ $event->waiting_list_close_date }}"
                         placeholder="{{ fake()->date() }}" disabled="{{ !!$event->is_approved }}"
                         description="Prevents new registrations on the waiting list starting from the specified date. However, individuals on the waiting list will still be able to complete their purchases when it's their turn." />
 
@@ -121,7 +121,7 @@
                         selected="{{ $event->type->id }}" disabled="{{ !!$event->is_approved }}" />
 
                     <x-form.input name="max_participants" label="Max Participants (0 means unlimited)" type="number"
-                        required="{{ true }}" value="{{ $event->max_participants }}"
+                        required="{{ true }}" value="{{ $event->max_participants ? $event->max_participants : 0 }}"
                         min="{{ 0 }}" placeholder="{{ __('events.max_participants_placeholder') }}"
                         disabled="{{ !!$event->is_approved }}" />
 

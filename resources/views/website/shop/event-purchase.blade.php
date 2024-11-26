@@ -261,7 +261,7 @@
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                                 <div>
                                     @if ($isWaitingList)
-                                        @if(isset($event->waiting_list_close_date) && $event->waiting_list_close_date < now())
+                                        @if(isset($event->waiting_list_close_date) && ($event->waiting_list_close_date < now()))
                                             <p class="mt-2 text-error-500">
                                                 {{ __('website.event_waiting_list_closed_text') }}
                                             </p>
@@ -385,7 +385,7 @@
                                     x-text="'€ ' + totalPrice.toFixed(2)"></p>
 
                                 @if ($isWaitingList)
-                                    @if(!(isset($event->waiting_list_close_date) && $event->waiting_list_close_date < now()))
+                                    @if(!(isset($event->waiting_list_close_date) && ($event->waiting_list_close_date < now())))
                                         <div x-show="shouldShowPayment" class="mt-4">
                                             <div @click="startWaitingListCheckout"
                                                 class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer">

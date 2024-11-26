@@ -26,10 +26,17 @@ export const googlemap = (location) => {
         init() {
             console.log(`googlemap init ${location}`);
 
-            fetchLocation(this.location).then((data) => {
-                data.address_components.forEach((element) => {
-                    // console.log(element);
+            fetchLocation(this.location).then(async (data) => {
+                await new Promise((resolve) => {
+                    const checkGoogle = setInterval(() => {
+                        if (typeof google !== "undefined") {
+                            clearInterval(checkGoogle);
+                            resolve();
+                        }
+                    }, 100);
+                });
 
+                data.address_components.forEach((element) => {
                     if (element.types.includes("route")) {
                         this.address = element.long_name + ", " + this.address;
                     }
@@ -73,8 +80,6 @@ export const googlemap = (location) => {
                     }
                 });
 
-                // console.log(data.geometry.location);
-
                 this.map = new google.maps.Map(
                     document.getElementById("eventGoogleMap"),
                     {
@@ -83,7 +88,6 @@ export const googlemap = (location) => {
                         height: "400px",
                     }
                 );
-
                 this.marker = new google.maps.Marker({
                     position: data.geometry.location,
                     map: this.map,

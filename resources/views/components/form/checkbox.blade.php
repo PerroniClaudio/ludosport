@@ -1,13 +1,15 @@
-@props(['id', 'name', 'label', 'isChecked' => false, 'disabled' => false, 'description' => null])
+@props(['id', 'name', 'label', 'isChecked' => false, 'disabled' => false, 'description' => null, 'hidden' => false,])
 
 <div x-data="{ isChecked: {{ $isChecked ? 'true' : 'false' }} }" class="flex items-center gap-2">
-    <label for="{{ $id }}" class="toggle-switch">
+    <label for="{{ $id }}" class="toggle-switch {{$hidden ? 'hidden' : '' }}">
         <input type="checkbox" id="{{ $id }}" name="{{ $name }}" x-model="isChecked"
             class="toggle-switch-checkbox" {{ $disabled ? 'disabled' : ''}}>
-        <span class="toggle-switch-slider"></span>
+        @if(!$hidden)
+            <span class="toggle-switch-slider"></span>
+        @endif
     </label>
 
-    @if($description)
+    @if($description && !$hidden)
         <div class="flex gap-1">
             {{-- <x-input-label value="{{ $label }}" /> --}}
             <span class="block font-medium text-sm text-background-700 dark:text-background-300">{{ $label }}</span>
@@ -22,7 +24,7 @@
                 <x-lucide-info class="h-4 text-background-300" />
             </div>
         </div>
-    @else
+    @elseif(!$hidden)
         {{-- <x-input-label value="{{ $label }}" /> --}}
         <span class="block font-medium text-sm text-background-700 dark:text-background-300">{{ $label }}</span>
     @endif
@@ -33,6 +35,12 @@
         display: inline-block;
         width: 60px;
         height: 34px;
+    }
+    
+    .toggle-switch.hidden {
+        opacity: 0;
+        width: 0;
+        height: 0;
     }
 
     .toggle-switch input {

@@ -86,4 +86,5 @@ return [
     'disable_event_message' => 'This action will disable the event, you cannot enable it again.',
     'chart_generated_at' => 'This chart was generated on :date',
     'chart_generate_new' => 'Generate an updated chart',
+    'event_thumbnail_tooltip' => 'Save other information before uploading. Unsaved changes will be lost.',
 ];
