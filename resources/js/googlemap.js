@@ -118,6 +118,17 @@ export const googlemap = (location) => {
                     this.marker.setMap(null);
                 }
 
+                // Aggiorna la mappa
+                
+                this.map = new google.maps.Map(
+                    document.getElementById("eventGoogleMap"),
+                    {
+                        center: data,
+                        zoom: 15,
+                        height: "400px",
+                    }
+                );
+
                 // Aggiungi un marker
 
                 this.marker = new google.maps.Marker({
