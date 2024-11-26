@@ -15,6 +15,16 @@ export const googlemap = (location) => {
         return data;
     };
 
+
+    const fetchGoogle = async () => new Promise((resolve) => {
+        const checkGoogle = setInterval(() => {
+            if (typeof google !== "undefined") {
+                clearInterval(checkGoogle);
+                resolve();
+            }
+        }, 100);
+    });
+
     return {
         location: location || JSON.stringify({ lat: 0, lng: 0 }),
         city: "",
@@ -25,73 +35,67 @@ export const googlemap = (location) => {
         marker: null,
         init() {
             console.log(`googlemap init ${location}`);
+            fetchGoogle().then(() => {
+                fetchLocation(this.location).then(async (data) => {
+                    
 
-            fetchLocation(this.location).then(async (data) => {
-                await new Promise((resolve) => {
-                    const checkGoogle = setInterval(() => {
-                        if (typeof google !== "undefined") {
-                            clearInterval(checkGoogle);
-                            resolve();
+                    data.address_components.forEach((element) => {
+                        if (element.types.includes("route")) {
+                            this.address = element.long_name + ", " + this.address;
                         }
-                    }, 100);
-                });
 
-                data.address_components.forEach((element) => {
-                    if (element.types.includes("route")) {
-                        this.address = element.long_name + ", " + this.address;
-                    }
-
-                    if (element.types.includes("street_number")) {
-                        this.address += element.long_name;
-                    }
-
-                    if (this.address === "") {
-                        if (element.types.includes("sublocality_level_2")) {
-                            this.address = element.long_name;
+                        if (element.types.includes("street_number")) {
+                            this.address += element.long_name;
                         }
-                    }
 
-                    if (element.types.includes("locality")) {
-                        this.city = element.long_name;
-                    }
+                        if (this.address === "") {
+                            if (element.types.includes("sublocality_level_2")) {
+                                this.address = element.long_name;
+                            }
+                        }
 
-                    if (this.city === "") {
-                        if (element.types.includes("postal_town")) {
+                        if (element.types.includes("locality")) {
                             this.city = element.long_name;
                         }
-                    }
 
-                    if (this.city === "") {
-                        if (
-                            element.types.includes(
-                                "administrative_area_level_2"
-                            )
-                        ) {
-                            this.city = element.long_name;
+                        if (this.city === "") {
+                            if (element.types.includes("postal_town")) {
+                                this.city = element.long_name;
+                            }
                         }
-                    }
 
-                    if (element.types.includes("country")) {
-                        this.country = element.long_name;
-                    }
+                        if (this.city === "") {
+                            if (
+                                element.types.includes(
+                                    "administrative_area_level_2"
+                                )
+                            ) {
+                                this.city = element.long_name;
+                            }
+                        }
 
-                    if (element.types.includes("postal_code")) {
-                        this.postal_code = element.long_name;
-                    }
-                });
+                        if (element.types.includes("country")) {
+                            this.country = element.long_name;
+                        }
 
-                this.map = new google.maps.Map(
-                    document.getElementById("eventGoogleMap"),
-                    {
-                        center: data.geometry.location,
-                        zoom: 15,
-                        height: "400px",
-                    }
-                );
-                this.marker = new google.maps.Marker({
-                    position: data.geometry.location,
-                    map: this.map,
-                });
+                        if (element.types.includes("postal_code")) {
+                            this.postal_code = element.long_name;
+                        }
+                    });
+
+                    this.map = new google.maps.Map(
+                        document.getElementById("eventGoogleMap"),
+                        {
+                            center: data.geometry.location,
+                            zoom: 15,
+                            height: "400px",
+                        }
+                    );
+                    this.marker = new google.maps.Marker({
+                        position: data.geometry.location,
+                        map: this.map,
+                    });
+                })
             });
         },
         updateMap: function () {
