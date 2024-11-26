@@ -12,7 +12,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            <div class="flex flex-col gap-4" x-script-element="calendar" x-data="calendar('{{ route('events.calendar') }}')">
+            <div class="flex flex-col gap-4" x-load x-data="calendar('{{ route('events.calendar') }}')">
 
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div x-ref="calendar" class="p-6 text-background-900 dark:text-background-100"></div>

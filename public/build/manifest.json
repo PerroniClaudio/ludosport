@@ -1,13 +1,145 @@
 {
+  "_auto-CdBL8C_c.js": {
+    "file": "assets/auto-CdBL8C_c.js",
+    "name": "auto"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-8bkSxznT.css",
+    "file": "assets/app-DK4_FeYd.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-Bypb4Ne9.js",
+    "file": "assets/app-bxCfZyGM.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/editor.js",
+      "resources/js/googlemap.js",
+      "resources/js/calendar.js",
+      "resources/js/participants.js",
+      "resources/js/eventpersonnel.js",
+      "resources/js/mapsearcher.js",
+      "resources/js/usernationgraphadmin.js",
+      "resources/js/useracademygraphadmin.js",
+      "resources/js/userschoolgraphadmin.js",
+      "resources/js/usercoursegraphadmin.js",
+      "resources/js/eventsparticipantsgraph.js",
+      "resources/js/userschoolgraph.js",
+      "resources/js/usersclangraph.js",
+      "resources/js/rankingschart.js",
+      "resources/js/enablingresults.js"
+    ]
+  },
+  "resources/js/calendar.js": {
+    "file": "assets/calendar-CFKGEVko.js",
+    "name": "calendar",
+    "src": "resources/js/calendar.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/editor.js": {
+    "file": "assets/editor-BUZeKidO.js",
+    "name": "editor",
+    "src": "resources/js/editor.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/enablingresults.js": {
+    "file": "assets/enablingresults-CpQjAD1I.js",
+    "name": "enablingresults",
+    "src": "resources/js/enablingresults.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/eventpersonnel.js": {
+    "file": "assets/eventpersonnel-DQYXpehs.js",
+    "name": "eventpersonnel",
+    "src": "resources/js/eventpersonnel.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/eventsparticipantsgraph.js": {
+    "file": "assets/eventsparticipantsgraph-dVRj5MQS.js",
+    "name": "eventsparticipantsgraph",
+    "src": "resources/js/eventsparticipantsgraph.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-CdBL8C_c.js"
+    ]
+  },
+  "resources/js/googlemap.js": {
+    "file": "assets/googlemap-CoqtdB3n.js",
+    "name": "googlemap",
+    "src": "resources/js/googlemap.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/mapsearcher.js": {
+    "file": "assets/mapsearcher-C3PB4uzj.js",
+    "name": "mapsearcher",
+    "src": "resources/js/mapsearcher.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/participants.js": {
+    "file": "assets/participants-DhpaD1iO.js",
+    "name": "participants",
+    "src": "resources/js/participants.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/rankingschart.js": {
+    "file": "assets/rankingschart-8vl7gccf.js",
+    "name": "rankingschart",
+    "src": "resources/js/rankingschart.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/useracademygraphadmin.js": {
+    "file": "assets/useracademygraphadmin-BYCv97Z5.js",
+    "name": "useracademygraphadmin",
+    "src": "resources/js/useracademygraphadmin.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-CdBL8C_c.js"
+    ]
+  },
+  "resources/js/usercoursegraphadmin.js": {
+    "file": "assets/usercoursegraphadmin-vqOXKDWY.js",
+    "name": "usercoursegraphadmin",
+    "src": "resources/js/usercoursegraphadmin.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-CdBL8C_c.js"
+    ]
+  },
+  "resources/js/usernationgraphadmin.js": {
+    "file": "assets/usernationgraphadmin-CNqPddjE.js",
+    "name": "usernationgraphadmin",
+    "src": "resources/js/usernationgraphadmin.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-CdBL8C_c.js"
+    ]
+  },
+  "resources/js/userschoolgraph.js": {
+    "file": "assets/userschoolgraph-DTTW1urs.js",
+    "name": "userschoolgraph",
+    "src": "resources/js/userschoolgraph.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-CdBL8C_c.js"
+    ]
+  },
+  "resources/js/userschoolgraphadmin.js": {
+    "file": "assets/userschoolgraphadmin-XwfO8X8x.js",
+    "name": "userschoolgraphadmin",
+    "src": "resources/js/userschoolgraphadmin.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-CdBL8C_c.js"
+    ]
+  },
+  "resources/js/usersclangraph.js": {
+    "file": "assets/usersclangraph-D6YuXH6K.js",
+    "name": "usersclangraph",
+    "src": "resources/js/usersclangraph.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-CdBL8C_c.js"
+    ]
   }
 }

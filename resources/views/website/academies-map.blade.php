@@ -43,7 +43,8 @@
             <p class="text-background-800 dark:text-background-200 text-justify">{{ __('website.academies_map_text') }}
             </p>
 
-            <div class="flex flex-col gap-4 rounded  min-h-[60vh]  mt-8" x-data="mapsearcher({{ $schools_json }})" x-init="$watch('nationFilter', (value) => fiterByNation(value))">
+            <div class="flex flex-col gap-4 rounded  min-h-[60vh]  mt-8" x-load x-data="mapsearcher({{ $schools_json }})"
+                x-init="$watch('nationFilter', (value) => fiterByNation(value))">
                 <div>
                     <div id="google-map" class="h-[600px] w-full"></div>
                 </div>

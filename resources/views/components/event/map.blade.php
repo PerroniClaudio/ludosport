@@ -46,7 +46,7 @@
     }
 </script>
 
-<div x-data="googlemap('{{ $event->location }}')" x-ref="eventGoogleMapContainer"
+<div x-load x-data="googlemap('{{ $event->location }}')" x-ref="eventGoogleMapContainer"
     class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
     <div class="flex items-center gap-1">
         <div class="flex items-center gap-1">

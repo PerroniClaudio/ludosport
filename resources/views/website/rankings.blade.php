@@ -14,8 +14,8 @@
                 <span class="text-secondary-500 ml-1">Style Points</span> with their colour.
             </p>
 
-            <div class="flex flex-col lg:grid lg:grid-cols-12 gap-4 rounded  min-h-[60vh]  mt-8" x-data="rankingschart"
-                x-init="$watch('nationFilter', (value) => fiterByNation(value))">
+            <div class="flex flex-col lg:grid lg:grid-cols-12 gap-4 rounded  min-h-[60vh]  mt-8" x-load
+                x-data="rankingschart" x-init="$watch('nationFilter', (value) => fiterByNation(value))">
                 <div class="flex flex-col gap-2 col-span-3">
                     <!-- Events -->
 
@@ -119,16 +119,18 @@
                                                                         <div x-text="`${row[column.field]}`"
                                                                             class="truncate">
                                                                         </div>
-                                                                        <template x-if="column.field === 'name' && (row.battle_name !== null) && (row.battle_name !== '')">
+                                                                        <template
+                                                                            x-if="column.field === 'name' && (row.battle_name !== null) && (row.battle_name !== '')">
                                                                             <a
                                                                                 x-bind:href="'/website-users/' + row.battle_name">
                                                                                 <x-lucide-arrow-right
                                                                                     class="w-4 h-4 text-primary-500 dark:text-primary-400 cursor-pointer hover:opacity-70" />
                                                                             </a>
                                                                         </template>
-                                                                        <template x-if="column.field === 'school' && (row.school_slug !== null) && (row.school_slug !== '')">
-                                                                            <a x-bind:href="'/school-profile/' + row.school_slug"
-                                                                                >
+                                                                        <template
+                                                                            x-if="column.field === 'school' && (row.school_slug !== null) && (row.school_slug !== '')">
+                                                                            <a
+                                                                                x-bind:href="'/school-profile/' + row.school_slug">
                                                                                 <x-lucide-arrow-right
                                                                                     class="w-4 h-4 text-primary-500 dark:text-primary-400 cursor-pointer hover:opacity-70" />
                                                                             </a>

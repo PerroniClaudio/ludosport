@@ -65,7 +65,7 @@
                             {{ $school->city }}, {{ $school->nation->name }}</span>
                     </div>
 
-                    <div x-data="googlemap('{{ $school->coordinates }}')" x-ref="eventGoogleMapContainer">
+                    <div x-load x-data="googlemap('{{ $school->coordinates }}')" x-ref="eventGoogleMapContainer">
                         <x-maps-google id="eventGoogleMap" style="height: 400px"></x-maps-google>
                     </div>
                 </section>
