@@ -10,7 +10,7 @@
                 x-text="`{{ __('dashboard.athletes_schools_title', ['academy' => '${academy.name}']) }}`">
             </h3>
             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid sm:grid-cols-2 gap-4">
                 <div>
                     <canvas id="userschoolgraph"></canvas>
                 </div>

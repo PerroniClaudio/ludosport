@@ -29,10 +29,10 @@
     </h3>
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-    <div class="grid grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <!-- Utenti attivi nell'accademia -->
 
-        <div class="p-4 bg-background-100 dark:bg-background-700 rounded-lg">
+        <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg">
             <h4 class="text-background-800 dark:text-background-200 text-lg">
                 {{ __('dashboard.rector_active_users') }}</h4>
             <p class="text-primary-600 dark:text-primary-500 text-3xl" x-text="active_users"></p>
@@ -40,7 +40,7 @@
 
         <!-- Utenti attivi ma non associati a un corso -->
 
-        <div class="p-4 bg-background-100 dark:bg-background-700 rounded-lg">
+        <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg">
             <h4 class="text-background-800 dark:text-background-200 text-lg">
                 {{ __('dashboard.rector_active_users_no_course') }}</h4>
             <p class="text-primary-600 dark:text-primary-500 text-3xl" x-text="active_users_no_course"></p>
@@ -48,7 +48,7 @@
 
         <!-- Utenti associati a un corso ma non attivi -->
 
-        <div class="p-4 bg-background-100 dark:bg-background-700 rounded-lg">
+        <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg">
             <h4 class="text-background-800 dark:text-background-200 text-lg">
                 {{ __('dashboard.rector_inactive_users') }}</h4>
             <p class="text-primary-600 dark:text-primary-500 text-3xl" x-text="users_course_not_active"></p>
@@ -56,7 +56,7 @@
 
         <!-- Utenti iscritti quest'anno per la prima volta -->
 
-        <div class="p-4 bg-background-100 dark:bg-background-700 rounded-lg">
+        <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg">
             <h4 class="text-background-800 dark:text-background-200 text-lg">
                 {{ __('dashboard.rector_new_users') }}</h4>
             <p class="text-primary-600 dark:text-primary-500 text-3xl" x-text="new_users_this_year"></p>

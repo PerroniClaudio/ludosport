@@ -9,7 +9,7 @@
                 {{ __('dashboard.athletes_nations_title') }}
             </h3>
             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid sm:grid-cols-2 gap-4">
                 <div>
                     <canvas id="usernationgraph"></canvas>
                 </div>

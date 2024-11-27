@@ -9,7 +9,7 @@
                     <a href="{{ route('dashboard') }}" class="bg-background-800 p-1 rounded">
                         {{-- <x-application-logo
                             class="block h-9 w-auto fill-current text-background-800 dark:text-background-200" /> --}}
-                        <x-application-logo class="block h-9 w-auto" />
+                        <x-application-logo class="block h-9 w-9" />
                     </a>
                 </div>
 
@@ -212,6 +212,12 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('exports.index')" :active="request()->routeIs('exports.*')">
                     {{ __('navigation.exports') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('deleted-elements.index')" :active="request()->routeIs('deleted-elements.*')">
+                    {{ __('navigation.deleted_elements') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('homepage')" :active="request()->routeIs('homepage')">
+                    {{ __('navigation.website') }}
                 </x-responsive-nav-link>
             @endif
         </div>
