@@ -43,7 +43,7 @@
                     </x-primary-button>
                 </div>
 
-                <div class="grid grid-cols-3 gap-4 py-8 text-background-900 dark:text-background-100">
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 py-8 text-background-900 dark:text-background-100">
                     <template x-for="user in users" :key="user.id">
                         <div class="bg-white dark:bg-transparent flex gap-4 mb-4  border dark:border-background-700 rounded p-4 hover:border-primary-500 cursor-pointer"
                             @click="userDetail(user.battle_name)">

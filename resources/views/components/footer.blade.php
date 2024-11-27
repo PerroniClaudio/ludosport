@@ -2,7 +2,7 @@
     <div class="container px-6 py-8 mx-auto">
         <div class="flex flex-col items-center text-center">
             <a href="#">
-                <x-application-logo class="block h-9 w-auto" />
+                <x-application-logo class="block h-9 w-9" />
             </a>
 
             <p class="max-w-md mx-auto mt-4 text-background-500 dark:text-background-400">

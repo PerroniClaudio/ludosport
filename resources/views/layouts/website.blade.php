@@ -28,7 +28,7 @@
                     <a href="{{ route('homepage') }}">
                         {{-- <x-application-logo
                             class="block h-9 w-auto fill-current text-background-800 dark:text-background-200" /> --}}
-                        <x-application-logo class="block h-9 w-auto" />
+                        <x-application-logo class="block h-9 w-9" />
                     </a>
                 </div>
 

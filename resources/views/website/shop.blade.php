@@ -7,7 +7,7 @@
             </h1>
 
             <div class="grid lg:grid-cols-2 gap-8 text-background-800 dark:text-background-200 text-center">
-                <section class="flex flex-col gap-4 bg-white dark:bg-background-800 p-8 rounded-md col-span-2">
+                <section class="flex flex-col gap-4 bg-white dark:bg-background-800 p-8 rounded-md lg:col-span-2">
                     <h3
                         class="text-4xl font-bold tracking-tighter sm:text-3xl xl:text-4xl/none pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300 text-center">
                         {{ __('website.shop_membership_activation') }}
@@ -16,7 +16,7 @@
                     <p class="text-background-800 dark:text-background-200 text-center">
                         {{ __('website.shop_membership_activation_text') }}</p>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid md:grid-cols-2 gap-4">
                         <div
                             class="border border-background-700 p-4 rounded-md flex flex-col items-center justify-center">
                             {{ __('website.shop_membership_activation_1') }}
@@ -28,7 +28,7 @@
                     </div>
 
 
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid md:grid-cols-3 gap-4">
                         <div
                             class="border border-background-700 p-4 rounded-md flex flex-col items-center justify-center">
                             {{ __('website.shop_membership_activation_3') }}
