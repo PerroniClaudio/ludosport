@@ -27,7 +27,7 @@
                 d[l](f, ...n))
         })
         ({
-            key: "{{ config('app.google.maps_key) }}",
+            key: "{{ config('app.google.maps_key') }}",
             v: "weekly",
 
         });
