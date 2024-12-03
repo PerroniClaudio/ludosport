@@ -131,6 +131,8 @@ return [
         'bank' => env('WIRE_TRANSFER_BANK', 'Banca di LudoSport'),
     ],
 
-
+    'google' => [
+        'maps_key' => env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN', ''),
+    ]
 
 ];

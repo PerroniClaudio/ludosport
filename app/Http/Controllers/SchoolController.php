@@ -338,7 +338,7 @@ class SchoolController extends Controller {
     private function getLocation($address) {
 
         $address = str_replace(" ", "+", $address);
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . config('app.google.maps_key);
         $response = file_get_contents($url);
         $json = json_decode($response, true);
 
@@ -366,7 +366,7 @@ class SchoolController extends Controller {
         try {
             $nation = Nation::find($request->nation);
 
-            $url = "https://addressvalidation.googleapis.com/v1:validateAddress?key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+            $url = "https://addressvalidation.googleapis.com/v1:validateAddress?key=" . config('app.google.maps_key);
             $data = [
                 'address' => [
                     'regionCode' => $nation->code,
@@ -465,7 +465,7 @@ class SchoolController extends Controller {
 
     private function getCoordinates($location) {
         $location = urlencode($location);
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$location}&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$location}&key=" . config('app.google.maps_key);
 
         $response = file_get_contents($url);
         $data = json_decode($response, true);
