@@ -199,7 +199,7 @@ class SchoolController extends Controller {
             ->whereNotIn('id', $school->personnel->pluck('id'))
             ->whereHas('roles', function ($query) {
                 $query->whereIn('name', ['rector', 'dean', 'manager', 'technician', 'instructor']);
-                })
+            })
             ->with(['roles'])
             ->get();
 
@@ -218,7 +218,7 @@ class SchoolController extends Controller {
         $athletes = [];
 
         // admin (tutti), rector, dean e manager (solo gli utenti associati all'accademia della scuola o a no academy)
-        switch($authRole){
+        switch ($authRole) {
             case 'admin':
                 $athletes = User::where('is_disabled', '0')->whereNotIn('id', $school->athletes->pluck('id'))->get();
                 break;
@@ -226,11 +226,13 @@ class SchoolController extends Controller {
             case 'dean':
             case 'manager':
                 $athletes = User::where('is_disabled', '0')->whereNotIn('id', $school->athletes->pluck('id'))->whereHas(
-                    'roles', function ($query) {
+                    'roles',
+                    function ($query) {
                         $query->where('name', 'athlete');
                     }
                 )->whereHas(
-                    'academyAthletes', function ($query) use ($school) {
+                    'academyAthletes',
+                    function ($query) use ($school) {
                         // $query->whereIn('academy_id', [$school->academy->id, 1]); //1 è no academy. Se si vuole far pescare anche da no academy direttamente nella scuola si fa così
                         $query->where('academy_id', $school->academy->id);
                     }
@@ -338,7 +340,7 @@ class SchoolController extends Controller {
     private function getLocation($address) {
 
         $address = str_replace(" ", "+", $address);
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . config('app.google.maps_key');
         $response = file_get_contents($url);
         $json = json_decode($response, true);
 
@@ -366,7 +368,7 @@ class SchoolController extends Controller {
         try {
             $nation = Nation::find($request->nation);
 
-            $url = "https://addressvalidation.googleapis.com/v1:validateAddress?key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+            $url = "https://addressvalidation.googleapis.com/v1:validateAddress?key=" . config('app.google.maps_key');
             $data = [
                 'address' => [
                     'regionCode' => $nation->code,
@@ -465,7 +467,7 @@ class SchoolController extends Controller {
 
     private function getCoordinates($location) {
         $location = urlencode($location);
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$location}&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$location}&key=" . config('app.google.maps_key');
 
         $response = file_get_contents($url);
         $data = json_decode($response, true);
@@ -611,11 +613,11 @@ class SchoolController extends Controller {
         $athlete = User::find($request->athlete_id);
         // $academy = Academy::find($school->academy_id);
 
-        if(!$athlete->schoolAthletes()->where('school_id', $school->id)->exists()) {
-                    
-            if($athlete->academyAthletes()->first()->id != $school->academy->id) {
+        if (!$athlete->schoolAthletes()->where('school_id', $school->id)->exists()) {
+
+            if ($athlete->academyAthletes()->first()->id != $school->academy->id) {
                 // L'admin può farlo sempre, il rettore, il dean e il manager solo se l'accademia è no academy
-                if($authRole !== 'admin' && $athlete->academyAthletes()->first()->id !== 1) {
+                if ($authRole !== 'admin' && $athlete->academyAthletes()->first()->id !== 1) {
                     return redirect()->route('dashboard')->with('error', 'Not authorized.');
                 }
                 // L'atleta può avere solo un'accademia associata
@@ -627,7 +629,7 @@ class SchoolController extends Controller {
         }
 
         // Se l'atleta non ha l'accademia principale, la assegna
-        if(!$athlete->primaryAcademyAthlete()){
+        if (!$athlete->primaryAcademyAthlete()) {
             $athlete->setPrimaryAcademyAthlete($school->academy->id);
         }
         // Se l'atleta non ha la scuola principale, la assegna
@@ -637,12 +639,12 @@ class SchoolController extends Controller {
 
         // Se l'atleta ha una scuola assegnata diversa da No School, toglie No School
         $noSchool = School::where('slug', 'no-school')->first();
-        if($noSchool) {
+        if ($noSchool) {
             if ($athlete->schoolAthletes()->whereNot('school_id', $noSchool->id)->count() > 0) {
                 $athlete->schoolAthletes()->detach($noSchool->id);
             }
         }
-            
+
         $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
 

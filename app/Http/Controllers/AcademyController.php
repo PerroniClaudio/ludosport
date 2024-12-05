@@ -156,7 +156,7 @@ class AcademyController extends Controller {
             ->whereNotIn('id', $academy->personnel->pluck('id'))
             ->whereHas('roles', function ($query) {
                 $query->whereIn('name', ['rector', 'dean', 'manager', 'technician', 'instructor']);
-                })
+            })
             ->with(['roles'])
             ->get();
 
@@ -182,21 +182,24 @@ class AcademyController extends Controller {
 
 
         $athletes = [];
-        switch($authRole) {
+        switch ($authRole) {
             case 'admin':
                 $athletes = User::where('is_disabled', '0')->whereNotIn('id', $academy->athletes->pluck('id'))->whereHas(
-                    'roles', function ($query) {
+                    'roles',
+                    function ($query) {
                         $query->where('name', 'athlete');
                     }
                 )->get();
                 break;
             case 'rector':
                 $athletes = User::where('is_disabled', '0')->whereNotIn('id', $academy->athletes->pluck('id'))->whereHas(
-                    'roles', function ($query) {
+                    'roles',
+                    function ($query) {
                         $query->where('name', 'athlete');
                     }
                 )->whereHas(
-                    'academyAthletes', function ($query) use ($academy) {
+                    'academyAthletes',
+                    function ($query) use ($academy) {
                         $query->whereIn('academy_id', [$academy->id, 1]); //1 è no academy
                     }
                 )->get();
@@ -392,16 +395,16 @@ class AcademyController extends Controller {
         if ($academy->athletes->contains($athlete->id)) {
             return redirect()->route($redirectRoute, $academy)->with('success', 'Athlete is already associated with this academy.');
         }
-        
+
         // l'atleta può essere associato ad una sola accademia, quindi se si modifica vanno rimossi anche tutti i collegamenti inferiori (scuole e corsi)
 
         // L'admin può farlo sempre, il rettore solo se l'accademia è no academy
-        if($authRole !== 'admin' && $athlete->academyAthletes()->first()->id !== 1) {
+        if ($authRole !== 'admin' && $athlete->academyAthletes()->first()->id !== 1) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
         // l'argomento è l'accademia che fa eccezione, (se serve)
         $athlete->removeAcademiesAthleteAssociations($academy);
-        
+
         $academy->athletes()->syncWithoutDetaching($athlete->id);
         // Se l'atleta non ha l'accademia principale, la assegna
         if (!$athlete->primaryAcademyAthlete()) {
@@ -415,11 +418,11 @@ class AcademyController extends Controller {
         // Se l'atleta non ha una scuola assegnata, assegna No school
         if ($athlete->schoolAthletes()->count() == 0) {
             $noSchool = School::where('slug', 'no-school')->first();
-            if($noSchool) {
+            if ($noSchool) {
                 $athlete->schoolAthletes()->syncWithoutDetaching($noSchool->id);
             }
         }
-        
+
         return redirect()->route($redirectRoute, $academy)->with('success', 'Athlete added successfully!');
     }
 
@@ -483,7 +486,7 @@ class AcademyController extends Controller {
     private function getLocation($address) {
 
         $address = str_replace(" ", "+", $address);
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . config('app.google.maps_key');
         $response = file_get_contents($url);
         $json = json_decode($response, true);
 
@@ -548,7 +551,7 @@ class AcademyController extends Controller {
 
     private function getCoordinates($location) {
         $location = urlencode($location);
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$location}&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$location}&key=" . config('app.google.maps_key');
 
         $response = file_get_contents($url);
         $data = json_decode($response, true);

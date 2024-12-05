@@ -27,7 +27,7 @@
                 d[l](f, ...n))
         })
         ({
-            key: "{{ env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN') }}",
+            key: "{{ config('app.google.maps_key') }}",
             v: "weekly",
 
         });

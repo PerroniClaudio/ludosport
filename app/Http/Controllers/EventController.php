@@ -446,7 +446,7 @@ class EventController extends Controller {
                 'lng' => '9.1893892288208',
             ];
         }
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?latlng={$coordinates['lat']},{$coordinates['lng']}&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?latlng={$coordinates['lat']},{$coordinates['lng']}&key=" . config('app.google.maps_key');
 
         $response = file_get_contents($url);
         $json = json_decode($response, true);
@@ -456,7 +456,7 @@ class EventController extends Controller {
 
     private function getCoordinates($address) {
         $address = str_replace(" ", "+", $address);
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . config('app.google.maps_key');
         $response = file_get_contents($url);
         $json = json_decode($response, true);
 
@@ -1174,7 +1174,7 @@ class EventController extends Controller {
             // Controlla il tipo di evento
             $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
             $isWaitingPayment = EventWaitingList::where(['event_id' => $event->id, 'user_id' => $user->id, 'is_waiting_payment' => true])->exists();
-            
+
             if ($event->resultType() === 'enabling') {
                 $isParticipating = $event->instructorResults()->where('user_id', $user->id)->exists();
             } else if ($event->resultType() === 'ranking') {
@@ -1188,7 +1188,6 @@ class EventController extends Controller {
                     && !($onlyWaitingList && $isWaitngListClosed)
                 )
             );
-
         }
 
         return view('website.event-detail', [

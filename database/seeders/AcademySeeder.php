@@ -14,7 +14,7 @@ class AcademySeeder extends Seeder {
      */
     public function run(): void {
         //
-        if(!Academy::where('slug', 'no-academy')->exists()) {
+        if (!Academy::where('slug', 'no-academy')->exists()) {
             Academy::create([
                 'name' => 'No academy',
                 'slug' => 'no-academy',
@@ -37,9 +37,9 @@ class AcademySeeder extends Seeder {
 
         // Inserisci i dati nel database
         foreach ($academies as $academy) {
-            
+
             $slug = Str::slug($academy['name']);
-            
+
             $address = $academy['address'] . " " . $academy['city'] . " "  . $academy['zip'];
             $location = $this->getLocation($address);
 
@@ -50,7 +50,7 @@ class AcademySeeder extends Seeder {
 
             $coordinates = $location ? json_encode(['lat' => $location['lat'], 'lng' => $location['lng']]) : null;
 
-            if(!Academy::where('slug', $slug)->exists()) {
+            if (!Academy::where('slug', $slug)->exists()) {
                 Academy::create([
                     'name' => $academy['name'],
                     'nation_id' => $nation->id ?? 1,
@@ -63,14 +63,13 @@ class AcademySeeder extends Seeder {
                     'coordinates' => $coordinates
                 ]);
             }
-
         }
     }
 
     private function getLocation($address) {
 
         $address = str_replace(" ", "+", $address);
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN');
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . config('app.google.maps_key');
         $response = file_get_contents($url);
         $json = json_decode($response, true);
 
@@ -80,7 +79,7 @@ class AcademySeeder extends Seeder {
 
         $addressComponents = $json['results'][0]['address_components'];
         $city = "";
-        if(isset($addressComponents[2])){
+        if (isset($addressComponents[2])) {
             $city = $addressComponents[2]['types'][0] == "route" ? ($addressComponents[3]['long_name'] ?? "") : $addressComponents[2]['long_name'];
         }
         return [

@@ -33,7 +33,6 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/invoices/store', [App\Http\Controllers\UserController::class, 'saveInvoice'])->name('users.invoices.store');
     Route::post('/invoices/update', [App\Http\Controllers\UserController::class, 'updateInvoice'])->name('users.invoices.update');
-
 });
 
 /** Eliminati */
@@ -350,12 +349,6 @@ require __DIR__ . '/script.php';
 
 Route::group([], function () {
     Route::get('/healthcheck', function () {
-
-        // $user = \App\Models\User::find(16);
-        
-        // $user->weaponFormsTechnician()->updateExistingPivot(14, ['awarded_at' => Carbon\Carbon::now()]);
-
-        dump(\App\Models\User::find(16)->weaponFormsTechnician);
         return 'healthcheck';
     })->name('healthcheck');
 });
