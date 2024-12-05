@@ -94,18 +94,45 @@
                             <td
                                 class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
                                 <div class="flex items-center gap-2">
-                                    <a @click="showReadReasonModal(row.reason)">
-                                        <x-lucide-mail
+                                    <div x-data="{tooltip: false}" x-on:mouseover="tooltip = true" x-on:mouseleave="tooltip = false" >
+                                        <div x-show="tooltip" 
+                                            x-cloak
+                                            class="absolute bg-background-100 
+                                            p-2 rounded-md text-sm text-background-800 
+                                            inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
+                                            {{ __('ranks.requests_read_reason') }}
+                                        </div>
+                                        <a @click="showReadReasonModal(row.reason)">
+                                            <x-lucide-mail
+                                                class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                                        </a>
+                                    </div>
+                                    <div x-data="{tooltip: false}" x-on:mouseover="tooltip = true" x-on:mouseleave="tooltip = false" >
+                                        <div x-show="tooltip" 
+                                            x-cloak
+                                            class="absolute bg-background-100 
+                                            p-2 rounded-md text-sm text-background-800 
+                                            inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
+                                            {{ __('ranks.requests_accept') }}
+                                        </div>
+                                        <a @click="showAcceptRequestModal(row.id)">
+                                            <x-lucide-check
                                             class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                                    </a>
-                                    <a @click="showAcceptRequestModal(row.id)">
-                                        <x-lucide-check
+                                        </a>
+                                    </div>
+                                    <div x-data="{tooltip: false}" x-on:mouseover="tooltip = true" x-on:mouseleave="tooltip = false" >
+                                        <div x-show="tooltip" 
+                                            x-cloak
+                                            class="absolute bg-background-100 
+                                            p-2 rounded-md text-sm text-background-800 
+                                            inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
+                                            {{ __('ranks.requests_reject') }}
+                                        </div>
+                                        <a @click="showRejectRequestModal(row.id)">
+                                            <x-lucide-circle-x
                                             class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                                    </a>
-                                    <a @click="showRejectRequestModal(row.id)">
-                                        <x-lucide-circle-x
-                                            class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                                    </a>
+                                        </a>
+                                    </div>
                                 </div>
                             </td>
                         </x-slot>
