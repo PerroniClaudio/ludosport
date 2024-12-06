@@ -65,10 +65,10 @@
         </div>
 
 
-        <x-form.input name="instagram" label="Instagram" type="text" required="{{ false }}"
+        <x-form.input name="instagram" label="{{ __('users.instagram_field') }}" type="text" required="{{ false }}"
             :value="$user->instagram" placeholder="{{ fake()->username() }}" />
 
-        <x-form.input name="telegram" label="Telegram handle" type="text" required="{{ false }}"
+        <x-form.input name="telegram" label="{{ __('users.telegram_field') }}" type="text" required="{{ false }}"
             :value="$user->telegram" placeholder="@username" />
 
 

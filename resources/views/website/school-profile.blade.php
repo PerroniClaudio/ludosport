@@ -24,7 +24,7 @@
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <section
                     class="bg-white dark:bg-background-800 text-background-800 dark:text-background-200 flex flex-col p-8 rounded order-2 lg:order-1">
-                    <h4 class="text-2xl">{{ __('website.academies_detail_users') }}</h4>
+                    <h4 class="text-2xl">{{ __('website.schools_detail_users') }}</h4>
 
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
@@ -55,7 +55,7 @@
                 </section>
                 <section
                     class="bg-white dark:bg-background-800 text-background-800 dark:text-background-200 flex flex-col gap-4 p-8 rounded order-1 lg:order-2">
-                    <h4 class="text-2xl">{{ __('website.academies_detail_location') }}</h4>
+                    <h4 class="text-2xl">{{ __('website.schools_detail_location') }}</h4>
 
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 

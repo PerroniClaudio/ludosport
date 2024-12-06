@@ -9,6 +9,7 @@ return [
     'requests_accept_text' => 'Are you sure you want to accept this request?',
     'requests_accept_text_all' => 'Are you sure you want to accept all requests?',
     'requests_reject_text' => 'Are you sure you want to reject this request?',
+    'requests_read_reason' => 'Read note',
     'requests_accept' => 'Accept',
     'requests_reject' => 'Reject',
     'requests_cancel' => 'Cancel',

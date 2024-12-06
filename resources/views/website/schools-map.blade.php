@@ -37,10 +37,10 @@
         <section class="col-span-12 py-12">
             <h1
                 class="text-6xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300">
-                {{ __('website.academies_map') }}
+                {{ __('website.schools_map') }}
             </h1>
 
-            <p class="text-background-800 dark:text-background-200 text-justify">{{ __('website.academies_map_text') }}
+            <p class="text-background-800 dark:text-background-200 text-justify">{{ __('website.schools_map_text') }}
             </p>
 
             <div class="flex flex-col gap-4 rounded  min-h-[60vh]  mt-8" x-load x-data="mapsearcher({{ $schools_json }})"
@@ -51,7 +51,7 @@
                 <div class="flex flex-col gap-2">
 
                     <div class="w-full p-2">
-                        <x-form.select name="country" label="{{ __('website.academies_map_nations') }}"
+                        <x-form.select name="country" label="{{ __('website.schools_map_nations') }}"
                             x-model="nationFilter" shouldHaveEmptyOption="true" :options="$nations" />
                     </div>
 

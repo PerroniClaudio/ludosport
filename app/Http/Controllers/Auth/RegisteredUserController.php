@@ -37,6 +37,7 @@ class RegisteredUserController extends Controller {
             'nationality' => ['required', 'string', 'exists:' . Nation::class . ',name'],
             'academy_id' => ['required', 'int', 'exists:' . Academy::class . ',id'],
             'how_found_us' => ['required', 'string', 'max:255'],
+            'subscription_year' => ['required', 'int', 'min:' . 2006, 'max:' . (date('Y'))],
         ]);
 
         $nation = Nation::where('name', $request->nationality)->first();
@@ -50,6 +51,7 @@ class RegisteredUserController extends Controller {
             'nation_id' => $nation->id,
             'battle_name' => $request->battle_name ?? ($request->name . $request->surname . rand(10, 99)),
             'how_found_us' => $request->how_found_us,
+            'subscription_year' => $request->subscription_year ?? date('Y'),
         ]);
 
         $user->academyAthletes()->syncWithoutDetaching($academy->id);

@@ -130,14 +130,6 @@ class DatabaseSeeder extends Seeder {
                 'image' => '/weapon-forms/long_saber/form_5.webp'
             ],
             [
-                'name' => 'Form 6 Long Saber',
-                'image' => '/weapon-forms/long_saber/form_6.webp'
-            ],
-            [
-                'name' => 'Form 7 Long Saber',
-                'image' => '/weapon-forms/long_saber/form_7.webp'
-            ],
-            [
                 'name' => 'Form 3 Dual Sabers',
                 'image' => '/weapon-forms/dual_saber/form_3.webp'
             ],
@@ -150,14 +142,6 @@ class DatabaseSeeder extends Seeder {
                 'image' => '/weapon-forms/dual_saber/form_5.webp'
             ],
             [
-                'name' => 'Form 6 Dual Sabers',
-                'image' => '/weapon-forms/dual_saber/form_6.webp'
-            ],
-            [
-                'name' => 'Form 7 Dual Sabers',
-                'image' => '/weapon-forms/dual_saber/form_7.webp'
-            ],
-            [
                 'name' => 'Form 3 Saberstaff',
                 'image' => '/weapon-forms/saberstaff/form_3.webp'
             ],
@@ -168,14 +152,6 @@ class DatabaseSeeder extends Seeder {
             [
                 'name' => 'Form 5 Saberstaff',
                 'image' => '/weapon-forms/saberstaff/form_5.webp'
-            ],
-            [
-                'name' => 'Form 6 Saberstaff',
-                'image' => '/weapon-forms/saberstaff/form_6.webp'
-            ],
-            [
-                'name' => 'Form 7 Saberstaff',
-                'image' => '/weapon-forms/saberstaff/form_7.webp'
             ],
         ];
 

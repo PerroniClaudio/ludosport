@@ -705,7 +705,7 @@ class UserController extends Controller {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'year' => 'required|integer',
+            'year' => ['required', 'int', 'min:' . 2006, 'max:' . (date('Y'))],
             'nationality' => 'required|string|exists:nations,id',
         ]);
 

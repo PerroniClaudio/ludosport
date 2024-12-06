@@ -68,7 +68,7 @@ class RankController extends Controller {
             return [
                 'id' => $request->id,
                 'requested_by' => $request->requestedBy->name . ' ' . $request->requestedBy->surname,
-                'rank' => $request->rank->name,
+                'rank' => __('users.' . strtolower($request->rank->name)),
                 'user_to_promote' => $request->userToPromote->name . ' ' . $request->userToPromote->surname,
                 'reason' => $request->reason,
                 'created_at' => $request->created_at->format('d/m/Y'),
@@ -97,7 +97,7 @@ class RankController extends Controller {
         foreach ($ranks as $rank) {
             $formattedRanks[] = [
                 'value' => $rank->id,
-                'label' => $rank->name,
+                'label' => __('users.' . strtolower($rank->name)),
             ];
         }
 

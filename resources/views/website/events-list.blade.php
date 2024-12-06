@@ -13,7 +13,7 @@
                 nationFilter: '{{ $nationFilter }}'
             }" x-init="$watch('nationFilter', (value) => window.location.href = `{{ env('APP_URL') }}/events-list?nation=${value}`)">
                 <div class="flex-1">
-                    <x-form.select name="country" label="{{ __('website.academies_map_nations') }}" x-model="nationFilter"
+                    <x-form.select name="country" label="{{ __('website.schools_map_nations') }}" x-model="nationFilter"
                         shouldHaveEmptyOption="false" :options="$continents" />
                 </div>
                 <a href="{{ route('events-list') }}" class="ml-2">

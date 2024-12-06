@@ -65,6 +65,18 @@
             ]" :shouldHaveEmptyOption="true" :required="true"  />
         </div>
 
+        <div class="mt-4">
+            @php
+                $subYears = [];
+                for ($year = 2006; $year <= date('Y'); $year++) {
+                    $subYears[] = ['value' => $year, 'label' => $year];
+                }
+            @endphp
+            <x-form.select  name="subscription_year" label="{{ __('First subscription year') }}"
+                :options="$subYears" 
+                :shouldHaveEmptyOption="false" :required="true" :value="date('Y')" />
+        </div>
+
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />

@@ -25,7 +25,7 @@ Route::get('/athlete-profile/{id}', function () {
 
 /** Academy Map */
 
-Route::get('/academies-map', [App\Http\Controllers\SchoolController::class, 'schoolsMap'])->name('schools-map');
+Route::get('/schools-map', [App\Http\Controllers\SchoolController::class, 'schoolsMap'])->name('schools-map');
 Route::get('/school-profile/{school:slug}', [App\Http\Controllers\SchoolController::class, 'detail'])->name('school-profile');
 Route::get('/academy-image/{academy}', [App\Http\Controllers\AcademyController::class, 'academyImage'])->name('academy-image');
 Route::middleware('throttle:rate_limit,1')->get('/schools-search', [App\Http\Controllers\SchoolController::class, 'searchSchools'])->name('schools-search');
