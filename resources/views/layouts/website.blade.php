@@ -20,7 +20,7 @@
 
 <body class="font-sans text-background-900 antialiased bg-background-100 dark:bg-background-800"
     x-data="{ open: false }">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -42,7 +42,7 @@
                     @endif
 
                     <x-nav-link :href="route('schools-map')" :active="request()->routeIs('schools-map')">
-                        {{ __('website.academies_map') }}
+                        {{ __('website.schools_map') }}
                     </x-nav-link>
                     <x-nav-link :href="route('rankings-website')" :active="request()->routeIs('rankings-website')">
                         {{ __('website.rankings') }}
@@ -135,7 +135,7 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-center bg-contain bg-no-repeat"
+    <div :class="{ 'block': open, 'hidden': !open }" class="relative z-20 hidden sm:hidden bg-center bg-contain bg-no-repeat"
         style="background-image: url('{{ env('APP_URL') }}/logo-saber-k');">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -143,7 +143,7 @@
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('schools-map')" :active="request()->routeIs('schools-map')">
-                {{ __('website.academies_map') }}
+                {{ __('website.schools_map') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('rankings-website')" :active="request()->routeIs('rankings-website')">
                 {{ __('website.rankings') }}
@@ -208,7 +208,7 @@
             </div>
         @endif
     </div>
-    <main class="min-h-screen bg-background-200 dark:bg-background-900">
+    <main class="relative z-10 min-h-screen bg-background-200 dark:bg-background-900">
         {{ $slot }}
     </main>
 

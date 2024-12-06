@@ -511,7 +511,7 @@ class AcademyController extends Controller {
 
     /** Ricerca lato web */
 
-    public function academiesMap() {
+    public function academiesMap() { //Funzione non utilizzata. Nel caso copiare la view schools-map
 
         $academies = Academy::where('is_disabled', '0')->whereNotNull('coordinates')->with(['nation'])->get();
         $formatted_academies = [];

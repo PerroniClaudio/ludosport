@@ -17,7 +17,7 @@
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                             value="{{ old('name') }}" placeholder="{{ fake()->company() }}" />
 
-                        <x-school.academy :nations="$nations" />
+                        <x-school.academy isCreate="{{true}}" :nations="$nations" />
 
                     </div>
 

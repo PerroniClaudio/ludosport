@@ -968,7 +968,7 @@ class SchoolController extends Controller {
             }
         }
 
-        return view('website.academies-map', [
+        return view('website.schools-map', [
             'schools_json' => json_encode($formatted_schools),
             'nations' => $available_nations,
         ]);
@@ -991,7 +991,7 @@ class SchoolController extends Controller {
 
     public function detail(School $school) {
 
-        return view('website.academy-profile', [
+        return view('website.school-profile', [
             'school' => $school,
             'athletes' => $school->athletes,
         ]);

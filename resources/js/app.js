@@ -40,6 +40,11 @@ document.addEventListener("click", function (event) {
 
     if (expandable) {
         if (event.target.tagName === "A" && event.target.hasAttribute("href")) {
+            
+            if (event.target.classList.contains("external")){
+                return;
+            }
+
             event.preventDefault();
 
             let reduceble = document.querySelector("#smallone");

@@ -20,7 +20,7 @@
                     <!-- Events -->
 
                     <div class="w-full">
-                        <x-form.select name="country" label="{{ __('website.academies_map_nations') }}"
+                        <x-form.select name="country" label="{{ __('website.schools_map_nations') }}"
                             x-model="nationFilter" shouldHaveEmptyOption="false" :optgroups="$continents" />
                     </div>
 

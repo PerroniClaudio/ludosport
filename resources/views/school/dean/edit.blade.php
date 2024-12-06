@@ -53,9 +53,9 @@
                                 }
                             }
                         @endphp
-                        <x-form.input name="name" label="Nationality" type="text" required="{{ true }}" disabled="{{ true }}"
+                        <x-form.input name="nationality" label="Nationality" type="text" required="{{ true }}" disabled="{{ true }}"
                             :value="$nationName" placeholder="{{ fake()->company() }}" />
-                        <x-form.input name="name" label="Academy" type="text" required="{{ true }}" disabled="{{ true }}"
+                        <x-form.input name="academy" label="Academy" type="text" required="{{ true }}" disabled="{{ true }}"
                             :value="$school->academy->name" placeholder="{{ fake()->company() }}" />
                     </div>
                 </div>
