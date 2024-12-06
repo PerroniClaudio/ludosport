@@ -7,9 +7,12 @@ export const rankingschart = () => {
         selectedEventData: {},
         athletesData: [],
         nationFilter: "",
+        nation: [],
         eventName: "General Rankings",
         getEventsList: async function (nationId = null) {
-            const url = `/website-rankings/events/list?date=${today.toISOString()}${nationId ? '&nation=' + nationId : ""}`;
+            const url = `/website-rankings/events/list?date=${today.toISOString()}${
+                nationId ? "&nation=" + nationId : ""
+            }`;
             const response = await fetch(url);
 
             if (response.ok) {
@@ -76,6 +79,11 @@ export const rankingschart = () => {
                 this.rows = this.athletesData;
             }
         },
+        resetToGeneralRankings: function () {
+            this.nationFilter = "";
+            this.getGeneralRankings();
+            this.getEventsList();
+        },
         fiterByNation: async function (nationId) {
             if (nationId == "") {
                 this.getGeneralRankings();
@@ -110,7 +118,9 @@ export const rankingschart = () => {
             });
 
             this.eventName = "National Rankings - " + data.nation.name;
+            this.nation = data.nation;
             this.rows = this.athletesData;
+            this.selectedEvent = 0;
         },
 
         /** Tabella */
