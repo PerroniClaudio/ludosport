@@ -26,10 +26,16 @@
 
                     <div class="hidden lg:flex flex-col gap-2">
 
-                        <div class="bg-primary-500 text-white rounded dark:bg-background-800 dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer"
+                        <div :class="{
+                            'bg-primary-500 text-white rounded dark:bg-background-800 dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer': selectedEvent ===
+                                0,
+                            'bg-white dark:bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer': selectedEvent !==
+                                0
+                        }"
                             data-id="0" @click="getGeneralRankings()">
 
-                            <span>{{ __('General rank') }}</span>
+                            <span x-show="nationFilter == ''">{{ __('General rank') }}</span>
+                            <span x-show="nationFilter != ''" x-text="'National Rankings - '+nation.name"></span>
                             <div
                                 class="flex flex-col justify-center align-center cursor-pointer hover:text-primary-500">
                                 <x-lucide-chevron-right class="w-6 h-6" />
@@ -37,7 +43,11 @@
                         </div>
 
                         <template x-for="event in events" :key="event.id">
-                            <div class="bg-white dark:bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer"
+                            <div :class="{
+                                'bg-primary-500 text-white': selectedEvent === event.id,
+                                'bg-white dark:bg-background-800': selectedEvent !== event.id
+                            }"
+                                class="bg-white dark:bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer"
                                 data-id="0" @click="getDataForEvent(event.id); eventName = event.name">
                                 <span x-text="event.name"></span>
                                 <div
@@ -46,6 +56,11 @@
                                 </div>
                             </div>
                         </template>
+
+                        <div x-on:click="resetToGeneralRankings()" x-show="nationFilter != ''"
+                            class="bg-white dark:bg-background-800 rounded dark:text-background-300 p-4 flex flex-row justify-between gap-2 cursor-pointer">
+                            <span>{{ __('Reset filter') }}</span>
+                        </div>
 
                         <div class="flex items-center justify-center mt-8">
                             <img src="/logo-saber" alt="" class="h-64">
