@@ -811,9 +811,24 @@ class AcademyController extends Controller {
 
     public function detail(Academy $academy) {
 
+        $rector = "";
+        $associated_personnel = $academy->personnel;
+
+        foreach ($associated_personnel as $key => $person) {
+            if ($person->hasRole('rector')) {
+                $rector = $person->name . " " . $person->surname;
+            }
+
+            $associated_personnel[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {
+                return __('users.' . $role);
+            })->toArray());
+        }
+
         return view('website.academy-profile', [
             'academy' => $academy,
+            'rector' => $rector,
             'athletes' => $academy->athletes,
+            'personnel' => $associated_personnel,
         ]);
     }
 
