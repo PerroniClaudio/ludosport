@@ -503,6 +503,10 @@ class User extends Authenticatable implements MustVerifyEmail {
     public function getRole() {
         return session('role', $this->roles()->first()->name);
     }
+    public function getActiveRoleId() {
+        $active_role = Role::where('name', $this->getRole())->first();
+        return $active_role->id;
+    }
 
     public function hasAnyRole($roles) {
         if (is_string($roles)) {

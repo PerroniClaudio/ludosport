@@ -88,7 +88,16 @@
                                         x-on:click="selectedAnnouncement = announcement.id"
                                         class="cursor-pointer p-2 border-b dark:border-background-700 flex items-center justify-between">
                                         <div class="flex flex-col gap-1">
-                                            <p x-text="announcement.object" class=""></p>
+                                            <div class="flex items-center gap-1">
+                                                <x-lucide-info class="h-4 w-4 text-blue-500"
+                                                    x-show="announcement.type == 1" />
+                                                <x-lucide-triangle-alert class="h-4 w-4 text-yellow-500"
+                                                    x-show="announcement.type == 2" />
+                                                <x-lucide-octagon-alert class="h-4 w-4 text-red-500"
+                                                    x-show="announcement.type == 3" />
+                                                <p x-text="announcement.object"></p>
+                                            </div>
+
                                             <p x-text="new Date(announcement.created_at).toLocaleDateString('it-IT', {
                                                 hour: 'numeric', 
                                                 minute: 'numeric' 
@@ -119,8 +128,21 @@
                         </div>
                         <div x-show="selectedAnnouncement" class="min-h-[55vh] flex flex-col justify-between">
                             <div>
-                                <h3 x-text="selectedAnnouncement.object"
-                                    class="text-2xl text-background-800 dark:text-background-200"></h3>
+                                <div class="flex items-center">
+                                    <div class="flex-1">
+                                        <h3 x-text="selectedAnnouncement.object"
+                                            class="text-2xl text-background-800 dark:text-background-200"></h3>
+                                    </div>
+
+                                    <div>
+                                        <x-lucide-info class="h-6 w-6 text-blue-500"
+                                            x-show="selectedAnnouncement.type == 1" />
+                                        <x-lucide-triangle-alert class="h-6 w-6 text-yellow-500"
+                                            x-show="selectedAnnouncement.type == 2" />
+                                        <x-lucide-octagon-alert class="h-6 w-6 text-red-500"
+                                            x-show="selectedAnnouncement.type == 3" />
+                                    </div>
+                                </div>
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                             </div>
                             <div class="flex-1">

@@ -82,7 +82,7 @@
                     ],
                     [
                         'name' => 'Seen at',
-                        'field' => 'created_at',
+                        'field' => 'seen_at',
                         'columnClasses' => '', // classes to style table th
                         'rowClasses' => '', // classes to style table td
                     ],
@@ -98,7 +98,7 @@
 
 
                         <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
-                            x-text="new Date(row.created_at).toLocaleDateString('it-IT', {
+                            x-text="new Date(row.seen_at).toLocaleDateString('it-IT', {
                                                     hour: 'numeric', 
                                                     minute: 'numeric' 
                                                 })">
