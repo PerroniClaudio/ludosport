@@ -1196,8 +1196,6 @@ class UserController extends Controller {
             $path = "users/" . $id . "/" . $file_name;
             $storeFile = $file->storeAs("users/" . $id . "/", $file_name, "gcs");
 
-
-
             if ($storeFile) {
                 $user = User::find($id);
                 $user->profile_picture = $path;
