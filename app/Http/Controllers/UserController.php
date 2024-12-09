@@ -1189,6 +1189,11 @@ class UserController extends Controller {
         $redirectRoute = $authRole === 'admin' ? 'users.edit' :  $authRole . '.users.edit';
         if ($request->file('profilepicture') != null) {
 
+            // Validate the uploaded image
+            $request->validate([
+                'profilepicture' => 'image|max:8192', // 8MB max
+            ]);
+
             $file = $request->file('profilepicture');
 
             $file_extension = $file->getClientOriginalExtension();
