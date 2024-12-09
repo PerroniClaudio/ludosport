@@ -115,7 +115,7 @@ class UserController extends Controller {
                     if ($role->label === 'instructor') {
                         $user->weapon_forms_formatted = $user->weaponFormsPersonnel()->pluck('name')->toArray();
                     }
-                    
+
                     if ($role->label === 'technician') {
                         $user->weapon_forms_formatted = $user->weaponFormsTechnician()->pluck('name')->toArray();
                     }
@@ -219,8 +219,8 @@ class UserController extends Controller {
             $user->setPrimaryAcademyAthlete($academy->id);
             // Un atelta senza scuola è associato alla scuola No school
             $noSchool = School::where('slug', 'no-school')->first();
-            if($noSchool) {
-            	$user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
+            if ($noSchool) {
+                $user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
             }
         } else {
             $academy->personnel()->syncWithoutDetaching($user->id);
@@ -296,8 +296,8 @@ class UserController extends Controller {
             $user->setPrimaryAcademyAthlete($academy->id);
             // Un atelta senza scuola è associato alla scuola No school
             $noSchool = School::where('slug', 'no-school')->first();
-            if($noSchool) {
-            	$user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
+            if ($noSchool) {
+                $user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
             }
         } else {
 
@@ -1217,7 +1217,10 @@ class UserController extends Controller {
         if ($request->file('profilepicture') != null) {
             $file = $request->file('profilepicture');
 
-
+            // Validate the uploaded image
+            $request->validate([
+                'profilepicture' => 'image|max:8192', // 8MB max
+            ]);
 
             $file_extension = $file->getClientOriginalExtension();
             $file_name = time() . '_avatar.' . $file_extension;
@@ -1231,7 +1234,7 @@ class UserController extends Controller {
 
                 return redirect()->route('profile.edit', $user->id)->with('success', 'Profile picture uploaded successfully!');
             } else {
-                ddd($storeFile);
+                return redirect()->route('profile.edit', $id)->with('error', 'Error uploading profile picture!');
             }
         } else {
             return redirect()->route('profile.edit', $id)->with('error', 'Error uploading profile picture!');
@@ -1788,7 +1791,7 @@ class UserController extends Controller {
             'success' => true,
         ]);
     }
-    
+
     public function editWeaponFormsTechnician(Request $request, User $user) {
         $authUser = User::find(auth()->user()->id);
         $authUserRole = $authUser->getRole();
@@ -1828,7 +1831,7 @@ class UserController extends Controller {
         ]);
     }
 
-    public function editWeaponFormsAwardingDate(User $user, Request $request){
+    public function editWeaponFormsAwardingDate(User $user, Request $request) {
         $authUser = User::find(auth()->user()->id);
         $authUserRole = $authUser->getRole();
         if ($authUserRole !== 'admin') {
@@ -1842,7 +1845,7 @@ class UserController extends Controller {
             'type' => 'required|string|in:athlete,personnel,technician',
         ]);
 
-        switch($request->type){
+        switch ($request->type) {
             case 'athlete':
                 $user->weaponForms()->updateExistingPivot($request->form_id, ['awarded_at' =>  \Carbon\Carbon::parse($request->awarded_at)]);
                 break;
@@ -1991,7 +1994,6 @@ class UserController extends Controller {
             if ($noSchool && ($user->schoolAthletes()->whereNot('school_id', $noSchool->id)->count() > 0)) {
                 $user->schoolAthletes()->detach($noSchool->id);
             }
-
         } else {
             return response()->json([
                 'error' => 'Invalid type!',
@@ -2088,12 +2090,11 @@ class UserController extends Controller {
             // Se ha un'associazione con una scuola diversa da No school, rimuove quella con No school, altimenti la aggiunge
             $noSchool = School::where('slug', 'no-school')->first();
             if ($noSchool) {
-                if($user->schoolAthletes()->whereNot('school_id', $noSchool->id)->count() > 0){
+                if ($user->schoolAthletes()->whereNot('school_id', $noSchool->id)->count() > 0) {
                     $user->schoolAthletes()->detach($noSchool->id);
                 } else {
                     $user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
                 }
-
             }
         } else {
             return response()->json([
@@ -2144,7 +2145,7 @@ class UserController extends Controller {
             if ($user->primarySchoolAthlete() == null) {
                 $noSchool = School::where('slug', 'no-school')->first();
                 if ($noSchool) {
-                    if ($user->schoolAthletes()->whereNot('school_id', $noSchool->id)->count() > 0){
+                    if ($user->schoolAthletes()->whereNot('school_id', $noSchool->id)->count() > 0) {
                         $user->schoolAthletes()->detach($noSchool->id);
                     } else {
                         $user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
