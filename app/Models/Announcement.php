@@ -36,7 +36,7 @@ class Announcement extends Model {
     }
 
     public function userHaveSeen() {
-        return $this->belongsToMany(User::class, 'announcement_users', 'announcement_id', 'user_id');
+        return $this->belongsToMany(User::class, 'announcement_users', 'announcement_id', 'user_id')->withTimestamps();
     }
 
     public function getType() {

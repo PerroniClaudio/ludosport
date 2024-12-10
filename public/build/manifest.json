@@ -4,12 +4,12 @@
     "name": "auto"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DA5xaJGb.css",
+    "file": "assets/app-D7H3bWqX.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-DllHSaVn.js",
+    "file": "assets/app-CVOgTYT3.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -83,7 +83,7 @@
     "isDynamicEntry": true
   },
   "resources/js/rankingschart.js": {
-    "file": "assets/rankingschart-8vl7gccf.js",
+    "file": "assets/rankingschart-BDbeJn0N.js",
     "name": "rankingschart",
     "src": "resources/js/rankingschart.js",
     "isDynamicEntry": true

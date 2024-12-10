@@ -108,7 +108,8 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('users.update', $user->id) }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form method="POST" action="{{ route('users.update', $user->id) }}"
+                class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @csrf
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">
@@ -236,12 +237,18 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
                 @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
-                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponForms->map(function ($form) {$form->awarded_at = explode(' ', $form->awarded_at)[0]; return $form; })" 
-                        type="athlete" />
-                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsPersonnel->map(function ($form) {$form->awarded_at = explode(' ', $form->awarded_at)[0]; return $form; })"
-                        type="personnel" />
-                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsTechnician->map(function ($form) {$form->awarded_at = explode(' ', $form->awarded_at)[0]; return $form; })"
-                        type="technician" />
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponForms->map(function ($form) {
+                        $form->awarded_at = explode(' ', $form->awarded_at)[0];
+                        return $form;
+                    })" type="athlete" />
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsPersonnel->map(function ($form) {
+                        $form->awarded_at = explode(' ', $form->awarded_at)[0];
+                        return $form;
+                    })" type="personnel" />
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsTechnician->map(function ($form) {
+                        $form->awarded_at = explode(' ', $form->awarded_at)[0];
+                        return $form;
+                    })" type="technician" />
                     <x-user.languages :languages="$user->languages" :user="$user->id" :availableLanguages="collect($languages)" />
                 @endif
                 <div @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete')) class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8"
@@ -272,6 +279,13 @@
                         </div>
                     </div>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+
+                    @if ($errors->get('profilepicture') != null)
+                        <div class="text-red-600 dark:text-red-400 flex items-center gap-1 my-2">
+                            <x-lucide-info class="h-4 text-red-600 dark:text-red-400" />
+                            <span>{{ __('users.error_profile_picture_size') }}</span>
+                        </div>
+                    @endif
 
                     @if ($user->profile_picture)
                         <img src="{{ route('user.profile-picture-show', $user->id) }}" alt="{{ $user->name }}"
@@ -313,7 +327,8 @@
                             @php
                                 $filteredAcademies = $allAcademies->diff($user->academies);
                             @endphp
-                            <x-user.select-institutions type="academy-personnel" :user="$user" :academies="$filteredAcademies" :selectedAcademies="$user->academies" />
+                            <x-user.select-institutions type="academy-personnel" :user="$user" :academies="$filteredAcademies"
+                                :selectedAcademies="$user->academies" />
                         </div>
                     </div>
 
@@ -345,7 +360,8 @@
                             @php
                                 $filteredAcademies = $allAcademies->diff($user->academyAthletes);
                             @endphp
-                            <x-user.select-institutions type="academy-athlete" :user="$user" :academies="$filteredAcademies" :selectedAcademies="$user->academyAthletes" />
+                            <x-user.select-institutions type="academy-athlete" :user="$user" :academies="$filteredAcademies"
+                                :selectedAcademies="$user->academyAthletes" />
                         </div>
                     </div>
 
@@ -381,7 +397,8 @@
                                 x-on:click.prevent="setInstitutionType('school'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
                                 <span>{{ __('users.set_main_personnel_school') }}</span>
                             </x-primary-button>
-                            <x-user.select-institutions type="school-personnel" :user="$user" :schools="$filteredSchoolsPersonnel" :selectedSchools="$user->schools" />
+                            <x-user.select-institutions type="school-personnel" :user="$user" :schools="$filteredSchoolsPersonnel"
+                                :selectedSchools="$user->schools" />
                         </div>
                     </div>
 
@@ -413,8 +430,9 @@
                                 x-on:click.prevent="setInstitutionType('school'), setRoleType('athlete'), $dispatch('open-modal', 'set-main-institution-modal')">
                                 <span>{{ __('users.set_main_athletes_school') }}</span>
                             </x-primary-button>
-                            
-                            <x-user.select-institutions type="school-athlete" :user="$user" :schools="$filteredSchoolsAthlete" :selectedSchools="$user->schoolAthletes" />
+
+                            <x-user.select-institutions type="school-athlete" :user="$user" :schools="$filteredSchoolsAthlete"
+                                :selectedSchools="$user->schoolAthletes" />
                         </div>
                     </div>
 
