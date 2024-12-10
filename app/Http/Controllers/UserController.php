@@ -795,10 +795,26 @@ class UserController extends Controller {
             // Se ha un ruolo da personale deve avere almeno un'accademia associata (anche se non primaria), altrimenti si associa a no academy
             if (array_intersect($rolesToAdd, ['rector', 'dean', 'manager', 'instructor', 'technician'])) {
                 if (!$user->primaryAcademy()) {
-                    if (!$user->academies()->first()) {
+                    if (!!$user->academies()->first()) {
+                        $user->setPrimaryAcademy($user->academies()->first()->id);
+                    } else if(!!$user->primaryAcademyAthlete()){
+                        $user->academies()->syncWithoutDetaching($user->primaryAcademyAthlete()->id);
+                        $user->setPrimaryAcademy($user->primaryAcademyAthlete()->id);
+                    } else {
                         $user->academies()->syncWithoutDetaching(1);
                         $user->setPrimaryAcademy(1);
                     }
+                }
+                // Nel caso di dean, manager e instructor si assegna anche la scuola in automatico
+                if (array_intersect($rolesToAdd, ['dean', 'manager', 'instructor'])){
+                    if(!$user->primarySchool()){
+                        if (!!$user->schools()->first()) {
+                            $user->setPrimarySchool($user->schools()->first()->id);
+                        } else if(!!$user->primarySchoolAthlete()){
+                            $user->schools()->syncWithoutDetaching($user->primarySchoolAthlete()->id);
+                            $user->setPrimarySchool($user->primarySchoolAthlete()->id);
+                        }
+                    } 
                 }
             }
         }
