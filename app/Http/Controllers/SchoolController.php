@@ -25,19 +25,19 @@ class SchoolController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
         if (in_array($authRole, ['dean', 'manager'])) {
-            $school = $authUser->primarySchool();
-            if ($school) {
-                return $this->edit($school);
+            $school = $authUser->primarySchool() ?? null;
+            if (!$school) {
+                return redirect()->route('dashboard')->with('error', 'You don\'t have a school assigned!');
             }
-            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+            return $this->edit($school);
         }
 
         if ($authRole === 'rector') {
-            $primaryAcademy = $authUser->primaryAcademy();
-
             if (!$authUser->validatePrimaryInstitutionPersonnel()) {
-                return redirect()->route('dashboard')->with('error', 'Not authorized.');
+                return redirect()->route('dashboard')->with('error', 'You don\'t have an academy assigned!');
             }
+            
+            $primaryAcademy = $authUser->primaryAcademy();
 
             $schools = School::with('nation')->where([['academy_id', $primaryAcademy->id], ['is_disabled', '0']])->orderBy('created_at', 'desc')->get();
         } else {

@@ -40,6 +40,10 @@ class ClanController extends Controller {
                 break;
             case 'dean':
             case 'manager':
+                $authUserSchool = $authUser->primarySchool() ?? null;
+                if(!$authUserSchool){
+                    return redirect()->route('dashboard')->with('error', 'You don\'t have a school assigned!');
+                }
                 $clans = $authUser->primarySchool() ? $authUser->primarySchool()->clan : [];
                 break;
             case 'instructor':
@@ -58,13 +62,11 @@ class ClanController extends Controller {
                     }
                 }
 
-
                 break;
             default:
                 $clans = [];
                 break;
         }
-
 
         foreach ($clans as $key => $clan) {
             $clans[$key]->school_name = $clan->school->name;

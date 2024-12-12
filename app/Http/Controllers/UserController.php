@@ -54,7 +54,10 @@ class UserController extends Controller {
 
                 // Utenti di una determinata accademia
 
-                $academy_id = $authUser->primaryAcademy()->id;
+                $academy_id = $authUser->primaryAcademy()->id ?? null;
+                if(!$academy_id){
+                    return redirect()->route("dashboard")->with('error', 'You don\'t have an academy assigned!');
+                }
 
                 $users = User::whereHas('academies', function (Builder $query) use ($academy_id) {
                     $query->where('academy_id', $academy_id);
@@ -69,7 +72,11 @@ class UserController extends Controller {
 
                 // Utenti di una determinata scuola
 
-                $school_id = $authUser->primarySchool()->id;
+                $school_id = $authUser->primarySchool()->id ?? null;
+
+                if(!$school_id){
+                    return redirect()->route("dashboard")->with('error', 'You don\'t have a school assigned!');
+                }
 
                 $users = User::whereHas('schools', function (Builder $query) use ($school_id) {
                     $query->where('school_id', $school_id);
