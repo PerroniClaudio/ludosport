@@ -1,7 +1,7 @@
 <nav x-data="{ open: false }"
     class="bg-white dark:bg-background-800 border-b border-background-100 dark:border-background-700">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -14,7 +14,7 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-2 lg:space-x-4 xl:space-x-8 lg:-my-px lg:ms-10 lg:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('dashboard.title') }}
                     </x-nav-link>
@@ -105,7 +105,7 @@
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden lg:flex lg:items-center lg:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
@@ -149,7 +149,7 @@
             </div>
 
             <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
+            <div class="-me-2 flex items-center lg:hidden">
                 <button @click="open = ! open"
                     class="inline-flex items-center justify-center p-2 rounded-md text-background-400 dark:text-background-500 hover:text-background-500 dark:hover:text-background-400 hover:bg-background-100 dark:hover:bg-background-900 focus:outline-none focus:bg-background-100 dark:focus:bg-background-900 focus:text-background-500 dark:focus:text-background-400 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -165,7 +165,7 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
+    <div :class="{ 'block': open, 'hidden': !open }" class="hidden lg:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('dashboard.title') }}
@@ -216,10 +216,10 @@
                 <x-responsive-nav-link :href="route('deleted-elements.index')" :active="request()->routeIs('deleted-elements.*')">
                     {{ __('navigation.deleted_elements') }}
                 </x-responsive-nav-link>
+            @endif
                 <x-responsive-nav-link :href="route('homepage')" :active="request()->routeIs('homepage')">
                     {{ __('navigation.website') }}
                 </x-responsive-nav-link>
-            @endif
         </div>
 
         <!-- Responsive Settings Options -->
