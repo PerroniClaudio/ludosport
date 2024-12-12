@@ -17,6 +17,27 @@
                             <img src="{{ route('nation-flag', $school->nation->id) }}" alt="{{ $school->nation->flag }}"
                                 class="h-2 w-4">
                         </div>
+                        <div class="flex items-center gap-2">
+                            <x-lucide-circle-user-round class="h-5 w-5 text-background-500 dark:text-background-400" />
+                            <span class="text-sm text-background-500 dark:text-background-400">
+                                {{ __('users.dean') }}: {{ $dean }}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <x-lucide-swords class="h-5 w-5 text-background-500 dark:text-background-400" />
+                            <a href="{{ route('academy-profile', $academy->slug) }}">
+                                <span
+                                    class="text-sm text-background-500 dark:text-background-400 hover:text-primary-500">
+                                    {{ $academy->name }}
+                                </span>
+                            </a>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <x-lucide-circle-user-round class="h-5 w-5 text-background-500 dark:text-background-400" />
+                            <span class="text-sm text-background-500 dark:text-background-400">
+                                {{ __('users.rector') }}: {{ $rector }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -24,7 +45,7 @@
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <section
                     class="bg-white dark:bg-background-800 text-background-800 dark:text-background-200 flex flex-col p-8 rounded order-2 lg:order-1">
-                    <h4 class="text-2xl">{{ __('website.schools_detail_users') }}</h4>
+                    <h4 class="text-2xl">{{ __('website.school_detail_users') }}</h4>
 
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
@@ -55,13 +76,14 @@
                 </section>
                 <section
                     class="bg-white dark:bg-background-800 text-background-800 dark:text-background-200 flex flex-col gap-4 p-8 rounded order-1 lg:order-2">
-                    <h4 class="text-2xl">{{ __('website.schools_detail_location') }}</h4>
+                    <h4 class="text-2xl">{{ __('website.school_detail_location') }}</h4>
 
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
                     <div class="flex items-center gap-2">
                         <x-lucide-map-pin class="w-10 h-10 text-primary-500 dark:text-primary-600" />
-                        <span class="text-background-200 font-4xl">{{ $school->address }}, {{ $school->postal_code }}
+                        <span class="dark:text-background-200 font-4xl">{{ $school->address }},
+                            {{ $school->postal_code }}
                             {{ $school->city }}, {{ $school->nation->name }}</span>
                     </div>
 

@@ -17,7 +17,7 @@ class AnnouncementController extends Controller {
     public function index() {
         //
 
-        $announcements = Announcement::where('is_deleted', false)->where('type', '!=', '4')->get();
+        $announcements = Announcement::where('is_deleted', false)->where('type', '!=', '4')->orderBy('id', 'desc')->get();
 
         foreach ($announcements as $announcement) {
             if ($announcement->roles !== null) {
@@ -30,6 +30,8 @@ class AnnouncementController extends Controller {
 
             $announcement->target = rtrim($announcement->target, ',');
         }
+
+
 
 
 
@@ -149,6 +151,9 @@ class AnnouncementController extends Controller {
             $userhaveseen[$key]['role'] = implode(', ', $user->roles->pluck('name')->map(function ($role) {
                 return __('users.' . $role);
             })->toArray());
+
+            /** Kai seen_at lmao */
+            $userhaveseen[$key]['seen_at'] = $user->pivot->created_at;
         }
 
 
@@ -340,35 +345,37 @@ class AnnouncementController extends Controller {
 
                 if ($allowed_roles == null) {
                     $allAcademies = $user->academies->pluck('id')->merge($user->primaryAcademyAthlete() ? [$user->primaryAcademyAthlete()->id] : []);
-                    if(!array_intersect($allAcademies, $academies)) {
+                    if (!array_intersect($allAcademies->toArray(), $academies)) {
                         return false;
                     }
                 } else {
                     $athleteRoleId = Role::where('name', 'athlete')->first()->id;
                     $canSee = false;
-                    if(in_array($athleteRoleId, $allowed_roles)) {
+                    if (in_array($athleteRoleId, $allowed_roles)) {
                         $primaryAcademyAthlete = $user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->id : null;
-                        if(in_array($primaryAcademyAthlete, $academies)) {
+                        if (in_array($primaryAcademyAthlete, $academies)) {
                             $canSee = true;
                         }
                     }
-                    if(array_intersect($user->roles->where('id', '!=', $athleteRoleId)->pluck('id')->toArray(), $allowed_roles)){
+                    if (array_intersect($user->roles->where('id', '!=', $athleteRoleId)->pluck('id')->toArray(), $allowed_roles)) {
                         // $allAcademiesPersonnel = $user->academies->pluck('id')->toArray();
                         $primaryAcademyPersonnel = $user->primaryAcademy() ? $user->primaryAcademy()->id : null;
-                        if(in_array($primaryAcademyPersonnel, $academies)) {
+                        if (in_array($primaryAcademyPersonnel, $academies)) {
                             $canSee = true;
                         }
                     }
 
-                    if(!$canSee) {
+                    if (!$canSee) {
                         return false;
                     }
-
                 }
             }
 
             if ($allowed_roles != null) {
-                if (!array_intersect($user->roles->pluck('id')->toArray(), $allowed_roles)) {
+
+                /** 09/12/2024 - cambio funzione, adesso vede solo gli annunci per il ruolo scelto nella sessione attiva. */
+
+                if (!in_array($user->getActiveRoleId(), $allowed_roles)) {
                     return false;
                 }
             }

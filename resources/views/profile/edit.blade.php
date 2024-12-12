@@ -42,6 +42,14 @@
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
+                @if ($errors->get('profilepicture') != null)
+                    <div class="text-red-600 dark:text-red-400 flex items-center gap-1 my-2">
+                        <x-lucide-info class="h-4 text-red-600 dark:text-red-400" />
+                        <span>{{ __('users.error_profile_picture_size') }}</span>
+                    </div>
+                @endif
+
+
                 @if ($user->profile_picture)
                     <img src="{{ route('user.profile-picture-show', $user->id) }}" alt="{{ $user->name }}"
                         class="w-1/3 rounded-lg">

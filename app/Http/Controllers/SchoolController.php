@@ -991,8 +991,27 @@ class SchoolController extends Controller {
 
     public function detail(School $school) {
 
+        $dean = "";
+
+        foreach ($school->personnel as $person) {
+            if ($person->hasRole('dean')) {
+                $dean = $person->name . " " . $person->surname;
+            }
+        }
+
+        $academy = $school->academy;
+        $rector = "";
+        foreach ($academy->personnel as $person) {
+            if ($person->hasRole('rector')) {
+                $rector = $person->name . " " . $person->surname;
+            }
+        }
+
         return view('website.school-profile', [
             'school' => $school,
+            'academy' => $academy,
+            'rector' => $rector,
+            'dean' => $dean,
             'athletes' => $school->athletes,
         ]);
     }
