@@ -621,7 +621,9 @@ class EventController extends Controller {
             switch ($event->type->name) {
                 case "School Tournament":
                 case "Academy Tournament":
-                    $users = $event->academy->users()->where(['is_disabled' => '0', "has_paid_fee" => '1'])->get();
+                    $users = User::WhereHas('academyAthletes', function ($query) use ($event) {
+                        $query->where('academy_id', $event->academy->id);
+                    })->where(['is_disabled' => '0', "has_paid_fee" => '1'])->get();
                     break;
                 case "National Tournament":
                     $academyNation = $event->academy->nation;
