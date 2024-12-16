@@ -1,3 +1,8 @@
+@props([
+    'page_title' => '',
+    'is_large' => false,
+])
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -27,10 +32,24 @@
             </a>
         </div>
 
-        <div
-            class="w-full sm:max-w-md mt-6 mb-6 px-6 py-4 bg-white dark:bg-background-800 shadow-md overflow-hidden sm:rounded-lg">
-            {{ $slot }}
+        <div class="w-full text-left sm:max-w-md lg:max-w-7xl">
+            <h1
+                class="text-6xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300">
+                {{ $page_title }}
+            </h1>
         </div>
+
+        @if ($is_large)
+            <div
+                class="w-full sm:max-w-md lg:max-w-7xl mt-6 mb-6 px-6 py-4 bg-white dark:bg-background-800 shadow-md overflow-hidden sm:rounded-lg">
+                {{ $slot }}
+            </div>
+        @else
+            <div
+                class="w-full sm:max-w-md  mt-6 mb-6 px-6 py-4 bg-white dark:bg-background-800 shadow-md overflow-hidden sm:rounded-lg">
+                {{ $slot }}
+            </div>
+        @endif
     </div>
 </body>
 
