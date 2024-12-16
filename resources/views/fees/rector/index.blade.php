@@ -83,6 +83,16 @@
                         });
                         this.paginatedAthletes = this.athletes_no_fees.slice((this.currentAthletePage - 1) * 10, this.currentAthletePage * 10);
                     },
+                    removeAthlete(athlete_id) {
+                        let athlete = this.athletes_add_fees.find((athlete) => {
+                            return athlete.id === athlete_id;
+                        });
+                        this.athletes_no_fees.push(athlete);
+                        this.athletes_add_fees = this.athletes_add_fees.filter((athlete) => {
+                            return athlete.id !== athlete_id;
+                        });
+                        this.paginatedAthletes = this.athletes_no_fees.slice((this.currentAthletePage - 1) * 10, this.currentAthletePage * 10);
+                    },
                     paginateAthletes: function() {
                         this.totalAthletePages = Math.ceil(this.athletes_no_fees.length / 10);
                         this.paginatedAthletes = this.athletes_no_fees.slice(0, 10);

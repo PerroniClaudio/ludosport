@@ -2,8 +2,7 @@
     'user' => null,
 ])
 
-<section
-    class="w-full dark:bg-background-600 bg-white border-8 border-primary-500 text-background-800 dark:text-white lg:w-1/2">
+<section class="w-full bg-background-900  border-8 border-primary-500  text-white lg:w-1/2">
     <div class="flex">
         <div class="w-[45%] p-2">
             <div class="flex items-center gap-1">
@@ -31,14 +30,14 @@
         </div>
     </div>
 
-    <div class="flex relative h-64">
+    <div class="flex relative h-80">
         <div class="w-[45%]"></div>
         <div class="w-[10%] bg-primary-500"></div>
         <div class="w-[45%]"></div>
 
         <div class="flex flex-col items-center justify-center absolute inset-0">
             <div class="border-8 border-primary-500 rounded-full">
-                <div class="border-8 border-black rounded-full p-2 bg-cover bg-center bg-no-repeat w-52 h-52"
+                <div class="border-8 border-black rounded-full p-2 bg-cover bg-center bg-no-repeat w-72 h-72"
                     style="background-image: url('{{ route('profile-picture', $user->id) }}')">
                 </div>
             </div>
@@ -52,11 +51,11 @@
 
         <div class="flex flex-col gap-8 items-center justify-center absolute inset-0">
 
-            <div class="flex flex-col items-center justify-center dark:bg-background-600 bg-white">
+            <div class="flex flex-col items-center justify-center bg-background-900">
                 <img src="{{ route('logoex') }}" alt="ludosport international">
             </div>
 
-            <p class="text-center w-full text-lg mt-4 dark:bg-background-600 bg-white">
+            <p class="text-center w-full text-lg mt-4 bg-background-900">
                 <span class="text-primary-500">ID</span>
                 {{ $user->unique_code }}
             </p>
@@ -102,7 +101,7 @@
                     <div
                         class="my-2 mx-2  {{ in_array($weapon_form->id, $user_forms) ? '' : 'opacity-30' }} flex flex-col items-center justify-center">
                         <div
-                            class="{{ (strpos($weapon_form->name, '6') || strpos($weapon_form->name, '7')) ? 'hidden' : '' }}">
+                            class="{{ strpos($weapon_form->name, '6') || strpos($weapon_form->name, '7') ? 'hidden' : '' }}">
                             <img src="{{ route('weapon-form-image', $weapon_form->id) }}"
                                 alt="{{ $weapon_form->name }}" class="w-8 h-8 dark:invert">
                         </div>

@@ -373,9 +373,12 @@ class AnnouncementController extends Controller {
 
             if ($allowed_roles != null) {
 
-                /** 09/12/2024 - cambio funzione, adesso vede solo gli annunci per il ruolo scelto nella sessione attiva. */
+                /** 
+                 * 09/12/2024 - cambio funzione, adesso vede solo gli annunci per il ruolo scelto nella sessione attiva. 
+                 * 16/12/2024 - modifica revertata
+                 */
 
-                if (!in_array($user->getActiveRoleId(), $allowed_roles)) {
+                if (!array_intersect($user->roles->pluck('id')->toArray(), $allowed_roles)) {
                     return false;
                 }
             }
