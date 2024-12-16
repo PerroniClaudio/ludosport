@@ -65,7 +65,7 @@
                         value="{{ number_format($event->price, 2) }}"
                         min="{{0}}" step="0.01"
                         required="{{ false }}" 
-                        disabled="{{true}}" />
+                        disabled="{{true}}" text_before="€" />
 
                 </div>
             </form>

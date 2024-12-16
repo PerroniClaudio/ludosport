@@ -35,4 +35,5 @@ return [
     'address_street_number' => 'Street number',
     'address_locality' => 'City/Locality',
     'school' => 'School',
+    "edit_school" => "Edit School #:id",
 ];
