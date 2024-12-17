@@ -67,6 +67,8 @@ Route::prefix('dean')->middleware('auth')->middleware('role:admin,dean')->group(
     Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('dean.schools.clans.store');
     Route::post('/schools/{school}/personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('dean.schools.personnel.store');
     Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('dean.schools.athlete.store');
+
+    Route::post('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'update'])->name('dean.schools.update');
   });
 
 

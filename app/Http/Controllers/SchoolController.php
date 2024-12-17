@@ -264,6 +264,13 @@ class SchoolController extends Controller {
      */
 
     public function update(Request $request, School $school) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
+        if(!$this->checkPermission($school)) {
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'academy_id' => 'required|integer|exists:academies,id',
@@ -916,12 +923,21 @@ class SchoolController extends Controller {
             case 'admin': // sempre autorizzato
                 break;
             case 'rector': // non autorizzato se la scuola non è nella sua accademia
-                $primaryAcademy = $authUser->primaryAcademy();
-                if (!$primaryAcademy || ($primaryAcademy->id != $school->academy->id)) {
+                $schoolAcademy = $school->academy;
+                $academyRector = $schoolAcademy->rector();
+                if(!$academyRector || ($academyRector->id != $authUser->id)) {
+                    $authorized = false;
+                }
+                // $primaryAcademy = $authUser->primaryAcademy();
+                // if (!$primaryAcademy || ($primaryAcademy->id != $school->academy->id)) {
+                //     $authorized = false;
+                // }
+                break;
+            case 'dean':
+                if (($authUser->id != ($school->dean()->id ?? null)) || $isStrict) {
                     $authorized = false;
                 }
                 break;
-            case 'dean':
             case 'manager': // non autorizzato se la scuola non è associata a lui o se strict è true
                 if (($authUser->primarySchool()->id ?? null) != $school->id || $isStrict) {
                     $authorized = false;

@@ -69,6 +69,8 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
     Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('manager.schools.clans.store');
     Route::post('/schools/{school}/personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('manager.schools.personnel.store');
     Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('manager.schools.athlete.store');
+
+    Route::post('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'update'])->name('manager.schools.update');
   });
 
 
