@@ -15,6 +15,12 @@
                 <div class="p-6 text-background-900 dark:text-background-100">
                     <x-table striped="false" :columns="[
                         [
+                            'name' => 'ID',
+                            'field' => 'id',
+                            'columnClasses' => '', // classes to style table th
+                            'rowClasses' => '', // classes to style table td
+                        ],
+                        [
                             'name' => 'Name',
                             'field' => 'name',
                             'columnClasses' => '', // classes to style table th

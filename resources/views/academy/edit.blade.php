@@ -50,7 +50,14 @@
                             </div>
                         </div>
 
-                        <h1 class="text-background-800 dark:text-background-200 text-lg">{{ __('academies.address') }}
+                        <div class="flex flex-col gap-2 ">
+                            <x-form.input name="email" label="{{__('academies.academy_email')}}" type="text" value="{{ $academy->rector() ? $academy->rector()->email: '' }}"
+                                placeholder="{{ fake()->email() }}" disabled />
+                            <x-form.input name="rector" label="{{__('academies.academy_rector')}}" type="text" value="{{ $academy->rector() ? ($academy->rector()->name . ' ' . ($academy->rector()->surname ?? '')): '' }}"
+                                placeholder="{{ fake()->name() }}" disabled description="{{__('academies.academy_rector_description')}}" />
+                        </div>
+                        
+                        {{-- <h1 class="text-background-800 dark:text-background-200 text-lg">{{ __('academies.address') }}
                         </h1>
                         <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                         <div class="flex flex-col gap-2 ">
@@ -60,9 +67,9 @@
                                 placeholder="{{ fake()->city() }}" />
                             <x-form.input name="zip" label="Zip" type="text" value="{{ $academy->zip }}"
                                 placeholder="{{ fake()->postcode() }}" />
-                        </div>
+                        </div> --}}
 
-                        <div class="fixed bottom-8 right-32">
+                        <div class="fixed bottom-8 right-32 z-30">
                             <x-primary-button type="submit">
                                 <x-lucide-save class="w-6 h-6 text-white" />
                             </x-primary-button>
@@ -94,10 +101,20 @@
                                     }
                                 }
                             @endphp
-                            <x-form.input name="name" label="Nationality" type="text"
+                            <x-form.input name="nationality" label="Nationality" type="text"
                                 required="{{ true }}" disabled="{{ true }}"
                                 value="{{ $nationName }}" placeholder="{{ fake()->company() }}" />
 
+                            <div class="flex flex-col gap-2 ">
+                                <x-form.input name="email" label="{{__('academies.academy_email')}}" type="text" value="{{ $academy->rector() ? $academy->rector()->email: '' }}"
+                                    placeholder="{{ fake()->email() }}" disabled />
+                                <x-form.input name="rector" label="{{__('academies.academy_rector')}}" type="text" value="{{ $academy->rector() ? ($academy->rector()->name . ' ' . ($academy->rector()->surname ?? '')): '' }}"
+                                    placeholder="{{ fake()->name() }}" disabled description="{{__('academies.academy_rector_description')}}" />
+                            </div>
+                            
+                            {{-- <h1 class="text-background-800 dark:text-background-200 text-lg">{{ __('academies.address') }}
+                            </h1>
+                            <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                             <x-form.input name="address" label="Address" type="text" required="{{ true }}"
                                 disabled="{{ true }}" value="{{ $academy->address }}"
                                 placeholder="{{ fake()->address() }}" />
@@ -106,7 +123,7 @@
                                 placeholder="{{ fake()->city() }}" />
                             <x-form.input name="zip" label="Zip" type="text" required="{{ true }}"
                                 disabled="{{ true }}" value="{{ $academy->zip }}"
-                                placeholder="{{ fake()->postcode() }}" />
+                                placeholder="{{ fake()->postcode() }}" /> --}}
                         </div>
                     </div>
 
