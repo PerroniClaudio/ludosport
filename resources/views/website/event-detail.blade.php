@@ -63,6 +63,11 @@
                             <p>{{ __('website.events_in_waiting_list') }}</p>
                         @elseif ($block_subscriptions || !$event->internal_shop)
                             <p>{{ __('website.events_subscriptions_blocked') }}</p>
+                            <p>
+                                {{ __('website.events_subscription_academy_email') }}
+                                <a href="mailto:{{ $academy_email }}"
+                                    class="text-primary-500">{{ $academy_email }}</a>
+                            </p>
                         @elseif ($waiting_list_closed)
                             <p>{{ __('website.event_waiting_list_closed_text') }}</p>
                         @endif
