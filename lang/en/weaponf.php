@@ -16,4 +16,5 @@ return [
     'currently_selected_athletes' => 'Currently Selected Athletes',
     'save' => 'Save',
     'create' => 'Create Weapon Form',
+    "edit_weapon_form" => "Edit Weapon Form #:id",
 ];

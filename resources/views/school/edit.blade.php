@@ -6,7 +6,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-background-800 dark:text-background-200 leading-tight">
-                {{ __('school.edit') }}
+                {{ __('school.edit_school', ['id' => $school->id]) }}
             </h2>
         </div>
     </x-slot>
@@ -54,14 +54,24 @@
                         @if ($authRole === 'rector')
                             <form method="POST" action="{{ route('rector.schools.update', $school->id) }}">
                                 @csrf
-                                <div class="flex flex-col gap-2 w-1/2">
-                                    <x-form.input name="name" label="Name" type="text"
-                                        required="{{ true }}" :value="$school->name"
-                                        placeholder="{{ fake()->company() }}" />
-                                    <x-school.rector.academy nationality="{{ $school->nation_id }}"
-                                        selectedAcademyId="{{ $school->academy_id }}"
-                                        selectedAcademy="{{ $school->academy->name }}" :nations="$nations"
-                                        :academies="$academies" />
+                                <div class="flex flex-col lg:flex-row gap-2">
+                                    <div class="flex flex-col gap-2 w-1/2">
+                                        <x-form.input name="name" label="Name" type="text"
+                                            required="{{ true }}" :value="$school->name"
+                                            placeholder="{{ fake()->company() }}" />
+                                        <x-school.rector.academy nationality="{{ $school->nation_id }}"
+                                            selectedAcademyId="{{ $school->academy_id }}"
+                                            selectedAcademy="{{ $school->academy->name }}" :nations="$nations"
+                                            :academies="$academies" />
+                                    </div>
+                                    <div class="flex flex-col gap-2 w-1/2">
+                                        <div class="flex flex-col gap-2 ">
+                                            <x-form.input name="dean" label="{{__('school.school_dean')}}" type="text" value="{{ $school->dean() ? ($school->dean()->name . ' ' . ($school->dean()->surname ?? '')): '' }}"
+                                                placeholder="{{ fake()->name() }}" disabled description="{{__('school.school_dean_description')}}" />
+                                            <x-form.input name="email" label="{{__('school.school_email')}}" type="text" value="{{ $school->email ?? '' }}"
+                                                placeholder="{{ fake()->email() }}" />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="fixed bottom-8 right-32 z-10">
@@ -94,10 +104,10 @@
                                     }
                                 @endphp
                                 <input type="hidden" name="" id="nationality" value="{{ $school->nation_id }}">
-                                <x-form.input name="name" label="Nationality" type="text"
+                                <x-form.input name="nationality" label="Nationality" type="text"
                                     required="{{ true }}" disabled="{{ true }}" :value="$nationName"
                                     placeholder="{{ fake()->company() }}" />
-                                <x-form.input name="name" label="Academy" type="text"
+                                <x-form.input name="academy_id" label="Academy" type="text"
                                     required="{{ true }}" disabled="{{ true }}" :value="$school->academy->name"
                                     placeholder="{{ fake()->company() }}" />
                             </div>

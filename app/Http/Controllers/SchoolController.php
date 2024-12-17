@@ -267,12 +267,14 @@ class SchoolController extends Controller {
         $request->validate([
             'name' => 'required|string|max:255',
             'academy_id' => 'required|integer|exists:academies,id',
+            'email' => 'nullable|email',
         ]);
 
         $school->update([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
             'academy_id' => $request->academy_id,
+            'email' => $request->email,
         ]);
 
         $authRole = User::find(auth()->user()->id)->getRole();
@@ -991,21 +993,10 @@ class SchoolController extends Controller {
 
     public function detail(School $school) {
 
-        $dean = "";
-
-        foreach ($school->personnel as $person) {
-            if ($person->hasRole('dean')) {
-                $dean = $person->name . " " . $person->surname;
-            }
-        }
+        $dean = $school->dean() ? $school->dean()->name . " " . $school->dean()->surname : "";
 
         $academy = $school->academy;
-        $rector = "";
-        foreach ($academy->personnel as $person) {
-            if ($person->hasRole('rector')) {
-                $rector = $person->name . " " . $person->surname;
-            }
-        }
+        $rector = $academy->rector() ? $academy->rector()->name . " " . $academy->rector()->surname : "";
 
         return view('website.school-profile', [
             'school' => $school,

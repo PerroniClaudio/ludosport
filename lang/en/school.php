@@ -35,4 +35,8 @@ return [
     'address_street_number' => 'Street number',
     'address_locality' => 'City/Locality',
     'school' => 'School',
+    "edit_school" => "Edit School #:id",
+    'school_email' => 'School Email',
+    'school_dean' => 'School Dean',
+    'school_dean_description' => 'The dean is the first dean with this school as primary school. If there is more than one, the first one found will be displayed. If there is none, the first dean in the school personnel will result as dean, even without the school as primary school.',
 ];

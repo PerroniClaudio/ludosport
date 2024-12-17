@@ -19,7 +19,8 @@ class School extends Model {
         'state',
         'zip',
         'country',
-        'coordinates'
+        'coordinates',
+        'email'
     ];
 
     public function toSearchableArray() {

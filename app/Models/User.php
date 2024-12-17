@@ -42,6 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         'bio',
         'how_found_us',
         'rank_id',
+        'gender'
     ];
 
     public function toSearchableArray() {

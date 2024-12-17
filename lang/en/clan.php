@@ -20,4 +20,5 @@ return [
     'quick_creae_personnel' => 'Quick Create Personnel',
     'quick_create_athlete' => 'Quick Create Athlete',
     'go_to_edit' => 'Go to Edit',
+    'edit_clan' => 'Edit Course #:id',
 ];

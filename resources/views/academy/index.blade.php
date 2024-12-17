@@ -17,6 +17,12 @@
                         striped="false" 
                         :columns="[
                             [
+                                'name' => 'ID',
+                                'field' => 'id',
+                                'columnClasses' => '', // classes to style table th
+                                'rowClasses' => '', // classes to style table td
+                            ],
+                            [
                                 'name' => 'Name',
                                 'field' => 'name',
                                 'columnClasses' => '', // classes to style table th

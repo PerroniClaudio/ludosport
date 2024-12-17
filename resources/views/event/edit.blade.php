@@ -139,7 +139,7 @@
 
                     <x-form.input name="price" label="Price (include taxes)" type="number"
                         value="{{ number_format($event->price, 2) }}" min="{{ 0 }}" step="0.01"
-                        required="{{ true }}" disabled="{{ !!$event->is_approved }}" />
+                        required="{{ true }}" disabled="{{ !!$event->is_approved }}" text_before="€" />
 
                 </div>
             </form>

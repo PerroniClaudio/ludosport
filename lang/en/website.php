@@ -73,7 +73,7 @@ return [
     'events_list_waiting_list' => 'Join the waiting list',
     'events_waiting_payment' => 'Complete the payment',
     'events_already_ordered' => 'You already have an order for this event.',
-    'events_subscriptions_blocked' => 'Reach out to the hosting Academy to secure your spot!',
+    'events_subscriptions_blocked' => 'Contact the hosting Academy to complete your registration!',
     'events_participating' => 'You already joined the event.',
     'events_in_waiting_list' => 'You are on the waiting list for this event.',
     'events_has_to_wait' => 'You are on the waiting list for this event.',

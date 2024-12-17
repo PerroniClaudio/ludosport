@@ -135,4 +135,5 @@ return [
     'instagram_field' => 'Instagram (public to everyone)',
     'telegram_field' => 'Telegram Handle (visible only to Admin and Rector)',
     'error_profile_picture_size' => 'Profile picture size must be less than 8MB',
+    "edit_user" => "Edit User #:id",
 ];

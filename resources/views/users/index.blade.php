@@ -64,6 +64,12 @@
                                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                                     <x-table striped="false" :columns="[
                                         [
+                                            'name' => 'ID',
+                                            'field' => 'id',
+                                            'columnClasses' => '', // classes to style table th
+                                            'rowClasses' => '', // classes to style table td
+                                        ],
+                                        [
                                             'name' => 'Name',
                                             'field' => 'name',
                                             'columnClasses' => '', // classes to style table th
@@ -114,6 +120,8 @@
                                     ]" :rows="$role">
                                         <x-slot name="tableRows">
                                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                                                x-text="row.id"></td>
+                                            <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                                 x-text="row.name"></td>
                                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                                 x-text="row.surname"></td>
@@ -156,6 +164,12 @@
                                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                                     <x-table striped="false" :columns="[
                                         [
+                                            'name' => 'ID',
+                                            'field' => 'id',
+                                            'columnClasses' => '',
+                                            'rowClasses' => '',
+                                        ],
+                                        [
                                             'name' => 'Name',
                                             'field' => 'name',
                                             'columnClasses' => '',
@@ -175,6 +189,8 @@
                                         ],
                                     ]" :rows="$role">
                                         <x-slot name="tableRows">
+                                            <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                                                x-text="row.id"></td>
                                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                                 x-text="row.name + ' ' + row.surname"></td>
                                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
@@ -198,6 +214,12 @@
                                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                                     <x-table striped="false" :columns="[
                                         [
+                                            'name' => 'ID',
+                                            'field' => 'id',
+                                            'columnClasses' => '',
+                                            'rowClasses' => '',
+                                        ],
+                                        [
                                             'name' => 'Name',
                                             'field' => 'name',
                                             'columnClasses' => '',
@@ -211,6 +233,8 @@
                                         ],
                                     ]" :rows="$role">
                                         <x-slot name="tableRows">
+                                            <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                                                x-text="row.id"></td>
                                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                                 x-text="row.name + ' ' + row.surname"></td>
                                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
