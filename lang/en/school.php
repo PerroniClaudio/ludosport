@@ -33,6 +33,7 @@ return [
     'go_to_edit_clan' => 'Go to Edit Course',
     'address_route' => 'Address',
     'address_street_number' => 'Street number',
+    'address_postal_code' => 'Postal Code',
     'address_locality' => 'City/Locality',
     'school' => 'School',
     "edit_school" => "Edit School #:id",
