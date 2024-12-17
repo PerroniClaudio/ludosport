@@ -1190,6 +1190,10 @@ class EventController extends Controller {
                     && !($onlyWaitingList && $isWaitngListClosed)
                 )
             );
+
+            // Email del rettore dell'accademia che ha organizzato l'evento 
+
+            $academy_email = $event->academy->rector()->email;
         }
 
         return view('website.event-detail', [
@@ -1201,6 +1205,7 @@ class EventController extends Controller {
             'is_in_waiting_list' => $isInWaitingList,
             'block_subscriptions' => $event->block_subscriptions,
             'is_waiting_payment' => $isWaitingPayment,
+            'academy_email' => $academy_email ?? null,
         ]);
     }
 
