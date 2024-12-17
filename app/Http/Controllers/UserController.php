@@ -55,7 +55,7 @@ class UserController extends Controller {
                 // Utenti di una determinata accademia
 
                 $academy_id = $authUser->primaryAcademy()->id ?? null;
-                if(!$academy_id){
+                if (!$academy_id) {
                     return redirect()->route("dashboard")->with('error', 'You don\'t have an academy assigned!');
                 }
 
@@ -74,7 +74,7 @@ class UserController extends Controller {
 
                 $school_id = $authUser->primarySchool()->id ?? null;
 
-                if(!$school_id){
+                if (!$school_id) {
                     return redirect()->route("dashboard")->with('error', 'You don\'t have a school assigned!');
                 }
 
@@ -92,6 +92,8 @@ class UserController extends Controller {
         }
 
         $viewPath = $authUserRole === 'admin' ? 'users.index' : 'users.' . $authUserRole . '.index';
+
+
 
         foreach ($roles as $role) {
             $filtered = $users->filter(function ($user) use ($role) {
@@ -131,6 +133,7 @@ class UserController extends Controller {
                 }
             }
         }
+
 
         return view($viewPath, [
             'users' => $users_sorted_by_role,
@@ -804,7 +807,7 @@ class UserController extends Controller {
                 if (!$user->primaryAcademy()) {
                     if (!!$user->academies()->first()) {
                         $user->setPrimaryAcademy($user->academies()->first()->id);
-                    } else if(!!$user->primaryAcademyAthlete()){
+                    } else if (!!$user->primaryAcademyAthlete()) {
                         $user->academies()->syncWithoutDetaching($user->primaryAcademyAthlete()->id);
                         $user->setPrimaryAcademy($user->primaryAcademyAthlete()->id);
                     } else {
@@ -813,15 +816,15 @@ class UserController extends Controller {
                     }
                 }
                 // Nel caso di dean, manager e instructor si assegna anche la scuola in automatico
-                if (array_intersect($rolesToAdd, ['dean', 'manager', 'instructor'])){
-                    if(!$user->primarySchool()){
+                if (array_intersect($rolesToAdd, ['dean', 'manager', 'instructor'])) {
+                    if (!$user->primarySchool()) {
                         if (!!$user->schools()->first()) {
                             $user->setPrimarySchool($user->schools()->first()->id);
-                        } else if(!!$user->primarySchoolAthlete()){
+                        } else if (!!$user->primarySchoolAthlete()) {
                             $user->schools()->syncWithoutDetaching($user->primarySchoolAthlete()->id);
                             $user->setPrimarySchool($user->primarySchoolAthlete()->id);
                         }
-                    } 
+                    }
                 }
             }
         }
