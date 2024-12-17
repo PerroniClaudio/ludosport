@@ -24,7 +24,7 @@
         <div id="nationality-container">
             <x-input-label for="nationality" value="{{ __('users.nationality') }}" />
             <div class="flex w-full gap-2">
-                <input type="hidden" name="nationality" x-model="selectedNationality">
+                <input type="hidden" name="nationality" id="nationality" x-model="selectedNationality">
                 <x-text-input disabled name="nationality_name" class="flex-1" type="text" x-model="selectedNation" />
             </div>
         </div>

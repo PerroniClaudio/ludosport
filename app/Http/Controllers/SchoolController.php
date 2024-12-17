@@ -373,6 +373,13 @@ class SchoolController extends Controller {
     }
 
     public function verifyAddress(Request $request) {
+        $request->validate([
+            'address' => 'required|string',
+            'city' => 'required|string',
+            'zip' => 'required|string',
+            'nation' => 'required|integer|exists:nations,id',
+            'school_id' => 'required|integer|exists:schools,id',
+        ]);
 
         try {
             $nation = Nation::find($request->nation);
@@ -381,7 +388,8 @@ class SchoolController extends Controller {
             $data = [
                 'address' => [
                     'regionCode' => $nation->code,
-                    'locality' =>  $request->zip . ' ' . $request->city,
+                    'locality' =>  $request->city,
+                    'postalCode' => $request->zip,
                     'addressLines' => [
                         $request->address
                     ],
@@ -398,11 +406,12 @@ class SchoolController extends Controller {
 
                 // Controlla se l'indirizzo è completo
 
-                if (isset($data['result']['verdict']['addressComplete'])) {
-                    $isAddressComplete = $data['result']['verdict']['addressComplete'];
-                } else {
-                    $isAddressComplete = false;
-                }
+                // if (isset($data['result']['verdict']['addressComplete'])) {
+                //     // Questa proprietà non c'è anche se i campi sono corretti
+                //     $isAddressComplete = $data['result']['verdict']['addressComplete'];
+                // } else {
+                //     $isAddressComplete = false;
+                // }
                 // Controlla se ci sono componenti non confermati
                 if (isset($data['result']['verdict']['hasUnconfirmedComponents'])) {
                     $hasUnconfirmedComponents = $data['result']['verdict']['hasUnconfirmedComponents'];
@@ -413,22 +422,23 @@ class SchoolController extends Controller {
                 // Ottieni l'indirizzo formattato
                 $formattedAddress = $data['result']['address']['formattedAddress'];
 
-                if ($isAddressComplete && !$hasUnconfirmedComponents) {
+                // if ($isAddressComplete && !$hasUnconfirmedComponents) {
+                if (!$hasUnconfirmedComponents) {
                     // L'indirizzo è valido e completo
 
                     $address = $request->address . " " . $request->city . " "  . $request->zip;
                     $location = $this->getLocation($address);
                     $school = School::find($request->school_id);
 
+                    $postalAddress = $data['result']['address']['postalAddress'];
                     $school->update([
                         'address' => $request->address,
-                        'city' => $location['city'],
-                        'state' => $location['state'],
+                        'city' => $postalAddress['locality'],
+                        'state' => $location['state'], // Regione
                         'zip' => $request->zip,
-                        'country' => $location['country'],
+                        'country' => ($location['country'] ? $location['country'] : $nation->name), // Nazione
                         'coordinates' => json_encode(['lat' => $location['lat'], 'lng' => $location['lng']]),
                     ]);
-
 
                     return response()->json([
                         'state' => 1,
@@ -465,11 +475,17 @@ class SchoolController extends Controller {
                     }
                 }
             } else {
+                return response()->json([
+                    'state' => 3,
+                    'message' => 'An error occurred while validating the address.',
+                    'response' => $response->json()
+                ]);
             }
         } catch (\Exception $e) {
             return response()->json([
                 'state' => 3,
-                'message' => $e->getMessage()
+                'message' => 'The address seems incorrect. Try including street name and house number, the city and the postal code.',
+                // 'message' => $e->getMessage()
             ]);
         }
     }
