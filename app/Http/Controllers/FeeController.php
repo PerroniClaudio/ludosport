@@ -10,6 +10,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Env;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Cashier;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ class FeeController extends Controller {
     public function index() {
         //
 
-        $user = User::find(Auth()->user()->id);
+        $user = User::find(Auth::user()->id);
         $academy_id = $user->primaryAcademy()->id ?? null;
 
         if (!$user->validatePrimaryInstitutionPersonnel()) {
@@ -54,7 +55,7 @@ class FeeController extends Controller {
     public function create() {
         //
 
-        $user = User::find(Auth()->user()->id);
+        $user = User::find(Auth::user()->id);
         $academy = $user->primaryAcademy()->id ?? null;
 
         if (!$academy) {
@@ -72,7 +73,7 @@ class FeeController extends Controller {
     public function renew() {
         //
 
-        $user = User::find(Auth()->user()->id);
+        $user = User::find(Auth::user()->id);
         $academy_id = $user->primaryAcademy()->id ?? null;
 
         if (!$academy_id) {
@@ -148,7 +149,7 @@ class FeeController extends Controller {
 
     public function extimateFeeConsumption(Request $request) {
 
-        $user = User::find(Auth()->user()->id);
+        $user = User::find(Auth::user()->id);
         $academy_id = $user->primaryAcademy()->id ?? null;
 
         $available_fees = Fee::where('academy_id', $academy_id)
@@ -173,7 +174,7 @@ class FeeController extends Controller {
 
     public function associateFeesToUsers(Request $request) {
 
-        $authuser = User::find(Auth()->user()->id);
+        $authuser = User::find(Auth::user()->id);
 
         $selected_users = json_decode($request->selected_users);
 
@@ -224,7 +225,7 @@ class FeeController extends Controller {
 
         // Crea ordine
 
-        $user = User::find(Auth()->user()->id);
+        $user = User::find(Auth::user()->id);
         $invoice = $user->invoices()->latest()->first();
 
         $order = Order::create([
@@ -278,7 +279,7 @@ class FeeController extends Controller {
 
     public function userCheckoutStripe(Request $request) {
 
-        $user = User::find(Auth()->user()->id);
+        $user = User::find(Auth::user()->id);
 
         $order_id = $request->session()->get('order_id');
         $order = Order::findOrFail($order_id);
@@ -494,7 +495,7 @@ class FeeController extends Controller {
 
         // Crea ordine
 
-        $user = User::find(Auth()->user()->id);
+        $user = User::find(Auth::user()->id);
         $invoice = $user->invoices()->latest()->first();
 
         $order = Order::create([
@@ -822,7 +823,7 @@ class FeeController extends Controller {
 
         // Crea ordine
 
-        $user = User::find(Auth()->user()->id);
+        $user = User::find(Auth::user()->id);
         $invoice = $user->invoices()->latest()->first();
 
         $order = Order::create([
