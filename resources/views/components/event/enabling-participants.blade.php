@@ -21,6 +21,16 @@
                 <div class="flex-1">
                     <h4 class="text-background-800 dark:text-background-200 text-lg">{{ __('events.available_users') }}
                     </h4>
+                    <div class='has-tooltip'>
+                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 -mt-8'>
+                            @if($authRole == 'admin')
+                                {{ __('events.event_admin_participants_tooltip') }}
+                            @else
+                                {{ __('events.event_others_participants_tooltip') }}
+                            @endif
+                        </span>
+                        <x-lucide-info class="h-4 text-background-400" />
+                    </div>
                 </div>
                 <div>
                     <input x-model="searchAvailablesValue" x-on:input="searchAvailableUsers(event);" type="text"

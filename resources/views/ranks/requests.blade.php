@@ -99,7 +99,7 @@
                                             x-cloak
                                             class="absolute bg-background-100 
                                             p-2 rounded-md text-sm text-background-800 
-                                            inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
+                                            inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full shadow-xl">
                                             {{ __('ranks.requests_read_reason') }}
                                         </div>
                                         <a @click="showReadReasonModal(row.reason)">
@@ -112,7 +112,7 @@
                                             x-cloak
                                             class="absolute bg-background-100 
                                             p-2 rounded-md text-sm text-background-800 
-                                            inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
+                                            inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full shadow-xl">
                                             {{ __('ranks.requests_accept') }}
                                         </div>
                                         <a @click="showAcceptRequestModal(row.id)">
@@ -125,7 +125,7 @@
                                             x-cloak
                                             class="absolute bg-background-100 
                                             p-2 rounded-md text-sm text-background-800 
-                                            inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
+                                            inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full shadow-xl">
                                             {{ __('ranks.requests_reject') }}
                                         </div>
                                         <a @click="showRejectRequestModal(row.id)">

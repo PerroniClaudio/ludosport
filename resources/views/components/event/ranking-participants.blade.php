@@ -18,9 +18,23 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="bg-background-100 dark:bg-background-900 p-4 rounded ">
             <div class="flex justify-between gap-2 items-center">
-                <div class="flex-1">
+                <div class="flex-1 flex gap-2 items-center">
                     <h4 class="text-background-800 dark:text-background-200 text-lg">{{ __('events.available_users') }}
                     </h4>
+                    <div class='has-tooltip'>
+                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 -mt-8'>
+                            @if($authRole == 'admin')
+                                {{ __('events.event_admin_participants_tooltip') }}
+                            @elseif(in_array(strtolower($event->type->name), ['school tournament', 'academy tournament']))
+                                {{ __('events.event_academy_participants_tooltip') }}
+                            @elseif(strtolower($event->type->name) == 'national tournament')
+                                {{ __('events.event_nation_participants_tooltip') }}
+                            @else
+                                {{ __('events.event_others_participants_tooltip') }}
+                            @endif
+                        </span>
+                        <x-lucide-info class="h-4 text-background-400" />
+                    </div>
                 </div>
                 <div>
                     <input x-model="searchAvailablesValue" x-on:input="searchAvailableUsers(event);" type="text"
