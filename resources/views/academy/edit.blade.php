@@ -174,7 +174,7 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.personnel') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        <x-academy.personnel :academy="$academy" :personnel="$personnel" />
+                        <x-academy.personnel :academy="$academy" :personnel="$personnel" :associatedPersonnel="$associated_personnel" />
                         <x-academy.create-user academy="{{ $academy->id }}" type="personnel" :roles="$editable_roles" />
                     </div>
                 </div>
@@ -218,7 +218,7 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.athletes') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        <x-academy.athletes :academy="$academy" :athletes="$athletes" />
+                        <x-academy.athletes :academy="$academy" :athletes="$athletes" :associatedAthletes="$associated_athletes" />
                         <x-academy.create-user academy="{{ $academy->id }}" type="athlete" :roles="$roles" />
                     </div>
                 </div>
