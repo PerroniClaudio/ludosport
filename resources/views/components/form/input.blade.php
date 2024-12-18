@@ -25,7 +25,7 @@
                         x-cloak
                         class="absolute bg-background-100 
                         p-2 rounded-md text-sm text-background-800 
-                        inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
+                        inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full shadow-xl">
                         {{ $description }}
                     </div>
                     <x-lucide-info class="h-4 text-background-300" />
@@ -37,7 +37,7 @@
     @endif
 
     {{-- Per evitare di ripetere l'input ci sono due if con la stessa condizione per contenerlo se servisse --}}
-    @if ($text_before)
+    @if ($text_before && !$hidden)
             <div class="flex gap-2 items-center">
                 <p>{{ $text_before }}</p> 
     @endif
@@ -49,7 +49,7 @@
                     @if ($step != null) step="{{ $step }}" @endif
                     class="{{ $hidden ? 'hidden' : '' }} {{ $disabled ? 'cursor-not-allowed' : '' }} w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
     
-    @if ($text_before)
+    @if ($text_before && !$hidden)
             </div>
     @endif
 

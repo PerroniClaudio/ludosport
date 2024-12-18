@@ -18,7 +18,7 @@
                     x-cloak
                     class="absolute bg-background-100 
                     p-2 rounded-md text-sm text-background-800 
-                    inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full">
+                    inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full shadow-xl">
                     {{ $description }}
                 </div>
                 <x-lucide-info class="h-4 text-background-300" />

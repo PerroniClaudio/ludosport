@@ -617,7 +617,9 @@ class EventController extends Controller {
         // Si potrebbe usare resultType() per escludere solo gli eventi enabling, ma non sappiamo se ci sono altri tipi di eventi che non devono essere inclusi.
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
-        if ($authRole !== "admin" && in_array($event->type->name, ["School Tournament", "Academy Tournament", "National Tournament"])) {
+        if ($authRole === "admin") {
+            $users = User::where('is_disabled', '0')->get();
+        } else if (in_array($event->type->name, ["School Tournament", "Academy Tournament", "National Tournament"])) {
             switch ($event->type->name) {
                 case "School Tournament":
                 case "Academy Tournament":
@@ -632,8 +634,8 @@ class EventController extends Controller {
                     })->where(['is_disabled' => '0', "has_paid_fee" => '1'])->get();
                     break;
             }
-        } else {
-            $users = User::where('is_disabled', '0')->get();
+        } else{
+            $users = User::where(['is_disabled' => '0', "has_paid_fee" => '1'])->get();
         }
         return response()->json($users);
     }
