@@ -3,6 +3,7 @@
 return [
     'title' => 'Fees',
     'fees' => 'Fees',
+    'renew_title' => 'Renew Fees',
     'available_fees' => 'Available Fees',
     'fees_list' => 'Fees List',
     'purchase_fees' => 'Purchase Fees',
@@ -26,6 +27,7 @@ return [
     'fees_success_message' => 'Your fees have been purchased successfully. You can now associate them to users.',
     'associate_fees' => 'Associate Fees',
     'users_no_fees' => 'Users with no fees',
+    'users_expired_fees' => 'Users with expired fees',
     'type_needed' => 'Type needed',
     'selected_users' => 'Selected Users',
     'associate_fees_message' => 'The following fees will be spent',

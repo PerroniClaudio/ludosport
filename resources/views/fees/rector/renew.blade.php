@@ -2,51 +2,15 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-background-800 dark:text-background-200 leading-tight">
-                {{ __('fees.title') }}
+                {{ __('fees.renew_title') }}
             </h2>
-
         </div>
     </x-slot>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-background-900 dark:text-background-100">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('fees.purchase_fees') }}
-                    </h3>
-                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <div
-                                class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex flex-col gap-2">
-                                <p>{{ __('fees.buy_new_fees') }}</p>
-                                <div class="flex justify-end ">
-                                    <a href="{{ route('rector.fees.purchase') }}">
-                                        <x-primary-button>
-                                            <x-lucide-arrow-right class="h-6 w-6 text-white" />
-                                        </x-primary-button>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div
-                                class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex flex-col gap-2">
-                                {{ __('fees.renew_expired_fees') }}
-                                <div class="flex justify-end ">
-                                    <a href="{{ route('rector.fees.renew') }}">
-                                        <x-primary-button>
-                                            <x-lucide-arrow-right class="h-6 w-6 text-white" />
-                                        </x-primary-button>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-background-900 dark:text-background-100" x-data="{
-                    athletes_no_fees: {{ collect($athletes_no_fees) }},
+                    athletes_no_fees: {{ collect($users_expired_fees) }},
                     athletes_add_fees: [],
                     fees_number: {{ $fees_number }},
                     paginatedAthletes: [],
@@ -161,7 +125,7 @@
                         this.paginateAthletes();
                     }
                 }">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('fees.associate_fees') }}
+                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('fees.renew_title') }}
                     </h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <div class="grid grid-cols-3 gap-4 mb-4">
@@ -180,7 +144,7 @@
                             <div class="flex justify-between gap-2 items-center">
                                 <div class="flex-1">
                                     <h4 class="text-background-800 dark:text-background-200 text-lg">
-                                        {{ __('fees.users_no_fees') }}
+                                        {{ __('fees.users_expired_fees') }}
                                     </h4>
                                 </div>
                                 <div>

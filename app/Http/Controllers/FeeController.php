@@ -58,7 +58,7 @@ class FeeController extends Controller {
         $academy = $user->primaryAcademy()->id ?? null;
 
         if (!$academy) {
-            return redirect()->route('fees.index')->with('error', 'Main academy academy not found');
+            return redirect()->route('dashboard')->with('error', 'Main academy academy not found');
         }
 
         $fee_price = config('app.stripe.fee_price_numeral');
@@ -66,6 +66,48 @@ class FeeController extends Controller {
         return view('fees.rector.create', [
             'academy' => $academy,
             'fee_price' => $fee_price,
+        ]);
+    }
+
+    public function renew() {
+        //
+
+        $user = User::find(Auth()->user()->id);
+        $academy_id = $user->primaryAcademy()->id ?? null;
+
+        if (!$academy_id) {
+            return redirect()->route('dashboard')->with('error', 'Main academy academy not found');
+        }
+
+        $fees = Fee::where('academy_id', $academy_id)->where([
+            ['used', '=', 0],
+            ['end_date', '>', now()->format('Y-m-d')],
+            ['academy_id', '=', $academy_id],
+        ])->count();
+
+        $academy = Academy::find($academy_id);
+        $users = $academy->athletes()->where('has_paid_fee', 1)->get();
+        $users_expired_fees = [];
+
+        foreach ($users as $key => $value) {
+
+            $latest_fee = $value->fees()->latest()->first();
+
+            if ($latest_fee->end_date < now()) {
+                $users_expired_fees[] = [
+                    'id' => $value->id,
+                    'name' => $value->name,
+                    'surname' => $value->surname,
+                    'email' => $value->email,
+                    'fee_expired_at' => $value->fees()->latest()->end_date,
+                ];
+            }
+        }
+
+
+        return view('fees.rector.renew', [
+            'users_expired_fees' => $users_expired_fees,
+            'fees_number' => $fees,
         ]);
     }
 
