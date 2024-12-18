@@ -3,8 +3,9 @@
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(function () {
-  Route::get('/fees', 'App\Http\Controllers\FeeController@index')->name('rector.fees.index');
-  Route::get('/fees/purchase', 'App\Http\Controllers\FeeController@create')->name('rector.fees.purchase');
+  Route::get('/fees', [App\Http\Controllers\FeeController::class, 'index'])->name('rector.fees.index');
+  Route::get('/fees/purchase', [App\Http\Controllers\FeeController::class, 'create'])->name('rector.fees.purchase');
+  Route::get('/fees/renew', [App\Http\Controllers\FeeController::class, 'renew'])->name('rector.fees.renew');
   Route::get('/invoices/user-data/{user}', [App\Http\Controllers\UserController::class, 'invoiceData'])->name('users.invoices.get');
 
 
