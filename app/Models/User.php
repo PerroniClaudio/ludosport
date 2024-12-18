@@ -87,8 +87,9 @@ class User extends Authenticatable implements MustVerifyEmail {
                 $user->email = strtolower($user->email);
             }
 
-            if (!$user->battle_name) {
-                $user->battle_name = $user->name . $user->surname . rand(10, 99);
+            // Se l'utente non ha inserito il battle name o se è già esistente viene generato in automatico
+            if (!$user->battle_name || User::where('battle_name', $user->battle_name)->exists()) {
+                $user->battle_name = $user->generateBattleName();
             }
 
             if (is_null($user->rank_id)) {
@@ -763,5 +764,15 @@ class User extends Authenticatable implements MustVerifyEmail {
             $highestRole = 'technician';
         }
         return $highestRole;
+    }
+
+    public function generateBattleName() {
+        $number = 10;
+        $tempBattleName = $this->name . $this->surname . $number;
+        while (User::where('battle_name', $tempBattleName)->count() > 0) {
+            $number++;
+            $tempBattleName = $this->name . $this->surname . $number;
+        }
+        return $tempBattleName;
     }
 }

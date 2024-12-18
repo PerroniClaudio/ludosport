@@ -815,20 +815,20 @@ class AcademyController extends Controller {
         $associated_personnel = $academy->personnel;
 
         foreach ($associated_personnel as $key => $person) {
-            if ($person->hasRole('rector')) {
-                $rector = $person->name . " " . $person->surname;
-            }
-
             $associated_personnel[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {
                 return __('users.' . $role);
             })->toArray());
         }
+
+        $rector = $academy->rector() ? $academy->rector()->name . " " . $academy->rector()->surname : "";
+
 
         return view('website.academy-profile', [
             'academy' => $academy,
             'rector' => $rector,
             'athletes' => $academy->athletes,
             'personnel' => $associated_personnel,
+            'academy_email' => $academy->rector() ? $academy->rector()->email : "",
         ]);
     }
 

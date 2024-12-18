@@ -22,6 +22,15 @@
                                 {{ __('users.rector') }}: {{ $rector }}
                             </span>
                         </div>
+                        <div class="flex items-center gap-2">
+                            <x-lucide-mail class="h-5 w-5 text-background-500 dark:text-background-400" />
+                            <span class="text-sm text-background-500 dark:text-background-400">
+                                {{ __('academies.academy_email_website') }}: 
+                                <a href="mailto:{{ $academy_email }}" class="text-primary-500">
+                                    {{ $academy_email }}
+                                </a>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </section>
