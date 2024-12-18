@@ -70,17 +70,17 @@
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm" x-text="row.surname">
                             </td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm text-right p-1">
-                                {{-- Il tecnico non può modificare i partecipanti in nessun caso. Solo gli admin possono modificare i partecipanti di eventi a pagamento, e solo entro il mimite massimo. --}}
+                                {{-- Il tecnico non può modificare i partecipanti in nessun caso. Solo gli admin possono modificare i partecipanti di eventi a pagamento, e solo entro il mimite massimo (0 è illimitato). --}}
                                 @if ($authRole != 'technician' && ($event->isFree() || $authRole == 'admin'))
                                     <template
-                                        x-if="({{ $event->max_participants > 0 ? $event->max_participants : 0 }} > (participants.length + {{ $event->waitingList->count() }}))">
+                                        x-if="({{$event->max_participants}} == 0 || ({{ $event->max_participants > 0 ? $event->max_participants : 0 }} > (participants.length + {{ $event->waitingList->count() }})))">
                                         <button @click="addParticipant(row.id)">
                                             <x-lucide-plus
                                                 class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
                                         </button>
                                     </template>
                                     <template
-                                        x-if="!({{ $event->max_participants > 0 ? $event->max_participants : 0 }} > (participants.length + {{ $event->waitingList->count() }}))">
+                                        x-if="!({{$event->max_participants}} == 0 || ({{ $event->max_participants > 0 ? $event->max_participants : 0 }} > (participants.length + {{ $event->waitingList->count() }})))">
                                         <button disabled>
                                             <x-lucide-ban class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
                                         </button>

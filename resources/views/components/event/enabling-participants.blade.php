@@ -18,7 +18,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="bg-background-100 dark:bg-background-900 p-4 rounded ">
             <div class="flex justify-between gap-2 items-center">
-                <div class="flex-1">
+                <div class="flex-1 flex gap-2 items-center">
                     <h4 class="text-background-800 dark:text-background-200 text-lg">{{ __('events.available_users') }}
                     </h4>
                     <div class='has-tooltip'>
@@ -69,14 +69,14 @@
                                 {{-- Il tecnico non può modificare i partecipanti in nessun caso. Solo gli admin possono modificare i partecipanti di eventi a pagamento. --}}
                                 @if ($authRole != 'technician' && ($event->isFree() || $authRole == 'admin'))
                                     <template
-                                        x-if="{{ $event->max_participants > 0 ? $event->max_participants : 0 }} > (participants.length + {{ $event->waitingList->count() }})">
+                                        x-if="({{$event->max_participants}} == 0 || ({{ $event->max_participants > 0 ? $event->max_participants : 0 }} > (participants.length + {{ $event->waitingList->count() }})))">
                                         <button @click="addParticipant(row.id)">
                                             <x-lucide-plus
                                                 class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
                                         </button>
                                     </template>
                                     <template
-                                        x-if="!({{ $event->max_participants > 0 ? $event->max_participants : 0 }} > (participants.length + {{ $event->waitingList->count() }}))">
+                                    x-if="!({{$event->max_participants}} == 0 || ({{ $event->max_participants > 0 ? $event->max_participants : 0 }} > (participants.length + {{ $event->waitingList->count() }})))">
                                         <button disabled>
                                             <x-lucide-ban class="w-4 h-4 text-secondary-500 dark:text-secondary-400" />
                                         </button>
@@ -90,7 +90,7 @@
                         </tr>
                     </template>
                 </tbody>
-
+                
             </table>
 
             <div class="flex items-center">
