@@ -382,8 +382,42 @@ class AcademyController extends Controller {
             $personnel->setPrimaryAcademy($academy->id);
         }
 
+        // Se la nuova accademia non è no academy, rimuove l'associazione a no academy
+        if ($personnel->academies()->count() > 1 && $academy->id != 1) {
+            $personnel->academies()->detach(1);
+        }
+
         $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
         return redirect()->route($redirectRoute, $academy)->with('success', 'Personnel added successfully!');
+    }
+    
+    public function removePersonnel(Request $request, Academy $academy) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        $personnel = User::find($request->personnel_id);
+
+        // L'admin può farlo sempre, il rettore solo se l'accademia è la sua
+        if ($authRole !== 'admin' && ($authRole !== 'rector' || (($academy->rector()->id ?? null) != $authUser->id))) {
+            return back()->with('error', 'Not authorized.');
+        }
+
+        // Prima di rimuovere l'associazione all'accademia rimuovere le associazioni a corsi e scuole
+        // Rimuove tutte le associazioni a corsi, scuole e accademia indicata e crea i log
+        $personnel->removeAcademyPersonnelAssociations($academy);
+        if ($personnel->academies()->count() == 0) {
+            // Se non ha accademie come personnel viene assegnato a No academy. Se si usa il codice più giù, si può rimuovere questo
+            $personnel->academies()->syncWithoutDetaching(1);
+            $personnel->setPrimaryAcademy(1);
+            Log::channel('academy')->info('Personnel associated with academy', [
+                'user_id' => $personnel->id,
+                'academy_id' => 1,
+                'made_by' => $authUser->id,
+            ]);
+        }
+
+        $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
+
+        return redirect()->route($redirectRoute, $academy)->with('success', 'Personnel removed successfully!');
     }
 
     public function addAthlete(Request $request, Academy $academy) {
@@ -424,6 +458,39 @@ class AcademyController extends Controller {
         }
 
         return redirect()->route($redirectRoute, $academy)->with('success', 'Athlete added successfully!');
+    }
+    
+    public function removeAthlete(Request $request, Academy $academy) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        $athlete = User::find($request->athlete_id);
+        $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
+
+        // l'atleta può essere associato ad una sola accademia, quindi se si modifica vanno rimossi anche tutti i collegamenti inferiori (scuole e corsi)
+
+        // L'admin può farlo sempre, il rettore solo se l'accademia è la sua
+        if ($authRole !== 'admin' && ($authRole !== 'rector' || (($academy->rector()->id ?? null) != $authUser->id))) {
+            return back()->with('error', 'Not authorized.');
+        }
+
+        // Se l'atleta è associato all'accademia, la rimuove
+        if(in_array($academy->id, $athlete->academyAthletes()->pluck('academy_id')->toArray())) {
+            // Si rimuovono tutte perchè tanto solo una se ne può avere. L'argomento è l'accademia che fa eccezione, (se serve)
+            $athlete->removeAcademiesAthleteAssociations();
+        }
+
+        // dato che sono state eliminate tutte le associazioni assegna No academy e No school
+        $noAcademy = Academy::where('slug', 'no-academy')->first();
+        if($noAcademy) {
+            $athlete->academyAthletes()->syncWithoutDetaching($noAcademy->id);
+            $athlete->setPrimaryAcademyAthlete($noAcademy->id);
+        }
+        $noSchool = School::where('slug', 'no-school')->first();
+        if ($noSchool) {
+            $athlete->schoolAthletes()->syncWithoutDetaching($noSchool->id);
+        }
+
+        return redirect()->route($redirectRoute, $academy)->with('success', 'Athlete removed successfully!');
     }
 
     public function all(Request $request) {

@@ -75,8 +75,10 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
     Route::post('/academies/{academy}/schools/create', [App\Http\Controllers\SchoolController::class, 'storeacademy'])->name('rector.academies.schools.create');
     Route::post('/academies/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'addSchool'])->name('rector.academies.schools.store');
     Route::post('/academies/{academy}/users/create', [App\Http\Controllers\UserController::class, 'storeForAcademy'])->name('rector.academies.users.create');
-    Route::post('/academies/{academy}/personnel', [App\Http\Controllers\AcademyController::class, 'addPersonnel'])->name('rector.academies.personnel.store');
-    Route::post('/academies/{academy}/athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('rector.academies.athlete.store');
+    Route::post('/academies/{academy}/add-personnel', [App\Http\Controllers\AcademyController::class, 'addPersonnel'])->name('rector.academies.personnel.store');
+    Route::post('/academies/{academy}/remove-personnel', [App\Http\Controllers\AcademyController::class, 'removePersonnel'])->name('rector.academies.personnel.remove');
+    Route::post('/academies/{academy}/add-athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('rector.academies.athlete.store');
+    Route::post('/academies/{academy}/remove-athlete', [App\Http\Controllers\AcademyController::class, 'removeAthlete'])->name('rector.academies.athlete.remove');
 
     Route::get('/academies/{academy}/users-search', [App\Http\Controllers\AcademyController::class, 'searchUsers'])->name('rector.academies.users-search');
   });
