@@ -30,34 +30,20 @@ class FeeController extends Controller {
             return redirect()->route('dashboard')->with('error', 'Main academy not found');
         }
 
-        $senior_fees = Fee::where('academy_id', $academy_id)->where([
-            ['type', '=',  1],
+        $fees = Fee::where('academy_id', $academy_id)->where([
             ['used', '=', 0],
             ['end_date', '>', now()->format('Y-m-d')],
             ['academy_id', '=', $academy_id],
         ])->count();
-        $junior_fees = Fee::where('academy_id', $academy_id)->where([
-            ['type', '=',  2],
-            ['used', '=', 0],
-            ['end_date', '>', now()->format('Y-m-d')],
-            ['academy_id', '=', $academy_id],
-        ])->count();
+
         $athletes_no_fees = Academy::find($academy_id)->athletes()->where('has_paid_fee', 0)->get();
 
         foreach ($athletes_no_fees as $key => $value) {
             $athletes_no_fees[$key]->fullname = $value->name . ' ' . $value->surname;
-
-            $today = now();
-            $athlete_birthday = Carbon::parse($value->birthday);
-            $athlete_age = abs(number_format($today->diffInYears($athlete_birthday)));
-
-            $athletes_no_fees[$key]->type_needed = $athlete_age > 16 ? __('fees.senior_fees') : __('fees.junior_fees');
         }
 
-
         return view('fees.rector.index', [
-            'senior_fees_number' => $senior_fees,
-            'junior_fees_number' => $junior_fees,
+            'fees_number' => $fees,
             'athletes_no_fees' => $athletes_no_fees,
         ]);
     }
@@ -75,8 +61,11 @@ class FeeController extends Controller {
             return redirect()->route('fees.index')->with('error', 'Main academy academy not found');
         }
 
+        $fee_price = config('app.stripe.fee_price_numeral');
+
         return view('fees.rector.create', [
             'academy' => $academy,
+            'fee_price' => $fee_price,
         ]);
     }
 
@@ -120,45 +109,23 @@ class FeeController extends Controller {
         $user = User::find(Auth()->user()->id);
         $academy_id = $user->primaryAcademy()->id ?? null;
 
+        $available_fees = Fee::where('academy_id', $academy_id)
+            ->where('used', 0)
+            ->where('end_date', '>', now()->format('Y-m-d'))
+            ->count();
 
-        $senior_fees = Fee::where('academy_id', $academy_id)->where([
-            ['type', '=',  1],
-            ['used', '=', 0],
-            ['end_date', '>', now()->format('Y-m-d')],
-            ['academy_id', '=', $academy_id],
-        ])->count();
-        $junior_fees = Fee::where('academy_id', $academy_id)->where([
-            ['type', '=',  2],
-            ['used', '=', 0],
-            ['end_date', '>', now()->format('Y-m-d')],
-            ['academy_id', '=', $academy_id],
-        ])->count();
-        $senior_fees_consumed = 0;
-        $junior_fees_consumed = 0;
+        $fees_consumed = 0;
 
         $selected_users = json_decode($request->selected_users);
 
         foreach ($selected_users as $id) {
-            $user = User::find($id);
-
-            $today = now();
-            $athlete_birthday = Carbon::parse($user->birthday);
-            $athlete_age = abs(number_format($today->diffInYears($athlete_birthday)));
-
-            if ($athlete_age > 16) {
-                $senior_fees_consumed++;
-            } else {
-                $junior_fees_consumed++;
-            }
+            $fees_consumed++;
         }
 
         return response()->json([
-            'senior_fees' => $senior_fees,
-            'junior_fees' => $junior_fees,
-            'senior_fees_consumed' => $senior_fees_consumed,
-            'junior_fees_consumed' => $junior_fees_consumed,
-            'is_junior_fees_needed' => $junior_fees_consumed > $junior_fees,
-            'is_senior_fees_needed' => $senior_fees_consumed > $senior_fees,
+            'available_fees' => $available_fees,
+            'fees_consumed' => $fees_consumed,
+            'is_fees_needed' => $fees_consumed > $available_fees,
         ]);
     }
 
@@ -167,30 +134,17 @@ class FeeController extends Controller {
         $authuser = User::find(Auth()->user()->id);
 
         $selected_users = json_decode($request->selected_users);
-        $now_date = now()->format('Y-m-d');
 
         DB::beginTransaction();
 
         foreach ($selected_users as $id) {
             $user = User::find($id);
 
-            $today = now();
-            $athlete_birthday = Carbon::parse($user->birthday);
-            $athlete_age = abs(number_format($today->diffInYears($athlete_birthday)));
-
-            if ($athlete_age > 16) {
-                $type = 1;
-            } else {
-                $type = 2;
-            }
-
             $availableFee = Fee::where([
-                ['type', '=',  $type],
                 ['used', '=', 0],
                 ['end_date', '>', now()->format('Y-m-d')],
                 ['academy_id', '=', $authuser->primaryAcademy()->id ?? 1],
             ])->first();
-
 
             if ($availableFee) {
 
@@ -210,7 +164,6 @@ class FeeController extends Controller {
                 return response()->json([
                     'is_error' => true,
                     'error' => 'No available fees',
-                    'type' => $type,
                 ]);
             }
         }
@@ -249,8 +202,8 @@ class FeeController extends Controller {
 
         foreach ($items as $item) {
 
-            $product_code = $item->name == 'senior_fee' ? Env('STRIPE_SENIOR_FEE_CODE') : Env('STRIPE_JUNIOR_FEE_CODE');
-            $price_id = $item->name == 'senior_fee' ? Env('STRIPE_SENIOR_FEE_PRICE') : Env('STRIPE_JUNIOR_FEE_PRICE');
+            $product_code = config('app.stripe.fee_code');
+            $price_id = config('app.stripe.fee_price');
             $price = $this->retrievePriceByPriceId($price_id);
 
             $order->items()->create([
@@ -295,8 +248,8 @@ class FeeController extends Controller {
 
         foreach ($items as $item) {
 
-            $product_code = $item->name == 'senior_fee' ? Env('STRIPE_SENIOR_FEE_CODE') : Env('STRIPE_JUNIOR_FEE_CODE');
-            $price_id = $item->name == 'senior_fee' ? Env('STRIPE_SENIOR_FEE_PRICE') : Env('STRIPE_JUNIOR_FEE_PRICE');
+            $product_code = config('app.stripe.fee_code');
+            $price_id = config('app.stripe.fee_price');
             $price = $this->retrievePriceByPriceId($price_id);
 
             $order->items()->create([
@@ -354,17 +307,17 @@ class FeeController extends Controller {
 
             foreach ($order->items as $item) {
                 $primaryAcademy = $user->primaryAcademy();
-                if(!$primaryAcademy) {
+                if (!$primaryAcademy) {
                     Log::error('Primary academy not found. Check for fees created for this order. - Order ID: ' . $order->id . ' - Item ID: ' . $item->id);
-                } 
+                }
 
                 for ($i = 0; $i < $item->quantity; $i++) {
                     Fee::create([
                         'user_id' => $order->user_id,
                         'academy_id' => $order->user->primaryAcademy()->id ?? 1,
-                        'type' => $item->product_name == 'senior_fee' ? 1 : 2,
+                        'type' => 3,
                         'start_date' => now(),
-                        'end_date' => now()->addYear(),
+                        'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
                         'auto_renew' => 0,
                         'unique_id' => Str::orderedUuid(),
                     ]);
@@ -412,10 +365,10 @@ class FeeController extends Controller {
                 Fee::create([
                     'user_id' => $order->user_id,
                     'academy_id' => $academyId,
-                    'type' => $item->product_name == 'senior_fee' ? 1 : 2,
+                    'type' => 3,
                     'start_date' => now(),
                     'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
-                    'auto_renew' => 1,
+                    'auto_renew' => 0,
                     'used' => 1,
                     'unique_id' => Str::orderedUuid(),
                 ]);
@@ -519,13 +472,13 @@ class FeeController extends Controller {
 
         foreach ($items as $item) {
 
-            $price = $item->name == 'senior_fee' ? 50 : 25;
+            $price = config('app.stripe.fee_price_numeral');
             $amount += $price;
 
             $order->items()->create([
                 'product_type' => 'fee',
                 'product_name' => $item->name,
-                'product_code' => $item->name == 'senior_fee' ? 'senior_fee' : 'junior_fee',
+                'product_code' => 'fee',
                 'quantity' => $item->quantity,
                 'price' => number_format($price * $item->quantity, 2),
                 'vat' => 0,
@@ -606,7 +559,7 @@ class FeeController extends Controller {
             $order->items()->create([
                 'product_type' => 'fee',
                 'product_name' => $item->name,
-                'product_code' => $item->name == 'senior_fee' ? 'senior_fee' : 'junior_fee',
+                'product_code' => 'fee',
                 'quantity' => $item->quantity,
                 'price' => number_format($amount, 2),
                 'vat' => 0,
@@ -703,7 +656,7 @@ class FeeController extends Controller {
                 Fee::create([
                     'user_id' => $order->user_id,
                     'academy_id' => $academyId,
-                    'type' => $item->product_name == 'senior_fee' ? 1 : 2,
+                    'type' => 3,
                     'start_date' => now(),
                     'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
                     'auto_renew' => 1,
@@ -778,7 +731,7 @@ class FeeController extends Controller {
                     Fee::create([
                         'user_id' => $order->user_id,
                         'academy_id' => $order->user->primaryAcademy()->id ?? 1,
-                        'type' => $item->product_name == 'senior_fee' ? 1 : 2,
+                        'type' => 3,
                         'start_date' => now(),
                         'end_date' => now()->addYear(),
                         'auto_renew' => 0,
@@ -846,13 +799,14 @@ class FeeController extends Controller {
 
         foreach ($items as $item) {
 
-            $price = $item->name == 'senior_fee' ? 50 : 25;
+            $price = config('app.stripe.fee_price_numeral');
+
             $amount += $price;
 
             $order->items()->create([
                 'product_type' => 'fee',
                 'product_name' => $item->name,
-                'product_code' => $item->name == 'senior_fee' ? 'senior_fee' : 'junior_fee',
+                'product_code' => 'fee',
                 'quantity' => $item->quantity,
                 'price' => number_format($price * $item->quantity, 2),
                 'vat' => 0,

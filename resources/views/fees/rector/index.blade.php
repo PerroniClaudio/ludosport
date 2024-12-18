@@ -48,8 +48,7 @@
                 <div class="p-6 text-background-900 dark:text-background-100" x-data="{
                     athletes_no_fees: {{ collect($athletes_no_fees) }},
                     athletes_add_fees: [],
-                    senior_fees_number: {{ $senior_fees_number }},
-                    junior_fees_number: {{ $junior_fees_number }},
+                    fees_number: {{ $fees_number }},
                     paginatedAthletes: [],
                     currentAthletePage: 1,
                     totalAthletePages: 1,
@@ -115,8 +114,7 @@
                             .then(data => {
                                 this.feesCheckData = data;
                 
-                                if (
-                                    ((this.feesCheckData.senior_fees - this.feesCheckData.senior_fees_consumed) >= 0) && ((this.feesCheckData.junior_fees - this.feesCheckData.junior_fees_consumed) >= 0)) {
+                                if ((this.feesCheckData.available_fees - this.feesCheckData.fees_consumed) >= 0) {
                                     this.$dispatch('open-modal', 'confirm-modal');
                                 } else {
                                     this.$dispatch('open-modal', 'error-modal');
@@ -169,19 +167,12 @@
                     <div class="grid grid-cols-3 gap-4 mb-4">
                         <div class="p-4 bg-background-100 dark:bg-background-700 rounded-lg">
                             <h4 class="text-background-800 dark:text-background-200 text-lg">
-                                {{ __('Available') }} {{ __('fees.senior_fees') }}</h4>
-                            <p class="text-primary-600 dark:text-primary-500 text-3xl" x-text="senior_fees_number">
+                                {{ __('fees.available_fees') }}</h4>
+                            <p class="text-primary-600 dark:text-primary-500 text-3xl" x-text="fees_number">
 
                             </p>
                         </div>
 
-                        <div class="p-4 bg-background-100 dark:bg-background-700 rounded-lg">
-                            <h4 class="text-background-800 dark:text-background-200 text-lg">
-                                {{ __('Available') }} {{ __('fees.junior_fees') }}</h4>
-                            <p class="text-primary-600 dark:text-primary-500 text-3xl" x-text="junior_fees_number">
-
-                            </p>
-                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mb-4">
@@ -208,9 +199,6 @@
                                             class="text-left bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
                                             {{ __('users.name') }}</th>
                                         <th
-                                            class="text-left bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                                            {{ __('fees.type_needed') }}</th>
-                                        <th
                                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
                                             {{ __('users.actions') }}</th>
                                     </tr>
@@ -220,8 +208,6 @@
                                         <tr>
                                             <td class="text-background-500 dark:text-background-300 text-sm"
                                                 x-text="row.fullname"></td>
-                                            <td class="text-background-500 dark:text-background-300 text-sm"
-                                                x-text="row.type_needed"></td>
                                             <td
                                                 class="text-background-500 dark:text-background-300 text-sm text-right p-1">
                                                 <button type="button" @click="addAthlete(row.id)">
@@ -297,9 +283,6 @@
                                             class="text-left bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
                                             {{ __('clan.name') }}</th>
                                         <th
-                                            class="text-left bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                                            {{ __('fees.type_needed') }}</th>
-                                        <th
                                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
                                             {{ __('users.actions') }}</th>
                                     </tr>
@@ -309,8 +292,6 @@
                                         <tr>
                                             <td class="text-background-500 dark:text-background-300 text-sm"
                                                 x-text="row.fullname"></td>
-                                            <td class="text-background-500 dark:text-background-300 text-sm"
-                                                x-text="row.type_needed"></td>
                                             <td
                                                 class="text-background-500 dark:text-background-300 text-sm text-right p-1">
                                                 <button type="button" @click="removeAthlete(row.id)">
@@ -344,13 +325,8 @@
                             </p>
 
                             <ul>
-                                <li x-show="feesCheckData.senior_fees_consumed > 0">
-                                    {{ __('fees.senior_fees_consumed') }}: <span
-                                        x-text="feesCheckData.senior_fees_consumed"></span>
-                                </li>
-                                <li x-show="feesCheckData.junior_fees_consumed > 0">
-                                    {{ __('fees.junior_fees_consumed') }}: <span
-                                        x-text="feesCheckData.junior_fees_consumed"></span>
+                                <li x-show="feesCheckData.fees_consumed > 0">
+                                    {{ __('fees.fees_consumed') }}: <span x-text="feesCheckData.fees_consumed"></span>
                                 </li>
                             </ul>
 
@@ -360,13 +336,10 @@
 
                             <ul>
                                 <li>
-                                    {{ __('fees.senior_fees') }}: <span
-                                        x-text="feesCheckData.senior_fees - feesCheckData.senior_fees_consumed"></span>
+                                    {{ __('fees.fees') }}: <span
+                                        x-text="feesCheckData.available_fees - feesCheckData.fees_consumed"></span>
                                 </li>
-                                <li>
-                                    {{ __('fees.junior_fees') }}: <span
-                                        x-text="feesCheckData.junior_fees - feesCheckData.junior_fees_consumed"></span>
-                                </li>
+
                             </ul>
 
                             <div class="flex justify-end">

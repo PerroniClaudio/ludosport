@@ -2,6 +2,7 @@
 
 return [
     'title' => 'Fees',
+    'fees' => 'Fees',
     'available_fees' => 'Available Fees',
     'fees_list' => 'Fees List',
     'purchase_fees' => 'Purchase Fees',
@@ -30,6 +31,7 @@ return [
     'associate_fees_message' => 'The following fees will be spent',
     'senior_fees_consumed' => 'Senior Fees Consumed',
     'junior_fees_consumed' => 'Junior Fees Consumed',
+    'fees_consumed' => 'Fees Consumed',
     'associate_fees_message_remaining' => 'Fee balance after the transaction',
     'associate_fees_error' => 'There are no fees available for the selected users, please purchase more.',
     'close' => 'Close',
@@ -37,4 +39,5 @@ return [
     'is_business' => 'Check if you are a business',
     'business_name' => 'Business Name',
     'insert_business_name' => 'Insert Business Name',
+    'available_fees' => 'Available Fees',
 ];
