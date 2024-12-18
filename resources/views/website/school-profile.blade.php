@@ -38,6 +38,14 @@
                                 {{ __('users.rector') }}: {{ $rector }}
                             </span>
                         </div>
+                        <div class="flex items-center gap-2">
+                            <x-lucide-mail class="h-5 w-5 text-background-500 dark:text-background-400" />
+                            <span class="text-sm text-background-500 dark:text-background-400">
+                                {{ __('school.school_email') }}: 
+                                <a href="mailto:{{ $school->email }}"
+                                class="text-primary-500">{{ $school->email }}</a>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </section>

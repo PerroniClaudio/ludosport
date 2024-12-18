@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Language;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,19 @@ class ProfileController extends Controller {
         $request->user()->fill($request->validated());
 
         $surname = $request->surname;
-        $battle_name = $request->battle_name ?? ($request->name . $request->surname . rand(10, 99));
+        $battle_name = $request->battle_name ?? $request->user()->generateBattleName();
+
+        // Dato che viene usato per vedere il profilo dell'utente, il battle name deve essere unico.
+        // Se esiste già gli lascia il suo (se non è doppio) oppure ne genera uno nuovo.
+        $battleNameError = false;
+        if(User::where('battle_name', $battle_name)->whereNot('id', $request->user()->id)->exists()) {
+            if($battle_name != $request->user()->battle_name && !User::where('battle_name', $request->user()->battle_name)->whereNot('id', $request->user()->id)->exists()) {
+                $battle_name = $request->user()->battle_name;
+            } else {
+                $battle_name = $request->user()->generateBattleName();
+            }
+            $battleNameError = true;
+        }
 
         $request->user()->update([
             'surname' => $surname,
@@ -41,6 +54,10 @@ class ProfileController extends Controller {
         }
 
         $request->user()->save();
+
+        if($battleNameError) {
+            return Redirect::route('profile.edit')->with('status', 'Profile updated! Battle name already exists.');
+        }
 
         return Redirect::route('profile.edit')->with('status', 'Profile updated!');
     }
