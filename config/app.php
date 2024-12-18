@@ -131,6 +131,12 @@ return [
         'bank' => env('WIRE_TRANSFER_BANK', 'Banca di LudoSport'),
     ],
 
+    'stripe' => [
+        'fee_price' => env('STRIPE_FEE_PRICE', 'price_xyz'),
+        'fee_code' => env('STRIPE_FEE', 'price_xyz'),
+        'fee_price_numeral' => env('STRIPE_FEE_PRICE_NUMERAL', 0),
+    ],
+
     'google' => [
         'maps_key' => env('MAPS_GOOGLE_MAPS_ACCESS_TOKEN', ''),
     ]

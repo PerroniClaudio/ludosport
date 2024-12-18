@@ -9,10 +9,8 @@
 
 
     <div class="py-12" x-data="{
-        seniorFees: 0,
-        juniorFees: 0,
-        seniorFeesPrice: 50,
-        juniorFeesPrice: 25,
+        fees_count: 0,
+        fee_price: {{ $fee_price }},
         totalPrice: 0,
         name: 'Name',
         surname: 'Surname',
@@ -34,42 +32,22 @@
                 this.shouldShowSdi = false
             }
         },
-        addSeniorFees() {
-            this.seniorFees++;
+        addFee() {
+            this.fees_count++;
     
-            if (this.seniorFees > 99) {
-                this.seniorFees = 99;
+            if (this.fees_count > 99) {
+                this.fees_count = 99;
             }
     
             this.calculateTotalPrice()
         },
-        minusSeniorFees() {
-            if (this.seniorFees > 0) {
-                this.seniorFees--;
+        minusFee() {
+            if (this.fees_count > 0) {
+                this.fees_count--;
             }
     
-            if (this.seniorFees > 99) {
-                this.seniorFees = 99;
-            }
-    
-            this.calculateTotalPrice()
-        },
-        addJuniorFees() {
-            this.juniorFees++;
-    
-            if (this.juniorFees > 99) {
-                this.juniorFees = 99;
-            }
-    
-            this.calculateTotalPrice()
-        },
-        minusJuniorFees() {
-            if (this.juniorFees > 0) {
-                this.juniorFees--;
-            }
-    
-            if (this.juniorFees > 99) {
-                this.juniorFees = 99;
+            if (this.fees_count > 99) {
+                this.fees_count = 99;
             }
     
             this.calculateTotalPrice()
@@ -88,7 +66,7 @@
             }
         },
         calculateTotalPrice() {
-            this.totalPrice = this.seniorFees * this.seniorFeesPrice + this.juniorFees * this.juniorFeesPrice;
+            this.totalPrice = this.fees_count * this.fee_price;
         },
         fetchInvoiceData() {
             const url = `/rector/invoices/user-data/{{ Auth()->user()->id }}`
@@ -154,17 +132,10 @@
             const url = `/rector/fees/stripe/checkout`
             let items = [];
     
-            if (this.seniorFees > 0) {
+            if (this.fees_count > 0) {
                 items.push({
-                    'name': 'senior_fee',
-                    'quantity': this.seniorFees,
-                })
-            }
-    
-            if (this.juniorFees > 0) {
-                items.push({
-                    'name': 'junior_fee',
-                    'quantity': this.juniorFees,
+                    'name': 'fee',
+                    'quantity': this.fees_count,
                 })
             }
     
@@ -181,22 +152,13 @@
     
             this.saveInvoiceData()
     
-    
-    
             const url = `/rector/fees/paypal/checkout`
             let items = [];
     
-            if (this.seniorFees > 0) {
+            if (this.fees_count > 0) {
                 items.push({
-                    'name': 'senior_fee',
-                    'quantity': this.seniorFees,
-                })
-            }
-    
-            if (this.juniorFees > 0) {
-                items.push({
-                    'name': 'junior_fee',
-                    'quantity': this.juniorFees,
+                    'name': 'fee',
+                    'quantity': this.fees_count,
                 })
             }
     
@@ -223,18 +185,10 @@
             const url = `/shop/fees/wire-transfer`
             let items = [];
     
-    
-            if (this.seniorFees > 0) {
+            if (this.fees_count > 0) {
                 items.push({
-                    'name': 'senior_fee',
-                    'quantity': this.seniorFees,
-                })
-            }
-    
-            if (this.juniorFees > 0) {
-                items.push({
-                    'name': 'junior_fee',
-                    'quantity': this.juniorFees,
+                    'name': 'fee',
+                    'quantity': this.fees_count,
                 })
             }
     
@@ -245,9 +199,6 @@
             })
     
             window.location.href = `${url}?${params}`
-        },
-        test() {
-            console.log('test')
         },
         init() {
             this.fetchInvoiceData()
@@ -287,52 +238,26 @@
                             </label>
                         </div>
 
-                        <div class="flex flex-col gap-4">
-                            <div class="flex justify-between items-center text-background-800 dark:text-background-200">
-                                <p class="text-lg">{{ __('fees.senior_fees') }}</p>
-                                <div class="flex w-32">
-                                    <div class="bg-background-700 flex flex-col items-center justify-center px-2 rounded-l-md"
-                                        @click="addSeniorFees">
-                                        <x-lucide-plus
-                                            class="h-6 w-6 text-background-800 dark:text-background-200 hover:text-primary-500 cursor-pointer"
-                                            id="senior_fees_plus" />
-                                    </div>
-                                    <div>
-                                        <input type="number" name="senior_fees" id="senior_fees_number" value="0"
-                                            x-model="seniorFees" x-on:keyup="validateNumber($event)" min="0"
-                                            max="99"
-                                            class="w-full text-center border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
-                                    </div>
-                                    <div class="bg-background-700 flex flex-col items-center justify-center px-2 rounded-r-md"
-                                        @click="minusSeniorFees">
-                                        <x-lucide-minus
-                                            class="h-6 w-6 text-background-800 dark:text-background-200 hover:text-primary-500 cursor-pointer"
-                                            id="senior_fees_plus" />
-                                    </div>
+                        <div class="flex justify-between items-center text-background-800 dark:text-background-200">
+                            <p class="text-lg">{{ __('fees.fees') }}</p>
+                            <div class="flex w-32">
+                                <div class="bg-background-700 flex flex-col items-center justify-center px-2 rounded-l-md"
+                                    @click="addFee">
+                                    <x-lucide-plus
+                                        class="h-6 w-6 text-background-800 dark:text-background-200 hover:text-primary-500 cursor-pointer"
+                                        id="fees_plus" />
                                 </div>
-                            </div>
-                            <div class="flex justify-between items-center text-background-800 dark:text-background-200">
-                                <p class="text-lg">{{ __('fees.junior_fees') }}</p>
-                                <div class="flex w-32">
-                                    <div class="bg-background-700 flex flex-col items-center justify-center px-2 rounded-l-md"
-                                        @click="addJuniorFees">
-                                        <x-lucide-plus
-                                            class="h-6 w-6 text-background-800 dark:text-background-200 hover:text-primary-500 cursor-pointer"
-                                            id="junior_fees_plus" />
-                                    </div>
-                                    <div>
-                                        <input type="text" name="junior_fees" id="junior_fees_number" value="0"
-                                            x-model="juniorFees" x-on:keyup="validateNumber($event)" min="0"
-                                            max="99"
-                                            class="w-full text-center border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
-                                    </div>
-                                    <div class="bg-background-700 flex flex-col items-center justify-center px-2 rounded-r-md"
-                                        @click="minusJuniorFees">
-
-                                        <x-lucide-minus
-                                            class="h-6 w-6 text-background-800 dark:text-background-200 hover:text-primary-500 cursor-pointer"
-                                            id="junior_fees_plus" />
-                                    </div>
+                                <div>
+                                    <input type="number" name="fees" id="fees_number" value="0"
+                                        x-model="fees_count" x-on:keyup="validateNumber($event)" min="0"
+                                        max="99"
+                                        class="w-full text-center border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                </div>
+                                <div class="bg-background-700 flex flex-col items-center justify-center px-2 rounded-r-md"
+                                    @click="minusFee">
+                                    <x-lucide-minus
+                                        class="h-6 w-6 text-background-800 dark:text-background-200 hover:text-primary-500 cursor-pointer"
+                                        id="fees_minus" />
                                 </div>
                             </div>
                         </div>
