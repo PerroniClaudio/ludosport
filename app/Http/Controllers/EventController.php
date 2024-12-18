@@ -980,9 +980,10 @@ class EventController extends Controller {
 
         foreach ($events as $key => $value) {
 
-            if (in_array($value['nation']['id'], $nations_ids)) {
-                continue;
-            }
+            // Non so perchè c'era questo controllo, ma lo tolgo perchè blocca la generazione degli indirizzi
+            // if (in_array($value['nation']['id'], $nations_ids)) {
+            //     continue;
+            // }
 
             $events[$key]['full_address'] = $value['address'] . ", " .  $value['postal_code'] . ", " .  $value['city'] . ", " .  $value['nation']['name'];
             $nations[] = [
