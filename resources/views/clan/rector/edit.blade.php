@@ -16,13 +16,12 @@
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                             :value="$clan->name" placeholder="{{ fake()->company() }}" />
 
-                        {{-- <x-clan.school :selectedSchoolId="$clan->school_id" :selectedSchool="$clan->school->name" /> --}}
                         <x-clan.rector.school :selectedSchoolId="$clan->school_id" :selectedSchool="$clan->school->name" />
                         <x-clan.weapon-form :selected_weapon="$clan->weaponform" :available_weapons="$available_weapons" />
 
                     </div>
 
-                    <div class="fixed bottom-8 right-32">
+                    <div class="fixed bottom-8 right-32 z-20">
                         <x-primary-button type="submit">
                             <x-lucide-save class="w-6 h-6 text-white" />
                         </x-primary-button>
