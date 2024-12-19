@@ -408,7 +408,7 @@ class AcademyController extends Controller {
             // Se non ha accademie come personnel viene assegnato a No academy. Se si usa il codice più giù, si può rimuovere questo
             $personnel->academies()->syncWithoutDetaching(1);
             $personnel->setPrimaryAcademy(1);
-            Log::channel('academy')->info('Personnel associated with academy', [
+            Log::channel('academy')->info('Personnel removed from academy', [
                 'user_id' => $personnel->id,
                 'academy_id' => 1,
                 'made_by' => $authUser->id,
@@ -864,7 +864,8 @@ class AcademyController extends Controller {
                 $authorized = true;
                 break;
             case 'rector': // non autorizzato se non è la sua accademia
-                if (!$isStrict && ($authUser->primaryAcademy() != null) && $authUser->primaryAcademy()->id == $academy->id) {
+                // if (!$isStrict && ($authUser->primaryAcademy() != null) && $authUser->primaryAcademy()->id == $academy->id) {
+                if (!$isStrict && ($academy->rector() && ($academy->rector()->id == $authUser->id))) {
                     $authorized = true;
                 }
                 break;

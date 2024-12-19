@@ -695,8 +695,11 @@ class User extends Authenticatable implements MustVerifyEmail {
         ]);
     }
 
-    // Rimuove tutte le associazioni del personnel la scuola indicata e i rispettivi corsi
+    // Rimuove tutte le associazioni del personnel con la scuola indicata e i rispettivi corsi
     public function removeSchoolPersonnelAssociations($schoolToRemove = null) {
+        if ($schoolToRemove == null) {
+            return;
+        }
         $authUser = User::find(auth()->user()->id);
         // Chi usa la funzione ha già il controllo sull'autorizzazione
         // $authRole = $authUser->getRole();
@@ -740,6 +743,52 @@ class User extends Authenticatable implements MustVerifyEmail {
             'schools' => $removedSchoolsIds,
             'courses' => $removedCoursesIds,
         ]);
+    }
+    
+    // Rimuove tutte le associazioni del personnel con la scuola indicata e i rispettivi corsi
+    public function removeClanPersonnelAssociations($clanToRemove = null) {
+        if ($clanToRemove == null) {
+            return;
+        }
+        $authUser = User::find(auth()->user()->id);
+        // Chi usa la funzione ha già il controllo sull'autorizzazione
+        // $authRole = $authUser->getRole();
+
+        $removedCourse = $this->clansPersonnel()->where('clan_id', $clanToRemove->id)->first();
+        if ($removedCourse) {
+            $this->clansPersonnel()->detach($removedCourse->id);
+            $removedCourseId = $removedCourse->id;
+    
+            // Metto tutti i dati su tutti e tre i canali. Si può modificare in futuro
+            Log::channel('user')->info('Removed personnel associations', [
+                'made_by' => $authUser->id,
+                'personnel' => $this->id,
+                'courses' => [$removedCourseId],
+            ]);
+        }
+    }
+
+    // Rimuove l'associazione dell'atleta con la scuola indicata e i rispettivi corsi
+    public function removeClanAthleteAssociations($clanToRemove = null) {
+        if ($clanToRemove == null) {
+            return;
+        }
+        $authUser = User::find(auth()->user()->id);
+        // Chi usa la funzione ha già il controllo sull'autorizzazione
+        // $authRole = $authUser->getRole();
+
+        $removedCourse = $this->clans()->where('clan_id', $clanToRemove->id)->first();
+        if ($removedCourse) {
+            $this->clans()->detach($removedCourse->id);
+            $removedCourseId = $removedCourse->id;
+            
+            // Metto tutti i dati su tutti e tre i canali. Si può modificare in futuro
+            Log::channel('user')->info('Removed athlete associations', [
+                'made_by' => $authUser->id,
+                'athlete' => $this->id,
+                'courses' => [$removedCourseId],
+            ]);
+        }
     }
 
     // Usatp negli import per capire l'autorizzazione per associazioni di atleti ad accademie, scuole e corsi. la parte di istruttore e tecnico non mi interessa per ora

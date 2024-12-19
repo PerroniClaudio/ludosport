@@ -245,7 +245,7 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.personnel') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        <x-school.personnel :school="$school" :personnel="$personnel" />
+                        <x-school.personnel :school="$school" :personnel="$personnel" :associatedPersonnel="$associated_personnel" />
                         @if ($authRole === 'admin' || $authRole === 'rector')
                             <x-school.create-user :school="$school->id" type="personnel" :roles="$editable_roles" />
                         @endif
@@ -293,7 +293,7 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.athletes') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        <x-school.athletes :school="$school" :athletes="$athletes" />
+                        <x-school.athletes :school="$school" :athletes="$athletes" :associatedAthletes="$associated_athletes" />
                         <x-school.create-user :school="$school->id" type="athlete" />
                     </div>
                 </div>

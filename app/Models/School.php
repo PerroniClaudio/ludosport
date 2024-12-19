@@ -62,12 +62,13 @@ class School extends Model {
                 return $r;
             }
         }
+        // Per ora si considera preside solo chi ha l'accademia come principale.
         // Altrimenti cerca tra tutto il personale (anche se non ha la scuola come principale)
-        foreach ($deans as $r) {
-            if ($r->schools->firstWhere('id', $this->id)) {
-                return $r;
-            }
-        }
+        // foreach ($deans as $r) {
+        //     if ($r->schools->firstWhere('id', $this->id)) {
+        //         return $r;
+        //     }
+        // }
         return null;
     }
 }

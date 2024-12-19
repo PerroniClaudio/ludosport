@@ -1,8 +1,6 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use GPBMetadata\Google\Protobuf\Api;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
@@ -116,8 +114,10 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/academies/{academy/schools/create', [App\Http\Controllers\SchoolController::class, 'storeacademy'])->name('academies.schools.create');
     Route::post('/academies/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'addSchool'])->name('academies.schools.store');
     Route::post('/academies/{academy}/users/create', [App\Http\Controllers\UserController::class, 'storeForAcademy'])->name('academies.users.create');
-    Route::post('/academies/{academy}/personnel', [App\Http\Controllers\AcademyController::class, 'addPersonnel'])->name('academies.personnel.store');
-    Route::post('/academies/{academy}/athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('academies.athlete.store');
+    Route::post('/academies/{academy}/add-personnel', [App\Http\Controllers\AcademyController::class, 'addPersonnel'])->name('academies.personnel.store');
+    Route::post('/academies/{academy}/remove-personnel', [App\Http\Controllers\AcademyController::class, 'removePersonnel'])->name('academies.personnel.remove');
+    Route::post('/academies/{academy}/add-athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('academies.athlete.store');
+    Route::post('/academies/{academy}/remove-athlete', [App\Http\Controllers\AcademyController::class, 'removeAthlete'])->name('academies.athlete.remove');
 
     Route::get('/academies/{academy}/users-search', [App\Http\Controllers\AcademyController::class, 'searchUsers'])->name('academies.users-search');
     Route::put('/academies/{academy}/picture', [App\Http\Controllers\AcademyController::class, 'picture'])->name('academies.picture.update');
@@ -146,8 +146,10 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/schools/{school}/clan/create', [App\Http\Controllers\ClanController::class, 'storeForSchool'])->name('schools.clan.create');
 
     Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('schools.clans.store');
-    Route::post('/schools/{school}/personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('schools.personnel.store');
+    Route::post('/schools/{school}/add-personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('schools.personnel.store');
+    Route::post('/schools/{school}/remove-personnel', [App\Http\Controllers\SchoolController::class, 'removePersonnel'])->name('schools.personnel.remove');
     Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('schools.athlete.store');
+    Route::post('/schools/{school}/remove-athlete', [App\Http\Controllers\SchoolController::class, 'removeAthlete'])->name('schools.athlete.remove');
 
     Route::get('/schools/{school}/users-search', [App\Http\Controllers\SchoolController::class, 'searchUsers'])->name('schools.users-search');
 });
@@ -172,8 +174,10 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/courses', [App\Http\Controllers\ClanController::class, 'store'])->name('clans.store');
     Route::post('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'update'])->name('clans.update');
     Route::post('/courses/{clan}/user/create', [App\Http\Controllers\UserController::class, 'storeForClan'])->name('clans.users.create');
-    Route::post('/courses/{clan}/instructors', [App\Http\Controllers\ClanController::class, 'addInstructor'])->name('clans.instructors.store');
-    Route::post('/courses/{clan}/athlete', [App\Http\Controllers\ClanController::class, 'addAthlete'])->name('clans.athletes.store');
+    Route::post('/courses/{clan}/add-instructors', [App\Http\Controllers\ClanController::class, 'addInstructor'])->name('clans.instructors.store');
+    Route::post('/courses/{clan}/remove-instructors', [App\Http\Controllers\ClanController::class, 'removeInstructor'])->name('clans.instructors.remove');
+    Route::post('/courses/{clan}/add-athlete', [App\Http\Controllers\ClanController::class, 'addAthlete'])->name('clans.athletes.store');
+    Route::post('/courses/{clan}/remove-athlete', [App\Http\Controllers\ClanController::class, 'removeAthlete'])->name('clans.athletes.remove');
 });
 
 /** Eventi */
@@ -351,4 +355,11 @@ Route::group([], function () {
     Route::get('/healthcheck', function () {
         return 'healthcheck';
     })->name('healthcheck');
+});
+
+
+Route::group([], function () {
+    Route::get('/test', function () {
+        return 'test';
+    });
 });

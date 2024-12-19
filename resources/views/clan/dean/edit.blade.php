@@ -34,7 +34,7 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('clan.instructors') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        <x-clan.instructors :clan="$clan" :instructors="$instructors" />
+                        <x-clan.instructors :clan="$clan" :instructors="$instructors" :associatedInstructors="$associated_instructors" />
                         {{-- <x-clan.create-user :clan="$clan->id" type="personnel" :roles="$editable_roles" /> --}}
                     </div>
                 </div>
@@ -78,7 +78,7 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('clan.athletes') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        <x-clan.athletes :clan="$clan" :athletes="$athletes" />
+                        <x-clan.athletes :clan="$clan" :athletes="$athletes" :associatedAthletes="$associated_athletes" />
                         <x-clan.create-user :clan="$clan->id" type="athlete" />
                     </div>
                 </div>

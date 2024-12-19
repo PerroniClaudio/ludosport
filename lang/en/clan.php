@@ -9,6 +9,8 @@ return [
     'athletes' => 'Athletes',
     'associate_instructors' => 'Associate Instructors',
     'associate_athletes' => 'Associate Athletes',
+    'remove_instructors' => 'Remove Instructors',
+    'remove_athletes' => 'Remove Athletes',
     'disable_clan' => 'Disable Course',
     'disable_clan_confirmation' => 'Are you sure you want to disable this course?',
     'disable_clan_message' => 'Once a course is disabled it will not be possible to associate new instructors or athletes and it won\'t be displayed on the main page.',
@@ -21,4 +23,6 @@ return [
     'quick_create_athlete' => 'Quick Create Athlete',
     'go_to_edit' => 'Go to Edit',
     'edit_clan' => 'Edit Course #:id',
+    'select' => 'Select',
+    'remove' => 'Remove',
 ];

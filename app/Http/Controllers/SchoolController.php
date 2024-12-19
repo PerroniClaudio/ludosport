@@ -625,6 +625,29 @@ class SchoolController extends Controller {
 
         return redirect()->route($redirectRoute, $school)->with('success', 'Personnel added successfully!');
     }
+    
+    public function removePersonnel(School $school, Request $request) {
+        //
+        if (!$this->checkPermission($school)) {
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
+
+        $personnel = User::find($request->personnel_id);
+        $personnel->removeSchoolPersonnelAssociations($school);
+
+        // Se non ha scuole associate come personale gli associa no school
+        if ($personnel->schools->count() == 0) {
+            $noSchool = School::where('slug', 'no-school')->first();
+            if ($noSchool) {
+                $personnel->schools()->syncWithoutDetaching([$noSchool->id]);
+            }
+        }
+
+        $authRole = User::find(auth()->user()->id)->getRole();
+        $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
+
+        return redirect()->route($redirectRoute, $school)->with('success', 'Personnel removed successfully!');
+    }
 
     public function addAthlete(School $school, Request $request) {
         $authUser = User::find(auth()->user()->id);
@@ -674,6 +697,32 @@ class SchoolController extends Controller {
         $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
 
         return redirect()->route($redirectRoute, $school)->with('success', 'Athlete added successfully!');
+    }
+    
+    public function removeAthlete(School $school, Request $request) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+
+        if (!$this->checkPermission($school)) {
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
+
+        // Vanno rimossi anche i collegamenti inferiori (corsi)
+        $athlete = User::find($request->athlete_id);
+        $athlete->removeSchoolAthleteAssociations($school);
+
+        // Se non ha scuole associate come atleta gli associa no school
+        if ($athlete->schools->count() == 0) {
+            $noSchool = School::where('slug', 'no-school')->first();
+            if ($noSchool) {
+                $athlete->schools()->syncWithoutDetaching([$noSchool->id]);
+            }
+        }
+
+        $authRole = User::find(auth()->user()->id)->getRole();
+        $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
+
+        return redirect()->route($redirectRoute, $school)->with('success', 'Athlete removed successfully!');
     }
 
     public function all(Request $request) {
@@ -950,12 +999,13 @@ class SchoolController extends Controller {
                 // }
                 break;
             case 'dean':
-                if (($authUser->id != ($school->dean()->id ?? null)) || $isStrict) {
+                // if (($authUser->id != ($school->dean()->id ?? null)) || $isStrict) {
+                if (!$school->dean() || ($school->dean()->id != $authUser->id) || $isStrict) {
                     $authorized = false;
                 }
                 break;
             case 'manager': // non autorizzato se la scuola non è associata a lui o se strict è true
-                if (($authUser->primarySchool()->id ?? null) != $school->id || $isStrict) {
+                if ((($authUser->primarySchool()->id ?? null) != $school->id) || $isStrict) {
                     $authorized = false;
                 }
                 break;

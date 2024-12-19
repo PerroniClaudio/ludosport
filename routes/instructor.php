@@ -59,8 +59,10 @@ Route::prefix('instructor')->middleware('auth')->middleware('role:admin,instruct
         Route::post('/courses', [App\Http\Controllers\ClanController::class, 'store'])->name('instructor.clans.store');
         Route::post('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'update'])->name('instructor.clans.update');
         Route::post('/courses/{clan}/user/create', [App\Http\Controllers\UserController::class, 'storeForClan'])->name('instructor.clans.users.create');
-        Route::post('/courses/{clan}/instructors', [App\Http\Controllers\ClanController::class, 'addInstructor'])->name('instructor.clans.instructors.store');
-        Route::post('/courses/{clan}/athlete', [App\Http\Controllers\ClanController::class, 'addAthlete'])->name('instructor.clans.athletes.store');
+        Route::post('/courses/{clan}/add-instructors', [App\Http\Controllers\ClanController::class, 'addInstructor'])->name('instructor.clans.instructors.store');
+        Route::post('/courses/{clan}/remove-instructors', [App\Http\Controllers\ClanController::class, 'removeInstructor'])->name('instructor.clans.instructors.remove');
+        Route::post('/courses/{clan}/add-athlete', [App\Http\Controllers\ClanController::class, 'addAthlete'])->name('instructor.clans.athletes.store');
+        Route::post('/courses/{clan}/remove-athlete', [App\Http\Controllers\ClanController::class, 'removeAthlete'])->name('instructor.clans.athletes.remove');
     });
 
     Route::get('announcements', [App\Http\Controllers\AnnouncementController::class, 'ownRoles'])->name('instructor.announcements.index');

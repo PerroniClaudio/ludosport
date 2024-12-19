@@ -110,8 +110,10 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
     Route::post('/schools/{school}/clan/create', [App\Http\Controllers\ClanController::class, 'storeForSchool'])->name('rector.schools.clan.create');
 
     Route::post('/schools/{school}/clans', [App\Http\Controllers\SchoolController::class, 'addClan'])->name('rector.schools.clans.store');
-    Route::post('/schools/{school}/personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('rector.schools.personnel.store');
+    Route::post('/schools/{school}/add-personnel', [App\Http\Controllers\SchoolController::class, 'addPersonnel'])->name('rector.schools.personnel.store');
+    Route::post('/schools/{school}/remove-personnel', [App\Http\Controllers\SchoolController::class, 'removePersonnel'])->name('rector.schools.personnel.remove');
     Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('rector.schools.athlete.store');
+    Route::post('/schools/{school}/remove-athlete', [App\Http\Controllers\SchoolController::class, 'removeAthlete'])->name('rector.schools.athlete.remove');
 
     Route::get('/schools/{school}/users-search', [App\Http\Controllers\SchoolController::class, 'searchUsers'])->name('rector.schools.users-search');
   });
@@ -133,8 +135,10 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
     Route::post('/courses', [App\Http\Controllers\ClanController::class, 'store'])->name('rector.clans.store');
     Route::post('/courses/{clan}', [App\Http\Controllers\ClanController::class, 'update'])->name('rector.clans.update');
     Route::post('/courses/{clan}/user/create', [App\Http\Controllers\UserController::class, 'storeForClan'])->name('rector.clans.users.create');
-    Route::post('/courses/{clan}/instructors', [App\Http\Controllers\ClanController::class, 'addInstructor'])->name('rector.clans.instructors.store');
-    Route::post('/courses/{clan}/athlete', [App\Http\Controllers\ClanController::class, 'addAthlete'])->name('rector.clans.athletes.store');
+    Route::post('/courses/{clan}/add-instructors', [App\Http\Controllers\ClanController::class, 'addInstructor'])->name('rector.clans.instructors.store');
+    Route::post('/courses/{clan}/remove-instructors', [App\Http\Controllers\ClanController::class, 'removeInstructor'])->name('rector.clans.instructors.remove');
+    Route::post('/courses/{clan}/add-athlete', [App\Http\Controllers\ClanController::class, 'addAthlete'])->name('rector.clans.athletes.store');
+    Route::post('/courses/{clan}/remove-athlete', [App\Http\Controllers\ClanController::class, 'removeAthlete'])->name('rector.clans.athletes.remove');
   });
 
 

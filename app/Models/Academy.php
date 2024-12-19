@@ -64,12 +64,13 @@ class Academy extends Model {
                 return $r;
             }
         }
+        // Per ora si considera rettore solo chi ha l'accademia come principale.
         // Altrimenti cerca tra tutto il personale (anche se non ha l'accademia come principale)
-        foreach ($rectors as $r) {
-            if ($r->academies->firstWhere('id', $this->id)) {
-                return $r;
-            }
-        }
+        // foreach ($rectors as $r) {
+        //     if ($r->academies->firstWhere('id', $this->id)) {
+        //         return $r;
+        //     }
+        // }
         return null;
     }
 }
