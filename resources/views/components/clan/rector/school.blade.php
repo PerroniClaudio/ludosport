@@ -5,8 +5,9 @@
 ])
 
 <div x-data="{
+    currentSchoolId: '{{ $selectedSchoolId }}',
     selectedSchoolId: '{{ $selectedSchoolId }}',
-    selectedSchool: '{{ $selectedSchool }}',
+    selectedSchool: '{{ addslashes($selectedSchool) }}',
     availableSchools: {{ auth()->user()->primaryAcademy()->schools ?? [] }},
     paginatedSchools: [],
     currentPage: 1,
@@ -53,9 +54,8 @@
     <div class="flex items-center gap-2">
         <input type="hidden" name="school_id" x-model="selectedSchoolId">
         <x-text-input disabled name="School" class="flex-1" type="text" x-model="selectedSchool" />
-        {{-- Si è deciso di non modificare la scuola di appartenenza per evitare problemi con le associazioni degli atleti eventualmente presenti --}}
-        
-        @if ($isCreating && in_array(auth()->user()->getRole(), ['admin', 'rector']))
+                
+        @if (in_array(auth()->user()->getRole(), ['admin', 'rector']))
             <div class="text-primary-500 hover:bg-background-500 dark:hover:bg-background-900 p-2 rounded-full cursor-pointer"
                 x-on:click.prevent="$dispatch('open-modal', 'selected-school-modal')">
                 <x-lucide-search class="w-6 h-6 text-primary-500 dark:text-primary-400" />
@@ -168,5 +168,29 @@
         @endif
 
     </div>
+
+    <template x-if="{{!$isCreating}} && (selectedSchoolId != currentSchoolId)">
+        <div class="mt-2">
+            <div class="flex gap-2">
+                <x-input-label for="transfer_athletes" value="{{ __('clan.transfer_athletes') }}" />
+                <div class="has-tooltip">
+                    <x-lucide-info class="h-4 text-background-300" />
+                    <div class="tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 -mt-8">
+                        {{ __('clan.transfer_athletes_tooltip') }}
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm">
+                <label class="flex items-center w-fit cursor-pointer">
+                    <input type="radio" name="transfer_athletes" value="yes" required>
+                    <span class="ml-2">{{ __('clan.yes') }}</span>
+                </label>
+                <label class="flex items-center w-fit cursor-pointer">
+                    <input type="radio" name="transfer_athletes" value="no" required>
+                    <span class="ml-2">{{ __('clan.no') }}</span>
+                </label>
+            </div>
+        </div>
+    </template>
 
 </div>

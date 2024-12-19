@@ -25,4 +25,8 @@ return [
     'edit_clan' => 'Edit Course #:id',
     'select' => 'Select',
     'remove' => 'Remove',
+    'transfer_athletes' => 'Do you want to move the associated athletes too?',
+    'transfer_athletes_tooltip' => 'Select yes if you want to move the associated athletes to the new school. Otherwise, select no and they will be removed from the course.',
+    'yes' => 'Yes',
+    'no' => 'No',
 ];

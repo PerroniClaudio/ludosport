@@ -384,6 +384,15 @@ class ClanController extends Controller {
             'school_id' => 'required',
         ]);
 
+        if ($request->school_id != $clan->school_id) {
+            $request->validate([
+                'transfer_athletes' => 'required'
+            ]);
+            if(!in_array($authRole, ['admin', 'rector'])){
+                return redirect()->route('dashboard')->with('error', 'You are not authorized to move courses between schools.');
+            }
+        }
+
         switch ($authRole) {
             case 'admin':
                 break;
@@ -392,23 +401,68 @@ class ClanController extends Controller {
                 $oldSchool = $primaryAcademy ? $primaryAcademy->schools->where('id', $clan->school_id)->first() : null;
                 $newSchool = $primaryAcademy ? $primaryAcademy->schools->where('id', $request->school_id)->first() : null;
                 if (!$oldSchool || !$newSchool) {
-                    return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
+                    return redirect()->route('dashboard')->with('error', 'You are not authorized to move courses between these schools.');
                 }
                 break;
             case 'dean':
             case 'manager':
                 $school = $authUser->primarySchool();
-                if (!$school || $school->id != $clan->school_id || $school->id != $request->school_id) {
-                    return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
+                if (!$school || ($school->id != $clan->school_id) || ($school->id != $request->school_id)) {
+                    return redirect()->route('dashboard')->with('error', 'You are not authorized to make this change.');
                 }
                 break;
             default:
-                return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
+                return redirect()->route('dashboard')->with('error', 'You are not authorized to make this change.');
                 break;
         }
 
         if ($request->weapon_form_id == 0) {
             $request->weapon_form_id = null;
+        }
+        
+        if($request->school_id != $clan->school_id){
+            if(!in_array($request->transfer_athletes, ['yes', 'no'])){
+                return back()->with('error', 'Invalid value for transfer_athletes.');
+            }
+            if($request->transfer_athletes == 'yes'){
+                // La scuola cambia e si vogliono spostare anche gli atleti
+                $oldSchool = School::find($clan->school_id);
+                $newSchool = School::find($request->school_id);
+                $athletes = $clan->users()->get();
+                $instructors = $clan->personnel()->get();
+
+                // Modificando prima la scuola del corso si mantengono le associazioni con gli atleti, che in questo caso non vanno eliminate
+                $clan->update([
+                    'school_id' => $request->school_id,
+                ]);
+
+                if($oldSchool->academy->id != $newSchool->academy->id){
+                    // Cambia anche l'accademia, quindi si eliminano associazioni con accademie, scuole e corsi
+                    foreach($athletes as $athlete){
+                        // Mettiamo l'eccezione per evitare di rimuovere le associazioni col corso spostato.
+                        $athlete->removeAcademiesAthleteAssociations($newSchool->academy); 
+                        $athlete->academyAthletes()->syncWithoutDetaching($newSchool->academy->id);
+                        $athlete->schoolAthletes()->syncWithoutDetaching($newSchool->id);
+                    }
+                    // Vanno associati gli istruttori anche all'altra accademia e scuola
+                    foreach($instructors as $instructor){
+                        $instructor->academies()->syncWithoutDetaching($newSchool->academy->id);
+                        $instructor->schools()->syncWithoutDetaching($newSchool->id);
+                    }
+                } else {
+                    // L'accademia non cambia, quindi si aggiungono solo le associazioni con la nuova scuola
+                    foreach($athletes as $athlete){
+                        $athlete->schoolAthletes()->syncWithoutDetaching($newSchool->id);
+                    }
+                    // Vanno associati gli istruttori anche all'altra scuola
+                    foreach($instructors as $instructor){
+                        $instructor->schools()->syncWithoutDetaching($newSchool->id);
+                    }
+                }
+            }else{
+                // La scuola cambia e non si vogliono spostare gli atleti
+                $clan->users()->detach();
+            }
         }
 
         $clan->update([

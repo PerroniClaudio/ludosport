@@ -21,7 +21,7 @@
 
                     </div>
 
-                    {{-- <div class="fixed bottom-8 right-32">
+                    {{-- <div class="fixed bottom-8 right-32 z-20">
                         <x-primary-button type="submit">
                             <x-lucide-save class="w-6 h-6 text-white" />
                         </x-primary-button>
