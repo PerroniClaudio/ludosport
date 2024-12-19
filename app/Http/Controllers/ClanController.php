@@ -458,7 +458,7 @@ class ClanController extends Controller {
 
     public function addInstructor(Clan $clan, Request $request) {
         $authRole = User::find(auth()->user()->id)->getRole();
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (!$this->checkPermission($clan)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
@@ -488,6 +488,21 @@ class ClanController extends Controller {
 
         $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
         return redirect()->route($redirectRoute, $clan)->with('success', 'Instructor added successfully.');
+    }
+    
+    public function removeInstructor(Clan $clan, Request $request) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        if (!$this->checkPermission($clan)) {
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
+
+        $user = User::find($request->instructor_id);
+
+        $user->removeClanPersonnelAssociations($clan);
+
+        $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
+        return redirect()->route($redirectRoute, $clan)->with('success', 'Instructor removed successfully.');
     }
 
     public function addAthlete(Clan $clan, Request $request) {
@@ -530,6 +545,21 @@ class ClanController extends Controller {
 
         $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
         return redirect()->route($redirectRoute, $clan)->with('success', 'Athlete added successfully.');
+    }
+    
+    public function removeAthlete(Clan $clan, Request $request) {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        if (!$this->checkPermission($clan)) {
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
+
+        $user = User::find($request->athlete_id);
+
+        $user->removeClanAthleteAssociations($clan);
+
+        $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
+        return redirect()->route($redirectRoute, $clan)->with('success', 'Athlete removed successfully.');
     }
 
     public function all(Request $request) {
@@ -586,5 +616,34 @@ class ClanController extends Controller {
         }
 
         return response()->json($formatted_clans);
+    }
+
+    public function checkPermission(Clan $clan){
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        $permitted = false;
+        switch ($authRole) {
+            case 'admin':
+                $permitted = true;
+                break;
+            case 'rector':
+                $academy = $clan->academy;
+                $rector = $academy->rector() ?? null;
+                $permitted = $rector && ($rector->id == $authUser->id);
+                break;
+            case 'dean':
+                $school = $clan->school;
+                $dean = $school->dean() ?? null;
+                $permitted = $dean && ($dean->id == $authUser->id);
+                break;
+            case 'manager':
+                $school = $clan->school;
+                $primarySchool = $authUser->primarySchool();
+                $permitted = $primarySchool && $school && ($primarySchool->id == $school->id);
+                break;
+            default:
+                break; 
+        }
+        return $permitted;
     }
 }
