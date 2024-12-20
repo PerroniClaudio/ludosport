@@ -130,6 +130,7 @@ class RankController extends Controller {
 
         $user = $request->userToPromote;
         $user->rank_id = $request->rank_id;
+        $user->save();
 
         $request->status = 'approved';
         $request->approved_by = auth()->id();
@@ -145,6 +146,7 @@ class RankController extends Controller {
         foreach ($requests as $request) {
             $user = $request->userToPromote;
             $user->rank_id = $request->rank_id;
+            $user->save();
 
             $request->status = 'approved';
             $request->approved_by = auth()->id();

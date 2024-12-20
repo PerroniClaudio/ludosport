@@ -50,7 +50,6 @@ class UserController extends Controller {
 
                 break;
             case 'rector':
-            case 'instructor':
 
                 // Utenti di una determinata accademia
 
@@ -66,10 +65,23 @@ class UserController extends Controller {
                 })->where('is_disabled', false)->get();
 
                 break;
+            case 'instructor':
+                // Utenti di tutte le accademie in cui ha un corso (tanto non può entrare nel dettaglio utente)
+                // $academy_id = $authUser->primaryAcademy()->id ?? null;
+                // if (!$academy_id) {
+                //     return redirect()->route("dashboard")->with('error', 'You don\'t have an academy assigned!');
+                // }
 
+                $academiesIds = $authUser->academies()->pluck('academy_id')->toArray();
+                $users = User::whereHas('academies', function (Builder $query) use ($academiesIds) {
+                    $query->whereIn('academy_id', $academiesIds);
+                })->orWhereHas('academyAthletes', function (Builder $query) use ($academiesIds) {
+                    $query->whereIn('academy_id', $academiesIds);
+                })->where('is_disabled', false)->get();
+
+                break;
             case 'dean':
             case 'manager':
-
                 // Utenti di una determinata scuola
 
                 $school_id = $authUser->primarySchool()->id ?? null;
