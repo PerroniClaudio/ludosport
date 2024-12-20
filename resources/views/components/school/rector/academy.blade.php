@@ -15,7 +15,7 @@
     selectedNationality: '{{ $nationality }}',
     selectedNation: '{{ $nation->name }}',
     selectedAcademyId: '{{ $selectedAcademyId }}',
-    selectedAcademy: '{{ $selectedAcademy ? $selectedAcademy : 'Select an academy' }}',
+    selectedAcademy: '{{ $selectedAcademy ? addslashes($selectedAcademy) : 'Select an academy' }}',
     academies: {{ collect($academies) }},
 
 }">

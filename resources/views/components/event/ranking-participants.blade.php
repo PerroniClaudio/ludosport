@@ -22,7 +22,7 @@
                     <h4 class="text-background-800 dark:text-background-200 text-lg">{{ __('events.available_users') }}
                     </h4>
                     <div class='has-tooltip'>
-                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 -mt-8'>
+                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
                             @if($authRole == 'admin')
                                 {{ __('events.event_admin_participants_tooltip') }}
                             @elseif(in_array(strtolower($event->type->name), ['school tournament', 'academy tournament']))

@@ -21,7 +21,7 @@
                             <div class="flex gap-1 items-center">
                                 {{-- <div class='has-tooltip'>
                                     <span
-                                        class='tooltip rounded shadow-lg p-1 bg-primary-500 text-white -mt-8'>{{ __('events.event_thumbnail_tooltip') }}</span>
+                                        class='tooltip rounded shadow-lg p-1 bg-primary-500 text-white text-sm max-w-[800px] -mt-6 -translate-y-full'>{{ __('events.event_thumbnail_tooltip') }}</span>
                                     <x-lucide-info class="w-5 h-5 text-primary-500 dark:text-primary-500 cursor-pointer" />
                                 </div> --}}
                                 <x-primary-button type="button" onclick="document.getElementById('thumbnail').click()">

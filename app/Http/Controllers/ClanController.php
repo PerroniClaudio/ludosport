@@ -420,6 +420,7 @@ class ClanController extends Controller {
             $request->weapon_form_id = null;
         }
         
+        // Qunado viene modificata la scuola del corso, si devono gestire anche le associazioni con gli atleti e gli istruttori
         if($request->school_id != $clan->school_id){
             if(!in_array($request->transfer_athletes, ['yes', 'no'])){
                 return back()->with('error', 'Invalid value for transfer_athletes.');

@@ -180,7 +180,7 @@
                 <x-input-label for="transfer_athletes" value="{{ __('clan.transfer_athletes') }}" />
                 <div class="has-tooltip">
                     <x-lucide-info class="h-4 text-background-300" />
-                    <div class="tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 -mt-8">
+                    <div class="tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full">
                         {{ __('clan.transfer_athletes_tooltip') }}
                     </div>
                 </div>

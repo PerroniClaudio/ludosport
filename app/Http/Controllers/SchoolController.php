@@ -277,6 +277,43 @@ class SchoolController extends Controller {
             'email' => 'nullable|email',
         ]);
 
+        if($school->academy_id != $request->academy_id) {
+            if(!in_array($request->transfer_athletes, ['yes', 'no'])){
+                return back()->with('error', 'Invalid value for transfer_athletes.');
+            }
+            if($request->transfer_athletes == 'yes'){
+                // $oldAcademy = Academy::find($school->academy_id);
+                $newAcademy = Academy::find($request->academy_id);
+                $athletes = $school->athletes()->get();
+                $personnel = $school->personnel()->get();
+
+                if(!$newAcademy){
+                    return back()->with('error', 'Invalid academy.');
+                }
+
+                $school->update([
+                    'academy_id' => $request->academy_id,
+                ]);
+
+                // Si eliminano associazioni con accademie, scuole e corsi
+                foreach($athletes as $athlete){
+                    // Mettiamo l'eccezione per evitare di rimuovere le associazioni con la scuola spostata e i suoi corsi.
+                    $athlete->removeAcademiesAthleteAssociations($newAcademy); 
+                    $athlete->academyAthletes()->syncWithoutDetaching($newAcademy->id);
+                }
+                // Vanno associati gli istruttori anche all'altra accademia
+                foreach($personnel as $person){
+                    $person->academies()->syncWithoutDetaching($newAcademy->id);
+                }
+            } else {
+                $clans = $school->clan()->get();
+                foreach($clans as $clan){
+                    $clan->users()->detach();
+                }
+                $school->athletes()->detach();
+            }
+        }
+
         $school->update([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
@@ -660,6 +697,12 @@ class SchoolController extends Controller {
         // Se mancano le associazioni a scuola e accademia del corso, si aggiungono
         $athlete = User::find($request->athlete_id);
         // $academy = Academy::find($school->academy_id);
+        if(!$athlete){
+            return redirect()->route('schools.edit', $school)->with('error', 'Athlete not found.');
+        }
+        if(!$athlete->hasRole('athlete')){
+            return redirect()->route('schools.edit', $school)->with('error', 'User is not an athlete.');
+        }
 
         if (!$athlete->schoolAthletes()->where('school_id', $school->id)->exists()) {
 

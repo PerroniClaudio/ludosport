@@ -61,7 +61,7 @@
                 </h2>
                 
                 <div class='has-tooltip'>
-                    <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 -mt-8'>
+                    <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
                         {{ __('academies.remove_athletes_tooltip') }}
                     </span>
                     <x-lucide-info class="h-4 text-background-400" />
