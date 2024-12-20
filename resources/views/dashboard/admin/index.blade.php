@@ -47,9 +47,9 @@
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6 text-background-900 dark:text-background-100">
                             <h3 class="text-background-800 dark:text-background-200 text-2xl">
-                                {{ __('dashboard.admin_role_requests') }}
+                                {{ __('dashboard.admin_rank_requests') }}
                             </h3>
-                            <p x-text="`{{ __('dashboard.admin_role_requests_text', ['count' => '${rankRequests}']) }}`"></p>
+                            <p x-text="`{{ __('dashboard.admin_rank_requests_text', ['count' => '${rankRequests}']) }}`"></p>
                             <div class="flex justify-end">
                                 <a href="/rank-requests">
                                     <x-primary-button>
