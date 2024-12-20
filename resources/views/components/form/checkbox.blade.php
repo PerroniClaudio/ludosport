@@ -13,15 +13,11 @@
         <div class="flex gap-1">
             {{-- <x-input-label value="{{ $label }}" /> --}}
             <span class="block font-medium text-sm text-background-700 dark:text-background-300">{{ $label }}</span>
-            <div x-data="{tooltip: false}" x-on:mouseover="tooltip = true" x-on:mouseleave="tooltip = false" >
-                <div x-show="tooltip" 
-                    x-cloak
-                    class="absolute bg-background-100 
-                    p-2 rounded-md text-sm text-background-800 
-                    inline-block break-words w-max max-w-80 -translate-x-1/2 -translate-y-full shadow-xl">
+            <div class="has-tooltip">
+                <x-lucide-info class="h-4 text-background-300" />
+                <div class="tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full">
                     {{ $description }}
                 </div>
-                <x-lucide-info class="h-4 text-background-300" />
             </div>
         </div>
     @elseif(!$hidden)

@@ -58,8 +58,8 @@
                                             required="{{ true }}" :value="$school->name"
                                             placeholder="{{ fake()->company() }}" />
                                         <x-school.rector.academy nationality="{{ $school->nation_id }}"
-                                            selectedAcademyId="{{ $school->academy_id }}"
-                                            selectedAcademy="{{ $school->academy->name }}" :nations="$nations"
+                                            :selectedAcademyId="$school->academy_id"
+                                            :selectedAcademy="$school->academy->name" :nations="$nations"
                                             :academies="$academies" />
                                     </div>
                                     <div class="flex flex-col gap-2 w-1/2">
@@ -145,8 +145,9 @@
                                         placeholder="{{ fake()->company() }}" />
 
                                         <x-school.academy nationality="{{ $school->nation_id }}"
-                                            selectedAcademyId="{{ $school->academy_id }}"
-                                            selectedAcademy="{{ $school->academy->name }}" :nations="$nations" />
+                                            :selectedAcademyId="$school->academy_id"
+                                            :selectedAcademy="$school->academy->name" 
+                                            :academies="$academies" :nations="$nations" />
                                     </div>
                                     <div class="flex flex-col gap-2 w-1/2">
                                         <div class="flex flex-col gap-2 ">
@@ -175,7 +176,7 @@
                                 {{ __('school.location') }}
                             </h3>
                             <div class='has-tooltip'>
-                                <span class='tooltip rounded shadow-lg p-1 bg-primary-500 text-white -mt-8'>
+                                <span class='tooltip rounded shadow-lg p-1 bg-primary-500 text-white text-sm max-w-[800px] -mt-6 -translate-y-full'>
                                     {{ __('school.location_explanation') }}</span>
                                 <x-lucide-info class="w-5 h-5 text-primary-500 dark:text-primary-500 cursor-pointer" />
                             </div>

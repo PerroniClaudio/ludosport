@@ -6,7 +6,7 @@
 
 <div x-data="{
     selectedSchoolId: '{{ $selectedSchoolId }}',
-    selectedSchool: '{{ $selectedSchool }}',
+    selectedSchool: '{{ addslashes($selectedSchool) }}',
     availableSchools: [],
     paginatedSchools: [],
     currentPage: 1,
