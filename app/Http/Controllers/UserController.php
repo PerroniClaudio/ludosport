@@ -146,9 +146,18 @@ class UserController extends Controller {
             }
         }
 
+        // put all users without roles in a no-role array inside the users_sorted_by_role array
+        $no_roles_users = $users->filter(function ($user) {
+            return $user->roles->isEmpty();
+        });
+        $users_without_roles = [];
+        foreach ($no_roles_users as $user) {
+            $users_without_roles[] = $user;
+        }
 
         return view($viewPath, [
             'users' => $users_sorted_by_role,
+            'users_without_roles' => $users_without_roles,
             'roles' => $roles,
         ]);
     }
