@@ -283,7 +283,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 });
 
 
-Route::group(['middleware' => ['auth', 'role:instructor,rector,dean,technician']], function () {
+Route::group(['middleware' => ['auth', 'role:instructor,rector,dean,manager,technician']], function () {
     Route::get('/rank-request', [App\Http\Controllers\RankController::class, 'rankRequestForm'])->name('users.rank.request');
     Route::post('/rank-request', [App\Http\Controllers\RankController::class, 'newRequest'])->name('users.rank.request.create');
     Route::get('/users-select', [App\Http\Controllers\UserController::class, 'searchJson'])->name('users-select');

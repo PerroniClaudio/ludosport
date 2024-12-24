@@ -397,7 +397,8 @@ class AcademyController extends Controller {
         $personnel = User::find($request->personnel_id);
 
         // L'admin può farlo sempre, il rettore solo se l'accademia è la sua
-        if ($authRole !== 'admin' && ($authRole !== 'rector' || (($academy->rector()->id ?? null) != $authUser->id))) {
+        // if ($authRole !== 'admin' && ($authRole !== 'rector' || (($academy->rector()->id ?? null) != $authUser->id))) {
+        if ($authRole !== 'admin' && ($authRole !== 'rector' || (($authUser->primaryAcademy()->id ?? null) != $academy->id) )) {
             return back()->with('error', 'Not authorized.');
         }
 
@@ -469,7 +470,8 @@ class AcademyController extends Controller {
         // l'atleta può essere associato ad una sola accademia, quindi se si modifica vanno rimossi anche tutti i collegamenti inferiori (scuole e corsi)
 
         // L'admin può farlo sempre, il rettore solo se l'accademia è la sua
-        if ($authRole !== 'admin' && ($authRole !== 'rector' || (($academy->rector()->id ?? null) != $authUser->id))) {
+        // if ($authRole !== 'admin' && ($authRole !== 'rector' || (($academy->rector()->id ?? null) != $authUser->id))) {
+        if ($authRole !== 'admin' && ($authRole !== 'rector' || (($authUser->primaryAcademy()->id ?? null) != $academy->id))) {
             return back()->with('error', 'Not authorized.');
         }
 
@@ -864,8 +866,8 @@ class AcademyController extends Controller {
                 $authorized = true;
                 break;
             case 'rector': // non autorizzato se non è la sua accademia
-                // if (!$isStrict && ($authUser->primaryAcademy() != null) && $authUser->primaryAcademy()->id == $academy->id) {
-                if (!$isStrict && ($academy->rector() && ($academy->rector()->id == $authUser->id))) {
+                // if (!$isStrict && ($academy->rector() && ($academy->rector()->id == $authUser->id))) {
+                if (!$isStrict && (($authUser->primaryAcademy()->id ?? null) == $academy->id)) {
                     $authorized = true;
                 }
                 break;

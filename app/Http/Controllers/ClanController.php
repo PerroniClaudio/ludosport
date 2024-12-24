@@ -683,13 +683,15 @@ class ClanController extends Controller {
                 break;
             case 'rector':
                 $academy = $clan->academy;
-                $rector = $academy->rector() ?? null;
-                $permitted = $rector && ($rector->id == $authUser->id);
+                // $rector = $academy->rector() ?? null;
+                // $permitted = $rector && ($rector->id == $authUser->id);
+                $permitted = ($authUser->primaryAcademy()->id ?? null) == $academy->id;
                 break;
             case 'dean':
                 $school = $clan->school;
-                $dean = $school->dean() ?? null;
-                $permitted = $dean && ($dean->id == $authUser->id);
+                // $dean = $school->dean() ?? null;
+                // $permitted = $dean && ($dean->id == $authUser->id);
+                $permitted = ($authUser->primarySchool()->id ?? null) == $school->id;
                 break;
             case 'manager':
                 $school = $clan->school;
@@ -697,7 +699,7 @@ class ClanController extends Controller {
                 $permitted = $primarySchool && $school && ($primarySchool->id == $school->id);
                 break;
             default:
-                break; 
+                break;
         }
         return $permitted;
     }

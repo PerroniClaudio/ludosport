@@ -1031,19 +1031,19 @@ class SchoolController extends Controller {
             case 'admin': // sempre autorizzato
                 break;
             case 'rector': // non autorizzato se la scuola non è nella sua accademia
-                $schoolAcademy = $school->academy;
-                $academyRector = $schoolAcademy->rector();
-                if(!$academyRector || ($academyRector->id != $authUser->id)) {
-                    $authorized = false;
-                }
-                // $primaryAcademy = $authUser->primaryAcademy();
-                // if (!$primaryAcademy || ($primaryAcademy->id != $school->academy->id)) {
+                // $schoolAcademy = $school->academy;
+                // $academyRector = $schoolAcademy->rector();
+                // if(!$academyRector || ($academyRector->id != $authUser->id)) {
                 //     $authorized = false;
                 // }
+                $primaryAcademy = $authUser->primaryAcademy();
+                if (!$primaryAcademy || ($primaryAcademy->id != $school->academy->id)) {
+                    $authorized = false;
+                }
                 break;
             case 'dean':
                 // if (($authUser->id != ($school->dean()->id ?? null)) || $isStrict) {
-                if (!$school->dean() || ($school->dean()->id != $authUser->id) || $isStrict) {
+                if ((($authUser->primarySchool()->id ?? null) != $school->id) || $isStrict) {
                     $authorized = false;
                 }
                 break;
