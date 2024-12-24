@@ -93,6 +93,10 @@
                                                 </a>
                                             </td>
                                         </x-slot>
+
+                                        <x-slot name="tableActions">
+
+                                        </x-slot>
                                     </x-table>
                                 </div>
                             </div>
@@ -262,6 +266,10 @@
                                                 </a>
                                             </td>
                                         </x-slot>
+
+                                        <x-slot name="tableActions">
+
+                                        </x-slot>
                                     </x-table>
                                 @else
                                     <h3 class="text-background-800 dark:text-background-200 text-2xl">
@@ -303,6 +311,10 @@
                                                         class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                                                 </a>
                                             </td>
+                                        </x-slot>
+
+                                        <x-slot name="tableActions">
+
                                         </x-slot>
                                     </x-table>
                                 @endif
