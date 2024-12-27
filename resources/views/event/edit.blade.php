@@ -34,7 +34,7 @@
                 } else {
                     FlashMessage.displayCustomMessage(json.message, 2000)
                 }
-                    
+        
             }
         }">
 
@@ -97,6 +97,8 @@
 
                 <div class="flex flex-col gap-2 w-1/2">
 
+                    <input type="hidden" name="user_timezone" value="" x-init="$el.value = Intl.DateTimeFormat().resolvedOptions().timeZone" />
+
                     <x-form.input name="" label="Academy" type="text" required="{{ true }}"
                         :value="$event->academy->name" placeholder="" disabled="{{ true }}" />
 
@@ -121,7 +123,8 @@
                         selected="{{ $event->type->id }}" disabled="{{ !!$event->is_approved }}" />
 
                     <x-form.input name="max_participants" label="Max Participants (0 means unlimited)" type="number"
-                        required="{{ true }}" value="{{ $event->max_participants ? $event->max_participants : 0 }}"
+                        required="{{ true }}"
+                        value="{{ $event->max_participants ? $event->max_participants : 0 }}"
                         min="{{ 0 }}" placeholder="{{ __('events.max_participants_placeholder') }}"
                         disabled="{{ !!$event->is_approved }}" />
 
