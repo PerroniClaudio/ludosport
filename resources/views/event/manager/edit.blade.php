@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-background-800 dark:text-background-200 leading-tight">
-                {{ __('events.edit', [ 'id' => $event->id]) }}
+                {{ __('events.edit', ['id' => $event->id]) }}
             </h2>
         </div>
     </x-slot>
@@ -14,8 +14,7 @@
                 $canSetPrice = in_array($authRole, ['admin']);
             @endphp --}}
             {{-- <form method="POST" action={{ route('manager.events.update', $event->id) }} --}}
-            <form 
-                class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+            <form class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 @csrf
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.info') }}</h3>
@@ -28,50 +27,50 @@
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
                 <div class="flex flex-col gap-2 w-1/2">
+                    <input type="hidden" name="user_timezone" value="" x-init="$el.value = Intl.DateTimeFormat().resolvedOptions().timeZone" />
+
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                        :value="$event->name" placeholder="{{ fake()->company() }}" 
-                        disabled="{{true}}" />
+                        :value="$event->name" placeholder="{{ fake()->company() }}" disabled="{{ true }}" />
 
                     <x-form.input name="start_date" label="Start Date" type="datetime-local"
                         required="{{ true }}" value="{{ $event->start_date }}"
-                        placeholder="{{ fake()->date() }}" 
-                        disabled="{{true}}" />
+                        placeholder="{{ fake()->date() }}" disabled="{{ true }}" />
 
                     <x-form.input name="end_date" label="End Date" type="datetime-local" required="{{ true }}"
                         value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}"
-                        disabled="{{true}}" />
-                    
-                    <x-form.input hidden name="waiting_list_close_date" label="Waiting list closing date" type="datetime-local" 
-                        required="{{ false }}" value="{{ $event->waiting_list_close_date }}"
-                        placeholder="{{ fake()->date() }}" disabled="{{true}}" 
+                        disabled="{{ true }}" />
+
+                    <x-form.input hidden name="waiting_list_close_date" label="Waiting list closing date"
+                        type="datetime-local" required="{{ false }}"
+                        value="{{ $event->waiting_list_close_date }}" placeholder="{{ fake()->date() }}"
+                        disabled="{{ true }}"
                         description="Prevents new registrations on the waiting list starting from the specified date. However, individuals on the waiting list will still be able to complete their purchases when it's their turn." />
 
-                    
+
                     <x-event.type-selector event_id="{{ $event->id }}" :types="$event->eventTypes()"
-                        selected="{{ $event->type->id }}" 
-                        disabled="{{true}}" />
+                        selected="{{ $event->type->id }}" disabled="{{ true }}" />
 
-                    <x-form.input name="max_participants" label="Max Participants (0 means unlimited)" type="number" required="{{ true }}"
-                        value="{{ $event->max_participants ? $event->max_participants : 0 }}" min="{{0}}" 
-                        placeholder="{{ __('events.max_participants_placeholder') }}"
-                        disabled="{{true}}" />
+                    <x-form.input name="max_participants" label="Max Participants (0 means unlimited)" type="number"
+                        required="{{ true }}"
+                        value="{{ $event->max_participants ? $event->max_participants : 0 }}"
+                        min="{{ 0 }}" placeholder="{{ __('events.max_participants_placeholder') }}"
+                        disabled="{{ true }}" />
 
-                    <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms" 
-                        disabled="{{true}}" />
-                        
+                    <x-event.weapon-form event_id="{{ $event->id }}" :selected_weapon="$event->weaponForm" :available_weapons="$weaponForms"
+                        disabled="{{ true }}" />
+
                     <x-form.checkbox hidden id="internal_shop" name="internal_shop" label="Internal Shop"
-                        isChecked="{{ $event->internal_shop }}" 
-                        disabled="{{true}}" />
-                    
-                    <x-form.checkbox hidden id="block_subscriptions" name="block_subscriptions" label="Block subscriptions (shop)"
-                        isChecked="{{ $event->block_subscriptions }}" 
-                        disabled="{{true}}" 
+                        isChecked="{{ $event->internal_shop }}" disabled="{{ true }}" />
+
+                    <x-form.checkbox hidden id="block_subscriptions" name="block_subscriptions"
+                        label="Block subscriptions (shop)" isChecked="{{ $event->block_subscriptions }}"
+                        disabled="{{ true }}"
                         description="If enabled, it prevents new registrations in the shop. However, individuals on the waiting list will still be able to complete their purchases when it's their turn." />
-                        
+
                     <x-form.input hidden name="price" label="Price (include taxes)" type="number"
-                        value="{{ number_format($event->price, 2) }}" min="{{0}}" step="0.01"
-                        required="{{ false }}" disabled="{{true}}" text_before="€" />
-                        
+                        value="{{ number_format($event->price, 2) }}" min="{{ 0 }}" step="0.01"
+                        required="{{ false }}" disabled="{{ true }}" text_before="€" />
+
                 </div>
             </form>
 
@@ -90,7 +89,7 @@
                 @elseif ($event->resultType() === 'ranking')
                     <x-event.ranking-participants :event="$event" :results="$rankingResults" />
                     {{-- Vogliono i risultati solo per i tipi ranking preimpostati --}}
-                    @if(in_array($event->type->name, ["School Tournament", "Academy Tournament", "National Tournament"]))
+                    @if (in_array($event->type->name, ['School Tournament', 'Academy Tournament', 'National Tournament']))
                         <x-event.ranking-results :results="$rankingResults" />
                     @endif
                 @endif

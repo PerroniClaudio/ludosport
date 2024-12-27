@@ -22,6 +22,8 @@
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
                 <div class="flex flex-col gap-2 w-1/2">
+                    <input type="hidden" name="user_timezone" value="" x-init="$el.value = Intl.DateTimeFormat().resolvedOptions().timeZone" />
+
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                         :value="$event->name" placeholder="{{ fake()->company() }}" 
                         disabled="{{true}}" />

@@ -83,6 +83,8 @@ class EventController extends Controller {
                 $pending[] = $event;
             }
         }
+
+
         $viewPath = $authRole === 'admin' ? 'event.index' : 'event.' . $authRole . '.index';
         return view($viewPath, [
             'approved_events' => $approved,
@@ -174,6 +176,8 @@ class EventController extends Controller {
      * Show the form for editing the specified resource.
      */
     public function edit(Event $event) {
+
+
         //
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
@@ -239,6 +243,12 @@ class EventController extends Controller {
         }
 
         $viewPath = $authRole === 'admin' ? 'event.edit' : 'event.' . $authRole . '.edit';
+
+
+        $event->start_date = Carbon::parse($event->start_date)->setTimezone('Europe/Rome');
+        $event->end_date = Carbon::parse($event->end_date)->setTimezone('Europe/Rome');
+        $event->waiting_list_close_date = Carbon::parse($event->waiting_list_close_date)->setTimezone('Europe/Rome');
+
 
         return view($viewPath, [
             'event' => $event,
@@ -312,7 +322,6 @@ class EventController extends Controller {
     public function update(Request $request, Event $event) {
 
 
-
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
@@ -383,8 +392,11 @@ class EventController extends Controller {
             }
 
             $event->name = $request->name;
-            $event->start_date = $request->start_date;
-            $event->end_date = $request->end_date;
+
+            $event->start_date = Carbon::parse($request->start_date, $request->user_timezone)->setTimezone('GMT');
+            $event->end_date = Carbon::parse($request->end_date, $request->user_timezone)->setTimezone('GMT');
+            // $event->start_date = $request->start_date;
+            // $event->end_date = $request->end_date;
 
             if (isset($request->weapon_form_id) && $request->weapon_form_id != 0) {
                 $event->weapon_form_id = $request->weapon_form_id;
@@ -393,7 +405,7 @@ class EventController extends Controller {
             $event->max_participants = $request->max_participants ?? null;
             $event_type = EventType::where('name', $request->event_type)->first();
             $event->event_type = $event_type->id;
-            $event->waiting_list_close_date = $request->waiting_list_close_date ?? null;
+            $event->waiting_list_close_date = Carbon::parse($request->waiting_list_close_date, $request->user_timezone)->setTimezone('GMT') ?? null;
 
             // Dati modificabli solo da admin 
 
@@ -634,7 +646,7 @@ class EventController extends Controller {
                     })->where(['is_disabled' => '0', "has_paid_fee" => '1'])->get();
                     break;
             }
-        } else{
+        } else {
             $users = User::where(['is_disabled' => '0', "has_paid_fee" => '1'])->get();
         }
         return response()->json($users);
