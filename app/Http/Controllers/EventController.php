@@ -990,6 +990,12 @@ class EventController extends Controller {
         $nations = [];
         $nations_ids = [];
 
+        $events_to_exclude = EventType::where('name', 'Training Course')->first()->events()->pluck('id')->toArray();
+
+        $events = $events->filter(function ($event) use ($events_to_exclude) {
+            return !in_array($event->id, $events_to_exclude);
+        });
+
         foreach ($events as $key => $value) {
 
             // Non so perchè c'era questo controllo, ma lo tolgo perchè blocca la generazione degli indirizzi
@@ -1042,6 +1048,12 @@ class EventController extends Controller {
             ['end_date', '<=', $date->format('Y-m-d')],
             ['is_disabled', '=', 0],
         ])->get();
+
+        $events_to_exclude = EventType::where('name', 'Training Course')->first()->events()->pluck('id')->toArray();
+
+        $events = $events->filter(function ($event) use ($events_to_exclude) {
+            return !in_array($event->id, $events_to_exclude);
+        });
 
 
         return response()->json($events);
