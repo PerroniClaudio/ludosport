@@ -152,6 +152,14 @@ class UserController extends Controller {
                         $user->weapon_forms_formatted = $user->weaponFormsTechnician()->pluck('name')->toArray();
                     }
 
+                    if ($role->label === 'rector') {
+                        $user->academy = $user->primaryAcademy() ? $user->primaryAcademy()->name : "No academy";
+                    }
+
+                    if ($role->label === 'dean') {
+                        $user->school = $user->primarySchool() ? $user->primarySchool()->name : "No school";
+                    }
+
                     $users_sorted_by_role[$role->label][] = $user;
                 }
             }
