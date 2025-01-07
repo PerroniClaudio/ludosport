@@ -75,6 +75,10 @@
                             </td>
                         </x-slot>
 
+                        <x-slot name="tableActions">
+
+                        </x-slot>
+
                     </x-table>
                 </div>
             </div>
