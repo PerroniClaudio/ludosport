@@ -26,4 +26,6 @@ return [
     'approve_transfer' => 'Approve Transfer',
     'approve_transfer_text' => 'Approve the wire transfer payment.',
     'approve_transfer_confirm' => 'Are you sure you want to approve this wire transfer payment?',
+    'free' => 'Free',
+    '' => '',
 ];
