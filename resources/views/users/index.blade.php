@@ -55,7 +55,7 @@
                             x-show="selectedRole == 'no_role'" x-cloak>
                             <div class="p-6 text-background-900 dark:text-background-100">
                                 <h3 class="text-background-800 dark:text-background-200 text-2xl">
-                                    {{ __('users.no_role') }}
+                                    {{ __('users.no_roles') }}
                                 </h3>
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                                 <x-table striped="false" :columns="[
