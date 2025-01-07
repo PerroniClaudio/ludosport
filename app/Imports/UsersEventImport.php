@@ -36,6 +36,13 @@ class UsersEventImport implements ToCollection {
 
             $user = User::where('email', $row[1])->first();
             $event = Event::find($row[0]);
+            
+            if(!$event) {
+                $this->log[] = "['Event not found. email: " . $row[1] . " - event ID: " . $row[0] . "']";
+                $this->is_partial = true;
+                continue;
+            }
+
             if(!$event->isFree() && !User::find($this->importingUser->id)->hasRole('admin')) {
                 $this->log[] = "['Unauthorized to import user to paid event. email: " . $row[1] . " - event ID: " . $row[0] . "']";
                 $this->is_partial = true;
