@@ -52,6 +52,12 @@
                             </a>
                         </div>
                     </div>
+                @else
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                        <p class="text-background-800 dark:text-background-200 text-xl">
+                            {{ __('events.wait_for_approval_and_location_text') }}
+                        </p>
+                    </div>
                 @endif
             @endif
 

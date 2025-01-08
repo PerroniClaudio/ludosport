@@ -9,6 +9,38 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
 
+            @if (!$event->is_approved)
+                @if ($event->nation_id != 0)
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                        <p class="text-background-800 dark:text-background-200 text-xl">
+                            {{ __('events.wait_for_approval_text') }}
+                        </p>
+                    </div>
+                @else
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                        <p class="text-background-800 dark:text-background-200 text-xl">
+                            {{ __('events.wait_for_approval_and_location_text') }}
+                        </p>
+                    </div>
+                @endif
+            @endif
+
+            @if ($event->is_approved)
+                @if (!$event->is_published)
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                        <p class="text-background-800 dark:text-background-200 text-xl">
+                            {{ __('events.wait_for_publishing_text') }}
+                        </p>
+                    </div>
+                @else
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                        <p class="text-background-800 dark:text-background-200 text-xl">
+                            {{ __('events.has_been_published_text') }}
+                        </p>
+                    </div>
+                @endif
+            @endif
+
             {{-- @php
                 $authRole = auth()->user()->getRole();
                 $canSetPrice = in_array($authRole, ['admin']);
