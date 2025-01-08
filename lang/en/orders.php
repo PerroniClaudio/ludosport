@@ -20,6 +20,7 @@ return [
     'created_at_text' => 'This order was created on',
     'senior_fee' => 'Senior Fee',
     'junior_fee' => 'Junior Fee',
+    'event_participation' => 'Event Participation',
     'fee' => 'Fee',
     'event' => 'Event',
     'wire_transfer' => 'Wire Transfer',
