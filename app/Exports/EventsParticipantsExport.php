@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Event;
 use App\Models\EventInstructorResult;
 use App\Models\EventResult;
 use Maatwebsite\Excel\Concerns\Exportable;
@@ -24,8 +25,11 @@ class EventsParticipantsExport implements WithMultipleSheets {
 
         $filters = collect(json_decode($this->export->filters)->filters);
 
-        foreach ($filters as $event) {
-            if($event->resultType() == 'enabling'){
+        foreach ($filters as $ev) {
+
+            $event = Event::find($ev->id);
+
+            if ($event->resultType() == 'enabling') {
                 $users = EventInstructorResult::where('event_id', $event->id)->with('user')->get()->map(function ($event_result) {
                     return [
                         $event_result->user->unique_code,
@@ -59,7 +63,7 @@ class EventsParticipantsExport implements WithMultipleSheets {
     }
 }
 
-class EventsParticipantsSheet implements FromArray, WithTitle{
+class EventsParticipantsSheet implements FromArray, WithTitle {
 
     private $users;
     private $event_id;
@@ -81,7 +85,8 @@ class EventsParticipantsSheet implements FromArray, WithTitle{
                 "Roles",
                 "Created At",
                 "Updated At"
-            ], $this->users
+            ],
+            $this->users
         ];
     }
 
