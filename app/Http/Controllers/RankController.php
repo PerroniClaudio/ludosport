@@ -6,6 +6,7 @@ use App\Models\Rank;
 use App\Models\RankRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RankController extends Controller {
     /**
@@ -112,10 +113,10 @@ class RankController extends Controller {
 
 
         $ranks = Rank::all();
-        $authUserRole = User::find(auth()->user()->id)->getRole();
+        $authUserRole = User::find(Auth::user()->id)->getRole();
 
         if ($authUserRole === 'instructor') {
-            $authSchools = auth()->user()->schools->pluck('id')->toArray();
+            $authSchools = Auth::user()->schools->pluck('id')->toArray();
 
             $users = User::whereHas('schools', function ($query) use ($authSchools) {
                 $query->whereIn('school_id', $authSchools);
@@ -145,7 +146,7 @@ class RankController extends Controller {
         ]);
 
         RankRequest::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::user()->id,
             'rank_id' => $request->rank_id,
             'user_to_promote_id' => $request->user_to_promote_id,
             'status' => 'pending',
@@ -158,12 +159,12 @@ class RankController extends Controller {
 
     public function acceptRequest(RankRequest $request) {
 
-        $user = $request->userToPromote;
+        $user = User::find($request->userToPromote->id);
         $user->rank_id = $request->rank_id;
         $user->save();
 
         $request->status = 'approved';
-        $request->approved_by = auth()->id();
+        $request->approved_by = Auth::user()->id;
         $request->approved_at = now();
         $request->save();
 
@@ -174,12 +175,12 @@ class RankController extends Controller {
         $requests = RankRequest::where('status', 'pending')->get();
 
         foreach ($requests as $request) {
-            $user = $request->userToPromote;
+            $user = User::find($request->userToPromote->id);
             $user->rank_id = $request->rank_id;
             $user->save();
 
             $request->status = 'approved';
-            $request->approved_by = auth()->id();
+            $request->approved_by = Auth::user()->id;
             $request->approved_at = now();
             $request->save();
         }
