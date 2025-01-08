@@ -83,7 +83,7 @@ class ImportController extends Controller {
             ];
         }
 
-        $instructorEvents = Event::all()->filter(function ($event) {
+        $instructorEvents = Event::where('is_disabled', false)->get()->filter(function ($event) {
             return $event->resultType() == 'enabling';
         })->map(function ($event) {
             return [
@@ -92,7 +92,7 @@ class ImportController extends Controller {
             ];
         });
 
-        $rankingEvents = Event::all()->filter(function ($event) {
+        $rankingEvents = Event::where('is_disabled', false)->get()->filter(function ($event) {
             return $event->resultType() == 'ranking';
         })->map(function ($event) {
             return [
