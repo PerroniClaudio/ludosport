@@ -13,7 +13,6 @@
         selectedElementId: 0,
         selectedElementType: '',
         restore: function(id, type) {
-            console.log(id, type);
             this.selectedElementId = id;
             this.selectedElementType = type;
             $dispatch('open-modal', 'restore-modal')
@@ -88,6 +87,27 @@
                     ]" :rows="$deleted_schools">
                         <x-slot name="tableActions">
                             <a x-on:click="restore(row.id, 'school')">
+                                <x-lucide-history
+                                    class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                            </a>
+                        </x-slot>
+                    </x-table>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-background-900 dark:text-background-100">
+                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('deleted.courses') }}</h3>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                    <x-table striped="false" :columns="[
+                        [
+                            'name' => 'Name',
+                            'field' => 'name',
+                            'columnClasses' => '', // classes to style table th
+                            'rowClasses' => '', // classes to style table td
+                        ],
+                    ]" :rows="$deleted_courses">
+                        <x-slot name="tableActions">
+                            <a x-on:click="restore(row.id, 'course')">
                                 <x-lucide-history
                                     class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                             </a>
