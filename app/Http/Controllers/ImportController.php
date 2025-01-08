@@ -93,7 +93,7 @@ class ImportController extends Controller {
         });
 
         $rankingEvents = Event::where('is_disabled', false)->get()->filter(function ($event) {
-            return $event->resultType() == 'ranking';
+            return ($event->resultType() == 'ranking' && in_array(strtolower($event->type->name), ["school tournament", "academy tournament", "national tournament"]));
         })->map(function ($event) {
             return [
                 'value' => $event->id,
