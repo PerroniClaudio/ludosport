@@ -601,7 +601,7 @@ class SchoolController extends Controller {
         $personnel = $school->personnel->pluck('id')->toArray();
 
         $primaryPersonnel = $school->personnel->filter(function ($person) use ($school) {
-            return $person->primarySchool() && $person->primarySchool()->id == $school->id;
+            return ($person->primarySchool() && ($person->primarySchool()->id == $school->id));
         })->pluck('id')->toArray();
 
         $school->athletes()->detach();
@@ -617,7 +617,7 @@ class SchoolController extends Controller {
             'primary_personnel_ids' => $primaryPersonnel,
         ]);
 
-        return redirect()->route(($authRole == 'admin' ? '' : $authRole) . 'schools.index')->with('success', 'School disabled successfully!');
+        return redirect()->route(($authRole == 'admin' ? '' : $authRole . '.') . 'schools.index')->with('success', 'School disabled successfully!');
     }
 
     public function addClan(School $school, Request $request) {

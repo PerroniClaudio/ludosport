@@ -392,7 +392,7 @@
                 </x-table>
             </div>
 
-            @if ($authRole === 'admin')
+            @if (in_array($authRole, ['admin', 'rector']))
                 @if (!$school->is_disabled)
                     <x-school.disable-form :school="$school->id" />
                 @endif
