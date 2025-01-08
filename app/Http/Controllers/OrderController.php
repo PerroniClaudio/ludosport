@@ -99,6 +99,8 @@ class OrderController extends Controller {
         $invoice->name = $request->name;
         $invoice->surname = $request->surname;
         $invoice->vat = $request->vat;
+        $invoice->business_name	= $request->business_name;
+        $invoice->sdi = $request->sdi;
 
         $invoice->save();
 
