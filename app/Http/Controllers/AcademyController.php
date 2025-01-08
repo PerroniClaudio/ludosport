@@ -243,6 +243,16 @@ class AcademyController extends Controller {
                 'nationality' => 'required|exists:nations,id',
             ]);
 
+            if ($academy->nation_id != $request->nationality) {
+
+                $schools = $academy->schools;
+
+                foreach ($schools as $school) {
+                    $school->nation_id = $request->nationality;
+                    $school->save();
+                }
+            }
+
             $academy->update([
                 'name' => $request->name,
                 'nation_id' => $request->nationality,
@@ -390,7 +400,7 @@ class AcademyController extends Controller {
         $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
         return redirect()->route($redirectRoute, $academy)->with('success', 'Personnel added successfully!');
     }
-    
+
     public function removePersonnel(Request $request, Academy $academy) {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
@@ -398,7 +408,7 @@ class AcademyController extends Controller {
 
         // L'admin può farlo sempre, il rettore solo se l'accademia è la sua
         // if ($authRole !== 'admin' && ($authRole !== 'rector' || (($academy->rector()->id ?? null) != $authUser->id))) {
-        if ($authRole !== 'admin' && ($authRole !== 'rector' || (($authUser->primaryAcademy()->id ?? null) != $academy->id) )) {
+        if ($authRole !== 'admin' && ($authRole !== 'rector' || (($authUser->primaryAcademy()->id ?? null) != $academy->id))) {
             return back()->with('error', 'Not authorized.');
         }
 
@@ -460,7 +470,7 @@ class AcademyController extends Controller {
 
         return redirect()->route($redirectRoute, $academy)->with('success', 'Athlete added successfully!');
     }
-    
+
     public function removeAthlete(Request $request, Academy $academy) {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
@@ -476,14 +486,14 @@ class AcademyController extends Controller {
         }
 
         // Se l'atleta è associato all'accademia, la rimuove
-        if(in_array($academy->id, $athlete->academyAthletes()->pluck('academy_id')->toArray())) {
+        if (in_array($academy->id, $athlete->academyAthletes()->pluck('academy_id')->toArray())) {
             // Si rimuovono tutte perchè tanto solo una se ne può avere. L'argomento è l'accademia che fa eccezione, (se serve)
             $athlete->removeAcademiesAthleteAssociations();
         }
 
         // dato che sono state eliminate tutte le associazioni assegna No academy e No school
         $noAcademy = Academy::where('slug', 'no-academy')->first();
-        if($noAcademy) {
+        if ($noAcademy) {
             $athlete->academyAthletes()->syncWithoutDetaching($noAcademy->id);
             $athlete->setPrimaryAcademyAthlete($noAcademy->id);
         }
