@@ -1426,18 +1426,14 @@ class UserController extends Controller {
 
     public function languages(User $user, Request $request) {
 
-        $role = $user->getRole();
+        $loggedUser = User::find(auth()->user()->id);
 
-        if ($role === 'athlete') {
-
-            $authUserId = auth()->user()->id;
-
-            if ($authUserId !== $user->id) {
-                return response()->json([
-                    'error' => 'You do not have the required role to access this page!',
-                ]);
-            }
+        if ($loggedUser->getRole() == 'athlete' && $loggedUser->id != $user->id) {
+            return response()->json([
+                'error' => 'You do not have permission for this data!',
+            ]);
         }
+
 
 
         $user->languages()->detach();
