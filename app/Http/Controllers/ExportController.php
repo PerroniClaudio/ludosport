@@ -260,15 +260,15 @@ class ExportController extends Controller {
                         $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
                     case 'instructor_event_results':
-                        $log[] = "['Exporting event participants']";
-                        $file_path = 'exports/' . $export->id . '/event_participants.xlsx';
+                        $log[] = "['Exporting event results']";
+                        $file_path = 'exports/' . $export->id . '/event_results.xlsx';
                         Excel::store(new EventsInstructorResultsExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
                         $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
                     case 'event_war':
                         $log[] = "['Exporting event arena points']";
-                        $file_path = 'exports/' . $export->id . '/event_war_points.xlsx';
+                        $file_path = 'exports/' . $export->id . '/event_arena_points.xlsx';
                         Excel::store(new EventsWarExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
                         $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";

@@ -44,7 +44,7 @@ class EventsInstructorResultsExport implements WithMultipleSheets {
                         $event_result->user->email,
                         $event_result->weaponForm->id ?? '',
                         $event_result->weaponForm->name ?? '',
-                        $event_result->result,
+                        $event_result->result . ($event_result->retake ? ' (' . $event_result->retake . ')' : ''),
                         $event_result->stage,
                         // $event_result->notes,
                     ];
