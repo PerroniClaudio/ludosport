@@ -8,8 +8,8 @@
     $authRole = $authUser->getRole();
     $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
     // L'atleta dovrebbe avere una sola accademia associata, ma le recupero comunque tutte per sicurezza
-    $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray());
-    // Dal momento che non può accedere alla pagina se l'utente non è associato alla sua accademia e che è del personale può comunque modificare il ruolo, $canEditRoles può essere sempre vero.
+$canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray());
+// Dal momento che non può accedere alla pagina se l'utente non è associato alla sua accademia e che è del personale può comunque modificare il ruolo, $canEditRoles può essere sempre vero.
     $canEditRoles = true;
 @endphp
 <x-app-layout>
@@ -134,7 +134,7 @@
                         x-data="{
                             selected: {{ collect($user->roles) }},
                             selectRole(role) {
-                                if ({{$canEditRoles ? 'true' : 'false'}} && {{ collect($editable_roles) }}.includes(role)) {
+                                if ({{ $canEditRoles ? 'true' : 'false' }} && {{ collect($editable_roles) }}.includes(role)) {
                                     if (this.selected.includes(role)) {
                                         this.selected = this.selected.filter(item => item !== role);
                                     } else {
@@ -193,7 +193,7 @@
                     @endif
                 </div>
 
-                @if($canEdit || $canEditRoles)
+                @if ($canEdit || $canEditRoles)
                     <div class="fixed bottom-8 right-32">
                         <x-primary-button type="submit">
                             <x-lucide-save class="w-6 h-6 text-white" />
@@ -216,7 +216,7 @@
 
                             <div class="flex flex-col gap-4">
                                 <div class="flex flex-col gap-2">
-                                    @if($canEdit)
+                                    @if ($canEdit)
                                         <input type="file" name="profilepicture" id="profilepicture" class="hidden"
                                             x-on:change="$refs.pfpform.submit()" />
                                         <x-primary-button type="button"
@@ -264,7 +264,8 @@
                             $mainAcademy = $user->primaryAcademy();
                         @endphp
                         @foreach ($user->academies as $academy)
-                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                            <div
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $academy->name }}
@@ -284,11 +285,12 @@
                             $mainAcademyAthlete = $user->primaryAcademyAthlete();
                         @endphp
                         @foreach ($user->academyAthletes as $academy)
-                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                            <div
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $academy->name }}
-                                    @if (($mainAcademyAthlete->id ?? null ) == $academy->id)
+                                    @if (($mainAcademyAthlete->id ?? null) == $academy->id)
                                         ({{ __('users.main_academy') }})
                                     @endif
                                 </span>
@@ -311,7 +313,8 @@
                             x-on:click.prevent="setInstitutionType('school'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
                             <span>{{ __('users.set_main_personnel_school') }}</span>
                         </x-primary-button>
-                        <x-user.select-institutions type="school-personnel" :user="$user" :schools="$filteredSchoolsPersonnel" :selectedSchools="$user->schools" />
+                        <x-user.select-institutions type="school-personnel" :user="$user" :schools="$filteredSchoolsPersonnel"
+                            :selectedSchools="$user->schools" />
                     </div>
 
                     <div class="flex flex-col gap-2">
@@ -320,7 +323,7 @@
                         @endphp
                         @foreach ($user->schools as $school)
                             <a href="{{ route('schools.edit', $school->id) }}"
-                             class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $school->name }}
@@ -340,8 +343,9 @@
                             x-on:click.prevent="setInstitutionType('school'), setRoleType('athlete'), $dispatch('open-modal', 'set-main-institution-modal')">
                             <span>{{ __('users.set_main_athletes_school') }}</span>
                         </x-primary-button>
-                        
-                        <x-user.select-institutions type="school-athlete" :user="$user" :schools="$filteredSchoolsAthlete" :selectedSchools="$user->schoolAthletes" />
+
+                        <x-user.select-institutions type="school-athlete" :user="$user" :schools="$filteredSchoolsAthlete"
+                            :selectedSchools="$user->schoolAthletes" />
                     </div>
 
                     <div class="flex flex-col gap-2">
@@ -349,7 +353,7 @@
                             $mainSchoolAthlete = $user->primarySchoolAthlete();
                         @endphp
                         @foreach ($user->schoolAthletes as $schools)
-                            <a href="{{ route('schools.edit', $schools->id) }}" 
+                            <a href="{{ route('schools.edit', $schools->id) }}"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
@@ -365,7 +369,8 @@
 
                 {{-- Modal con form dinamico per modifica accademia/scuola principale --}}
                 <x-modal name="set-main-institution-modal" :show="$errors->get('name') || $errors->get('go_to_edit')" focusable>
-                    <form method="POST" action="{{ route(($authRole === 'admin' ? '' : $authRole . '.')  . 'users.set-main-institution') }}"
+                    <form method="POST"
+                        action="{{ route(($authRole === 'admin' ? '' : $authRole . '.') . 'users.set-main-institution') }}"
                         class="p-6 flex flex-col gap-4" x-ref="edituserform" enctype="multipart/form-data">
                         @csrf
 
@@ -429,14 +434,16 @@
                         <template x-if="institutionType == 'school' && roleType == 'personnel'">
                             @php
                                 $schoolsPersonnelOptions = [];
-                                if($authRole == "admin"){
+                                if ($authRole == 'admin') {
                                     $schoolsPersonnelOptions = $user->schools->map(function ($school) {
                                         return ['value' => $school->id, 'label' => $school->name];
                                     });
-                                }else{
-                                    $schoolsPersonnelOptions = $user->schools->whereIn('academy_id', $authUser->primaryAcademy()->id)->map(function ($school) {
-                                        return ['value' => $school->id, 'label' => $school->name];
-                                    });
+                                } else {
+                                    $schoolsPersonnelOptions = $user->schools
+                                        ->whereIn('academy_id', $authUser->primaryAcademy()->id)
+                                        ->map(function ($school) {
+                                            return ['value' => $school->id, 'label' => $school->name];
+                                        });
                                 }
                                 $selectedSchool = [
                                     'value' => $user->primarySchool()->id ?? null,
@@ -471,6 +478,23 @@
 
 
             </div>
+
+            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4">
+                <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                    {{ __('users.rank') }}</h3>
+                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                <p class="text-background-600 dark:text-background-200 mb-2">
+                    {{ __('users.rank_message', [
+                        'rank' => $user->rank->name,
+                    ]) }}
+                </p>
+                <a href="{{ route('users.rank.request.specific', $user->id) }}">
+                    <x-primary-button>
+                        <span>{{ __('users.request_rank') }}</span>
+                    </x-primary-button>
+                </a>
+            </div>
+
 
             @if (!$user->is_disabled)
                 <x-user.disable-user-form :user="$user->id" />

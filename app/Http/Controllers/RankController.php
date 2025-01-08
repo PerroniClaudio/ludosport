@@ -107,6 +107,36 @@ class RankController extends Controller {
         ]);
     }
 
+    public function rankRequestFormUser(User $user) {
+
+
+
+        $ranks = Rank::all();
+        $authUserRole = User::find(auth()->user()->id)->getRole();
+
+        if ($authUserRole === 'instructor') {
+            $authSchools = auth()->user()->schools->pluck('id')->toArray();
+
+            $users = User::whereHas('schools', function ($query) use ($authSchools) {
+                $query->whereIn('school_id', $authSchools);
+            })->get();
+        }
+
+        $formattedRanks = [];
+
+        foreach ($ranks as $rank) {
+            $formattedRanks[] = [
+                'value' => $rank->id,
+                'label' => __('users.' . strtolower($rank->name)),
+            ];
+        }
+
+        return view('ranks.create-request', [
+            'ranks' => $formattedRanks,
+            'users' =>  collect([$user])
+        ]);
+    }
+
     public function newRequest(Request $request) {
         $request->validate([
             'rank_id' => 'required|exists:ranks,id',

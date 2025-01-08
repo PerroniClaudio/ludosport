@@ -24,35 +24,45 @@
                             console.log(this.user);
                         }
                     }">
-
-                        <div class="flex items-end">
-                            <div class="flex-1">
-                                <x-form.input-model name="needle" label="Search by name" type="search"
-                                    required="{{ true }}" value="{{ old('name') }}"
-                                    placeholder="{!! fake()->firstName() !!}" />
+                        @if ($users->count() > 1)
+                            <div class="flex items-end">
+                                <div class="flex-1">
+                                    <x-form.input-model name="needle" label="Search by name" type="search"
+                                        required="{{ true }}" value="{{ old('name') }}"
+                                        placeholder="{!! fake()->firstName() !!}" />
+                                </div>
+                                <x-primary-button class="ml-2" type="button" @click="searchUsers">
+                                    <x-lucide-search class="w-6 h-6 text-white" />
+                                </x-primary-button>
                             </div>
-                            <x-primary-button class="ml-2" type="button" @click="searchUsers">
-                                <x-lucide-search class="w-6 h-6 text-white" />
-                            </x-primary-button>
-                        </div>
+                        @endif
 
                         <form method="POST" action="{{ route('users.rank.request.create') }}">
 
                             @csrf
 
-                            <div x-show="users.length > 0">
-                                <x-input-label for="user" value="User to promote" />
-                                <select name="user_to_promote_id" id="user"
-                                    class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm"
-                                    x-model="user">
-                                    <option value="" selected>{{ __('Select an option') }}</option>
-                                    <template x-for="user in users" :key="user.id">
-                                        <option x-text="user.name + ' ' + user.surname" :value="user.id"></option>
-                                    </template>
-                                </select>
-                                <x-input-error :messages="$errors->get('user_to_promote_id')" class="mt-2" />
+                            @if ($users->count() > 1)
+                                <div x-show="users.length > 0">
+                                    <x-input-label for="user" value="User to promote" />
+                                    <select name="user_to_promote_id" id="user"
+                                        class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm"
+                                        x-model="user">
+                                        <option value="" selected>{{ __('Select an option') }}</option>
+                                        <template x-for="user in users" :key="user.id">
+                                            <option x-text="user.name + ' ' + user.surname" :value="user.id">
+                                            </option>
+                                        </template>
+                                    </select>
+                                    <x-input-error :messages="$errors->get('user_to_promote_id')" class="mt-2" />
 
-                            </div>
+                                </div>
+                            @elseif ($users->count() == 1)
+                                <p>{{ __('users.request_rank_promoting', [
+                                    'user' => $users->first()->name . ' ' . $users->first()->surname,
+                                ]) }}
+                                </p>
+                                <input type="hidden" name="user_to_promote_id" value="{{ $users->first()->id }}" />
+                            @endif
 
                             <x-form.select name="rank_id" label="Rank" required="{{ true }}"
                                 shouldHaveEmptyOption="true" :options="$ranks" />

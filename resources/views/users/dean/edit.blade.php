@@ -8,7 +8,7 @@
     $authRole = $authUser->getRole();
     $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
     // Può modificare l'utente solo se è un atleta della stessa scuola
-    $canEdit = in_array($authUser->primarySchool()->id, $user->schoolAthletes->pluck('id')->toArray());
+$canEdit = in_array($authUser->primarySchool()->id, $user->schoolAthletes->pluck('id')->toArray());
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -104,7 +104,7 @@
 
                         <div>
                             <x-input-label for="nationality" value="Nationality" />
-                            <select name="nationality" id="nationality" {{!$canEdit ? 'disabled' : ''}}
+                            <select name="nationality" id="nationality" {{ !$canEdit ? 'disabled' : '' }}
                                 class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
                                 @foreach ($nations as $key => $nation)
                                     <optgroup label="{{ $key }}"">
@@ -132,7 +132,7 @@
                         x-data="{
                             selected: {{ collect($user->roles) }},
                             selectRole(role) {
-                                if ({{$canEdit ? 'true' : 'false'}} && {{ collect($editable_roles) }}.includes(role)) {
+                                if ({{ $canEdit ? 'true' : 'false' }} && {{ collect($editable_roles) }}.includes(role)) {
                                     if (this.selected.includes(role)) {
                                         this.selected = this.selected.filter(item => item !== role);
                                     } else {
@@ -191,7 +191,7 @@
                     @endif
                 </div>
 
-                @if($canEdit)
+                @if ($canEdit)
                     <div class="fixed bottom-8 right-32">
                         <x-primary-button type="submit">
                             <x-lucide-save class="w-6 h-6 text-white" />
@@ -213,7 +213,7 @@
 
                             <div class="flex flex-col gap-4">
                                 <div class="flex flex-col gap-2">
-                                    @if($canEdit)
+                                    @if ($canEdit)
                                         <input type="file" name="profilepicture" id="profilepicture" class="hidden"
                                             x-on:change="$refs.pfpform.submit()" />
                                         <x-primary-button type="button"
@@ -249,7 +249,8 @@
                             $mainAcademyPersonnel = $user->primaryAcademy();
                         @endphp
                         @foreach ($user->academies as $academy)
-                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                            <div
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $academy->name }}
@@ -269,7 +270,8 @@
                             $mainAcademyAthlete = $user->primaryAcademyAthlete();
                         @endphp
                         @foreach ($user->academyAthletes as $academy)
-                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                            <div
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $academy->name }}
@@ -295,7 +297,8 @@
                             $mainSchoolPersonnel = $user->primarySchool();
                         @endphp
                         @foreach ($user->schools as $school)
-                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                            <div
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $school->name }}
@@ -315,7 +318,8 @@
                             $mainSchoolAthlete = $user->primarySchoolAthlete();
                         @endphp
                         @foreach ($user->schoolAthletes as $schools)
-                            <div class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                            <div
+                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $schools->name }}
@@ -328,6 +332,22 @@
                     </div>
                 </div>
 
+            </div>
+
+            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4">
+                <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                    {{ __('users.rank') }}</h3>
+                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                <p class="text-background-600 dark:text-background-200 mb-2">
+                    {{ __('users.rank_message', [
+                        'rank' => $user->rank->name,
+                    ]) }}
+                </p>
+                <a href="{{ route('users.rank.request.specific', $user->id) }}">
+                    <x-primary-button>
+                        <span>{{ __('users.request_rank') }}</span>
+                    </x-primary-button>
+                </a>
             </div>
 
             @if (!$user->is_disabled)
