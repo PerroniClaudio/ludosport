@@ -22,19 +22,31 @@
             this.sortColumn = columnIndex;
             this.sortDirection = 'asc';
         }
-
         this.rows = [...this.rows].sort((a, b) => {
             const column = this.columns[columnIndex];
-            const aValue = String(a[column.field]);
-            const bValue = String(b[column.field]);
+            const aValue = a[column.field];
+            const bValue = b[column.field];
 
-            if (this.sortDirection === 'asc') {
-                return aValue.localeCompare(bValue);
+            if (!isNaN(aValue) && !isNaN(bValue)) {
+                if (this.sortDirection === 'asc') {
+                    return aValue - bValue;
+                } else {
+                    return bValue - aValue;
+                }
             } else {
-                return bValue.localeCompare(aValue);
+                const aStr = String(aValue);
+                const bStr = String(bValue);
+
+                if (this.sortDirection === 'asc') {
+                    return aStr.localeCompare(bStr);
+                } else {
+                    return bStr.localeCompare(aStr);
+                }
             }
         });
+
     },
+
     searchByValue: function(e) {
         const search = e.target.value.toLowerCase();
         if (search === '') {
