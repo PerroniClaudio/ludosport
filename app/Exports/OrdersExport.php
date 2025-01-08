@@ -71,8 +71,8 @@ class OrdersExport implements FromArray {
             "Business Name",
             "VAT",
             "SDI",
-            "Items",
-            "Created At"
+            "Created At",
+            "Items"
         ];
 
 
