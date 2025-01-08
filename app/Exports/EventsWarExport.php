@@ -61,7 +61,7 @@ class EventsWarPointsSheet implements FromArray, WithTitle {
                 "Code",
                 "Name",
                 "Surname",
-                "War Points"
+                "Arena Points"
             ], $this->users
         ];
     }
