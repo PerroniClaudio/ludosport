@@ -46,7 +46,10 @@ class OrdersExport implements FromArray {
                 $order->invoice->sdi,
                 $order->created_at,
                 $order->items->map(function ($item) {
-                    return __('orders.' . $item->product_name) . " x " . $item->quantity . " - " . $item->total . "€\n";
+                    // return __('orders.' . $item->product_name) . " x " . $item->quantity . " - " . $item->total . "€\n";
+                    return ($item->product_type ==  'event_participation'
+                    ? __('events.event_participation') . ' - ' . $item->product_name
+                    : __('orders.' . $item->product_name));
                 })->implode(', '),
 
             ];
