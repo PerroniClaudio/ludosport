@@ -29,4 +29,5 @@ return [
     'approve_transfer_confirm' => 'Are you sure you want to approve this wire transfer payment?',
     'free' => 'Free',
     '' => '',
+    'admin' => 'Admin',
 ];

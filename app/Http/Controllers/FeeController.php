@@ -94,13 +94,14 @@ class FeeController extends Controller {
 
             $latest_fee = $value->fees()->latest()->first();
 
-            if ($latest_fee->end_date < now()) {
+            if ($latest_fee && ($latest_fee->end_date < Carbon::now())) {
                 $users_expired_fees[] = [
                     'id' => $value->id,
                     'name' => $value->name,
                     'surname' => $value->surname,
+                    'fullname' => $value->name . ' ' . $value->surname,
                     'email' => $value->email,
-                    'fee_expired_at' => $value->fees()->latest()->end_date,
+                    'fee_expired_at' => $latest_fee->end_date,
                 ];
             }
         }
