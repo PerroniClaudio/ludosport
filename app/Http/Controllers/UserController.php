@@ -262,7 +262,13 @@ class UserController extends Controller {
             $user->setPrimaryAcademyAthlete($academy->id);
             // Un atelta senza scuola è associato alla scuola No school
             $noSchool = School::where('slug', 'no-school')->first();
-            if ($noSchool) {
+            // Se creato da dean o manager va associato alla scuola altrimenti non lo possono vedere.
+            // Dato che dean e manager sono abilitati ad una scuola sola, basta recuperare quella.
+            if(in_array($authRole, ['dean', 'manager']) && $authUser->primarySchool()) {
+                $school = $authUser->primarySchool();
+                $school->athletes()->syncWithoutDetaching($user->id);
+                $user->setPrimarySchoolAthlete($school->id);
+            } else if ($noSchool) {
                 $user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
             }
         } else {

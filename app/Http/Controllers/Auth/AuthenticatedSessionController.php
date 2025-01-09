@@ -22,6 +22,12 @@ class AuthenticatedSessionController extends Controller {
      * Handle an incoming authentication request.
      */
     public function store(LoginRequest $request): RedirectResponse {
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && $user->is_disabled) {
+            return back()->withErrors(['email' => 'This account has been disabled. Contact the administrator to enable it.']);
+        }
+
         $request->authenticate();
 
         $request->session()->regenerate();

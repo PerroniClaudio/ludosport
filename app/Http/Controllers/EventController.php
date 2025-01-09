@@ -1232,7 +1232,7 @@ class EventController extends Controller {
             'is_in_waiting_list' => $isInWaitingList,
             'block_subscriptions' => $event->block_subscriptions,
             'is_waiting_payment' => $isWaitingPayment,
-            'academy_email' => $academy_email,
+            'academy_email' => $academy_email ?? '',
         ]);
     }
 
