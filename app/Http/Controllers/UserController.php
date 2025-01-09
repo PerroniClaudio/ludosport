@@ -6,9 +6,11 @@ use App\Mail\CreatedUserEmail;
 use App\Models\Academy;
 use App\Models\Announcement;
 use App\Models\Clan;
+use App\Models\Fee;
 use App\Models\Invoice;
 use App\Models\Language;
 use App\Models\Nation;
+use App\Models\Order;
 use App\Models\Rank;
 use App\Models\Role;
 use App\Models\School;
@@ -763,8 +765,64 @@ class UserController extends Controller {
         $newRank = $user->rank_id;
 
         if ($authRole === 'admin') {
-            $newHasPaidFee = ($request->has_paid_fee == 'on' ?  1 :  0);
             $newRank = Rank::find($request->rank)->id ?? $user->rank_id;
+            $newHasPaidFee = ($request->has_paid_fee == 'on' ?  1 :  0);
+
+            if ($oldHasPaidFee == 0 && $newHasPaidFee == 1) {
+
+                $lastInvoice = $user->invoices()->latest()->first();
+                // L'invoice in questo caso non servirebbe, ma è richiesta dall'ordine, quindi si crea comunque.
+                $invoice = $user->invoices()->create([
+                    'user_id' => $user->id,
+                    'name' => $lastInvoice ? ($lastInvoice->name ?: $user->name) : $user->name,
+                    'surname' => $lastInvoice ? ($lastInvoice->surname ?: ($user->surname ?: '')) : ($user->surname ?: ''),
+                    'address' => $lastInvoice ? ($lastInvoice->address ?: json_encode([
+                        'address' => '',
+                        'zip' => '',
+                        'city' => '',
+                        'country' => 'Italy',
+                    ])) : json_encode([
+                        'address' => '',
+                        'zip' => '',
+                        'city' => '',
+                        'country' => 'Italy',
+                    ]),
+                    'vat' => $lastInvoice ? ($lastInvoice->vat ?: '') : '',
+                    'sdi' => $lastInvoice ? ($lastInvoice->sdi ?: '') : '',
+                ]);
+
+                $order = Order::create([
+                    'user_id' => $user->id,
+                    'status' => 2, // Completed
+                    'total' => 0,
+                    'payment_method' => 'admin',
+                    'order_number' => Str::orderedUuid(),
+                    'result' => '{}',
+                    'invoice_id' => $invoice->id,
+                ]);
+
+                $order->items()->create([
+                    'product_type' => 'fee',
+                    'product_name' => 'fee',
+                    'product_code' => 'fee',
+                    'quantity' => 1,
+                    'price' => 0,
+                    'vat' => 0,
+                    'total' => 0
+                ]);
+
+                $fee = Fee::create([
+                    'user_id' => $order->user_id,
+                    'academy_id' => $user->primaryAcademyAthlete()->id ?? 1,
+                    'type' => 3,
+                    'start_date' => now(),
+                    'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
+                    'auto_renew' => 0,
+                    'unique_id' => Str::orderedUuid(),
+                    'used' => 1,
+                ]);
+                
+            }
         }
 
         $user->update([
