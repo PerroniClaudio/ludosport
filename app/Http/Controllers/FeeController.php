@@ -243,12 +243,12 @@ class FeeController extends Controller {
 
         $items = json_decode($request->items);
         $prices = [];
-
+        
+        $product_code = config('app.stripe.fee_code');
+        $price_id = config('app.stripe.fee_price');
+        $price = $this->retrievePriceByPriceId($price_id);
+        
         foreach ($items as $item) {
-
-            $product_code = config('app.stripe.fee_code');
-            $price_id = config('app.stripe.fee_price');
-            $price = $this->retrievePriceByPriceId($price_id);
 
             $order->items()->create([
                 'product_type' => 'fee',
@@ -290,11 +290,11 @@ class FeeController extends Controller {
         $items = json_decode($request->items);
         $prices = [];
 
-        foreach ($items as $item) {
+        $product_code = config('app.stripe.fee_code');
+        $price_id = config('app.stripe.fee_price');
+        $price = $this->retrievePriceByPriceId($price_id);
 
-            $product_code = config('app.stripe.fee_code');
-            $price_id = config('app.stripe.fee_price');
-            $price = $this->retrievePriceByPriceId($price_id);
+        foreach ($items as $item) {
 
             $order->items()->create([
                 'product_type' => 'fee',
@@ -514,9 +514,10 @@ class FeeController extends Controller {
         $items = json_decode($request->items);
         $amount = 0;
 
+        $price = config('app.stripe.fee_price_numeral');
+        
         foreach ($items as $item) {
 
-            $price = config('app.stripe.fee_price_numeral');
             $amount += $price;
 
             $order->items()->create([
@@ -597,8 +598,9 @@ class FeeController extends Controller {
 
         $items = json_decode($request->items);
         $amount = 0;
+        $feePrice = config('app.stripe.fee_price_numeral');
         foreach ($items as $item) {
-            $amount += $item->name == 'senior_fee' ? 50 : 25;
+            $amount += $feePrice;
 
             $order->items()->create([
                 'product_type' => 'fee',
@@ -841,9 +843,9 @@ class FeeController extends Controller {
         $items = json_decode($request->items);
         $amount = 0;
 
+        $price = config('app.stripe.fee_price_numeral');
+        
         foreach ($items as $item) {
-
-            $price = config('app.stripe.fee_price_numeral');
 
             $amount += $price;
 

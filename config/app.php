@@ -134,7 +134,7 @@ return [
     'stripe' => [
         'fee_price' => env('STRIPE_FEE_PRICE', 'price_xyz'),
         'fee_code' => env('STRIPE_FEE', 'price_xyz'),
-        'fee_price_numeral' => env('STRIPE_FEE_PRICE_NUMERAL', 0),
+        'fee_price_numeral' => env('FEE_PRICE_NUMERAL', 0),
     ],
 
     'google' => [
