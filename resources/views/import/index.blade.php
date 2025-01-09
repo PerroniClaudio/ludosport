@@ -76,7 +76,10 @@
                                 </a>
                             </x-primary-button>
                             <x-primary-button x-show="row.event_id != null">
-                                <a x-bind:href="'/events/' + row.event_id">
+                                @php
+                                    $redirectRoute = $authRole === 'admin' ? '/events/' : '/' . $authRole . '/events/';
+                                @endphp
+                                <a x-bind:href="'{{$redirectRoute}}' + row.event_id">
                                     <x-lucide-eye class="w-5 h-5 cursor-pointer" />
                                 </a>
                             </x-primary-button>

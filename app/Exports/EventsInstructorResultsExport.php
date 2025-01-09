@@ -51,14 +51,14 @@ class EventsInstructorResultsExport implements WithMultipleSheets {
                 })->toArray();
             }
 
-            $sheets[] = new EventsParticipantsSheet($users, $event->id, $event->name);
+            $sheets[] = new EventsResultsSheet($users, $event->id, $event->name);
         }
 
         return $sheets;
     }
 }
 
-class EventsParticipantsSheet implements FromArray, WithTitle{
+class EventsResultsSheet implements FromArray, WithTitle{
 
     private $users;
     private $event_id;
