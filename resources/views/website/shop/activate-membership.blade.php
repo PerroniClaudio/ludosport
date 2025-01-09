@@ -1,12 +1,13 @@
+@php
+ $feePrice = config('app.stripe.fee_price_numeral');
+@endphp
 <x-website-layout>
     <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
         <section class="col-span-12 py-12">
             <div x-data="{
                 birthday: '',
-                seniorFees: 0,
-                juniorFees: 0,
-                seniorFeesPrice: 50,
-                juniorFeesPrice: 25,
+                Fees: 0,
+                FeesPrice: {{$feePrice}},
                 totalPrice: 0,
                 name: 'Name',
                 surname: 'Surname',
@@ -45,26 +46,13 @@
                     let age = Math.abs(this.differenzaInAnni(new Date(), date))
             
                     if (age < 99) {
-            
-                        if (age >= 16) {
-                            this.seniorFees = 1
-                            this.juniorFees = 0
-            
-                            this.totalPrice = this.seniorFeesPrice
-            
-                        } else {
-                            this.seniorFees = 0
-                            this.juniorFees = 1
-            
-                            this.totalPrice = this.juniorFeesPrice
-            
-                        }
+                        this.fees = 1
+                        this.totalPrice = this.FeesPrice
             
                         this.shouldShowPayment = true
             
                     } else {
-                        this.seniorFees = 0
-                        this.juniorFees = 0
+                        this.fees = 0
                         this.totalPrice = 0
                         this.shouldShowPayment = false
                     }
@@ -134,19 +122,10 @@
                     const url = `/shop/fees/stripe/checkout`
                     let items = [];
             
-                    if (this.seniorFees > 0) {
-                        items.push({
-                            'name': 'senior_fee',
-                            'quantity': this.seniorFees,
-                        })
-                    }
-            
-                    if (this.juniorFees > 0) {
-                        items.push({
-                            'name': 'junior_fee',
-                            'quantity': this.juniorFees,
-                        })
-                    }
+                    items.push({
+                        'name': 'fee',
+                        'quantity': this.fees,
+                    })
             
                     const itemsJson = JSON.stringify(items)
             
@@ -162,20 +141,11 @@
             
                     const url = `/shop/fees/paypal/checkout`
                     let items = [];
-            
-                    if (this.seniorFees > 0) {
-                        items.push({
-                            'name': 'senior_fee',
-                            'quantity': this.seniorFees,
-                        })
-                    }
-            
-                    if (this.juniorFees > 0) {
-                        items.push({
-                            'name': 'junior_fee',
-                            'quantity': this.juniorFees,
-                        })
-                    }
+                    
+                    items.push({
+                        'name': 'fee',
+                        'quantity': this.fees,
+                    })
             
                     const itemsJson = JSON.stringify(items)
             
@@ -200,21 +170,11 @@
                     const url = `/shop/fees/wire-transfer`
                     let items = [];
             
-            
-                    if (this.seniorFees > 0) {
-                        items.push({
-                            'name': 'senior_fee',
-                            'quantity': this.seniorFees,
-                        })
-                    }
-            
-                    if (this.juniorFees > 0) {
-                        items.push({
-                            'name': 'junior_fee',
-                            'quantity': this.juniorFees,
-                        })
-                    }
-            
+                    items.push({
+                        'name': 'fee',
+                        'quantity': this.fees,
+                    })
+                        
                     const itemsJson = JSON.stringify(items)
             
                     const params = new URLSearchParams({
@@ -239,17 +199,18 @@
                             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
 
                                 <div>
-                                    <label for="seniorFees" class="text-background-800 dark:text-background-200">
+                                    <label for="fees" class="text-background-800 dark:text-background-200">
                                         {{ __('website.birthday') }}
                                     </label>
-                                    <input type="date" name="birthday" id="seniorFees" x-model="birthday"
+                                    <input type="date" name="birthday" id="fees" x-model="birthday"
+                                        max="{{ date('Y-m-d', strtotime('-0 years')) }}" min="{{ date('Y-m-d', strtotime('-99 years')) }}"
                                         x-on:input="calculateFeePrice"
                                         class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
                                 </div>
 
-                                <p class="text-background-800 dark:text-background-200 mt-4">
+                                {{-- <p class="text-background-800 dark:text-background-200 mt-4">
                                     {{ __('website.membership_age') }}
-                                </p>
+                                </p> --}}
 
                                 <p class="text-background-800 dark:text-background-200 mt-4">
                                     {{ __('website.membership_expiration_text') }}
