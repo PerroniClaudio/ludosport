@@ -147,11 +147,11 @@ class UserController extends Controller {
                     }
 
                     if ($role->label === 'instructor') {
-                        $user->weapon_forms_formatted = $user->weaponFormsPersonnel()->pluck('name')->toArray();
+                        $user->weapon_forms_instructor_formatted = $user->weaponFormsPersonnel()->pluck('name')->toArray();
                     }
 
                     if ($role->label === 'technician') {
-                        $user->weapon_forms_formatted = $user->weaponFormsTechnician()->pluck('name')->toArray();
+                        $user->weapon_forms_technician_formatted = $user->weaponFormsTechnician()->pluck('name')->toArray();
                     }
 
                     if ($role->label === 'rector') {
