@@ -72,7 +72,15 @@
                                         x-on:click="setSelectedAnnouncement(announcement)"
                                         class="cursor-pointer p-2 border-b dark:border-background-700 flex items-center justify-between">
                                         <div class="flex flex-col gap-1">
-                                            <p x-text="announcement.object" class="font-bold"></p>
+                                            <div class="flex items-center gap-1">
+                                                <x-lucide-info class="h-4 w-4 min-w-4 text-blue-500"
+                                                    x-show="announcement.type == 1" />
+                                                <x-lucide-triangle-alert class="h-4 w-4 min-w-4 text-yellow-500"
+                                                    x-show="announcement.type == 2" />
+                                                <x-lucide-octagon-alert class="h-4 w-4 min-w-4 text-red-500"
+                                                    x-show="announcement.type == 3" />
+                                                <p x-text="announcement.object" class="font-bold flex-0"></p>
+                                            </div>
                                             <p x-text="new Date(announcement.created_at).toLocaleDateString('it-IT', {
                                                 hour: 'numeric', 
                                                 minute: 'numeric' 
@@ -80,7 +88,7 @@
                                                 class="font-bold text-xs">
                                             </p>
                                         </div>
-                                        <x-lucide-chevron-right class="h-6 w-6 font-bold" />
+                                        <x-lucide-chevron-right class="h-6 w-6 min-w-6 font-bold" />
                                     </div>
 
                                     <div x-show="!shouldShowAsNew(announcement)"
@@ -89,11 +97,11 @@
                                         class="cursor-pointer p-2 border-b dark:border-background-700 flex items-center justify-between">
                                         <div class="flex flex-col gap-1">
                                             <div class="flex items-center gap-1">
-                                                <x-lucide-info class="h-4 w-4 text-blue-500"
+                                                <x-lucide-info class="h-4 w-4 min-w-4 text-blue-500"
                                                     x-show="announcement.type == 1" />
-                                                <x-lucide-triangle-alert class="h-4 w-4 text-yellow-500"
+                                                <x-lucide-triangle-alert class="h-4 w-4 min-w-4 text-yellow-500"
                                                     x-show="announcement.type == 2" />
-                                                <x-lucide-octagon-alert class="h-4 w-4 text-red-500"
+                                                <x-lucide-octagon-alert class="h-4 w-4 min-w-4 text-red-500"
                                                     x-show="announcement.type == 3" />
                                                 <p x-text="announcement.object"></p>
                                             </div>
@@ -105,7 +113,7 @@
                                                 class=" text-xs">
                                             </p>
                                         </div>
-                                        <x-lucide-chevron-right class="h-6 w-6" />
+                                        <x-lucide-chevron-right class="h-6 w-6 min-w-6" />
 
                                     </div>
                                 </div>
