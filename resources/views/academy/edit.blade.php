@@ -51,8 +51,8 @@
                         </div>
 
                         <div class="flex flex-col gap-2 ">
-                            <x-form.input name="email" label="{{__('academies.academy_email')}}" type="text" value="{{ $academy->rector() ? $academy->rector()->email: '' }}"
-                                placeholder="{{ fake()->email() }}" disabled />
+                            <x-form.input name="email" label="{{__('academies.academy_email')}}" type="text" value="{{ $academy->email ?? '' }}"
+                                placeholder="{{ fake()->email() }}" />
                             <x-form.input name="rector" label="{{__('academies.academy_rector')}}" type="text" value="{{ $academy->rector() ? ($academy->rector()->name . ' ' . ($academy->rector()->surname ?? '')): '' }}"
                                 placeholder="{{ fake()->name() }}" disabled description="{{__('academies.academy_rector_description')}}" />
                         </div>
@@ -106,7 +106,7 @@
                                 value="{{ $nationName }}" placeholder="{{ fake()->company() }}" />
 
                             <div class="flex flex-col gap-2 ">
-                                <x-form.input name="email" label="{{__('academies.academy_email')}}" type="text" value="{{ $academy->rector() ? $academy->rector()->email: '' }}"
+                                <x-form.input name="email" label="{{__('academies.academy_email')}}" type="text" value="{{ $academy->email ?? '' }}"
                                     placeholder="{{ fake()->email() }}" disabled />
                                 <x-form.input name="rector" label="{{__('academies.academy_rector')}}" type="text" value="{{ $academy->rector() ? ($academy->rector()->name . ' ' . ($academy->rector()->surname ?? '')): '' }}"
                                     placeholder="{{ fake()->name() }}" disabled description="{{__('academies.academy_rector_description')}}" />
