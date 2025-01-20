@@ -350,7 +350,7 @@
                                     ],
                                     [
                                         'name' => 'Academy',
-                                        'field' => 'academy',
+                                        'field' => 'primary_academy',
                                         'columnClasses' => '',
                                         'rowClasses' => '',
                                     ],
@@ -363,7 +363,7 @@
                                         <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                             x-text="row.email"></td>
                                         <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
-                                            x-text="row.academy"></td>
+                                            x-text="row.primary_academy"></td>
                                         <td
                                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
                                             <a x-bind:href="'/users/' + row.id">
@@ -404,7 +404,7 @@
                                     ],
                                     [
                                         'name' => 'School',
-                                        'field' => 'school',
+                                        'field' => 'primary_school',
                                         'columnClasses' => '',
                                         'rowClasses' => '',
                                     ],
@@ -417,7 +417,7 @@
                                         <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                             x-text="row.email"></td>
                                         <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
-                                            x-text="row.school"></td>
+                                            x-text="row.primary_school"></td>
                                         <td
                                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
                                             <a x-bind:href="'/users/' + row.id">

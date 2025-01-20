@@ -20,6 +20,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -31,7 +32,7 @@ use Illuminate\Support\Facades\Password;
 class UserController extends Controller {
 
     public function index() {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
         if (!in_array($authUserRole, ['admin', 'rector', 'dean', 'manager', 'technician', 'instructor'])) {
@@ -155,11 +156,11 @@ class UserController extends Controller {
                     }
 
                     if ($role->label === 'rector') {
-                        $user->academy = $user->primaryAcademy() ? $user->primaryAcademy()->name : "No academy";
+                        $user->primary_academy = $user->primaryAcademy() ? $user->primaryAcademy()->name : "No academy";
                     }
 
                     if ($role->label === 'dean') {
-                        $user->school = $user->primarySchool() ? $user->primarySchool()->name : "No school";
+                        $user->primary_school = $user->primarySchool() ? $user->primarySchool()->name : "No school";
                     }
 
                     $users_sorted_by_role[$role->label][] = $user;
@@ -175,7 +176,7 @@ class UserController extends Controller {
     }
 
     public function create() {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
@@ -215,7 +216,7 @@ class UserController extends Controller {
     }
 
     public function store(Request $request) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
@@ -264,7 +265,7 @@ class UserController extends Controller {
             $noSchool = School::where('slug', 'no-school')->first();
             // Se creato da dean o manager va associato alla scuola altrimenti non lo possono vedere.
             // Dato che dean e manager sono abilitati ad una scuola sola, basta recuperare quella.
-            if(in_array($authRole, ['dean', 'manager']) && $authUser->primarySchool()) {
+            if (in_array($authRole, ['dean', 'manager']) && $authUser->primarySchool()) {
                 $school = $authUser->primarySchool();
                 $school->athletes()->syncWithoutDetaching($user->id);
                 $user->setPrimarySchoolAthlete($school->id);
@@ -294,7 +295,7 @@ class UserController extends Controller {
     }
 
     public function storeForAcademy(Request $request) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
@@ -380,7 +381,7 @@ class UserController extends Controller {
     }
 
     public function  storeForSchool(Request $request) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
@@ -465,7 +466,7 @@ class UserController extends Controller {
     }
 
     public function  storeForClan(Request $request) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
@@ -552,7 +553,7 @@ class UserController extends Controller {
     }
 
     public function edit(User $user) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
@@ -611,7 +612,7 @@ class UserController extends Controller {
 
         // Per select-institutions
         $allAcademies = Academy::all();
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authRole = User::find(Auth::user()->id)->getRole();
         $viewPath = $authRole === 'admin' ? 'users.edit' :  'users.' . $authRole . '.edit';
         $filteredSchoolsPersonnel = School::whereIn('academy_id', $user->academies->pluck('id'))->whereNotIn('id', $user->schools->pluck('id'))->where('is_disabled', '0')->with(['nation'])->get();
         $filteredSchoolsAthlete = School::whereIn('academy_id', $user->academyAthletes->pluck('id'))->whereNotIn('id', $user->schoolAthletes->pluck('id'))->where('is_disabled', '0')->with(['nation'])->get();
@@ -710,7 +711,7 @@ class UserController extends Controller {
     }
 
     public function update(Request $request, User $user) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
@@ -827,7 +828,6 @@ class UserController extends Controller {
                     'unique_id' => Str::orderedUuid(),
                     'used' => 1,
                 ]);
-                
             }
         }
 
@@ -865,7 +865,7 @@ class UserController extends Controller {
         $newRoles = explode(',', $request->roles);
 
         // Recupera l'utente che ha fatto la richiesta
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
 
         // Determina i ruoli da aggiungere e da rimuovere
         $rolesToAdd = array_diff($newRoles, $currentRoles);
@@ -985,14 +985,14 @@ class UserController extends Controller {
         }
 
 
-        $authUserRole = User::find(auth()->user()->id)->getRole();
+        $authUserRole = User::find(Auth::user()->id)->getRole();
         $redirectRoute = $authUserRole === 'admin' ? 'users.edit' :  $authUserRole . '.users.edit';
 
         return redirect()->route($redirectRoute, $user->id)->with('success', 'User updated successfully!');
     }
 
     public function destroy(User $user) {
-        $authRole = User::find(auth()->user()->id)->getRole();
+        $authRole = User::find(Auth::user()->id)->getRole();
 
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
@@ -1013,7 +1013,7 @@ class UserController extends Controller {
 
         // Installare meilisearch e continuare aggiungendo le condizionni per rector, dean, manager ecc.
 
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
         switch ($authRole) {
@@ -1113,7 +1113,7 @@ class UserController extends Controller {
     }
 
     public function filter() {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
         switch ($authRole) {
@@ -1148,7 +1148,7 @@ class UserController extends Controller {
     }
 
     public function filterResult(Request $request) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
         $users = [];
@@ -1294,7 +1294,7 @@ class UserController extends Controller {
             'role' => 'required|string|exists:roles,label',
         ]);
 
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
 
         if ($authUser->hasRole($request->role)) {
             session(['role' => $request->role]);
@@ -1366,7 +1366,7 @@ class UserController extends Controller {
     }
 
     public function dashboard(Request $request) {
-        $user = auth()->user()->id;
+        $user = Auth::user()->id;
         $user = User::find($user);
         $role = $user->getRole();
 
@@ -1549,7 +1549,7 @@ class UserController extends Controller {
 
     public function languages(User $user, Request $request) {
 
-        $loggedUser = User::find(auth()->user()->id);
+        $loggedUser = User::find(Auth::user()->id);
 
         if ($loggedUser->getRole() == 'athlete' && $loggedUser->id != $user->id) {
             return response()->json([
@@ -1573,7 +1573,7 @@ class UserController extends Controller {
     }
 
     public function invoicedata(User $user) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         if ($authUser->getRole() == 'athlete' && ($authUser->id != $user->id)) {
             return response()->json([
                 'error' => 'You do not have permission for this data!',
@@ -1888,7 +1888,7 @@ class UserController extends Controller {
     }
 
     public function editWeaponFormsAthlete(Request $request, User $user) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
         if ($authUserRole !== 'admin') {
@@ -1930,7 +1930,7 @@ class UserController extends Controller {
     }
 
     public function editWeaponFormsPersonnel(Request $request, User $user) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
         if ($authUserRole !== 'admin') {
@@ -1972,7 +1972,7 @@ class UserController extends Controller {
     }
 
     public function editWeaponFormsTechnician(Request $request, User $user) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
         if ($authUserRole !== 'admin') {
             return response()->json([
@@ -2011,7 +2011,7 @@ class UserController extends Controller {
     }
 
     public function editWeaponFormsAwardingDate(User $user, Request $request) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
         if ($authUserRole !== 'admin') {
             return response()->json([
@@ -2056,7 +2056,7 @@ class UserController extends Controller {
     }
 
     public function associateAcademy(Request $request) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
         if ($authUserRole !== 'admin') {
@@ -2134,7 +2134,7 @@ class UserController extends Controller {
     }
 
     public function associateSchool(Request $request) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
         $user = User::find($request->user_id);
@@ -2185,7 +2185,7 @@ class UserController extends Controller {
     }
 
     public function removeAcademy(Request $request) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
         if ($authUserRole !== 'admin') {
@@ -2287,7 +2287,7 @@ class UserController extends Controller {
     }
 
     public function removeSchool(Request $request) {
-        $authUser = User::find(auth()->user()->id);
+        $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
         $user = User::find($request->user_id);
