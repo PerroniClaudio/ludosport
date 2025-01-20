@@ -40,6 +40,8 @@ return [
     'academy_email' => 'Academy Email',
     'academy_email_website' => 'Academy Email',
     'rector_email_website' => 'Rector Email',
+    'picture_info' => 'The picture must be less than 8MB',
+    'error_picture_size' => 'The picture must be less than 8MB',
     'academy_rector' => 'Academy Rector',
     'academy_rector_description' => 'The rector is the one with this role and the academy as primary academy.',
     // 'academy_rector_description' => 'The rector is the one with this role and the academy as primary academy. If there is more than one, the first one found will be displayed. If there is none, the first rector in the academy personnel will result as rector, even without the academy as primary academy.',

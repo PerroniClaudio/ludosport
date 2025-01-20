@@ -131,38 +131,54 @@
 
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8"
                     x-data="{}">
-                    <div class="flex justify-between">
-                        <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.logo') }}
-                        </h3>
-
-                        <div>
-                            <form method="POST" action="{{ route('academies.picture.update', $academy->id) }}"
-                                enctype="multipart/form-data" x-ref="pfpform">
-                                @csrf
-                                @method('PUT')
-
-                                <div class="flex flex-col gap-4">
-                                    <div class="flex flex-col gap-2">
-                                        <input type="file" name="academylogo" id="academylogo" class="hidden"
-                                            x-on:change="$refs.pfpform.submit()" />
-                                        <x-primary-button type="button"
-                                            onclick="document.getElementById('academylogo').click()">
-                                            {{ __('users.upload_picture') }}
-                                        </x-primary-button>
+                    <div class="flex flex-col h-full">
+                        <div class="flex-none">
+                            <div class="flex justify-between">
+                                <div class="flex gap-2 items-center">
+                                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.logo') }}
+                                    </h3>
+                                    <div class='has-tooltip'>
+                                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                            {{ __('academies.picture_info') }}
+                                        </span>
+                                        <x-lucide-info class="h-4 text-background-400" />
                                     </div>
                                 </div>
-                            </form>
+                                <div>
+                                    <form method="POST" action="{{ route('academies.picture.update', $academy->id) }}"
+                                        enctype="multipart/form-data" x-ref="pfpform">
+                                        @csrf
+                                        @method('PUT')
+        
+                                        <div class="flex flex-col gap-4">
+                                            <div class="flex flex-col gap-2">
+                                                <input type="file" name="academylogo" id="academylogo" class="hidden"
+                                                    x-on:change="$refs.pfpform.submit()" />
+                                                <x-primary-button type="button"
+                                                    onclick="document.getElementById('academylogo').click()">
+                                                    {{ __('users.upload_picture') }}
+                                                </x-primary-button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                            @if ($errors->get('academylogo') != null)
+                                <div class="text-red-600 dark:text-red-400 flex items-center gap-1 my-2">
+                                    <x-lucide-info class="h-4 text-red-600 dark:text-red-400" />
+                                    <span>{{ __('academies.error_picture_size') }}</span>
+                                </div>
+                            @endif
                         </div>
-                    </div>
-                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-
-                    <div class="flex flex-col items-center justify-center flex-1 h-full">
-
-                        @if ($academy->picture)
-                            <img src="{{ route('academy-image', $academy->id) }}" alt="{{ $academy->name }}"
-                                class="w-1/2 rounded-lg">
-                        @endif
-
+                            <div class="flex flex-col items-center justify-center flex-1 h-auto">
+        
+                                @if ($academy->picture)
+                                    <img src="{{ route('academy-image', $academy->id) }}" alt="{{ $academy->name }}"
+                                        class="w-1/2 rounded-lg">
+                                @endif
+        
+                            </div>
                     </div>
                 </div>
             </div>
