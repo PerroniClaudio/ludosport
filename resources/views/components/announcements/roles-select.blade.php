@@ -58,9 +58,18 @@
 
     <x-modal name="select-roles-modal" :show="$errors->customrole->isNotEmpty()" maxWidth="7xl" focusable>
         <div class="p-6 flex flex-col gap-2">
-            <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
-                {{ __('announcements.select_roles') }}
-            </h2>
+            
+            <div class="flex gap-2 items-center">
+                <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
+                    {{ __('announcements.select_roles') }}
+                </h2>
+                <div class='has-tooltip'>
+                    <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 mr-12 translate-x-8 z-50'>
+                        {{ __('announcements.select_roles_info') }}
+                    </span>
+                    <x-lucide-info class="h-4 text-background-400" />
+                </div>
+            </div>
             <div class="flex gap-2">
                 <x-primary-button x-on:click.prevent="addAllRoles" >
                     <x-lucide-plus class="w-5 h-5 text-white" />

@@ -21,7 +21,7 @@
     isAcademySelected: function(academyId) {
         return this.selectedIds.includes(academyId);
     },
-    {{-- addAllAcademies: function() {
+    addAllAcademies: function() {
         this.selected = this.academies;
         this.selectedIds = this.academies.map(academy => academy.id);
         this.selectedIdsJson = JSON.stringify(this.selectedIds);
@@ -30,7 +30,7 @@
         this.selected = [];
         this.selectedIds = [];
         this.selectedIdsJson = JSON.stringify(this.selectedIds);
-    }, --}}
+    },
     init() {
         console.log(this.selectedIds);
         this.selected = this.selectedIds.map(id => this.academies.find(academy => academy.id === id));
@@ -61,17 +61,25 @@
 
     <x-modal name="select-academy-modal" :show="$errors->customrole->isNotEmpty()" maxWidth="7xl" focusable>
         <div class="p-6 flex flex-col gap-2">
-            <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
-                {{ __('announcements.select_academies') }}
-            </h2>
-            {{-- <div class="flex gap-2">
+            <div class="flex gap-2 items-center">
+                <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
+                    {{ __('announcements.select_academies') }}
+                </h2>
+                <div class='has-tooltip'>
+                    <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 mr-12 translate-x-8 z-50'>
+                        {{ __('announcements.select_academies_info') }}
+                    </span>
+                    <x-lucide-info class="h-4 text-background-400" />
+                </div>
+            </div>
+            <div class="flex gap-2">
                 <x-primary-button x-on:click.prevent="addAllAcademies" >
                     <x-lucide-plus class="w-5 h-5 text-white" />
                 </x-primary-button>
                 <x-primary-button x-on:click.prevent="removeAllAcademies" x-show="selectedIds.length > 0">
                     <x-lucide-minus class="w-5 h-5 text-white" />
                 </x-primary-button>
-            </div> --}}
+            </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <x-table :columns="[
