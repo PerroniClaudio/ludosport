@@ -255,6 +255,7 @@ class AcademyController extends Controller {
 
             $academy->update([
                 'name' => $request->name,
+                'email' => $request->email,
                 'nation_id' => $request->nationality,
                 'slug' => Str::slug($request->name),
                 'address' => $request->address,
@@ -273,6 +274,7 @@ class AcademyController extends Controller {
 
             $academy->update([
                 'name' => $request->name,
+                'email' => $request->email,
                 'nation_id' => $request->nationality,
                 'slug' => Str::slug($request->name),
             ]);
@@ -908,7 +910,7 @@ class AcademyController extends Controller {
             'rector' => $rector,
             'athletes' => $academy->athletes,
             'personnel' => $associated_personnel,
-            'academy_email' => $academy->rector() ? $academy->rector()->email : "",
+            'academy_email' => $academy->email ?? "",
         ]);
     }
 
