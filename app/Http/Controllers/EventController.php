@@ -489,6 +489,11 @@ class EventController extends Controller {
         $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
         if ($request->file('thumbnail') != null) {
+            // Validate the uploaded image
+            $request->validate([
+                'thumbnail' => 'image|max:8192', // 8MB max
+            ]);
+
             $file = $request->file('thumbnail');
             $file_name = time() . '_' . $file->getClientOriginalName();
             $path = "events/" . $id . "/" . $file_name;

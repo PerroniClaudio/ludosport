@@ -95,4 +95,6 @@ return [
     'chart_generated_at' => 'This chart was generated on :date',
     'chart_generate_new' => 'Generate an updated chart',
     'event_thumbnail_tooltip' => 'Save other information before uploading. Unsaved changes will be lost.',
+    'thumbnail_info' => 'The picture must be less than 8MB',
+    'error_thumbnail_size' => 'The picture must be less than 8MB',
 ];

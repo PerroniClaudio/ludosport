@@ -916,6 +916,11 @@ class AcademyController extends Controller {
 
     public function picture(Academy $academy, Request $request) {
         if ($request->file('academylogo') != null) {
+            // Validate the uploaded image
+            $request->validate([
+                'academylogo' => 'image|max:8192', // 8MB max
+            ]);
+
             $file = $request->file('academylogo');
 
             $file_extension = $file->getClientOriginalExtension();
