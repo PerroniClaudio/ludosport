@@ -425,12 +425,22 @@ class ClanController extends Controller {
             if(!in_array($request->transfer_athletes, ['yes', 'no'])){
                 return back()->with('error', 'Invalid value for transfer_athletes.');
             }
+            Log::channel('clan')->info('Moving clan to another school', [
+                'made_by' => $authUser->id,
+                'clan' => $clan->id,
+                'old_school' => $clan->school_id,
+                'new_school' => $request->school_id,
+                'old_academy' => $clan->school->academy->id ?? '',
+                'new_academy' => School::find($request->school_id)->academy->id ?? '',
+                'transfer_athletes' => $request->transfer_athletes,
+                'clan_athletes' => $clan->users()->pluck('user_id')->toArray(),
+                'clan_personnel' => $clan->personnel()->pluck('user_id')->toArray(),
+            ]);
             if($request->transfer_athletes == 'yes'){
                 // La scuola cambia e si vogliono spostare anche gli atleti
                 $oldSchool = School::find($clan->school_id);
                 $newSchool = School::find($request->school_id);
                 $athletes = $clan->users()->get();
-                $instructors = $clan->personnel()->get();
 
                 // Modificando prima la scuola del corso si mantengono le associazioni con gli atleti, che in questo caso non vanno eliminate
                 $clan->update([
@@ -443,27 +453,78 @@ class ClanController extends Controller {
                         // Mettiamo l'eccezione per evitare di rimuovere le associazioni col corso spostato.
                         $athlete->removeAcademiesAthleteAssociations($newSchool->academy); 
                         $athlete->academyAthletes()->syncWithoutDetaching($newSchool->academy->id);
+                        if (!$athlete->primaryAcademyAthlete()) {
+                            $athlete->setPrimaryAcademyAthlete($newSchool->academy->id);
+                        }
                         $athlete->schoolAthletes()->syncWithoutDetaching($newSchool->id);
-                    }
-                    // Vanno associati gli istruttori anche all'altra accademia e scuola
-                    foreach($instructors as $instructor){
-                        $instructor->academies()->syncWithoutDetaching($newSchool->academy->id);
-                        $instructor->schools()->syncWithoutDetaching($newSchool->id);
+                        Log::channel('user')->info('Athlete associated with academy - moving clan', [
+                            'made_by' => $authUser->id,
+                            'user' => $athlete->id,
+                            'academy' => $newSchool->academy->id,
+                            'school' => $newSchool->id,
+                            'clan' => $clan->id,
+                        ]);
+                        Log::channel('user')->info('Athlete associated with school - moving clan', [
+                            'made_by' => $authUser->id,
+                            'user' => $athlete->id,
+                            'school' => $newSchool->id,
+                            'clan' => $clan->id,
+                        ]);
                     }
                 } else {
                     // L'accademia non cambia, quindi si aggiungono solo le associazioni con la nuova scuola
                     foreach($athletes as $athlete){
-                        $athlete->schoolAthletes()->syncWithoutDetaching($newSchool->id);
-                    }
-                    // Vanno associati gli istruttori anche all'altra scuola
-                    foreach($instructors as $instructor){
-                        $instructor->schools()->syncWithoutDetaching($newSchool->id);
+                        if (!$athlete->schoolAthletes->contains($newSchool->id)) {
+                            $athlete->schoolAthletes()->syncWithoutDetaching($newSchool->id);
+                            Log::channel('user')->info('Athlete associated with school - moving clan', [
+                                'made_by' => $authUser->id,
+                                'user' => $athlete->id,
+                                'school' => $newSchool->id,
+                                'clan' => $clan->id,
+                            ]);
+                        }
                     }
                 }
             }else{
                 // La scuola cambia e non si vogliono spostare gli atleti
-                $clan->users()->detach();
+
+                $clanAthletes = $clan->users;
+                if($clanAthletes->count() > 0){
+                    Log::channel('clan')->info('Removed athletes associations - moving clan no athletes', [
+                        'made_by' => $authUser->id,
+                        'athletes' => $clanAthletes->pluck('id')->toArray(),
+                        'clan' => $clan->id,
+                    ]);
+                }
+                foreach($clanAthletes as $athlete){
+                    $clan->users()->detach($athlete->id);
+                    Log::channel('user')->info('Removed athlete associations - moving clan no athletes', [
+                        'made_by' => $authUser->id,
+                        'athlete' => $athlete->id,
+                        'clan' => $clan->id,
+                    ]);
+                }
             }
+
+            // In ogni caso si rimuove il personale associato al corso
+
+            $clanPersonnel = $clan->personnel;
+            if($clanPersonnel->count() > 0){
+                Log::channel('clan')->info('Removed personnel associations - moving clan', [
+                    'made_by' => $authUser->id,
+                    'personnel' => $clanPersonnel->pluck('id')->toArray(),
+                    'clan' => $clan->id,
+                ]);
+            }
+            foreach($clanPersonnel as $person){
+                $clan->personnel()->detach($person->id);
+                Log::channel('user')->info('Removed personnel associations - moving clan', [
+                    'made_by' => $authUser->id,
+                    'personnel' => $person->id,
+                    'clans' => [$clan->id],
+                ]);
+            }
+
         }
 
         $clan->update([

@@ -281,11 +281,20 @@ class SchoolController extends Controller {
             if(!in_array($request->transfer_athletes, ['yes', 'no'])){
                 return back()->with('error', 'Invalid value for transfer_athletes.');
             }
+            Log::channel('school')->info('Moving school to another academy', [
+                'made_by' => $authUser->id,
+                'school' => $school->id,
+                'old_academy' => $school->academy_id,
+                'new_academy' => $request->academy_id,
+                'transfer_athletes' => $request->transfer_athletes,
+                'school_athletes' => $school->athletes->pluck('id')->toArray(),
+                'school_personnel' => $school->personnel->pluck('id')->toArray(),
+                'school_clans' => $school->clan->pluck('id')->toArray(),
+            ]);
             if($request->transfer_athletes == 'yes'){
                 // $oldAcademy = Academy::find($school->academy_id);
                 $newAcademy = Academy::find($request->academy_id);
                 $athletes = $school->athletes()->get();
-                $personnel = $school->personnel()->get();
 
                 if(!$newAcademy){
                     return back()->with('error', 'Invalid academy.');
@@ -300,17 +309,98 @@ class SchoolController extends Controller {
                     // Mettiamo l'eccezione per evitare di rimuovere le associazioni con la scuola spostata e i suoi corsi.
                     $athlete->removeAcademiesAthleteAssociations($newAcademy); 
                     $athlete->academyAthletes()->syncWithoutDetaching($newAcademy->id);
-                }
-                // Vanno associati gli istruttori anche all'altra accademia
-                foreach($personnel as $person){
-                    $person->academies()->syncWithoutDetaching($newAcademy->id);
+                    if (!$athlete->primaryAcademyAthlete()) {
+                        $athlete->setPrimaryAcademyAthlete($newAcademy->id);
+                    }
+
+                    // Non serve controllare se l'atleta è già associato all'accademia perchè gli atleti ne hanno una sola per volta e se cambia non può essere già associato.
+                    Log::channel('user')->info('Athlete associated with academy - moving school', [
+                        'made_by' => $authUser->id,
+                        'athlete' => $athlete->id,
+                        'academy' => $newAcademy->id,
+                        'school' => $school->id,
+                    ]);
                 }
             } else {
                 $clans = $school->clan()->get();
                 foreach($clans as $clan){
-                    $clan->users()->detach();
+                    $clanAthletes = $clan->users;
+                    if($clanAthletes->count() > 0){
+                        Log::channel('clan')->info('Removed athletes associations - moving school no athletes', [
+                            'made_by' => $authUser->id,
+                            'athletes' => $clanAthletes->pluck('id')->toArray(),
+                            'clan' => $clan->id,
+                            'school' => $school->id,
+                        ]);
+                    }
+                    foreach($clanAthletes as $athlete){
+                        $clan->users()->detach($athlete->id);
+                        Log::channel('user')->info('Removed athlete associations - moving school no athletes', [
+                            'made_by' => $authUser->id,
+                            'athlete' => $athlete->id,
+                            'clans' => [$clan->id],
+                            'school' => $school->id,
+                        ]);
+                    }
                 }
-                $school->athletes()->detach();
+
+                $schoolAthletes = $school->athletes;
+                if($schoolAthletes->count() > 0){
+                    Log::channel('school')->info('Removed athletes associations - moving school no athletes', [
+                        'made_by' => $authUser->id,
+                        'athletes' => $schoolAthletes->pluck('id')->toArray(),
+                        'school' => $school->id,
+                    ]);
+                }
+                foreach($schoolAthletes as $athlete){
+                    $school->athletes()->detach($athlete->id);
+                    Log::channel('user')->info('Removed athlete associations - moving school no athletes', [
+                        'made_by' => $authUser->id,
+                        'athlete' => $athlete->id,
+                        'schools' => [$school->id],
+                    ]);
+                }
+            }
+
+            // In ogni caso si rimuove il personale associato alla scuola (e ai corsi della scuola).
+
+            $clans = $school->clan()->get();
+            foreach($clans as $clan){
+                $clanPersonnel = $clan->personnel;
+                if($clanPersonnel->count() > 0){
+                    Log::channel('clan')->info('Removed personnel associations - moving school', [
+                        'made_by' => $authUser->id,
+                        'personnel' => $clanPersonnel->pluck('id')->toArray(),
+                        'clan' => $clan->id,
+                        'school' => $school->id,
+                    ]);
+                }
+                foreach($clanPersonnel as $person){
+                    $clan->personnel()->detach($person->id);
+                    Log::channel('user')->info('Removed personnel associations - moving school', [
+                        'made_by' => $authUser->id,
+                        'personnel' => $person->id,
+                        'clans' => [$clan->id],
+                        'school' => $school->id,
+                    ]);
+                }
+            }
+
+            $schoolPersonnel = $school->personnel;
+            if($schoolPersonnel->count() > 0){
+                Log::channel('school')->info('Removed personnel associations - moving school', [
+                    'made_by' => $authUser->id,
+                    'personnel' => $schoolPersonnel->pluck('id')->toArray(),
+                    'school' => $school->id,
+                ]);
+            }
+            foreach($schoolPersonnel as $person){
+                $school->personnel()->detach($person->id);
+                Log::channel('user')->info('Removed personnel associations - moving school', [
+                    'made_by' => $authUser->id,
+                    'personnel' => $person->id,
+                    'schools' => [$school->id],
+                ]);
             }
         }
 

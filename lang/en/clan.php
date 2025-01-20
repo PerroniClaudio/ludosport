@@ -26,7 +26,7 @@ return [
     'select' => 'Select',
     'remove' => 'Remove',
     'transfer_athletes' => 'Do you want to move the associated athletes too?',
-    'transfer_athletes_tooltip' => 'Select yes if you want to move the associated athletes to the new school. Otherwise, select no and they will be removed from the course.',
+    'transfer_athletes_tooltip' => 'Select yes if you want to move the associated athletes to the new school (if the new school is in another academy all other associations to courses and schools in the current academy will be lost). Otherwise, select no and they will be removed from the course. The personnel will still be removed from this course.',
     'yes' => 'Yes',
     'no' => 'No',
 ];
