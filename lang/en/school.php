@@ -49,7 +49,7 @@ return [
     // 'school_dean_description' => 'The dean is the first dean with this school as primary school. If there is more than one, the first one found will be displayed. If there is none, the first dean in the school personnel will result as dean, even without the school as primary school.',
     'transfer_courses_tooltip' => 'When changing the academy, even the courses related to the school will be moved. If you want to move only the school, first move the connected courses to another school.',
     'transfer_athletes' => 'Do you want to move the associated athletes too?',
-    'transfer_athletes_tooltip' => 'Select yes if you want to move the associated athletes to the new academy and remove their connections with every other school and course (the athlete can only be associated to one academy). Otherwise, select no and they will be removed from the school and its courses.',
+    'transfer_athletes_tooltip' => 'Select yes if you want to move the associated athletes to the new academy and remove their connections with every other school and course (the athlete can only be associated to one academy). Otherwise, select no and they will be removed from the school and its courses. The personnel will still be removed from this school and its courses.',
     'yes' => 'Yes',
     'no' => 'No',
 ];
