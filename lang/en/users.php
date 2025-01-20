@@ -141,4 +141,5 @@ return [
     'error_profile_picture_size' => 'Profile picture size must be less than 8MB',
     'edit_user' => 'Edit User #:id',
     'no_roles' => 'No roles',
+    'profile_picture_info' => 'Profile picture must be less than 8MB',
 ];

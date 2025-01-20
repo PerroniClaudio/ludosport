@@ -19,8 +19,16 @@
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4"
                 x-data="{}">
                 <div class="flex justify-between">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('users.profile_picture') }}
-                    </h3>
+                    <div class="flex gap-2 items-center">
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('users.profile_picture') }}
+                        </h3>
+                        <div class='has-tooltip'>
+                            <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                {{ __('users.profile_picture_info') }}
+                            </span>
+                            <x-lucide-info class="h-4 text-background-400" />
+                        </div>
+                    </div>
                     <div>
                         <form method="POST" action="{{ route('users.update-pfp', $user->id) }}"
                             enctype="multipart/form-data" x-ref="pfpform">
