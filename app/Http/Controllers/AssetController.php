@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Nation;
 use App\Models\Rank;
+use App\Models\User;
 use App\Models\WeaponForm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -134,6 +135,53 @@ class AssetController extends Controller {
         $image = $response->body();
         $headers = [
             'Content-Type' => 'image/webp',
+            'Content-Length' => strlen($image),
+        ];
+
+        return response($image, 200, $headers);
+    }
+
+
+    public function weaponFormFor(WeaponForm $weapon, User $user) {
+
+        $asset_name = explode(' ', $weapon->name);
+        $asset = $asset_name[0] . "_" . $asset_name[1] . ".svg";
+
+        switch ($user->getRole()) {
+            case "athlete":
+                if ($user->weaponForms()->pluck('weapon_forms.id')->contains($weapon->id)) {
+                    $url = $this->retrieveAsset("/weapon-forms/athlete/{$asset}");
+                } else {
+                    $url = $this->retrieveAsset("/weapon-forms/default/{$asset}");
+                }
+
+                break;
+            case "instructor":
+                if ($user->weaponFormsPersonnel()->pluck('weapon_forms.id')->contains($weapon->id)) {
+                    $url = $this->retrieveAsset("/weapon-forms/instructor/{$asset}");
+                } else {
+                    $url = $this->retrieveAsset("/weapon-forms/default/{$asset}");
+                }
+                break;
+            case "technician":
+                if ($user->weaponFormsTechnician()->pluck('weapon_forms.id')->contains($weapon->id)) {
+                    $url = $this->retrieveAsset("/weapon-forms/technician/{$asset}");
+                } else {
+                    $url = $this->retrieveAsset("/weapon-forms/default/{$asset}");
+                }
+                break;
+
+            default:
+                $url = $this->retrieveAsset("/weapon-forms/default/{$asset}");
+                break;
+        }
+
+
+
+        $response = Http::get($url);
+        $image = $response->body();
+        $headers = [
+            'Content-Type' => 'image/svg+xml',
             'Content-Length' => strlen($image),
         ];
 
