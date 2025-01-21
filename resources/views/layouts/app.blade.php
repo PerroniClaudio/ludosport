@@ -35,11 +35,15 @@
         <main>
             {{ $slot }}
         </main>
-
+        
 
     </div>
 
     <x-flash />
+    
+    {{-- Cookie Policy e Privacy Policy banner (nell'admin non serve) --}}
+    {{-- <x-policy-banner /> --}}
+
 </body>
 
 </html>

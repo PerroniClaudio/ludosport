@@ -51,6 +51,10 @@
             </div>
         @endif
     </div>
+
+    {{-- Cookie Policy e Privacy Policy banner --}}
+    <x-policy-banner />
+
 </body>
 
 </html>
