@@ -214,6 +214,10 @@
 
     <x-flash />
     <x-footer />
+
+    {{-- Cookie Policy e Privacy Policy banner --}}
+    <x-policy-banner />
+
 </body>
 
 
