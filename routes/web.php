@@ -17,9 +17,8 @@ Route::get('/bollino', [App\Http\Controllers\AssetController::class, 'bollino'])
 Route::get('/nation/{nation}/flag', [App\Http\Controllers\AssetController::class, 'nationFlag'])->name('nation-flag');
 Route::get('/ranks/{rank}/image', [App\Http\Controllers\AssetController::class, 'rankImage'])->name('rank-image');
 Route::get('/weapon-form-id/{weapon:id}/{user}/image', [App\Http\Controllers\AssetController::class, 'weaponFormFor'])->name('weapon-form-image-user');
-
+Route::get('/weapon/{weapon}/image', [App\Http\Controllers\AssetController::class, 'weaponImage'])->name('weapon-image');
 Route::get('/weapon-form/{weapon:id}/image', [App\Http\Controllers\AssetController::class, 'weaponFormImage'])->name('weapon-form-image');
-// Route::get('/weapon-form-id/{weapon:id}/image', [App\Http\Controllers\AssetController::class, 'weaponFormFor'])->name('weapon-form-image-user');
 Route::get('/favicon', [App\Http\Controllers\AssetController::class, 'favicon'])->name('favicon');
 Route::get('/logoex', [App\Http\Controllers\AssetController::class, 'logoex'])->name('logoex');
 Route::get('/user/{user}/profile-picture', [App\Http\Controllers\UserController::class, 'propic'])->name('user.profile-picture-show');

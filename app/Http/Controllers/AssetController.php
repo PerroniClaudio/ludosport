@@ -141,6 +141,18 @@ class AssetController extends Controller {
         return response($image, 200, $headers);
     }
 
+    public function weaponImage($weapon) {
+        $url = $this->retrieveAsset("/weapon-forms/weapons_base/{$weapon}.webp");
+        $response = Http::get($url);
+        $image = $response->body();
+        $headers = [
+            'Content-Type' => 'image/webp',
+            'Content-Length' => strlen($image),
+        ];
+
+        return response($image, 200, $headers);
+    }
+
 
     public function weaponFormFor(WeaponForm $weapon, User $user) {
 
