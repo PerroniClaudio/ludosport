@@ -123,4 +123,7 @@ return [
     'transfer_amount' => 'Transfer Amount',
     'wire_transfer_additional_info' => 'Order ID must be indicated in transfer notes. Orders will be processed only once the funds have been received.',
     'thank_you' => 'Thank you for your purchase!',
+    'cookies_banner_title' => 'Cookie policy',
+    'cookies_banner_text' => 'We use functional cookies and similar technologies for security and a better user experience. By continuing to visit this site you agree to our use of cookies.',
+    'cookies_banner_accept' => 'Accept',
 ];
