@@ -109,7 +109,7 @@
             </section>
 
             <div class="lg:w-1/2">
-                <x-user.weapon-forms-show :forms="$user->weaponForms" />
+                <x-user.weapon-forms-show :forms="$user->weaponForms" :user="$user" />
             </div>
 
             @if ($user->bio != '')
