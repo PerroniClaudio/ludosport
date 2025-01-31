@@ -62,7 +62,7 @@
     <div class="grid grid-cols-3 gap-2 mb-2">
 
         @foreach ($weapon_forms->take(3) as $weapon_form)
-            <div class="flex items-center justify-center col-span-3  ">
+            <div class="flex items-center justify-center">
 
                 <img src="{{ route('weapon-form-image-user', [
                     'weapon' => $weapon_form->id,
@@ -71,6 +71,8 @@
                     alt="{{ $weapon_form->name }}" class="w-8 h-8" style="">
 
             </div>
+            <div></div>
+            <div></div>
         @endforeach
 
     </div>
