@@ -12,13 +12,13 @@
     <div class="grid grid-cols-3 gap-2 mb-2">
         <div class="flex flex-col items-center justify-center">
             <img src="{{ route('weapon-image', [
-                'weapon' => 'longsaber',
+                'weapon' => 'saberstaff',
             ]) }}"
                 alt="long saber" class="w-12 h-12 invert">
         </div>
         <div class="flex flex-col items-center justify-center">
             <img src="{{ route('weapon-image', [
-                'weapon' => 'saberstaff',
+                'weapon' => 'longsaber',
             ]) }}"
                 alt="long saber" class="w-12 h-12 invert">
         </div>
@@ -79,8 +79,9 @@
 
     <div class="grid grid-cols-3 rounded gap-2 mb-2">
 
+       
         <div class="flex flex-col gap-2">
-            @foreach ($long_saber_weapon_forms as $weapon_form)
+            @foreach ($saberstaff_weapon_forms as $weapon_form)
                 <div class="flex items-center justify-center ">
                     <img src="{{ route('weapon-form-image-user', [
                         'weapon' => $weapon_form->id,
@@ -90,8 +91,8 @@
                 </div>
             @endforeach
         </div>
-        <div class="flex flex-col gap-2">
-            @foreach ($saberstaff_weapon_forms as $weapon_form)
+         <div class="flex flex-col gap-2">
+            @foreach ($long_saber_weapon_forms as $weapon_form)
                 <div class="flex items-center justify-center ">
                     <img src="{{ route('weapon-form-image-user', [
                         'weapon' => $weapon_form->id,
