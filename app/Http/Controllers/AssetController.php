@@ -159,36 +159,26 @@ class AssetController extends Controller {
         $asset_name = explode(' ', $weapon->name);
         $asset = $asset_name[0] . "_" . $asset_name[1] . ".svg";
 
-        switch ($user->getRole()) {
-            case "athlete":
-                if ($user->weaponForms()->pluck('weapon_forms.id')->contains($weapon->id)) {
-                    $url = $this->retrieveAsset("/weapon-forms/athlete/{$asset}");
-                } else {
-                    $url = $this->retrieveAsset("/weapon-forms/default/{$asset}");
-                }
+        $hasFoundCompletition = false;
 
-                break;
-            case "instructor":
-                if ($user->weaponFormsPersonnel()->pluck('weapon_forms.id')->contains($weapon->id)) {
-                    $url = $this->retrieveAsset("/weapon-forms/instructor/{$asset}");
-                } else {
-                    $url = $this->retrieveAsset("/weapon-forms/default/{$asset}");
-                }
-                break;
-            case "technician":
-                if ($user->weaponFormsTechnician()->pluck('weapon_forms.id')->contains($weapon->id)) {
-                    $url = $this->retrieveAsset("/weapon-forms/technician/{$asset}");
-                } else {
-                    $url = $this->retrieveAsset("/weapon-forms/default/{$asset}");
-                }
-                break;
-
-            default:
-                $url = $this->retrieveAsset("/weapon-forms/default/{$asset}");
-                break;
+        if ($user->weaponForms()->pluck('weapon_forms.id')->contains($weapon->id)) {
+            $url = $this->retrieveAsset("/weapon-forms/athlete/{$asset}");
+            $hasFoundCompletition = true;
+        }
+        
+        if ($user->weaponFormsPersonnel()->pluck('weapon_forms.id')->contains($weapon->id)) {
+            $url = $this->retrieveAsset("/weapon-forms/instructor/{$asset}");
+            $hasFoundCompletition = true;
         }
 
-
+        if ($user->weaponFormsTechnician()->pluck('weapon_forms.id')->contains($weapon->id)) {
+            $url = $this->retrieveAsset("/weapon-forms/technician/{$asset}");
+            $hasFoundCompletition = true;
+        } 
+                
+        if (!$hasFoundCompletition) {
+            $url = $this->retrieveAsset("/weapon-forms/default/{$asset}");
+        }
 
         $response = Http::get($url);
         $image = $response->body();
