@@ -245,9 +245,9 @@ class EventController extends Controller {
         $viewPath = $authRole === 'admin' ? 'event.edit' : 'event.' . $authRole . '.edit';
 
 
-        $event->start_date = Carbon::parse($event->start_date, 'GMT')->setTimezone('Europe/Rome');
-        $event->end_date = Carbon::parse($event->end_date, 'GMT')->setTimezone('Europe/Rome');
-        $event->waiting_list_close_date = Carbon::parse($event->waiting_list_close_date, 'GMT')->setTimezone('Europe/Rome');
+        // $event->start_date = Carbon::parse($event->start_date, 'GMT')->setTimezone('Europe/Rome');
+        // $event->end_date = Carbon::parse($event->end_date, 'GMT')->setTimezone('Europe/Rome');
+        // $event->waiting_list_close_date = Carbon::parse($event->waiting_list_close_date, 'GMT')->setTimezone('Europe/Rome');
 
         // dd($event->start_date . ' ' . $event->end_date);
 
@@ -394,8 +394,8 @@ class EventController extends Controller {
 
             $event->name = $request->name;
 
-            $event->start_date = Carbon::parse($request->start_date, $request->user_timezone)->setTimezone('GMT');
-            $event->end_date = Carbon::parse($request->end_date, $request->user_timezone)->setTimezone('GMT');
+            // $event->start_date = Carbon::parse($request->start_date, $request->user_timezone)->setTimezone('GMT');
+            // $event->end_date = Carbon::parse($request->end_date, $request->user_timezone)->setTimezone('GMT');
 
             if (isset($request->weapon_form_id) && $request->weapon_form_id != 0) {
                 $event->weapon_form_id = $request->weapon_form_id;
@@ -404,7 +404,7 @@ class EventController extends Controller {
             $event->max_participants = $request->max_participants ?? null;
             $event_type = EventType::where('name', $request->event_type)->first();
             $event->event_type = $event_type->id;
-            $event->waiting_list_close_date = Carbon::parse($request->waiting_list_close_date, $request->user_timezone)->setTimezone('GMT') ?? null;
+            $event->waiting_list_close_date = $request->waiting_list_close_date;
 
             // Dati modificabli solo da admin 
 
