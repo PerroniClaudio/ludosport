@@ -55,12 +55,14 @@
                                             x-text="row.name"></td>
                                         <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                             x-text="new Date(row.start_date).toLocaleDateString('it-IT', {
+                                            timeZone: 'UTC',
                                             hour: 'numeric', 
                                             minute: 'numeric' 
                                         })">
                                         </td>
                                         <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                             x-text="new Date(row.end_date).toLocaleDateString('it-IT', {
+                                            timeZone: 'UTC',
                                             hour: 'numeric', 
                                             minute: 'numeric' 
                                         })">
@@ -121,12 +123,14 @@
                                             x-text="row.name"></td>
                                         <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                             x-text="new Date(row.start_date).toLocaleDateString('it-IT', {
+                                            timeZone: 'UTC',
                                             hour: 'numeric', 
                                             minute: 'numeric' 
                                         })">
                                         </td>
                                         <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                             x-text="new Date(row.end_date).toLocaleDateString('it-IT', {
+                                            timeZone: 'UTC',
                                             hour: 'numeric', 
                                             minute: 'numeric' 
                                         })">
