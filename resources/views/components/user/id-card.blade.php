@@ -24,12 +24,17 @@
 
             </div>
             <div class="flex flex-row justify-end w-[45%] p-2">
-                @if ($user->primaryAcademyAthlete())
-                    <img class="w-24 aspect-square" src="/academy-image/{{ $user->primaryAcademyAthlete()->id }}"
-                        alt="{{ $user->primaryAcademyAthlete()->name }}">
-                @elseif ($user->primaryAcademy())
-                    <img class="w-24 aspect-square" src="/academy-image/{{ $user->primaryAcademy()->id }}"
+                {{-- Precedenza all'accademia da personale, poi se quella da personale non c'è o è no academy, viene quella da atleta. 
+                    se è non c'è o è no academy usa l'immagine di no academy. --}}
+                @if ($user->primaryAcademy() && ($user->primaryAcademy()->id != 1))
+                    <img class="h-24 aspect-square object-cover object-center" src="/academy-image/{{ $user->primaryAcademy()->id }}"
                         alt="{{ $user->primaryAcademy()->name }}">
+                @elseif ($user->primaryAcademyAthlete())
+                    <img class="h-24 aspect-square object-cover object-center" src="/academy-image/{{ $user->primaryAcademyAthlete()->id }}"
+                        alt="{{ $user->primaryAcademyAthlete()->name }}">
+                @else
+                    <img class="h-24 aspect-square object-cover object-center" src="/academy-image/1"
+                        alt="No academy">
                 @endif
             </div>
         </div>

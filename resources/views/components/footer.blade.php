@@ -23,8 +23,8 @@
                     {{ __('website.footer_link_text_3') }}
                 </a>
             </p>
-
-
+            <a class="text-background-800 hover:text-primary" href="/cookie-policy">Cookie policy</a>
+        
         </div>
 
         <hr class="my-10 border-background-200 dark:border-background-700" />

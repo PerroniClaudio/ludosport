@@ -105,3 +105,9 @@ Route::group(['middleware' => ['auth']], function () {
 Route::middleware('throttle:rate_limit,1')->get('/website-users/search', [App\Http\Controllers\UserController::class, 'searchJson'])->name('website-users-search');
 Route::get('/profile-picture/{user}', [App\Http\Controllers\UserController::class, 'propic'])->name('profile-picture');
 Route::get('/website-users/{user:battle_name}', [App\Http\Controllers\UserController::class, 'show'])->name('website-users-show');
+
+/** Statiche */
+
+Route::get('/cookie-policy', function () {
+    return view('website.cookie-policy');
+})->name('cookie-policy');
