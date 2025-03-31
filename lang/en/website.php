@@ -126,4 +126,5 @@ return [
     'cookies_banner_title' => 'Cookie policy',
     'cookies_banner_text' => 'We use functional cookies and similar technologies for security and a better user experience. By continuing to visit this site you agree to our use of cookies.',
     'cookies_banner_accept' => 'Accept',
+    'cookie_policy_title' => 'Cookie Policy',
 ];
