@@ -29,12 +29,10 @@
                 @if ($user->primaryAcademy() && ($user->primaryAcademy()->id != 1))
                     <img class="h-24 aspect-square object-cover object-center" src="/academy-image/{{ $user->primaryAcademy()->id }}"
                         alt="{{ $user->primaryAcademy()->name }}">
-                @elseif ($user->primaryAcademyAthlete())
+                @elseif ($user->primaryAcademyAthlete() && ($user->primaryAcademyAthlete()->id != 1))
                     <img class="h-24 aspect-square object-cover object-center" src="/academy-image/{{ $user->primaryAcademyAthlete()->id }}"
                         alt="{{ $user->primaryAcademyAthlete()->name }}">
-                @else
-                    <img class="h-24 aspect-square object-cover object-center" src="/academy-image/1"
-                        alt="No academy">
+                    {{-- Altrimenti non mostra niente. No academy non si deve vedere --}}
                 @endif
             </div>
         </div>
