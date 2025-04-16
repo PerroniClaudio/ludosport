@@ -8,8 +8,8 @@
     $authRole = $authUser->getRole();
     $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
     // L'atleta dovrebbe avere una sola accademia associata, ma le recupero comunque tutte per sicurezza
-$canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray());
-// Dal momento che non può accedere alla pagina se l'utente non è associato alla sua accademia e che è del personale può comunque modificare il ruolo, $canEditRoles può essere sempre vero.
+    $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray());
+    // Dal momento che non può accedere alla pagina se l'utente non è associato alla sua accademia e che è del personale può comunque modificare il ruolo, $canEditRoles può essere sempre vero.
     $canEditRoles = true;
 @endphp
 <x-app-layout>
@@ -512,9 +512,9 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
             </div>
 
 
-            @if (!$user->is_disabled)
+            {{-- @if (!$user->is_disabled && ($authRole == 'admin'))
                 <x-user.disable-user-form :user="$user->id" />
-            @endif
+            @endif --}}
         </div>
     </div>
 </x-app-layout>

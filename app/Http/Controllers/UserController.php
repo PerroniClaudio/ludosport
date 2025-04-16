@@ -994,7 +994,8 @@ class UserController extends Controller {
     public function destroy(User $user) {
         $authRole = User::find(Auth::user()->id)->getRole();
 
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        // if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (!in_array($authRole, ['admin'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 

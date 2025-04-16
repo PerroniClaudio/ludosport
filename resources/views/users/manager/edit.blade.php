@@ -8,7 +8,7 @@
     $authRole = $authUser->getRole();
     $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
     // Può modificare l'utente solo se è un atleta della stessa scuola
-$canEdit = in_array($authUser->primarySchool()->id, $user->schoolAthletes->pluck('id')->toArray());
+    $canEdit = in_array($authUser->primarySchool()->id, $user->schoolAthletes->pluck('id')->toArray());
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -368,9 +368,9 @@ $canEdit = in_array($authUser->primarySchool()->id, $user->schoolAthletes->pluck
                 </a>
             </div>
 
-            @if (!$user->is_disabled)
+            {{-- @if (!$user->is_disabled && ($authRole == 'admin'))
                 <x-user.disable-user-form :user="$user->id" />
-            @endif
+            @endif --}}
         </div>
     </div>
 </x-app-layout>

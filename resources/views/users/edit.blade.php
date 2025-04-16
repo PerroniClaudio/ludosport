@@ -1,3 +1,7 @@
+@php
+    $authUser = auth()->user();
+    $authRole = $authUser->getRole();
+@endphp
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -577,7 +581,7 @@
 
             </div>
 
-            @if (!$user->is_disabled)
+            @if (!$user->is_disabled && ($authRole == 'admin'))
                 <x-user.disable-user-form :user="$user->id" />
             @endif
         </div>
