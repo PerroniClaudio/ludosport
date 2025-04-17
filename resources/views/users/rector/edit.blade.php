@@ -210,7 +210,67 @@
 
             </form>
 
-            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4"
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
+                @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponForms->map(function ($form) {
+                        $form->awarded_at = explode(' ', $form->awarded_at)[0];
+                        return $form;
+                    })" type="athlete" />
+                @endif
+                <div @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete')) class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8"
+                    @else
+                        class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 col-span-2" 
+                    @endif
+                    x-data="{}">
+                    <div class="flex justify-between">
+                        <div class="flex gap-2 items-center">
+                            <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                {{ __('users.profile_picture') }}
+                            </h3>
+                            <div class='has-tooltip'>
+                                <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                    {{ __('users.profile_picture_info') }}
+                                </span>
+                                <x-lucide-info class="h-4 text-background-400" />
+                            </div>
+                        </div>
+                        <div>
+                            <form method="POST" action="{{ route('rector.users.picture.update', $user->id) }}"
+                                enctype="multipart/form-data" x-ref="pfpform">
+                                @csrf
+                                @method('PUT')
+
+                                <div class="flex flex-col gap-4">
+                                    <div class="flex flex-col gap-2">
+                                        <input type="file" name="profilepicture" id="profilepicture"
+                                            class="hidden" x-on:change="$refs.pfpform.submit()" />
+                                        <x-primary-button type="button"
+                                            onclick="document.getElementById('profilepicture').click()">
+                                            {{ __('users.upload_picture') }}
+                                        </x-primary-button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+
+                    @if ($errors->get('profilepicture') != null)
+                        <div class="text-red-600 dark:text-red-400 flex items-center gap-1 my-2">
+                            <x-lucide-info class="h-4 text-red-600 dark:text-red-400" />
+                            <span>{{ __('users.error_profile_picture_size') }}</span>
+                        </div>
+                    @endif
+
+                    @if ($user->profile_picture)
+                        <img src="{{ route('user.profile-picture-show', $user->id) }}" alt="{{ $user->name }}"
+                            class="w-1/3 rounded-lg">
+                    @endif
+
+                </div>
+            </div>
+
+            {{-- <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4"
                 x-data="{}">
                 <div class="flex justify-between">
                     <div class="flex gap-2 items-center">
@@ -251,7 +311,7 @@
                     <img src="{{ $user->profile_picture }}" alt="{{ $user->name }}" class="w-1/3 rounded-lg">
                 @endif
 
-            </div>
+            </div> --}}
 
             <div class="grid grid-cols-2 gap-4" x-data="{
                 institutionType: 'school',
