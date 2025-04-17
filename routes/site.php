@@ -30,6 +30,7 @@ Route::get('/school-profile/{school:slug}', [App\Http\Controllers\SchoolControll
 Route::get('/academy-profile/{academy:slug}', [App\Http\Controllers\AcademyController::class, 'detail'])->name('academy-profile');
 Route::get('/academy-image/{academy}', [App\Http\Controllers\AcademyController::class, 'academyImage'])->name('academy-image');
 Route::middleware('throttle:rate_limit,1')->get('/schools-search', [App\Http\Controllers\SchoolController::class, 'searchSchools'])->name('schools-search');
+Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
 
 /** Rankings */
 

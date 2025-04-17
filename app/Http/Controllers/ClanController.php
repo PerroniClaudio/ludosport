@@ -244,6 +244,9 @@ class ClanController extends Controller {
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'instructor'])) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
         }
+        if(!$clan){
+            return redirect()->route('dashboard')->with('error', 'Course not found.');
+        }
         if ($clan->is_disabled && $authRole !== 'admin') {
             return redirect()->route('dashboard')->with('error', 'Course disabled.');
         }
@@ -272,8 +275,8 @@ class ClanController extends Controller {
                 foreach ($academies as $academy) {
                     $schools = $academy->schools;
                     foreach ($schools as $school) {
-                        foreach ($school->clan as $clan) {
-                            $clans[] = $clan->id;
+                        foreach ($school->clan as $singleClan) {
+                            $clans[] = $singleClan->id;
                         }
                     }
                 }

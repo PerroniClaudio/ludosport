@@ -20,7 +20,7 @@
 @endif
 
 
-<div class="hidden text-white py-2 px-4 rounded-xl top-8 text-sm" id="custom-error-message">
+<div class="hidden text-white py-2 px-4 rounded-xl top-8 text-sm z-50" id="custom-error-message">
     <p></p>
 </div>
 

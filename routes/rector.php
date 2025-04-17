@@ -45,6 +45,8 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
     Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('rector.users.picture.update');
     Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('rector.nation.academies.index');
     // Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('rector.academies.schools.index');
+    Route::post('/users/{user}/weapon-forms-athlete', [App\Http\Controllers\UserController::class, 'editWeaponFormsAthlete'])->name('rector.user.weapon-forms-athlete.store');
+    Route::post('/users/{user}/weapon-forms-edit-date', [App\Http\Controllers\UserController::class, 'editWeaponFormsAwardingDate'])->name('rector.user.weapon-forms-edit-date');
   });
 
   /** Ruoli */
