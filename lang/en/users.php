@@ -30,6 +30,7 @@ return [
     'academies' => 'Academies',
     'select_academy' => 'Select Academy',
     'select_school' => 'Select School',
+
     'save' => 'Save',
     'create' => 'Create',
     'edit' => 'Edit',
@@ -142,4 +143,15 @@ return [
     'edit_user' => 'Edit User #:id',
     'no_roles' => 'No roles',
     'profile_picture_info' => 'Profile picture must be less than 8MB',
+
+    'academy_and_school' => 'Academy and School',
+    'select_academy_school' => 'Select Academy and School',
+    'sas_academy_search_label' => 'Academy Search',
+    'sas_academy_search_placeholder' => 'Search for Academy',
+    'sas_academy_search_no_results' => 'No results found for Academy',
+    'sas_available_schools' => 'Available Schools',
+    'sas_select_school_placeholder' => 'Select School',
+    'sas_select_school' => 'Select School',
+    'sas_select_school_label' => 'Schools',
+    'sas_save_selection' => 'Save Selection',
 ];

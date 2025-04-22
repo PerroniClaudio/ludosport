@@ -544,8 +544,6 @@ class AcademyController extends Controller {
     }
 
     public function search(Request $request) {
-        // $academies = Academy::where('name', 'like', '%' . $request->name . '%')->where('is_disabled', '0')->get();
-
         $academies = Academy::query()->when($request->search, function ($q, $search) {
             return $q->whereIn('id', Academy::search($search)->keys());
         })->where('is_disabled', '0')->with(['nation'])->get();

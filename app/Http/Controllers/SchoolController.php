@@ -36,7 +36,7 @@ class SchoolController extends Controller {
             if (!$authUser->validatePrimaryInstitutionPersonnel()) {
                 return redirect()->route('dashboard')->with('error', 'You don\'t have an academy assigned!');
             }
-            
+
             $primaryAcademy = $authUser->primaryAcademy();
 
             $schools = School::with('nation')->where([['academy_id', $primaryAcademy->id], ['is_disabled', '0']])->orderBy('created_at', 'desc')->get();
@@ -267,7 +267,7 @@ class SchoolController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if(!$this->checkPermission($school)) {
+        if (!$this->checkPermission($school)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
@@ -277,8 +277,8 @@ class SchoolController extends Controller {
             'email' => 'nullable|email',
         ]);
 
-        if($school->academy_id != $request->academy_id) {
-            if(!in_array($request->transfer_athletes, ['yes', 'no'])){
+        if ($school->academy_id != $request->academy_id) {
+            if (!in_array($request->transfer_athletes, ['yes', 'no'])) {
                 return back()->with('error', 'Invalid value for transfer_athletes.');
             }
             Log::channel('school')->info('Moving school to another academy', [
@@ -291,12 +291,12 @@ class SchoolController extends Controller {
                 'school_personnel' => $school->personnel->pluck('id')->toArray(),
                 'school_clans' => $school->clan->pluck('id')->toArray(),
             ]);
-            if($request->transfer_athletes == 'yes'){
+            if ($request->transfer_athletes == 'yes') {
                 // $oldAcademy = Academy::find($school->academy_id);
                 $newAcademy = Academy::find($request->academy_id);
                 $athletes = $school->athletes()->get();
 
-                if(!$newAcademy){
+                if (!$newAcademy) {
                     return back()->with('error', 'Invalid academy.');
                 }
 
@@ -305,9 +305,9 @@ class SchoolController extends Controller {
                 ]);
 
                 // Si eliminano associazioni con accademie, scuole e corsi
-                foreach($athletes as $athlete){
+                foreach ($athletes as $athlete) {
                     // Mettiamo l'eccezione per evitare di rimuovere le associazioni con la scuola spostata e i suoi corsi.
-                    $athlete->removeAcademiesAthleteAssociations($newAcademy); 
+                    $athlete->removeAcademiesAthleteAssociations($newAcademy);
                     $athlete->academyAthletes()->syncWithoutDetaching($newAcademy->id);
                     if (!$athlete->primaryAcademyAthlete()) {
                         $athlete->setPrimaryAcademyAthlete($newAcademy->id);
@@ -323,9 +323,9 @@ class SchoolController extends Controller {
                 }
             } else {
                 $clans = $school->clan()->get();
-                foreach($clans as $clan){
+                foreach ($clans as $clan) {
                     $clanAthletes = $clan->users;
-                    if($clanAthletes->count() > 0){
+                    if ($clanAthletes->count() > 0) {
                         Log::channel('clan')->info('Removed athletes associations - moving school no athletes', [
                             'made_by' => $authUser->id,
                             'athletes' => $clanAthletes->pluck('id')->toArray(),
@@ -333,7 +333,7 @@ class SchoolController extends Controller {
                             'school' => $school->id,
                         ]);
                     }
-                    foreach($clanAthletes as $athlete){
+                    foreach ($clanAthletes as $athlete) {
                         $clan->users()->detach($athlete->id);
                         Log::channel('user')->info('Removed athlete associations - moving school no athletes', [
                             'made_by' => $authUser->id,
@@ -345,14 +345,14 @@ class SchoolController extends Controller {
                 }
 
                 $schoolAthletes = $school->athletes;
-                if($schoolAthletes->count() > 0){
+                if ($schoolAthletes->count() > 0) {
                     Log::channel('school')->info('Removed athletes associations - moving school no athletes', [
                         'made_by' => $authUser->id,
                         'athletes' => $schoolAthletes->pluck('id')->toArray(),
                         'school' => $school->id,
                     ]);
                 }
-                foreach($schoolAthletes as $athlete){
+                foreach ($schoolAthletes as $athlete) {
                     $school->athletes()->detach($athlete->id);
                     Log::channel('user')->info('Removed athlete associations - moving school no athletes', [
                         'made_by' => $authUser->id,
@@ -365,9 +365,9 @@ class SchoolController extends Controller {
             // In ogni caso si rimuove il personale associato alla scuola (e ai corsi della scuola).
 
             $clans = $school->clan()->get();
-            foreach($clans as $clan){
+            foreach ($clans as $clan) {
                 $clanPersonnel = $clan->personnel;
-                if($clanPersonnel->count() > 0){
+                if ($clanPersonnel->count() > 0) {
                     Log::channel('clan')->info('Removed personnel associations - moving school', [
                         'made_by' => $authUser->id,
                         'personnel' => $clanPersonnel->pluck('id')->toArray(),
@@ -375,7 +375,7 @@ class SchoolController extends Controller {
                         'school' => $school->id,
                     ]);
                 }
-                foreach($clanPersonnel as $person){
+                foreach ($clanPersonnel as $person) {
                     $clan->personnel()->detach($person->id);
                     Log::channel('user')->info('Removed personnel associations - moving school', [
                         'made_by' => $authUser->id,
@@ -387,14 +387,14 @@ class SchoolController extends Controller {
             }
 
             $schoolPersonnel = $school->personnel;
-            if($schoolPersonnel->count() > 0){
+            if ($schoolPersonnel->count() > 0) {
                 Log::channel('school')->info('Removed personnel associations - moving school', [
                     'made_by' => $authUser->id,
                     'personnel' => $schoolPersonnel->pluck('id')->toArray(),
                     'school' => $school->id,
                 ]);
             }
-            foreach($schoolPersonnel as $person){
+            foreach ($schoolPersonnel as $person) {
                 $school->personnel()->detach($person->id);
                 Log::channel('user')->info('Removed personnel associations - moving school', [
                     'made_by' => $authUser->id,
@@ -752,7 +752,7 @@ class SchoolController extends Controller {
 
         return redirect()->route($redirectRoute, $school)->with('success', 'Personnel added successfully!');
     }
-    
+
     public function removePersonnel(School $school, Request $request) {
         //
         if (!$this->checkPermission($school)) {
@@ -787,10 +787,10 @@ class SchoolController extends Controller {
         // Se mancano le associazioni a scuola e accademia del corso, si aggiungono
         $athlete = User::find($request->athlete_id);
         // $academy = Academy::find($school->academy_id);
-        if(!$athlete){
+        if (!$athlete) {
             return redirect()->route('schools.edit', $school)->with('error', 'Athlete not found.');
         }
-        if(!$athlete->hasRole('athlete')){
+        if (!$athlete->hasRole('athlete')) {
             return redirect()->route('schools.edit', $school)->with('error', 'User is not an athlete.');
         }
 
@@ -831,7 +831,7 @@ class SchoolController extends Controller {
 
         return redirect()->route($redirectRoute, $school)->with('success', 'Athlete added successfully!');
     }
-    
+
     public function removeAthlete(School $school, Request $request) {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
@@ -899,6 +899,21 @@ class SchoolController extends Controller {
             $formatted_schools[] = [
                 'id' => $school->id,
                 'academy' => $school->academy->name,
+                'name' => $school->name,
+            ];
+        }
+
+        return response()->json($formatted_schools);
+    }
+
+    public function getByAcademyGuest(Request $request) {
+        $schools = School::where('academy_id', $request->academy_id)->where('is_disabled', '0')->get();
+
+        $formatted_schools = [];
+
+        foreach ($schools as $key => $school) {
+            $formatted_schools[] = [
+                'id' => $school->id,
                 'name' => $school->name,
             ];
         }

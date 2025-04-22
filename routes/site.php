@@ -103,6 +103,14 @@ Route::group(['middleware' => ['auth']], function () {
     })->name('my-profile');
 });
 
+/** Registrazione */
+
+Route::prefix('/registration')->group(function () {
+    Route::get('/academy-search', [App\Http\Controllers\AcademyController::class, 'search'])->name('academy-search');
+    Route::get('/school-search', [App\Http\Controllers\SchoolController::class, 'getByAcademyGuest'])->name('school-search');
+});
+
+
 Route::middleware('throttle:rate_limit,1')->get('/website-users/search', [App\Http\Controllers\UserController::class, 'searchJson'])->name('website-users-search');
 Route::get('/profile-picture/{user}', [App\Http\Controllers\UserController::class, 'propic'])->name('profile-picture');
 Route::get('/website-users/{user:battle_name}', [App\Http\Controllers\UserController::class, 'show'])->name('website-users-show');

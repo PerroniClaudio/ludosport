@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Academy;
 use App\Models\Announcement;
 use App\Models\Nation;
+use App\Models\School;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -36,14 +37,17 @@ class RegisteredUserController extends Controller {
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'nationality' => ['required', 'string', 'exists:' . Nation::class . ',name'],
             'academy_id' => ['required', 'int', 'exists:' . Academy::class . ',id'],
+            'school_id' => ['nullable', 'int', 'exists:' . School::class . ',id'],
             'how_found_us' => ['required', 'string', 'max:255'],
             'birthday' => ['required', 'date', 'before:' . date('Y-m-d', strtotime('-10 years'))],
             'subscription_year' => ['required', 'int', 'min:' . 2006, 'max:' . (date('Y'))],
             'gender' => ['required', 'string', 'in:male,female,other,notsay'],
+            'battle_name' => ['nullable', 'string', 'max:255'],
         ]);
 
         $nation = Nation::where('name', $request->nationality)->first();
         $academy = Academy::find($request->academy_id);
+        $battle_name = preg_replace('/[^A-Za-z0-9 ]/', '', $request->battle_name);
 
         $user = User::create([
             'name' => $request->name,
@@ -51,7 +55,7 @@ class RegisteredUserController extends Controller {
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'nation_id' => $nation->id,
-            'battle_name' => $request->battle_name ?? ($request->name . $request->surname . rand(10, 99)),
+            'battle_name' => $battle_name ?? ($request->name . $request->surname . rand(10, 99)),
             'how_found_us' => $request->how_found_us,
             'subscription_year' => $request->subscription_year ?? date('Y'),
             'birthday' => $request->birthday,
@@ -59,6 +63,7 @@ class RegisteredUserController extends Controller {
         ]);
 
         $user->academyAthletes()->syncWithoutDetaching($academy->id);
+        $user->schoolAthletes()->syncWithoutDetaching($request->school_id);
         $user->roles()->syncWithoutDetaching(7);
 
         Announcement::create([
