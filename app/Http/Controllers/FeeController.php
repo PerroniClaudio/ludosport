@@ -220,6 +220,61 @@ class FeeController extends Controller {
         ]);
     }
 
+    public function academyAvailableFees(Request $request) {
+        $authUser = User::find(Auth::user()->id);
+        $authRole = $authUser->getRole();
+
+        if ($authRole != 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $academy = Academy::find($request->academy_id);
+
+        if (!$academy) {
+            return response()->json(['error' => 'Academy not found'], 404);
+        }
+
+        $fees = Fee::where('academy_id', $academy->id)
+            ->where('end_date', '>', now()->format('Y-m-d'))
+            ->where('used', 0)
+            ->get();
+
+        return response()->json([
+            'fees' => $fees,
+            'count' => $fees->count(),
+        ]);
+    }
+
+    public function createFreeFeesForAcademy(Request $request) {
+        $authUser = User::find(Auth::user()->id);
+        $authRole = $authUser->getRole();
+
+        if ($authRole != 'admin') {
+            return redirect()->back()->withErrors(['new_fees_error' => 'Unauthorized']);
+        }
+
+        $academy = Academy::find($request->academy_id);
+
+        if (!$academy) {
+            return redirect()->back()->withErrors(['academy' => 'Academy not found']);
+        }
+
+        for ($index = 0; $index < $request->number; $index++) {
+            Fee::create([
+                'user_id' => 0,
+                'academy_id' => $academy->id,
+                'type' => 3,
+                'start_date' => now(),
+                'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
+                'auto_renew' => 0,
+                'unique_id' => Str::orderedUuid(),
+                'used' => 0,
+            ]);
+        }
+
+        return back()->with('success', 'Fees created successfully');
+    }
+
     //? Checkout with Stripe.
 
     public function checkoutStripe(Request $request) {
@@ -243,11 +298,11 @@ class FeeController extends Controller {
 
         $items = json_decode($request->items);
         $prices = [];
-        
+
         $product_code = config('app.stripe.fee_code');
         $price_id = config('app.stripe.fee_price');
         $price = $this->retrievePriceByPriceId($price_id);
-        
+
         foreach ($items as $item) {
 
             $order->items()->create([
@@ -515,7 +570,7 @@ class FeeController extends Controller {
         $amount = 0;
 
         $price = config('app.stripe.fee_price_numeral');
-        
+
         foreach ($items as $item) {
 
             $amount += $price;
@@ -844,7 +899,7 @@ class FeeController extends Controller {
         $amount = 0;
 
         $price = config('app.stripe.fee_price_numeral');
-        
+
         foreach ($items as $item) {
 
             $amount += $price;

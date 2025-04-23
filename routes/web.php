@@ -107,6 +107,9 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/academies/{academy}/athletes-data', [App\Http\Controllers\AcademyController::class, 'athletesDataForAcademy'])->name('academies.athletes-data');
     Route::get('/academies/{academy}/athletes-school-data', [App\Http\Controllers\AcademyController::class, 'athletesSchoolDataForAcademy'])->name('academies.athletes-school-data');
     Route::get('/academies/{academy}/athletes-year-data', [App\Http\Controllers\AcademyController::class, 'getAthletesNumberPerYear'])->name('academies.athletes-year-data');
+    Route::get('/academies/{academy}/athletes-no-fee', [App\Http\Controllers\AcademyController::class, 'athletesWithNoFee'])->name('academies.athletes-no-fee');
+    Route::get('/academies/available-fees', [App\Http\Controllers\FeeController::class, 'academyAvailableFees'])->name('academies.available-fees');
+    Route::post('/academies/generate-fees', [App\Http\Controllers\FeeController::class, 'createFreeFeesForAcademy'])->name('academies.generate-fees');
 
     Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'edit'])->name('academies.edit');
     Route::delete('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'destroy'])->name('academies.disable');
