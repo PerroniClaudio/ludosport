@@ -2,68 +2,50 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Academy;
 use App\Models\Rank;
 use App\Models\RankRequest;
+use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class RankController extends Controller {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index() {
-        //
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create() {
-        //
-    }
+    private function fetchRequests($authUserRole, $allowedRanks, $authEntities, $entityType) {
+        $users = [];
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {
-        //
-    }
+        foreach ($authEntities as $entityId) {
+            $entity = $entityType::find($entityId);
+            $users = array_merge($users, $entity->athletes->toArray(), $entity->personnel->toArray());
+        }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Rank $rank) {
-        //
-    }
+        $user_ids = collect($users)->pluck('id')->toArray();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Rank $rank) {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Rank $rank) {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Rank $rank) {
-        //
+        return RankRequest::where('status', 'pending')
+            ->whereIn('user_to_promote_id', $user_ids)
+            ->whereIn('rank_id', $allowedRanks)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     public function requests() {
+        $authUserRole = User::find(Auth::user()->id)->getRole();
 
-        $requests = RankRequest::with('requestedBy', 'rank', 'userToPromote', 'approvedBy')
-            ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        if ($authUserRole === 'dean') {
+            $authSchools = Auth::user()->schools->pluck('id')->toArray();
+            $allowedRanks = Rank::whereIn('name', ['Initiate'])->pluck('id')->toArray();
+            $requests = $this->fetchRequests($authUserRole, $allowedRanks, $authSchools, School::class);
+        } else if ($authUserRole === 'rector') {
+            $authAcademies = Auth::user()->academies->pluck('id')->toArray();
+            $allowedRanks = Rank::whereIn('name', ['Initiate', 'Academic'])->pluck('id')->toArray();
+            $requests = $this->fetchRequests($authUserRole, $allowedRanks, $authAcademies, Academy::class);
+        } else {
+            $requests = RankRequest::with('requestedBy', 'rank', 'userToPromote', 'approvedBy')
+                ->where('status', 'pending')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
 
         $reduced = $requests->map(function ($request) {
             return [
@@ -81,17 +63,102 @@ class RankController extends Controller {
         ]);
     }
 
-    public function rankRequestForm() {
-        $ranks = Rank::all();
-        $authUserRole = User::find(auth()->user()->id)->getRole();
+    public function acceptAllRequests() {
+        $authUserRole = User::find(Auth::user()->id)->getRole();
 
-        if ($authUserRole === 'instructor') {
-            $authSchools = auth()->user()->schools->pluck('id')->toArray();
-
-            $users = User::whereHas('schools', function ($query) use ($authSchools) {
-                $query->whereIn('school_id', $authSchools);
-            })->get();
+        if ($authUserRole === 'dean') {
+            $authSchools = Auth::user()->schools->pluck('id')->toArray();
+            $allowedRanks = Rank::whereIn('name', ['Initiate'])->pluck('id')->toArray();
+            $requests = $this->fetchRequests($authUserRole, $allowedRanks, $authSchools, School::class);
+        } else if ($authUserRole === 'rector') {
+            $authAcademies = Auth::user()->academies->pluck('id')->toArray();
+            $allowedRanks = Rank::whereIn('name', ['Initiate', 'Academic'])->pluck('id')->toArray();
+            $requests = $this->fetchRequests($authUserRole, $allowedRanks, $authAcademies, Academy::class);
+        } else {
+            $requests = RankRequest::with('requestedBy', 'rank', 'userToPromote', 'approvedBy')
+                ->where('status', 'pending')
+                ->orderBy('created_at', 'desc')
+                ->get();
         }
+
+        foreach ($requests as $request) {
+            $user = User::find($request->userToPromote->id);
+            $user->rank_id = $request->rank_id;
+            $user->save();
+
+            $request->status = 'approved';
+            $request->approved_by = Auth::user()->id;
+            $request->approved_at = now();
+            $request->save();
+        }
+
+        return redirect()->route('rank-requests.index');
+    }
+
+    public function countPendingRequests() {
+        $authUserRole = User::find(Auth::user()->id)->getRole();
+        $pending_requests = 0;
+
+        if ($authUserRole === 'dean') {
+            $authSchools = Auth::user()->schools->pluck('id')->toArray();
+            $allowedRanks = Rank::whereIn('name', ['Initiate'])->pluck('id')->toArray();
+            $pending_requests = $this->fetchRequests($authUserRole, $allowedRanks, $authSchools, School::class)->count();
+        } else if ($authUserRole === 'rector') {
+            $authAcademies = Auth::user()->academies->pluck('id')->toArray();
+            $allowedRanks = Rank::whereIn('name', ['Initiate', 'Academic'])->pluck('id')->toArray();
+            $pending_requests = $this->fetchRequests($authUserRole, $allowedRanks, $authAcademies, Academy::class)->count();
+        } else {
+            $pending_requests = RankRequest::where('status', 'pending')->count();
+        }
+
+        return $pending_requests;
+    }
+
+    public function rankRequestForm() {
+
+        $authUserRole = User::find(Auth::user()->id)->getRole();
+        $users = [];
+
+        if (in_array($authUserRole, ['instructor', 'dean'])) {
+
+            // Solo iniziato ed accademico 
+            $ranks = Rank::whereIn('name', ['Initiate', 'Academic'])->get();
+            $authSchools = Auth::user()->schools->pluck('id')->toArray();
+
+            foreach ($authSchools as $school) {
+                $school = School::find($school);
+                $users = array_merge($users, $school->athletes->toArray(), $school->personnel->toArray());
+            }
+        } else if ($authUserRole === 'rector') {
+
+            // Anche cavaliere
+            $ranks = Rank::whereIn('name', ['Initiate', 'Academic', 'Chevalier'])->get();
+            $authAcademies = Auth::user()->academies->pluck('id')->toArray();
+
+            foreach ($authAcademies as $academy) {
+                $academy = Academy::find($academy);
+                $users = array_merge($users, $academy->athletes->toArray(), $academy->personnel->toArray());
+            }
+        } else {
+
+            $ranks = Rank::whereIn('name', ['Initiate', 'Academic'])->get();
+
+            $authSchools = Auth::user()->schools->pluck('id')->toArray();
+
+            foreach ($authSchools as $school) {
+                $school = School::find($school);
+                $users = array_merge($users, $school->athletes->toArray(), $school->personnel->toArray());
+            }
+
+            $authAcademies = Auth::user()->academies->pluck('id')->toArray();
+
+            foreach ($authAcademies as $academy) {
+                $academy = Academy::find($academy);
+                $users = array_merge($users, $academy->athletes->toArray(), $academy->personnel->toArray());
+            }
+        }
+
+        $users = collect($users)->unique('id');
 
         $formattedRanks = [];
 
@@ -102,6 +169,7 @@ class RankController extends Controller {
             ];
         }
 
+
         return view('ranks.create-request', [
             'ranks' => $formattedRanks,
             'users' => $users ?? User::all(),
@@ -109,8 +177,6 @@ class RankController extends Controller {
     }
 
     public function rankRequestFormUser(User $user) {
-
-
 
         $ranks = Rank::all();
         $authUserRole = User::find(Auth::user()->id)->getRole();
@@ -171,27 +237,9 @@ class RankController extends Controller {
         return redirect()->route('rank-requests.index');
     }
 
-    public function acceptAllRequests() {
-        $requests = RankRequest::where('status', 'pending')->get();
-
-        foreach ($requests as $request) {
-            $user = User::find($request->userToPromote->id);
-            $user->rank_id = $request->rank_id;
-            $user->save();
-
-            $request->status = 'approved';
-            $request->approved_by = Auth::user()->id;
-            $request->approved_at = now();
-            $request->save();
-        }
-
-
-        return redirect()->route('rank-requests.index');
-    }
-
     public function rejectRequest(RankRequest $request) {
         $request->status = 'rejected';
-        $request->approved_by = auth()->id();
+        $request->approved_by = Auth::user()->id;
         $request->approved_at = now();
         $request->save();
 
@@ -207,9 +255,5 @@ class RankController extends Controller {
         } else {
             return redirect()->route('rank-requests.index')->with('error', 'Cannot delete a request that has already been approved or rejected.');
         }
-    }
-
-    public function countPendingRequests() {
-        return RankRequest::where('status', 'pending')->count();
     }
 }

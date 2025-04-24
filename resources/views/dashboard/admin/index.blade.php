@@ -8,22 +8,19 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            <div class="flex flex-col gap-4"
-                x-data="{
-                    rankRequests: null,
-
-                    async getPendingRequests() {
-                        const response = await fetch('/pending-rank-requests');
-                        const data = await response.json();
-                        console.log('Pendingrequests: ', data)
-                        return data;
-                    },
-
-                    async init(){
-                        this.rankRequests = await this.getPendingRequests();
-                    }
-                }"
-            >
+            <div class="flex flex-col gap-4" x-data="{
+                rankRequests: null,
+            
+                async getPendingRequests() {
+                    const response = await fetch('/pending-rank-requests');
+                    const data = await response.json();
+                    return data;
+                },
+            
+                async init() {
+                    this.rankRequests = await this.getPendingRequests();
+                }
+            }">
 
                 <x-dashboard.admin.user-world-numbers />
 
@@ -49,7 +46,9 @@
                             <h3 class="text-background-800 dark:text-background-200 text-2xl">
                                 {{ __('dashboard.admin_rank_requests') }}
                             </h3>
-                            <p x-text="`{{ __('dashboard.admin_rank_requests_text', ['count' => '${rankRequests}']) }}`"></p>
+                            <p
+                                x-text="`{{ __('dashboard.admin_rank_requests_text', ['count' => '${rankRequests}']) }}`">
+                            </p>
                             <div class="flex justify-end">
                                 <a href="/rank-requests">
                                     <x-primary-button>
@@ -59,7 +58,7 @@
                             </div>
                         </div>
                     </div>
-    
+
                 </div>
 
                 <!-- Paga in bulk le fee degli utenti non attivi -->
@@ -142,36 +141,31 @@
                                 this.setSelectedSchool(e.detail);
                             })
                         }
-                    }'
-                >
+                    }'>
                     <!-- Grafico a torta per vedere la divisione di utenti tra le nazioni + Confronto tra iscritti anno precedente e iscritti anno corrente  -->
                     <template x-if="!selectedNation">
                         <x-dashboard.admin.user-nation-graph
                             @nation-selected.window="setSelectedNation($event.detail)" />
                     </template>
-                    
+
                     <!-- Grafico a torta per vedere la divisione di utenti tra le accademie + Confronto tra iscritti anno precedente e iscritti anno corrente  -->
                     <template x-if="selectedNation && !selectedAcademy">
-                        <x-dashboard.admin.user-academy-graph
-                            nation="selectedNation"
-                            selectedNationData="selectedNationData"
-                            nationsData="nationsData"
-                            @academy-selected.window="setSelectedAcademy($event.detail)" /> 
+                        <x-dashboard.admin.user-academy-graph nation="selectedNation"
+                            selectedNationData="selectedNationData" nationsData="nationsData"
+                            @academy-selected.window="setSelectedAcademy($event.detail)" />
                     </template>
 
                     <!-- Grafico a torta per vedere la divisione di utenti tra le scuole + Confronto tra iscritti anno precedente e iscritti anno corrente  -->
                     <template x-if="selectedNation && selectedAcademy && !selectedSchool">
-                        <x-dashboard.admin.user-school-graph
-                            academy="selectedAcademy"
+                        <x-dashboard.admin.user-school-graph academy="selectedAcademy"
                             selectedAcademyData="selectedAcademyData"
                             @school-selected.window="setSelectedSchool($event.detail)" />
                     </template>
                     {{-- <x-dashboard.user-school-graph academyId="{{ Auth()->user()->primaryAcademy()->id ?? null }}" /> --}}
-                   
+
                     <!-- Grafico a torta per vedere la divisione di utenti tra i corsi + Confronto tra iscritti anno precedente e iscritti anno corrente  -->
                     <template x-if="selectedNation && selectedAcademy && selectedSchool">
-                        <x-dashboard.admin.user-course-graph
-                            school="selectedSchool"
+                        <x-dashboard.admin.user-course-graph school="selectedSchool"
                             selectedSchoolData="selectedSchoolData" />
                     </template>
                 </div>
