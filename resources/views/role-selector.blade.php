@@ -21,7 +21,7 @@
         <!-- Page Content -->
         <main class="flex flex-col min-h-screen items-center justify-center">
             <form method="POST" action="{{ route('profile.role.update') }}"
-                class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg w-1/3"
+                class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg w-full sm:max-w-md lg:max-w-xl "
                 x-data="{
                     selected: null,
                 }">

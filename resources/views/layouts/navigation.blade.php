@@ -236,6 +236,12 @@
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 
+                @if (count(Auth::user()->allowedRoles()) > 1)
+                    <x-responsive-nav-link :href="route('role-selector')">
+                        {{ __('users.select_role') }}
+                    </x-responsive-nav-link>
+                @endif
+
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
