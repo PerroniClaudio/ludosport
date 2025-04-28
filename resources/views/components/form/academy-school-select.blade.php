@@ -1,5 +1,5 @@
 <div x-data="{
-    isDialogOpen: true,
+    isDialogOpen: false,
     selectedAcademyId: null,
     selectedSchoolId: null,
     academies: [],
@@ -100,7 +100,7 @@
                                 <div class="p-4 border rounded-lg cursor-pointer "
                                     :class="selectedAcademyId === academy.id ?
                                         'bg-primary-200 dark:bg-primary-600 text-background-600 dark:text-background-100 border-2 border-primary-500 dark:border-primary-400' :
-                                        'hover:bg-primary-100 dark:hover:bg-primary-600 hover:text-background-100 text-background-600 dark:text-background-400 border-background-100 dark:border-background-700'"
+                                        'hover:bg-primary-500 dark:hover:bg-primary-600 hover:text-background-100 text-background-600 dark:text-background-400 border-background-100 dark:border-background-700'"
                                     x-on:click="selectedAcademyId = academy.id; selectedAcademy = academy.name;">
                                     <h3 class="font-semibold" x-text="academy.name"></h3>
                                     <p class="text-sm" x-text="academy.nation"></p>
