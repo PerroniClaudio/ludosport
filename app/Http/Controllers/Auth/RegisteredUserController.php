@@ -63,7 +63,9 @@ class RegisteredUserController extends Controller {
         ]);
 
         $user->academyAthletes()->syncWithoutDetaching($academy->id);
+        $user->setPrimaryAcademyAthlete($academy->id);
         $user->schoolAthletes()->syncWithoutDetaching($request->school_id);
+        $user->setPrimarySchoolAthlete($request->school_id);
         $user->roles()->syncWithoutDetaching(7);
 
         Announcement::create([
