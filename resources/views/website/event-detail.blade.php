@@ -1,8 +1,8 @@
 <x-website-layout>
-    <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
+    <div class="grid grid-cols-12 gap-x-3 sm:px-8 pb-16  container mx-auto max-w-7xl">
         <section class="col-span-12 py-12">
             <div
-                class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 text-background-800 dark:text-background-200">
+                class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-2 sm:p-8 text-background-800 dark:text-background-200">
                 <h1 class="font-semibold text-3xl  leading-tight">
                     {{ $event->name }}</h1>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
@@ -10,16 +10,16 @@
                     {!! $event->description !!}
                 </section>
 
-                <section class="grid grid-cols-2 gap-4 my-8">
-                    <div class="flex flex-col gap-2 bg-background-100 dark:bg-background-700 rounded-lg p-8">
+                <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 my-8">
+                    <div class="flex flex-col gap-2 bg-background-100 dark:bg-background-700 rounded-lg p-8 text-sm sm:text-base">
 
                         <h2 class="font-semibold text-2xl  leading-tight">
                             {{ __('events.info') }}</h2>
                         <div class="border-b border-background-100 dark:border-background-500 my-2"></div>
 
                         <div class="flex items-center gap-2">
-                            <x-lucide-map-pin class="w-10 h-10 text-primary-500 dark:text-primary-600" />
-                            <span class=" font-4xl">{{ $event->address }},
+                            <x-lucide-map-pin class="w-6 h-6 sm:w-10 sm:h-10 shrink-0 text-primary-500 dark:text-primary-600" />
+                            <span>{{ $event->address }},
                                 {{ $event->postal_code }}
                                 {{ $event->city }}, {{ $event->nation->name }}</span>
                         </div>
@@ -31,7 +31,7 @@
 
                             @endphp
 
-                            <x-lucide-calendar-days class="w-10 h-10 text-primary-500 dark:text-primary-600" />
+                            <x-lucide-calendar-days class="w-6 h-6 sm:w-10 sm:h-10 shrink-0 text-primary-500 dark:text-primary-600" />
                             <div class="flex flex-col gap-1">
                                 <span class="">{{ __('events.start_date') }}:
                                     {{ $start_date->format('d/m/Y H:i') }}
@@ -44,7 +44,7 @@
                         
                         @if($event->academy)
                             <div class="flex items-center gap-2">
-                                <x-lucide-swords class="w-10 h-10 text-primary-500 dark:text-primary-600" />
+                                <x-lucide-swords class="w-6 h-6 sm:w-10 sm:h-10 shrink-0 text-primary-500 dark:text-primary-600" />
                                 <div class="flex flex-col gap-1">
                                     <div>
                                         {{ __('academies.academy') }}: <a class="text-primary-500 dark:text-primary-600" href="{{ route('academy-profile', $event->academy->slug) }}">
