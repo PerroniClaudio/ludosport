@@ -1,30 +1,30 @@
 <x-website-layout>
     <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
         <section class="col-span-12 py-12 flex flex-col gap-8">
-            <section class="bg-white dark:bg-background-800 flex p-8 rounded">
-                <div class="rounded-full h-24 w-24">
+            <section class="bg-white dark:bg-background-800 flex gap-8 flex-col sm:flex-row p-8 rounded">
+                <div class="rounded-full h-24 w-24 shrink-0">
                     <img src="{{ route('academy-image', $school->academy->id) }}" alt="avatar"
                         class="rounded-full h-24 w-24" />
                 </div>
-                <div class="flex-1 flex flex-col gap-2 ml-8">
-                    <div class="w-1/2 flex flex-col gap-2">
-                        <div class="text-4xl text-primary-500">{{ $school->name }}</div>
+                <div class="flex-1 flex flex-col gap-2">
+                    <div class="flex flex-col gap-2">
+                        <div class="text-3xl sm:text-4xl text-primary-500">{{ $school->name }}</div>
                         <div class="flex items-center gap-2">
-                            <x-lucide-flag class="h-5 w-5 text-background-500 dark:text-background-400" />
+                            <x-lucide-flag class="h-5 w-5 text-background-500 dark:text-background-400 shrink-0" />
                             <span class="text-sm text-background-500 dark:text-background-400">
                                 {{ $school->nation->name }}
                             </span>
-                            <img src="{{ route('nation-flag', $school->nation->id) }}" alt="{{ $school->nation->flag }}"
+                            <img src="{{ route('nation-flag', $school->nation->id) }}" alt="{{ $school->nation->name }}"
                                 class="h-2 w-4">
                         </div>
                         <div class="flex items-center gap-2">
-                            <x-lucide-circle-user-round class="h-5 w-5 text-background-500 dark:text-background-400" />
+                            <x-lucide-circle-user-round class="h-5 w-5 text-background-500 dark:text-background-400 shrink-0" />
                             <span class="text-sm text-background-500 dark:text-background-400">
                                 {{ __('users.dean') }}: {{ $dean }}
                             </span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <x-lucide-swords class="h-5 w-5 text-background-500 dark:text-background-400" />
+                            <x-lucide-swords class="h-5 w-5 text-background-500 dark:text-background-400 shrink-0" />
                             <a href="{{ route('academy-profile', $academy->slug) }}">
                                 <span
                                     class="text-sm text-background-500 dark:text-background-400 hover:text-primary-500">
@@ -33,13 +33,13 @@
                             </a>
                         </div>
                         <div class="flex items-center gap-2">
-                            <x-lucide-circle-user-round class="h-5 w-5 text-background-500 dark:text-background-400" />
+                            <x-lucide-circle-user-round class="h-5 w-5 text-background-500 dark:text-background-400 shrink-0" />
                             <span class="text-sm text-background-500 dark:text-background-400">
                                 {{ __('users.rector') }}: {{ $rector }}
                             </span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <x-lucide-mail class="h-5 w-5 text-background-500 dark:text-background-400" />
+                            <x-lucide-mail class="h-5 w-5 text-background-500 dark:text-background-400 shrink-0" />
                             <span class="text-sm text-background-500 dark:text-background-400">
                                 {{ __('school.school_email') }}: 
                                 <a href="mailto:{{ $school->email }}"
@@ -90,7 +90,7 @@
 
                     <div class="flex items-center gap-2">
                         <x-lucide-map-pin class="w-10 h-10 text-primary-500 dark:text-primary-600" />
-                        <span class="dark:text-background-200 font-4xl">{{ $school->address }},
+                        <span class="dark:text-background-200">{{ $school->address }},
                             {{ $school->postal_code }}
                             {{ $school->city }}, {{ $school->nation->name }}</span>
                     </div>
