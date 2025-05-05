@@ -84,128 +84,63 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('dean.users.update', $user->id) }}" class="grid grid-cols-2 gap-4">
-                @csrf
-
-                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">
-                        {{ __('users.personal_details_message') }}</h3>
-                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                    <div class="flex flex-col gap-2">
-                        <x-form.input name="name" label="Name" type="text" required="{{ true }}"
-                            :value="$user->name" placeholder="{{ fake()->firstName() }}" :disabled="!$canEdit" />
-                        <x-form.input name="surname" label="Surname" type="text" required="{{ true }}"
-                            :value="$user->surname" placeholder="{{ fake()->lastName() }}" :disabled="!$canEdit" />
-                        <x-form.input name="email" label="Email" type="email" required="{{ true }}"
-                            value="{{ $user->email }}" placeholder="{{ fake()->email() }}" :disabled="!$canEdit" />
-                        <x-form.input name="year" label="First subscription year" type="text"
-                            required="{{ true }}" value="{{ $user->subscription_year }}"
-                            placeholder="{{ date('Y') }}" :disabled="!$canEdit" />
-
-                        <div>
-                            <x-input-label for="nationality" value="Nationality" />
-                            <select name="nationality" id="nationality" {{ !$canEdit ? 'disabled' : '' }}
-                                class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
-                                @foreach ($nations as $key => $nation)
-                                    <optgroup label="{{ $key }}"">
-                                        @foreach ($nation as $n)
-                                            <option value="{{ $n['id'] }}"
-                                                {{ $n['id'] == $user->nation_id ? 'selected' : '' }}>
-                                                {{ $n['name'] }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <x-input-label for="" value="Instagram" />
-                            <div class="w-full min-h-10 cursor-not-allowed px-3 py-2 border border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
-                                {{ $user->instagram ?? '' }}
+            <div class="grid grid-cols-2 gap-4">
+                <form method="POST" action="{{ route('dean.users.update', $user->id) }}">
+                    @csrf
+    
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                            {{ __('users.personal_details_message') }}</h3>
+                        <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                        <div class="flex flex-col gap-2">
+                            <x-form.input name="name" label="Name" type="text" required="{{ true }}"
+                                :value="$user->name" placeholder="{{ fake()->firstName() }}" :disabled="!$canEdit" />
+                            <x-form.input name="surname" label="Surname" type="text" required="{{ true }}"
+                                :value="$user->surname" placeholder="{{ fake()->lastName() }}" :disabled="!$canEdit" />
+                            <x-form.input name="email" label="Email" type="email" required="{{ true }}"
+                                value="{{ $user->email }}" placeholder="{{ fake()->email() }}" :disabled="!$canEdit" />
+                            <x-form.input name="year" label="First subscription year" type="text"
+                                required="{{ true }}" value="{{ $user->subscription_year }}"
+                                placeholder="{{ date('Y') }}" :disabled="!$canEdit" />
+    
+                            <div>
+                                <x-input-label for="nationality" value="Nationality" />
+                                <select name="nationality" id="nationality" {{ !$canEdit ? 'disabled' : '' }}
+                                    class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
+                                    @foreach ($nations as $key => $nation)
+                                        <optgroup label="{{ $key }}"">
+                                            @foreach ($nation as $n)
+                                                <option value="{{ $n['id'] }}"
+                                                    {{ $n['id'] == $user->nation_id ? 'selected' : '' }}>
+                                                    {{ $n['name'] }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endforeach
+                                </select>
                             </div>
-                        </div>
-                        
-                    </div>
-                </div>
-
-
-
-                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">
-                        {{ __('users.authorization') }}</h3>
-                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-
-                    <div class="grid grid-cols-2 gap-2 text-background-800 dark:text-background-200"
-                        x-data="{
-                            selected: {{ collect($user->roles) }},
-                            selectRole(role) {
-                                if ({{ $canEdit ? 'true' : 'false' }} && {{ collect($editable_roles) }}.includes(role)) {
-                                    if (this.selected.includes(role)) {
-                                        this.selected = this.selected.filter(item => item !== role);
-                                    } else {
-                                        this.selected.push(role);
-                                    }
-                                }
-                            }
-                        }">
-
-                        @foreach ($roles as $role)
-                            <div x-on:click="selectRole('{{ $role->label }}')"
-                                class="border border-background-700 hover:border-primary-500 rounded-lg p-4 cursor-pointer flex items-center gap-2"
-                                :class="{ 'border-primary-500': selected.includes('{{ $role->label }}') }">
-
-                                @switch($role->label)
-                                    @case('admin')
-                                        <x-lucide-crown class="w-6 h-6 text-primary-500" />
-                                    @break
-
-                                    @case('athlete')
-                                        <x-lucide-swords class="w-6 h-6 text-primary-500" />
-                                    @break
-
-                                    @case('rector')
-                                        <x-lucide-graduation-cap class="w-6 h-6 text-primary-500" />
-                                    @break
-
-                                    @case('dean')
-                                        <x-lucide-book-marked class="w-6 h-6 text-primary-500" />
-                                    @break
-
-                                    @case('manager')
-                                        <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                    @break
-
-                                    @case('technician')
-                                        <x-lucide-wrench class="w-6 h-6 text-primary-500" />
-                                    @break
-
-                                    @case('instructor')
-                                        <x-lucide-megaphone class="w-6 h-6 text-primary-500" />
-                                    @break
-
-                                    @default
-                                @endswitch
-
-                                <span>{{ __("users.{$role->label}") }}</span>
+    
+                            <div>
+                                <x-input-label for="" value="Instagram" />
+                                <div class="w-full min-h-10 cursor-not-allowed px-3 py-2 border border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
+                                    {{ $user->instagram ?? '' }}
+                                </div>
                             </div>
-                        @endforeach
-
-                        <input type="hidden" name="roles" x-model="selected">
+                            
+                        </div>
                     </div>
-
-                    @if ($user->hasRole('manager'))
-                        <x-user.custom-role :user="$user->id" :roleid="isset($user->customRoles->first()->id) ? $user->customRoles->first()->id : 0" />
+    
+                    @if ($canEdit)
+                        <div class="fixed bottom-8 right-32">
+                            <x-primary-button type="submit">
+                                <x-lucide-save class="w-6 h-6 text-white" />
+                            </x-primary-button>
+                        </div>
                     @endif
+                </form>
+                <div>
+                    <x-user.roles :user="$user" :roles="$user->roles" :availableRoles="$roles" />
                 </div>
-
-                @if ($canEdit)
-                    <div class="fixed bottom-8 right-32">
-                        <x-primary-button type="submit">
-                            <x-lucide-save class="w-6 h-6 text-white" />
-                        </x-primary-button>
-                    </div>
-                @endif
-            </form>
+            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
                 @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))

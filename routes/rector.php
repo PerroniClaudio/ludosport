@@ -41,6 +41,7 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
     Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('rector.users.edit');
     Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('rector.users.store');
     Route::post('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('rector.users.update');
+    Route::post('/user-roles/{user}', [App\Http\Controllers\UserController::class, 'updateRoles'])->name('users.roles-update');
     Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('rector.users.disable');
     Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('rector.users.picture.update');
     Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('rector.nation.academies.index');
