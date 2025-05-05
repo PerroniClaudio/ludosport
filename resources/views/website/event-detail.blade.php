@@ -41,26 +41,32 @@
                                 </span>
                             </div>
                         </div>
-                        
-                        @if($event->academy)
+
+                        @if ($event->academy)
                             <div class="flex items-center gap-2">
                                 <x-lucide-swords class="w-6 h-6 sm:w-10 sm:h-10 shrink-0 text-primary-500 dark:text-primary-600" />
                                 <div class="flex flex-col gap-1">
                                     <div>
-                                        {{ __('academies.academy') }}: <a class="text-primary-500 dark:text-primary-600" href="{{ route('academy-profile', $event->academy->slug) }}">
+                                        {{ __('academies.academy') }}: <a
+                                            class="text-primary-500 dark:text-primary-600"
+                                            href="{{ route('academy-profile', $event->academy->slug) }}">
                                             {{ $event->academy->name }}
                                         </a>
                                     </div>
-                                    @if($academy_email)
+                                    @if ($academy_email)
                                         <div>
-                                            {{__('academies.academy_email')}}: <a class="text-primary-500 dark:text-primary-600" href="mailto:{{ $academy_email ?? '' }}">
-                                                {{$academy_email ?? ''}}
+                                            {{ __('academies.academy_email') }}: <a
+                                                class="text-primary-500 dark:text-primary-600"
+                                                href="mailto:{{ $academy_email ?? '' }}">
+                                                {{ $academy_email ?? '' }}
                                             </a>
                                         </div>
                                     @elseif (isset($event->academy->rector()->email))
                                         <div>
-                                            {{__('academies.rector_email_website')}}: <a class="text-primary-500 dark:text-primary-600" href="mailto:{{ $event->academy->rector()->email ?? '' }}">
-                                                {{$event->academy->rector()->email ?? ''}}
+                                            {{ __('academies.rector_email_website') }}: <a
+                                                class="text-primary-500 dark:text-primary-600"
+                                                href="mailto:{{ $event->academy->rector()->email ?? '' }}">
+                                                {{ $event->academy->rector()->email ?? '' }}
                                             </a>
                                         </div>
                                     @endif
@@ -68,35 +74,36 @@
                             </div>
                         @endif
 
-                        @if ($canpurchase)
-                            <a href="{{ route('event-purchase', $event->id) }}">
-                                <x-primary-button>
-                                    @if ($is_waiting_payment)
-                                        {{ __('website.events_waiting_payment') }}
-                                    @elseif($only_waiting_list)
-                                        {{ __('website.events_list_waiting_list') }}
-                                    @else
-                                        {{ __('website.events_list_participate') }}
-                                    @endif
-                                </x-primary-button>
-                            </a>
-                        @elseif (!Auth()->user()->has_paid_fee)
-                            <p>{{ __('website.events_pay_fee_before') }}</p>
-                        @elseif ($is_participating)
-                            <p>{{ __('website.events_participating') }}</p>
-                        @elseif ($is_in_waiting_list)
-                            {{-- Qui si può aggiungere il bottone per mandarlo al completamento del pagamento se ha il flag is_waiting_payment --}}
-                            <p>{{ __('website.events_in_waiting_list') }}</p>
-                        @elseif ($block_subscriptions || !$event->internal_shop)
-                            <p>{{ __('website.events_subscriptions_blocked') }}</p>
-                            {{-- <p>
-                                {{ __('website.events_subscription_academy_email') }}
-                                <a href="mailto:{{ $academy_email }}"
-                                    class="text-primary-500">{{ $academy_email }}</a>
-                            </p> --}}
-                        @elseif ($waiting_list_closed)
-                            <p>{{ __('website.event_waiting_list_closed_text') }}</p>
-                        @endif
+                        @auth
+
+
+
+                            @if ($canpurchase)
+                                <a href="{{ route('event-purchase', $event->id) }}">
+                                    <x-primary-button>
+                                        @if ($is_waiting_payment)
+                                            {{ __('website.events_waiting_payment') }}
+                                        @elseif($only_waiting_list)
+                                            {{ __('website.events_list_waiting_list') }}
+                                        @else
+                                            {{ __('website.events_list_participate') }}
+                                        @endif
+                                    </x-primary-button>
+                                </a>
+                            @elseif (!Auth()->user()->has_paid_fee)
+                                <p>{{ __('website.events_pay_fee_before') }}</p>
+                            @elseif ($is_participating)
+                                <p>{{ __('website.events_participating') }}</p>
+                            @elseif ($is_in_waiting_list)
+                                {{-- Qui si può aggiungere il bottone per mandarlo al completamento del pagamento se ha il flag is_waiting_payment --}}
+                                <p>{{ __('website.events_in_waiting_list') }}</p>
+                            @elseif ($block_subscriptions || !$event->internal_shop)
+                                <p>{{ __('website.events_subscriptions_blocked') }}</p>
+                            @elseif ($waiting_list_closed)
+                                <p>{{ __('website.event_waiting_list_closed_text') }}</p>
+                            @endif
+
+                        @endauth
 
                     </div>
                     <div x-load x-data="googlemap('{{ $event->location }}')" x-ref="eventGoogleMapContainer">
