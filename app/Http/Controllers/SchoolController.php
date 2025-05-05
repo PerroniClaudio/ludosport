@@ -1226,12 +1226,15 @@ class SchoolController extends Controller {
         $dean = $school->dean() ? $school->dean()->name . " " . $school->dean()->surname : "";
 
         $academy = $school->academy;
-        $rector = $academy->rector() ? $academy->rector()->name . " " . $academy->rector()->surname : "";
+
+        $rectors = $academy->personnel()->whereHas('roles', function ($query) {
+            $query->where('name', 'rector');
+        })->get();
 
         return view('website.school-profile', [
             'school' => $school,
             'academy' => $academy,
-            'rector' => $rector,
+            'rectors' => $rectors,
             'dean' => $dean,
             'athletes' => $school->athletes,
         ]);

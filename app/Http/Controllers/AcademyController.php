@@ -922,12 +922,14 @@ class AcademyController extends Controller {
             })->toArray());
         }
 
-        $rector = $academy->rector() ? $academy->rector()->name . " " . $academy->rector()->surname : "";
+        $rectors = $academy->personnel()->whereHas('roles', function ($query) {
+            $query->where('name', 'rector');
+        })->get();
 
 
         return view('website.academy-profile', [
             'academy' => $academy,
-            'rector' => $rector,
+            'rectors' => $rectors,
             'athletes' => $academy->athletes,
             'personnel' => $associated_personnel,
             'academy_email' => $academy->email ?? "",
