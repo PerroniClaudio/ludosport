@@ -32,6 +32,8 @@ Route::get('/academy-image/{academy}', [App\Http\Controllers\AcademyController::
 Route::middleware('throttle:rate_limit,1')->get('/schools-search', [App\Http\Controllers\SchoolController::class, 'searchSchools'])->name('schools-search');
 Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
 
+
+
 /** Rankings */
 
 Route::prefix('/website-rankings')->group(function () {
@@ -66,9 +68,12 @@ Route::prefix('/shop')->group(function () {
     Route::get('/wire-transfer/{order}/success', [App\Http\Controllers\OrderController::class, 'successUserWireTransfer'])->middleware('auth')->name('shop.wire-transfer-success');
 });
 
+
+Route::get('/events-list', [App\Http\Controllers\EventController::class, 'eventsList'])->name('events-list');
+Route::get('/events-detail/{event:slug}', [App\Http\Controllers\EventController::class, 'show'])->name('event-detail');
+
 Route::group(['middleware' => ['auth']], function () {
-    Route::get('/events-list', [App\Http\Controllers\EventController::class, 'eventsList'])->name('events-list');
-    Route::get('/events-detail/{event:slug}', [App\Http\Controllers\EventController::class, 'show'])->name('event-detail');
+
     Route::get('/event-purchase/{event:id}', [App\Http\Controllers\EventController::class, 'purchase'])->name('event-purchase');
 
     Route::get('/shop/event/{event}/stripe/checkout', [App\Http\Controllers\EventController::class, 'userCheckoutStripe'])->middleware('auth')->name('shop.events.stripe-checkout');

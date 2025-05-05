@@ -17,15 +17,26 @@
                                 alt="{{ $academy->nation->name }}" class="h-2 w-4">
                         </div>
                         <div class="flex items-center gap-2">
-                            <x-lucide-circle-user-round class="h-5 w-5 text-background-500 dark:text-background-400 shrink-0" />
+                            <x-lucide-circle-user-round
+                                class="h-5 w-5 text-background-500 dark:text-background-400 shrink-0" />
                             <span class="text-sm text-background-500 dark:text-background-400">
-                                {{ __('users.rector') }}: {{ $rector }}
+                                {{ __('users.rector') }}:
+                                @foreach ($rectors as $rector)
+                                    <span
+                                        class="text-sm text-background-500 dark:text-background-400 hover:text-primary-500">
+                                        {{ $rector->name }} {{ $rector->surname }}
+                                    </span>
+
+                                    @if (!$loop->last)
+                                        ,
+                                    @endif
+                                @endforeach
                             </span>
                         </div>
                         <div class="flex items-center gap-2">
                             <x-lucide-mail class="h-5 w-5 text-background-500 dark:text-background-400 shrink-0" />
                             <span class="text-sm text-background-500 dark:text-background-400">
-                                {{ __('academies.academy_email_website') }}: 
+                                {{ __('academies.academy_email_website') }}:
                                 <a href="mailto:{{ $academy_email }}" class="text-primary-500">
                                     {{ $academy_email }}
                                 </a>
