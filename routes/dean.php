@@ -16,7 +16,7 @@ Route::prefix('dean')->middleware('auth')->middleware('role:admin,dean')->group(
     Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('dean.users.edit');
     Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('dean.users.store');
     Route::post('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('dean.users.update');
-    Route::post('/user-roles/{user}', [App\Http\Controllers\UserController::class, 'updateRoles'])->name('users.roles-update');
+    Route::post('/user-roles/{user}', [App\Http\Controllers\UserController::class, 'updateRoles'])->name('dean.users.roles-update');
     Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('dean.users.disable');
     Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('dean.users.picture.update');
     // Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('dean.nation.academies.index');
