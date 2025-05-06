@@ -66,6 +66,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('users.store');
     Route::post('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
+    Route::post('/user-roles/{user}', [App\Http\Controllers\UserController::class, 'updateRoles'])->name('users.roles-update');
     Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.disable');
     Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('nation.academies.index');
     Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
@@ -107,6 +108,9 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/academies/{academy}/athletes-data', [App\Http\Controllers\AcademyController::class, 'athletesDataForAcademy'])->name('academies.athletes-data');
     Route::get('/academies/{academy}/athletes-school-data', [App\Http\Controllers\AcademyController::class, 'athletesSchoolDataForAcademy'])->name('academies.athletes-school-data');
     Route::get('/academies/{academy}/athletes-year-data', [App\Http\Controllers\AcademyController::class, 'getAthletesNumberPerYear'])->name('academies.athletes-year-data');
+    Route::get('/academies/{academy}/athletes-no-fee', [App\Http\Controllers\AcademyController::class, 'athletesWithNoFee'])->name('academies.athletes-no-fee');
+    Route::get('/academies/available-fees', [App\Http\Controllers\FeeController::class, 'academyAvailableFees'])->name('academies.available-fees');
+    Route::post('/academies/generate-fees', [App\Http\Controllers\FeeController::class, 'createFreeFeesForAcademy'])->name('academies.generate-fees');
 
     Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'edit'])->name('academies.edit');
     Route::delete('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'destroy'])->name('academies.disable');
@@ -273,15 +277,14 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 /** Ranks requests */
 
-Route::group(['middleware' => ['auth', 'role:admin']], function () {
-
+Route::group(['middleware' => ['auth', 'role:admin,rector,dean']], function () {
     Route::get('/rank-requests', [App\Http\Controllers\RankController::class, 'requests'])->name('rank-requests.index');
-    Route::get('/pending-rank-requests', [App\Http\Controllers\RankController::class, 'countPendingRequests'])->name('pending-rank-requests.index');
     Route::get('/rank-requests/approve-all', [App\Http\Controllers\RankController::class, 'acceptAllRequests'])->name('rank-requests.approve-all');
 
     Route::get('/rank-requests/{request}/approve', [App\Http\Controllers\RankController::class, 'acceptRequest'])->name('rank-requests.approve');
     Route::get('/rank-requests/{request}/reject', [App\Http\Controllers\RankController::class, 'rejectRequest'])->name('rank-requests.reject');
     Route::get('/rank-requests/{request}/delete', [App\Http\Controllers\RankController::class, 'deleteRequest'])->name('rank-requests.delete');
+    Route::get('/pending-rank-requests', [App\Http\Controllers\RankController::class, 'countPendingRequests'])->name('pending-rank-requests.index');
 });
 
 
@@ -291,6 +294,7 @@ Route::group(['middleware' => ['auth', 'role:instructor,rector,dean,manager,tech
     Route::post('/rank-request', [App\Http\Controllers\RankController::class, 'newRequest'])->name('users.rank.request.create');
     Route::get('/users-select', [App\Http\Controllers\UserController::class, 'searchJson'])->name('users-select');
 });
+
 
 /** Annunci */
 

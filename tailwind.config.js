@@ -9,6 +9,10 @@ export default {
         "./resources/views/**/*.blade.php",
     ],
 
+    future: {
+        hoverOnlyWhenSupported: true, // Abilita il supporto per dispositivi con hover
+    },
+
     theme: {
         extend: {
             fontFamily: {

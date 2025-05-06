@@ -9,7 +9,7 @@
                 <div class="flex items-center gap-1">
                     <div class="flex-[1_1_0]">
                         <img class="w-12" src="{{ route('nation-flag', $user->nation->id) }}"
-                            alt="{{ $user->nation->flag }}">
+                            alt="{{ $user->nation->name }}">
                     </div>
                     <div class="flex-[2_1_0]">
                         <p class="text-primary-500 uppercase font-bold text-2xl">{{ $user->nation->name }}</p>

@@ -51,12 +51,14 @@
                         </div>
 
                         <div class="flex flex-col gap-2 ">
-                            <x-form.input name="email" label="{{__('academies.academy_email')}}" type="text" value="{{ $academy->email ?? '' }}"
-                                placeholder="{{ fake()->email() }}" />
-                            <x-form.input name="rector" label="{{__('academies.academy_rector')}}" type="text" value="{{ $academy->rector() ? ($academy->rector()->name . ' ' . ($academy->rector()->surname ?? '')): '' }}"
-                                placeholder="{{ fake()->name() }}" disabled description="{{__('academies.academy_rector_description')}}" />
+                            <x-form.input name="email" label="{{ __('academies.academy_email') }}" type="text"
+                                value="{{ $academy->email ?? '' }}" placeholder="{{ fake()->email() }}" />
+                            <x-form.input name="rector" label="{{ __('academies.academy_rector') }}" type="text"
+                                value="{{ $academy->rector() ? $academy->rector()->name . ' ' . ($academy->rector()->surname ?? '') : '' }}"
+                                placeholder="{{ fake()->name() }}" disabled
+                                description="{{ __('academies.academy_rector_description') }}" />
                         </div>
-                        
+
                         {{-- <h1 class="text-background-800 dark:text-background-200 text-lg">{{ __('academies.address') }}
                         </h1>
                         <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
@@ -106,12 +108,16 @@
                                 value="{{ $nationName }}" placeholder="{{ fake()->company() }}" />
 
                             <div class="flex flex-col gap-2 ">
-                                <x-form.input name="email" label="{{__('academies.academy_email')}}" type="text" value="{{ $academy->email ?? '' }}"
-                                    placeholder="{{ fake()->email() }}" disabled />
-                                <x-form.input name="rector" label="{{__('academies.academy_rector')}}" type="text" value="{{ $academy->rector() ? ($academy->rector()->name . ' ' . ($academy->rector()->surname ?? '')): '' }}"
-                                    placeholder="{{ fake()->name() }}" disabled description="{{__('academies.academy_rector_description')}}" />
+                                <x-form.input name="email" label="{{ __('academies.academy_email') }}" type="text"
+                                    value="{{ $academy->email ?? '' }}" placeholder="{{ fake()->email() }}"
+                                    disabled />
+                                <x-form.input name="rector" label="{{ __('academies.academy_rector') }}"
+                                    type="text"
+                                    value="{{ $academy->rector() ? $academy->rector()->name . ' ' . ($academy->rector()->surname ?? '') : '' }}"
+                                    placeholder="{{ fake()->name() }}" disabled
+                                    description="{{ __('academies.academy_rector_description') }}" />
                             </div>
-                            
+
                             {{-- <h1 class="text-background-800 dark:text-background-200 text-lg">{{ __('academies.address') }}
                             </h1>
                             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
@@ -135,10 +141,12 @@
                         <div class="flex-none">
                             <div class="flex justify-between">
                                 <div class="flex gap-2 items-center">
-                                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.logo') }}
+                                    <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                        {{ __('academies.logo') }}
                                     </h3>
                                     <div class='has-tooltip'>
-                                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                        <span
+                                            class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
                                             {{ __('academies.picture_info') }}
                                         </span>
                                         <x-lucide-info class="h-4 text-background-400" />
@@ -149,7 +157,7 @@
                                         enctype="multipart/form-data" x-ref="pfpform">
                                         @csrf
                                         @method('PUT')
-        
+
                                         <div class="flex flex-col gap-4">
                                             <div class="flex flex-col gap-2">
                                                 <input type="file" name="academylogo" id="academylogo" class="hidden"
@@ -171,14 +179,14 @@
                                 </div>
                             @endif
                         </div>
-                            <div class="flex flex-col items-center justify-center flex-1 h-auto">
-        
-                                @if ($academy->picture)
-                                    <img src="{{ route('academy-image', $academy->id) }}" alt="{{ $academy->name }}"
-                                        class="w-1/2 rounded-lg">
-                                @endif
-        
-                            </div>
+                        <div class="flex flex-col items-center justify-center flex-1 h-auto">
+
+                            @if ($academy->picture)
+                                <img src="{{ route('academy-image', $academy->id) }}" alt="{{ $academy->name }}"
+                                    class="w-1/2 rounded-lg">
+                            @endif
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -222,7 +230,7 @@
                     ],
                 ]" :rows="$associated_personnel">
                     <x-slot name="tableActions">
-                        <a x-bind:href="'{{$authRole === 'admin' ? '' : '/' . $authRole}}' + '/users/' + row.id">
+                        <a x-bind:href="'{{ $authRole === 'admin' ? '' : '/' . $authRole }}' + '/users/' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>
@@ -297,7 +305,7 @@
                             x-text="row.school"></td>
                         <td
                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                            <a x-bind:href="'{{$authRole === 'admin' ? '' : '/' . $authRole}}' + '/users/' + row.id">
+                            <a x-bind:href="'{{ $authRole === 'admin' ? '' : '/' . $authRole }}' + '/users/' + row.id">
                                 <x-lucide-pencil
                                     class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                             </a>
@@ -334,12 +342,16 @@
                     ],
                 ]" :rows="$academy->schools">
                     <x-slot name="tableActions">
-                        <a x-bind:href="'{{$authRole === "admin" ? '' : '/' . $authRole}}' + '/schools/' + row.id">
+                        <a x-bind:href="'{{ $authRole === 'admin' ? '' : '/' . $authRole }}' + '/schools/' + row.id">
                             <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                         </a>
                     </x-slot>
                 </x-table>
             </div>
+
+            @if ($authRole === 'admin')
+                <x-academy.fees :academy="$academy->id" />
+            @endif
 
             @if ($authRole === 'admin')
 

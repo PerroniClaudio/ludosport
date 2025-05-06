@@ -13,8 +13,13 @@
             </p>
             <p class="max-w-md mx-auto mt-4 text-background-500 dark:text-background-400">
                 {{ __('website.footer_text_2') }}
-                <a class="external text-primary-300 hover:text-primary-500" href="https://www.udemy.com/course/lightsaber-combat-by-ludosport-master-form-1/?couponCode=24T4MT120424" target="_blank">
+                <br>
+                <a class="external text-primary-300 hover:text-primary-500" href="https://www.udemy.com/course/lightsaber-combat-by-ludosport-master-form-1/?referralCode=12BA6D124A65BD260145" target="_blank">
                     {{ __('website.footer_link_text_2') }}
+                </a>
+                <br>
+                <a class="external text-primary-300 hover:text-primary-500" href="https://www.udemy.com/course/lightsaber-duel-by-ludosport-brandish-to-the-next-level/?referralCode=5DE008188FCC1BFFC9AB" target="_blank">
+                    {{ __('website.footer_link_text_4') }}
                 </a>
             </p>
             <p class="max-w-md mx-auto mt-4 text-background-500 dark:text-background-400">

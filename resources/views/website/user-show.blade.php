@@ -1,19 +1,19 @@
 <x-website-layout>
-    <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
+    <div class="grid grid-cols-12 gap-x-3 sm:px-8 pb-16  container mx-auto max-w-7xl">
         <section class="col-span-12 py-12 flex flex-col gap-8">
-            <section class="bg-white dark:bg-background-800 flex lg:p-8 p-4 rounded">
-                <div class="rounded-full h-24 w-24 hidden lg:block">
+            <section class="bg-white dark:bg-background-800 flex p-4 lg:p-8 sm:rounded-lg">
+                <div class="rounded-full h-24 w-24 hidden lg:block shrink-0">
                     <img src="{{ route('profile-picture', $user->id) }}" alt="avatar" class="rounded-full h-24 w-24" />
                 </div>
                 <div class="flex-1 flex flex-col gap-2 lg:ml-8">
                     <div class="lg:w-1/2 flex flex-col gap-2">
                         <div class="text-primary-500 flex items-center gap-2">
-                            <div class="rounded-full h-12 w-12 lg:hidden block">
+                            <div class="rounded-full h-12 w-12 lg:hidden block shrink-0">
                                 <img src="{{ route('profile-picture', $user->id) }}" alt="avatar"
                                     class="rounded-full h-12 w-12" />
                             </div>
 
-                            <span class="text-4xl">{{ $user->name }} {{ $user->surname }}</span>
+                            <span class="text-xl sm:text-3xl lg:text-4xl">{{ $user->name }} {{ $user->surname }}</span>
 
                             @if ($user->has_paid_fee)
                                 <x-lucide-verified class="h-6 w-6 text-primary-500" />
@@ -30,7 +30,7 @@
                             <span class="text-sm text-background-500 dark:text-background-400">
                                 {{ $user->nation->name }}
                             </span>
-                            <img src="{{ route('nation-flag', $user->nation->id) }}" alt="{{ $user->nation->flag }}"
+                            <img src="{{ route('nation-flag', $user->nation->id) }}" alt="{{ $user->nation->name }}"
                                 class="h-2 w-4">
                         </div>
 
@@ -38,8 +38,8 @@
                             <div
                                 class="border border-background-700 text-background-800 dark:text-background-200 rounded-full p-2 cursor-pointer flex items-center gap-2">
                                 <img src="{{ route('rank-image', $user->rank->id) }}" alt="rank"
-                                    class="rounded-full h-8 w-8" />
-                                <p>{{ __('users.' . strtolower($user->rank->name)) }}</p>
+                                    class="rounded-full h-8 w-8 shrink-0" />
+                                <p class="text-sm sm:text-base">{{ __('users.' . strtolower($user->rank->name)) }}</p>
                             </div>
                         </div>
 
@@ -47,14 +47,14 @@
                             <div>
                                 <a href="https://www.instagram.com/{{ $user->instagram }}" target="_blank"
                                     class="border border-background-700 text-background-800 dark:text-background-200 rounded-full p-4 cursor-pointer flex items-center gap-2">
-                                    <x-lucide-camera class="w-6 h-6 text-background-800 dark:text-background-200" />
-                                    <p>{{ $user->instagram }}</p>
+                                    <x-lucide-camera class="w-6 h-6 text-background-800 dark:text-background-200 shrink-0" />
+                                    <p class="break-all text-sm sm:text-base">{{ $user->instagram }}</p>
                                 </a>
                             </div>
                         @endif
 
 
-                        <div class="grid grid-cols-2 gap-2 text-background-800 dark:text-background-200"
+                        <div class="grid max-[500px]:grid-cols-1 grid-cols-2 gap-2 text-background-800 dark:text-background-200"
                             x-data="{
                                 selected: {{ collect($user->roles) }},
                             }">
@@ -66,37 +66,37 @@
 
                                     @switch($role->label)
                                         @case('admin')
-                                            <x-lucide-crown class="w-6 h-6 text-primary-500" />
+                                            <x-lucide-crown class="w-6 h-6 text-primary-500 shrink-0" />
                                         @break
 
                                         @case('athlete')
-                                            <x-lucide-swords class="w-6 h-6 text-primary-500" />
+                                            <x-lucide-swords class="w-6 h-6 text-primary-500 shrink-0" />
                                         @break
 
                                         @case('rector')
-                                            <x-lucide-graduation-cap class="w-6 h-6 text-primary-500" />
+                                            <x-lucide-graduation-cap class="w-6 h-6 text-primary-500 shrink-0" />
                                         @break
 
                                         @case('dean')
-                                            <x-lucide-book-marked class="w-6 h-6 text-primary-500" />
+                                            <x-lucide-book-marked class="w-6 h-6 text-primary-500 shrink-0" />
                                         @break
 
                                         @case('manager')
-                                            <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
+                                            <x-lucide-briefcase class="w-6 h-6 text-primary-500 shrink-0" />
                                         @break
 
                                         @case('technician')
-                                            <x-lucide-wrench class="w-6 h-6 text-primary-500" />
+                                            <x-lucide-wrench class="w-6 h-6 text-primary-500 shrink-0" />
                                         @break
 
                                         @case('instructor')
-                                            <x-lucide-megaphone class="w-6 h-6 text-primary-500" />
+                                            <x-lucide-megaphone class="w-6 h-6 text-primary-500 shrink-0" />
                                         @break
 
                                         @default
                                     @endswitch
 
-                                    <span>{{ __("users.{$role->label}") }}</span>
+                                    <span class="text-sm sm:text-base">{{ __("users.{$role->label}") }}</span>
                                 </div>
                             @endforeach
 
@@ -114,7 +114,7 @@
 
             @if ($user->bio != '')
                 <section
-                    class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 text-background-800 dark:text-background-200">
+                    class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg text-sm sm:text-base p-4 sm:p-8 text-background-800 dark:text-background-200">
                     <div class="flex-1">
                         <h3 class="text-2xl">{{ __('website.user_profile_bio') }}</h3>
                         <div class="border-b border-background-100 dark:border-background-700 my-2"></div>

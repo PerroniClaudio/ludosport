@@ -79,7 +79,6 @@ class ChartController extends Controller {
                         'user_id' => $value->user_id,
                         'user_name' => $value->user->name . ' ' . $value->user->surname,
                         'user_battle_name' => $value->user->battle_name,
-                        'user_battle_name' => $value->user->battle_name,
                         'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
                         'user_school' => $value->user->primarySchoolAthlete()->name ?? '',
                         'school_slug' => $value->user->primarySchoolAthlete()->slug ?? '',

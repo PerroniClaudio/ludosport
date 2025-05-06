@@ -759,9 +759,9 @@ class UserController extends Controller {
             'nationality' => 'required|string|exists:nations,id',
         ]);
 
+        // La modifica dei ruoli è stata spostata in updateRoles
         // Controlla il ruolo prima di creare l'utente. se la richiesta non è di tipo atleta deve avere almeno un altro ruolo
-        $newRoles = explode(',', $request->roles);
-        if (count($newRoles) < 1 || ($newRoles[0] === '')) {
+        if ($user->roles->count() < 1) {
             return back()->with('error', 'You must assign at least one role to the user!');
         }
 
@@ -859,18 +859,81 @@ class UserController extends Controller {
             ]);
         }
 
+        $authUserRole = User::find(Auth::user()->id)->getRole();
+        $redirectRoute = $authUserRole === 'admin' ? 'users.edit' :  $authUserRole . '.users.edit';
+
+        return redirect()->route($redirectRoute, $user->id)->with('success', 'User updated successfully!');
+    }
+
+    public function updateRoles(Request $request, User $user) {
+        $authUser = User::find(Auth::user()->id);
+        $authRole = $authUser->getRole();
+
+        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+            // return back()->with('error', 'You do not have the required role to access this page!');
+            return response()->json(['error' => 'You do not have the required role to access this page!'], 403);
+        }
+
+        $canUpdate = true;
+        switch ($authRole) {
+            case 'admin':
+                break;
+            case 'rector':
+                if (!in_array(
+                    $authUser->primaryAcademy()->id,
+                    array_merge(
+                        $user->academies()->pluck('academy_id')->toArray(),
+                        [$user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->id : null]
+                    )
+                )) {
+                    $canUpdate = false;
+                }
+                break;
+            case 'dean':
+            case 'manager':
+                if (!in_array(
+                    $authUser->primarySchool()->id,
+                    array_merge(
+                        $user->schools()->pluck('school_id')->toArray(),
+                        [$user->primarySchoolAthlete() ? $user->primarySchoolAthlete()->id : null]
+                    )
+                )) {
+                    $canUpdate = false;
+                }
+                break;
+            default:
+                // return back()->with('error', 'You do not have the required role to access this page!');
+                return response()->json(['error' => 'You do not have the required role to access this page!'], 403);       
+        }
+        if (!$canUpdate) {
+            // return back()->with('error', 'You are not authorized to edit this user!');
+            return response()->json(['error' => 'You are not authorized to edit this user!'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'roles' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+            'error' => $validator->errors()->first(),
+            ], 422);
+        }
+        
         // Recupera i ruoli attuali dell'utente
         $currentRoles = $user->roles->pluck('label')->toArray();
         // Recupera i nuovi ruoli dal request
         $newRoles = explode(',', $request->roles);
-
-        // Recupera l'utente che ha fatto la richiesta
-        $authUser = User::find(Auth::user()->id);
-
+        
+        if (count($newRoles) < 1 || ($newRoles[0] === '')) {
+            // return back()->with('error', 'You must assign at least one role to the user!');
+            return response()->json(['error' => 'You must assign at least one role to the user!'], 422);
+        }
+        
         // Determina i ruoli da aggiungere e da rimuovere
         $rolesToAdd = array_diff($newRoles, $currentRoles);
         $rolesToRemove = array_diff($currentRoles, $newRoles);
-
+        
         $shouldLogRolesChange = false;
 
         // Check if $rolesToAdd has any items
@@ -984,11 +1047,11 @@ class UserController extends Controller {
             ]);
         }
 
-
-        $authUserRole = User::find(Auth::user()->id)->getRole();
-        $redirectRoute = $authUserRole === 'admin' ? 'users.edit' :  $authUserRole . '.users.edit';
-
-        return redirect()->route($redirectRoute, $user->id)->with('success', 'User updated successfully!');
+        // return back()->with('success', 'User roles updated successfully!');
+        return response()->json([
+            'success' => true,
+            'message' => 'User roles updated successfully!',
+        ]);
     }
 
     public function destroy(User $user) {

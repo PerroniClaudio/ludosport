@@ -1201,28 +1201,33 @@ class EventController extends Controller {
         $onlyWaitingList = $event->isWaitingList();
         $isWaitngListClosed = $event->waiting_list_close_date && ($event->waiting_list_close_date < now());
 
-        $user = User::find(auth()->user()->id);
+        if (Auth::check()) {
+            $user = User::find(Auth::user()->id);
+            if ($user->has_paid_fee) {
+                // Controlla il tipo di evento
+                $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
+                $isWaitingPayment = EventWaitingList::where(['event_id' => $event->id, 'user_id' => $user->id, 'is_waiting_payment' => true])->exists();
 
-        if ($user->has_paid_fee) {
-            // Controlla il tipo di evento
-            $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
-            $isWaitingPayment = EventWaitingList::where(['event_id' => $event->id, 'user_id' => $user->id, 'is_waiting_payment' => true])->exists();
+                if ($event->resultType() === 'enabling') {
+                    $isParticipating = $event->instructorResults()->where('user_id', $user->id)->exists();
+                } else if ($event->resultType() === 'ranking') {
+                    $isParticipating = $event->results()->where('user_id', $user->id)->exists();
+                }
 
-            if ($event->resultType() === 'enabling') {
-                $isParticipating = $event->instructorResults()->where('user_id', $user->id)->exists();
-            } else if ($event->resultType() === 'ranking') {
-                $isParticipating = $event->results()->where('user_id', $user->id)->exists();
+                // Shop interno, attesa pagamento, iscrizioni sbloccate, non partecipa, non in waiting list (se in attesa di pagamento può), se waiting list deve essere prima della data di chiusura della waiting list
+                $canpurchase = $event->internal_shop && (
+                    $isWaitingPayment || (
+                        !$event->block_subscriptions && !$isParticipating && !$isInWaitingList
+                        && !($onlyWaitingList && $isWaitngListClosed)
+                    )
+                );
             }
-
-            // Shop interno, attesa pagamento, iscrizioni sbloccate, non partecipa, non in waiting list (se in attesa di pagamento può), se waiting list deve essere prima della data di chiusura della waiting list
-            $canpurchase = $event->internal_shop && (
-                $isWaitingPayment || (
-                    !$event->block_subscriptions && !$isParticipating && !$isInWaitingList
-                    && !($onlyWaitingList && $isWaitngListClosed)
-                )
-            );
-
+        } else {
+            $canpurchase = false;
         }
+
+
+
 
         return view('website.event-detail', [
             'event' => $event,

@@ -54,11 +54,9 @@
                         {{ __('website.user_search') }}
                     </x-nav-link>
 
-                    @if (Auth::check())
-                        <x-nav-link :href="route('events-list')" :active="request()->routeIs('events-list')">
-                            {{ __('website.events_list') }}
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('events-list')" :active="request()->routeIs('events-list')">
+                        {{ __('website.events_list') }}
+                    </x-nav-link>
 
                 </div>
             </div>
@@ -92,6 +90,13 @@
                             <x-dropdown-link :href="route('profile.edit')">
                                 {{ __('Profile') }}
                             </x-dropdown-link>
+                            
+                            @if (count(Auth::user()->allowedRoles()) > 1)
+                                <x-dropdown-link :href="route('role-selector')">
+                                    {{ __('users.select_role') }}
+                                </x-dropdown-link>
+                            @endif
+
                             <!-- Authentication -->
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -135,7 +140,8 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{ 'block': open, 'hidden': !open }" class="relative z-20 hidden sm:hidden bg-center bg-contain bg-no-repeat"
+    <div :class="{ 'block': open, 'hidden': !open }"
+        class="relative z-20 hidden sm:hidden bg-center bg-contain bg-no-repeat"
         style="background-image: url('{{ env('APP_URL') }}/logo-saber-k');">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -155,9 +161,9 @@
                 {{ __('website.user_search') }}
             </x-responsive-nav-link>
             @if (Auth::check())
-                <x-responsive-nav-link  :href="route('events-list')" :active="request()->routeIs('events-list')">
+                <x-responsive-nav-link :href="route('events-list')" :active="request()->routeIs('events-list')">
                     {{ __('website.events_list') }}
-                </x-responsive-nav-link >
+                </x-responsive-nav-link>
             @endif
 
         </div>
@@ -176,6 +182,12 @@
                     <x-responsive-nav-link :href="route('profile.edit')">
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
+
+                    @if (count(Auth::user()->allowedRoles()) > 1)
+                        <x-responsive-nav-link :href="route('role-selector')">
+                            {{ __('users.select_role') }}
+                        </x-responsive-nav-link>
+                    @endif
 
                     <!-- Authentication -->
                     <form method="POST" action="{{ route('logout') }}">
