@@ -60,7 +60,7 @@
                                     <span>{{ __('users.disabled') }}</span>
                                 </div>
                             @endif
-                        </div>
+                        </div> 
                         <div>
                             @if ($user->is_verified)
                                 <div
