@@ -680,7 +680,7 @@ class UserController extends Controller {
 
     public function propic(User $user) {
 
-        $cacheKey = 'propic1-' . $user->id;
+        $cacheKey = 'propic-' . $user->id;
 
         $image = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($user) {
             if ($user->profile_picture !== null) {
