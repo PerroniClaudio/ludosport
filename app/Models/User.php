@@ -9,7 +9,6 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
-use App\Models\Invoice as Invoice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -744,7 +743,7 @@ class User extends Authenticatable implements MustVerifyEmail {
             'courses' => $removedCoursesIds,
         ]);
     }
-    
+
     // Rimuove tutte le associazioni del personnel con la scuola indicata e i rispettivi corsi
     public function removeClanPersonnelAssociations($clanToRemove = null) {
         if ($clanToRemove == null) {
@@ -758,7 +757,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         if ($removedCourse) {
             $this->clansPersonnel()->detach($removedCourse->id);
             $removedCourseId = $removedCourse->id;
-    
+
             // Metto tutti i dati su tutti e tre i canali. Si può modificare in futuro
             Log::channel('user')->info('Removed personnel associations', [
                 'made_by' => $authUser->id,
@@ -781,7 +780,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         if ($removedCourse) {
             $this->clans()->detach($removedCourse->id);
             $removedCourseId = $removedCourse->id;
-            
+
             // Metto tutti i dati su tutti e tre i canali. Si può modificare in futuro
             Log::channel('user')->info('Removed athlete associations', [
                 'made_by' => $authUser->id,
