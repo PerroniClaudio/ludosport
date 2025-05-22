@@ -125,3 +125,7 @@ Route::get('/website-users/{user:battle_name}', [App\Http\Controllers\UserContro
 Route::get('/cookie-policy', function () {
     return view('website.cookie-policy');
 })->name('cookie-policy');
+
+Route::get('/privacy-policy', function () {
+    return view('website.privacy-policy');
+})->name('privacy-policy');
