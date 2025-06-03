@@ -1089,7 +1089,10 @@ class UserController extends Controller {
                          * @disregard Intelephense non rileva il metodo whereIn
                          */
                         return $q->whereIn('id', User::search($value)->keys());
-                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                    })
+                    ->where('is_disabled', false)
+                    ->with(['roles', 'academies', 'academyAthletes', 'nation'])
+                    ->get();
                 break;
             case 'rector':
                 if (!$authUser->primaryAcademy()) {
@@ -1107,7 +1110,10 @@ class UserController extends Controller {
                         })->orWhereHas('academyAthletes', function ($q) use ($authUser) {
                             return $q->where('academies.id', $authUser->primaryAcademy()->id);
                         });
-                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                    })
+                    ->where('is_disabled', false)
+                    ->with(['roles', 'academies', 'academyAthletes', 'nation'])
+                    ->get();
                 break;
             case 'dean':
             case 'manager':
@@ -1126,7 +1132,10 @@ class UserController extends Controller {
                         })->orWhereHas('schoolAthletes', function ($q) use ($authUser) {
                             return $q->where('schools.id', $authUser->primarySchool()->id);
                         });
-                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                    })
+                    ->where('is_disabled', false)
+                    ->with(['roles', 'academies', 'academyAthletes', 'nation'])
+                    ->get();
                 break;
             case 'instructor':
                 if (!$authUser->primarySchool()) {
@@ -1147,7 +1156,10 @@ class UserController extends Controller {
                         })->orWhereHas('schoolAthletes', function ($q) use ($schoolsIds) {
                             return $q->whereIn('schools.id', $schoolsIds);
                         });
-                    })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+                    })
+                    ->where('is_disabled', false)
+                    ->with(['roles', 'academies', 'academyAthletes', 'nation'])
+                    ->get();
                 break;
             default:
                 return back()->with('error', 'You are not authorized to access this page!');
@@ -1171,7 +1183,10 @@ class UserController extends Controller {
                  * @disregard Intelephense non rileva il metodo whereIn
                  */
                 return $q->whereIn('id', User::search($value)->keys());
-            })->with(['roles', 'academies', 'academyAthletes', 'nation'])->get();
+            })
+            ->where('is_disabled', false)
+            ->with(['roles', 'academies', 'academyAthletes', 'nation'])
+            ->get();
 
         return response()->json($users);
     }
@@ -1226,11 +1241,11 @@ class UserController extends Controller {
             foreach ($selectedCourses as $course) {
                 $course = Clan::find($course);
 
-                foreach ($course->users as $user) {
+                foreach ($course->users->where('is_disabled', false) as $user) {
                     $users[] = $user;
                 }
 
-                foreach ($course->personnel as $person) {
+                foreach ($course->personnel->where('is_disabled', false) as $person) {
                     $users[] = $person;
                 }
             }
@@ -1242,11 +1257,11 @@ class UserController extends Controller {
                 foreach ($selectedSchools as $school) {
                     $school = School::find($school);
 
-                    foreach ($school->athletes as $user) {
+                    foreach ($school->athletes->where('is_disabled', false) as $user) {
                         $users[] = $user;
                     }
 
-                    foreach ($school->personnel as $person) {
+                    foreach ($school->personnel->where('is_disabled', false) as $person) {
                         $users[] = $person;
                     }
                 }
@@ -1257,11 +1272,11 @@ class UserController extends Controller {
                     foreach ($selectedAcademies as $academy) {
                         $academy = Academy::find($academy);
 
-                        foreach ($academy->athletes as $user) {
+                        foreach ($academy->athletes->where('is_disabled', false) as $user) {
                             $users[] = $user;
                         }
 
-                        foreach ($academy->personnel as $person) {
+                        foreach ($academy->personnel->where('is_disabled', false) as $person) {
                             $users[] = $person;
                         }
                     }
@@ -1272,6 +1287,9 @@ class UserController extends Controller {
                 }
             }
         }
+        
+        // Rimuovi i duplicati
+        $users = collect($users)->unique('id')->values();
 
         $shouldCheckForYear = $request->year != null;
         $shouldCheckForCreationDateFrom = $request->from != null;

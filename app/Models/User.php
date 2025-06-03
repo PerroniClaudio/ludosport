@@ -51,6 +51,7 @@ class User extends Authenticatable implements MustVerifyEmail {
             'surname' => $this->surname,
             'email' => $this->email,
             'battle_name' => $this->battle_name,
+            'is_disabled' => $this->is_disabled,
         ];
     }
 
