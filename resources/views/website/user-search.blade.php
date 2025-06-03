@@ -49,7 +49,7 @@
                             @click="userDetail(user.battle_name)">
                             <div class="rounded-full h-12 w-12">
                                 <img x-bind:src="'{{ env('APP_URL') }}/profile-picture/' + user.id" alt="avatar"
-                                    class="rounded-full h-12 w-12" />
+                                    class="rounded-full h-12 w-12 object-cover object-center" />
                             </div>
                             <div>
                                 <div class="text-md text-primary-500" x-text="user.name + ' ' + user.surname"></div>

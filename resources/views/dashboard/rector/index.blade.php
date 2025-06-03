@@ -20,15 +20,34 @@
                     <!-- Paga in bulk le fee degli utenti non attivi -->
 
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
+
+
+
+
+                        <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg"
+                            x-data="{
+                                rankRequests: null,
+                            
+                                async getPendingRequests() {
+                                    const response = await fetch('/pending-rank-requests');
+                                    const data = await response.json();
+                                    return data;
+                                },
+                            
+                                async init() {
+                                    this.rankRequests = await this.getPendingRequests();
+                                }
+                            }">
                             <div class="p-6 text-background-900 dark:text-background-100">
                                 <h3 class="text-background-800 dark:text-background-200 text-2xl">
-                                    {{ __('dashboard.rector_bulk_fee') }}
+                                    {{ __('dashboard.admin_rank_requests') }}
                                 </h3>
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                                <p>{{ __('dashboard.rector_bulk_fee_text') }}</p>
-                                <div class="flex justify-end ">
-                                    <a href="{{ route('rector.fees.index') }}">
+                                <p
+                                    x-text="`{{ __('dashboard.admin_rank_requests_text', ['count' => '${rankRequests}']) }}`">
+                                </p>
+                                <div class="flex justify-end">
+                                    <a href="{{ route('rank-requests.index') }}">
                                         <x-primary-button>
                                             <x-lucide-arrow-right class="h-6 w-6 text-white" />
                                         </x-primary-button>
@@ -46,6 +65,23 @@
                                 <p>{{ __('dashboard.rector_rank_requests_text') }}</p>
                                 <div class="flex justify-end">
                                     <a href="{{ route('users.rank.request') }}">
+                                        <x-primary-button>
+                                            <x-lucide-arrow-right class="h-6 w-6 text-white" />
+                                        </x-primary-button>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg col-span-2">
+                            <div class="p-6 text-background-900 dark:text-background-100">
+                                <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                    {{ __('dashboard.rector_bulk_fee') }}
+                                </h3>
+                                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                                <p>{{ __('dashboard.rector_bulk_fee_text') }}</p>
+                                <div class="flex justify-end ">
+                                    <a href="{{ route('rector.fees.index') }}">
                                         <x-primary-button>
                                             <x-lucide-arrow-right class="h-6 w-6 text-white" />
                                         </x-primary-button>

@@ -903,7 +903,7 @@ class UserController extends Controller {
                 break;
             default:
                 // return back()->with('error', 'You do not have the required role to access this page!');
-                return response()->json(['error' => 'You do not have the required role to access this page!'], 403);       
+                return response()->json(['error' => 'You do not have the required role to access this page!'], 403);
         }
         if (!$canUpdate) {
             // return back()->with('error', 'You are not authorized to edit this user!');
@@ -916,24 +916,24 @@ class UserController extends Controller {
 
         if ($validator->fails()) {
             return response()->json([
-            'error' => $validator->errors()->first(),
+                'error' => $validator->errors()->first(),
             ], 422);
         }
-        
+
         // Recupera i ruoli attuali dell'utente
         $currentRoles = $user->roles->pluck('label')->toArray();
         // Recupera i nuovi ruoli dal request
         $newRoles = explode(',', $request->roles);
-        
+
         if (count($newRoles) < 1 || ($newRoles[0] === '')) {
             // return back()->with('error', 'You must assign at least one role to the user!');
             return response()->json(['error' => 'You must assign at least one role to the user!'], 422);
         }
-        
+
         // Determina i ruoli da aggiungere e da rimuovere
         $rolesToAdd = array_diff($newRoles, $currentRoles);
         $rolesToRemove = array_diff($currentRoles, $newRoles);
-        
+
         $shouldLogRolesChange = false;
 
         // Check if $rolesToAdd has any items
@@ -1195,9 +1195,9 @@ class UserController extends Controller {
             case 'manager':
                 $academies = collect(($authUser->primarySchool()->academy ?? null) ? [$authUser->primarySchool()->academy] : []);
                 break;
-                // case 'technician':
-                //     $academies = Academy::where('is_disabled', false)->with('nation')->get();
-                //     break;
+            // case 'technician':
+            //     $academies = Academy::where('is_disabled', false)->with('nation')->get();
+            //     break;
             case 'instructor':
                 $academies = collect([$authUser->primaryAcademy()]);
                 break;
@@ -1583,7 +1583,6 @@ class UserController extends Controller {
             }
 
             return true;
-
         });
 
         $not_seen = [];
@@ -1976,7 +1975,7 @@ class UserController extends Controller {
         $requestForms = explode(',', $request->weapon_forms);
 
         $toRemove = $previousForms->whereNotIn('id', $requestForms);
-        if($authUserRole != 'admin' && !$toRemove->isEmpty()) {
+        if ($authUserRole != 'admin' && !$toRemove->isEmpty()) {
             return response()->json([
                 'error' => 'You are not authorized to remove already associated weapon forms!',
             ]);
@@ -2099,13 +2098,13 @@ class UserController extends Controller {
             ]);
         }
         // Se la richiesta è del rettore ed è diversa da athlete o l'utente non è nell'accademia del rettore non si può modificare
-        if($authUserRole == 'rector' && ($request->type == 'athlete') && !$user->academyAthletes->contains($authUser->primaryAcademy()->id)) {
+        if ($authUserRole == 'rector' && ($request->type == 'athlete') && !$user->academyAthletes->contains($authUser->primaryAcademy()->id)) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ]);
         }
         // Se la richiesta è del preside ed è diversa da athlete o l'utente non è nella scuola del preside non si può modificare
-        if($authUserRole == 'dean' && ($request->type == 'athlete') && !$user->schoolAthletes->contains($authUser->primarySchool()->id)) {
+        if ($authUserRole == 'dean' && ($request->type == 'athlete') && !$user->schoolAthletes->contains($authUser->primarySchool()->id)) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ]);
