@@ -119,10 +119,19 @@ class RankController extends Controller {
         $authUserRole = User::find(Auth::user()->id)->getRole();
         $users = [];
 
-        if (in_array($authUserRole, ['instructor', 'dean'])) {
+        if ($authUserRole === 'instructor') {
 
             // Solo iniziato ed accademico 
             $ranks = Rank::whereIn('name', ['Initiate', 'Academic'])->get();
+            $authSchools = Auth::user()->schools->pluck('id')->toArray();
+
+            foreach ($authSchools as $school) {
+                $school = School::find($school);
+                $users = array_merge($users, $school->athletes->toArray(), $school->personnel->toArray());
+            }
+        }  else if ($authUserRole === 'dean') {
+            // Anche cavaliere 
+            $ranks = Rank::whereIn('name', ['Initiate', 'Academic', 'Chevalier'])->get();
             $authSchools = Auth::user()->schools->pluck('id')->toArray();
 
             foreach ($authSchools as $school) {
