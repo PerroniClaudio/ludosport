@@ -5,6 +5,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->group(function () {
   // Sblocco una route alla volta, mano a mano che le implemento
 
+  Route::get('/fees', [App\Http\Controllers\FeeController::class, 'index'])->name('manager.fees.index');
+  Route::get('/fees/extimate', [App\Http\Controllers\FeeController::class, 'extimateFeeConsumption'])->name('manager.fees.extimate');
+  Route::post('/fees/associate', [App\Http\Controllers\FeeController::class, 'associateFeesToUsers'])->name('manager.fees.associate');
+
   /** Users */
 
   Route::group([], function () {
@@ -19,6 +23,9 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
     Route::post('/user-roles/{user}', [App\Http\Controllers\UserController::class, 'updateRoles'])->name('manager.users.roles-update');
     Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('manager.users.disable');
     Route::put('/users/{user}/picture', [App\Http\Controllers\UserController::class, 'picture'])->name('manager.users.picture.update');
+
+    Route::post('/users/{user}/weapon-forms-athlete', [App\Http\Controllers\UserController::class, 'editWeaponFormsAthlete'])->name('manager.user.weapon-forms-athlete.store');
+    Route::post('/users/{user}/weapon-forms-edit-date', [App\Http\Controllers\UserController::class, 'editWeaponFormsAwardingDate'])->name('manager.user.weapon-forms-edit-date');
     // Route::get('/nation/{nation}/academies', [App\Http\Controllers\NationController::class, 'academies'])->name('manager.nation.academies.index');
     // Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('manager.academies.schools.index');
   });
@@ -34,9 +41,13 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
 
   /** Accademie */
 
+  Route::get('academy', [App\Http\Controllers\AcademyController::class, 'index'])->name('manager.academy.index'); //reindirizza all'edit dell'accademia principale
+
   Route::group([], function () {
     Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('manager.academies.all');
     Route::get('/academies/search', [App\Http\Controllers\AcademyController::class, 'search'])->name('manager.academies.search');
+
+    Route::get('/academies/{academy}/users-search', [App\Http\Controllers\AcademyController::class, 'searchUsers'])->name('manager.academies.users-search');
   });
 
   // Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'show'])->name('manager.academies.show');
@@ -109,19 +120,22 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
     Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])->name('manager.events.search');
     Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('manager.events.index');
     Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('manager.events.calendar');
-    // Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('manager.events.create');
+    Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('manager.events.create');
     Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('manager.events.edit');
-    // Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('manager.events.store');
-    // Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('manager.events.update');
-    // Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('manager.events.save.description');
-    // Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('manager.events.save.location');
-    // Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('manager.events.update.thumbnail');
+    Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('manager.events.store');
+    Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('manager.events.update');
+    Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('manager.events.save.description');
+    Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('manager.events.save.location');
+    Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('manager.events.update.thumbnail');
     Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('manager.events.participants');
     Route::get('events/{event}/available-users', [App\Http\Controllers\EventController::class, 'available'])->name('manager.events.available');
     Route::post('add-participants', [App\Http\Controllers\EventController::class, 'selectParticipants'])->name('manager.events.participants.add');
     Route::get('events/{event}/participants/export', [App\Http\Controllers\EventController::class, 'exportParticipants'])->name('manager.events.participants.export');
     Route::get('/event-types/json', [App\Http\Controllers\EventTypeController::class, 'list'])->name('manager.events.types');
     Route::get('events/{event}/personnel', [App\Http\Controllers\EventController::class, 'personnel'])->name('manager.events.personnel');
+    Route::get('events/{event}/available-personnel', [App\Http\Controllers\EventController::class, 'availablePersonnel'])->name('manager.events.available_personnel');
+    Route::get('events/{event}/personnel', [App\Http\Controllers\EventController::class, 'personnel'])->name('manager.events.personnel');
+    Route::post('events/{event}/add-personnel', [App\Http\Controllers\EventController::class, 'addPersonnel'])->name('manager.events.add_personnel');
   });
 
   /** Imports */

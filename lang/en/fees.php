@@ -42,4 +42,5 @@ return [
     'business_name' => 'Business Name',
     'insert_business_name' => 'Insert Business Name',
     'available_fees' => 'Available Fees',
+    'fees_purchase_info' => 'Fees can only be purchased by Rectors.'
 ];

@@ -7,60 +7,79 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+# Ludosport Management System
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Gestione digitale per la community Ludosport: atleti, istruttori, eventi, pagamenti e molto altro in un'unica piattaforma.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Descrizione
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Questo progetto è una web application sviluppata in Laravel per la gestione centralizzata delle attività Ludosport, tra cui:
 
-## Learning Laravel
+-   Anagrafica atleti e staff
+-   Gestione eventi, iscrizioni e presenze
+-   Pagamenti e quote associative
+-   Ruoli e permessi (atleta, istruttore, manager, tecnico, ecc.)
+-   Reportistica e esportazione dati
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Requisiti
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+-   PHP >= 8.3
+-   Composer
+-   Database SQLite (default) o altro supportato da Laravel
+-   Node.js, pnpm o npm (per asset frontend)
+-   Docker (opzionale, per sviluppo e produzione)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Installazione
 
-## Laravel Sponsors
+1. Clona la repository:
+    ```sh
+    git clone <repo-url>
+    cd ludosport
+    ```
+2. Installa le dipendenze PHP:
+    ```sh
+    composer install
+    ```
+3. Installa le dipendenze frontend:
+    ```sh
+    pnpm install
+    # oppure
+    npm install
+    ```
+4. Copia il file `.env.example` in `.env` e configura le variabili ambiente.
+5. Genera la chiave dell'applicazione:
+    ```sh
+    php artisan key:generate
+    ```
+6. Esegui le migrazioni e i seeders:
+    ```sh
+    php artisan migrate --seed
+    ```
+7. Avvia il server di sviluppo:
+    ```sh
+    php artisan serve
+    ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Struttura principale della codebase
 
-### Premium Partners
+-   `app/` — Logica applicativa (Models, Http, Events, Jobs, ecc.)
+-   `routes/` — Definizione delle rotte (web, API, ruoli specifici)
+-   `resources/` — Views Blade, asset CSS/JS
+-   `database/` — Migrazioni, seeders, factories
+-   `docker/` — Configurazioni Docker e ambienti
+-   `tests/` — Test automatici (Pest, PHPUnit)
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Comandi utili
 
-## Contributing
+-   Avvio ambiente locale: `php artisan serve`
+-   Esecuzione test: `./vendor/bin/pest`
+-   Compilazione asset: `pnpm run dev` o `npm run dev`
+-   Avvio ambiente Docker: `docker-compose -f docker/docker-compose.dev.yml up`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Contribuire
 
-## Code of Conduct
+Contributi sono benvenuti! Apri una issue o una pull request. Consulta la documentazione Laravel per le linee guida generali.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Licenza
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Questo progetto è open-source, distribuito sotto licenza [MIT](https://opensource.org/licenses/MIT).

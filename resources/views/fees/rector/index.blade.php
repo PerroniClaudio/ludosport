@@ -9,43 +9,50 @@
     </x-slot>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
-            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-background-900 dark:text-background-100">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('fees.purchase_fees') }}
-                    </h3>
-                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <div
-                                class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex flex-col gap-2">
-                                <p>{{ __('fees.buy_new_fees') }}</p>
-                                <div class="flex justify-end ">
-                                    <a href="{{ route('rector.fees.purchase') }}">
-                                        <x-primary-button>
-                                            <x-lucide-arrow-right class="h-6 w-6 text-white" />
-                                        </x-primary-button>
-                                    </a>
+
+            @php
+                $authRole = auth()->user()->getRole();
+            @endphp
+            @if ($authRole === 'rector')
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-background-900 dark:text-background-100">
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('fees.purchase_fees') }}
+                        </h3>
+                        <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1">
+                                <div
+                                    class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex flex-col gap-2">
+                                    <p>{{ __('fees.buy_new_fees') }}</p>
+                                    <div class="flex justify-end ">
+                                        <a href="{{ route('rector.fees.purchase') }}">
+                                            <x-primary-button>
+                                                <x-lucide-arrow-right class="h-6 w-6 text-white" />
+                                            </x-primary-button>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="flex-1">
-                            <div
-                                class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex flex-col gap-2">
-                                {{ __('fees.renew_expired_fees') }}
-                                <div class="flex justify-end ">
-                                    <a href="{{ route('rector.fees.renew') }}">
-                                        <x-primary-button>
-                                            <x-lucide-arrow-right class="h-6 w-6 text-white" />
-                                        </x-primary-button>
-                                    </a>
+                            <div class="flex-1">
+                                <div
+                                    class="border border-background-700 text-background-800 dark:text-background-200 rounded-lg p-4 cursor-pointer flex flex-col gap-2">
+                                    {{ __('fees.renew_expired_fees') }}
+                                    <div class="flex justify-end ">
+                                        <a href="{{ route('rector.fees.renew') }}">
+                                            <x-primary-button>
+                                                <x-lucide-arrow-right class="h-6 w-6 text-white" />
+                                            </x-primary-button>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-background-900 dark:text-background-100" x-data="{
+                    authRole: '{{ $authRole }}',
                     athletes_no_fees: {{ collect($athletes_no_fees) }},
                     athletes_add_fees: [],
                     fees_number: {{ $fees_number }},
@@ -98,7 +105,7 @@
                     },
                     openConfirmModal: function() {
                 
-                        let url = `/rector/fees/extimate`;
+                        let url = `/${this.authRole}/fees/extimate`;
                         let params = new URLSearchParams({
                             selected_users: JSON.stringify(this.athletes_add_fees.map((athlete) => {
                                 return athlete.id;
@@ -128,7 +135,7 @@
                     },
                     confirmAssociateFees: function() {
                 
-                        let url = `/rector/fees/associate`;
+                        let url = `/${this.authRole}/fees/associate`;
                         const fd = new FormData();
                 
                         const selected_users = this.athletes_add_fees.map((athlete) => {
@@ -161,8 +168,21 @@
                         this.paginateAthletes();
                     }
                 }">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('fees.associate_fees') }}
-                    </h3>
+                    <div class="flex gap-2 items-center">
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                            {{ __('fees.associate_fees') }}
+
+                        </h3>
+                        @if ($authRole === 'manager')
+                            <div class='has-tooltip'>
+                                <span
+                                    class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                    {{ __('fees.fees_purchase_info') }}
+                                </span>
+                                <x-lucide-info class="h-4 text-background-400" />
+                            </div>
+                        @endif
+                    </div>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <div class="grid grid-cols-3 gap-4 mb-4">
                         <div class="p-4 bg-background-100 dark:bg-background-700 rounded-lg">

@@ -6,7 +6,7 @@
 
 <script>
     async function saveMapContent() {
-        @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
+        @if ($authRole === 'admin' || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')))
             const location = document.getElementById('eventLocationCoordinates').value;
 
 
@@ -68,7 +68,7 @@
 
     <div class="grid grid-cols-2 gap-4">
 
-        @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
+        @if ($authRole === 'admin' || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')))
             <form action="{{ route($formRoute, $event->id) }}" method="POST" class="h-96">
             @else
                 <form>
@@ -97,7 +97,7 @@
 
         <input type="hidden" name="location" id="eventLocationCoordinates" x-model="location">
 
-        @if (Auth::user()->hasRole('admin') || (!$event->is_approved && ($authRole === 'rector')))
+        @if (Auth::user()->hasRole('admin') || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')))
             <div class="col-span-2 flex items-center gap-2 mt-8">
                 <div class="flex-1">
                     <x-primary-button type="button" class="w-full" @click="updateMap()">

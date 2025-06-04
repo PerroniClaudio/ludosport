@@ -24,13 +24,17 @@ class AcademyController extends Controller {
         //
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
-        if (in_array($authRole, ['rector'])) {
+        if (in_array($authRole, ['rector', 'manager'])) {
+
             $academy = $authUser->primaryAcademy();
             if ($authUser->validatePrimaryInstitutionPersonnel()) {
+
                 return $this->edit($academy);
             }
+
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
+
 
         $academies = Academy::with('nation')->where('is_disabled', '0')->orderBy('created_at', 'desc')->get();
 
@@ -193,6 +197,7 @@ class AcademyController extends Controller {
                 )->get();
                 break;
             case 'rector':
+            case 'manager':
                 $athletes = User::where('is_disabled', '0')->whereNotIn('id', $academy->athletes->pluck('id'))->whereHas(
                     'roles',
                     function ($query) {
@@ -211,6 +216,7 @@ class AcademyController extends Controller {
 
         $roles = Role::all();
         $editable_roles = $authUser->getEditableRoles();
+
 
         return view('academy.edit', [
             'academy' => $academy,
@@ -897,7 +903,8 @@ class AcademyController extends Controller {
             case 'admin': // sempre autorizzato
                 $authorized = true;
                 break;
-            case 'rector': // non autorizzato se non è la sua accademia
+            case 'rector':
+            case 'manager':
                 // if (!$isStrict && ($academy->rector() && ($academy->rector()->id == $authUser->id))) {
                 if (!$isStrict && (($authUser->primaryAcademy()->id ?? null) == $academy->id)) {
                     $authorized = true;

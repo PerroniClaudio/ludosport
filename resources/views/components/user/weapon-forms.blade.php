@@ -25,25 +25,29 @@
             @elseif ($type === 'personnel')
                 {{ __('users.weapons_forms_personnel') }}
             @else
-                {{ __('users.weapons_forms') }}</h3>
-            @endif
+                {{ __('users.weapons_forms') }}
+        </h3>
+        @endif
         </h3>
         {{-- l'admin può modificare tutto. il rettore solo le forme da atleta --}}
-        @if($type === 'technician')
-            @if($authRole === 'admin')
-                <x-primary-button type="button" class="h-fit" x-on:click.prevent="$dispatch('open-modal', 'add-weapon-form-technician-modal')">
+        @if ($type === 'technician')
+            @if ($authRole === 'admin')
+                <x-primary-button type="button" class="h-fit"
+                    x-on:click.prevent="$dispatch('open-modal', 'add-weapon-form-technician-modal')">
                     <x-lucide-plus class="w-5 h-5" />
                 </x-primary-button>
             @endif
         @elseif($type === 'personnel')
-            @if($authRole === 'admin')
-                <x-primary-button type="button" class="h-fit" x-on:click.prevent="$dispatch('open-modal', 'add-weapon-form-personnel-modal')">
+            @if ($authRole === 'admin')
+                <x-primary-button type="button" class="h-fit"
+                    x-on:click.prevent="$dispatch('open-modal', 'add-weapon-form-personnel-modal')">
                     <x-lucide-plus class="w-5 h-5" />
                 </x-primary-button>
             @endif
         @else
-            @if(in_array($authRole, ['admin', 'rector', 'dean']))
-                <x-primary-button type="button" class="h-fit" x-on:click.prevent="$dispatch('open-modal', 'add-weapon-form-modal')">
+            @if (in_array($authRole, ['admin', 'rector', 'dean', 'manager']))
+                <x-primary-button type="button" class="h-fit"
+                    x-on:click.prevent="$dispatch('open-modal', 'add-weapon-form-modal')">
                     <x-lucide-plus class="w-5 h-5" />
                 </x-primary-button>
             @endif
@@ -66,14 +70,15 @@
     ]" :rows="$forms">
 
         <x-slot name="tableActions">
-                <button type="button" x-on:click.prevent="()=>openEditWeaponFormModal('{{$type}}', row.id, row.awarded_at)">
-                    <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                </button>
+            <button type="button"
+                x-on:click.prevent="()=>openEditWeaponFormModal('{{ $type }}', row.id, row.awarded_at)">
+                <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+            </button>
         </x-slot>
-        
+
     </x-table>
-    
-    @if($type === 'technician')
+
+    @if ($type === 'technician')
         @if ($authRole === 'admin')
             <x-modal name="add-weapon-form-technician-modal" :show="$errors->customrole->isNotEmpty()" focusable>
                 <div class="p-6 flex flex-col gap-2" x-data="{
@@ -97,17 +102,17 @@
                         formData.append('weapon_forms', weapon_forms);
                 
                         fetch('/users/{{ $user }}/weapon-forms-technician', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: formData,
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log(data)
-                            window.location.reload();
-                        })
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: formData,
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data)
+                                window.location.reload();
+                            })
                     },
                 }">
                     <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
@@ -122,7 +127,8 @@
                             <template x-for="weaponForm in weapon_forms" :key="weaponForm.id">
                                 <div x-show="shouldShowWeaponForm(weaponForm.id)" x-on:click="addWeaponForm(weaponForm)"
                                     class="p-2 border border-background-100 dark:border-background-700 rounded-lg cursor-pointer">
-                                    <p class="text-sm text-background-500 dark:text-background-300" x-text="weaponForm.name"></p>
+                                    <p class="text-sm text-background-500 dark:text-background-300"
+                                        x-text="weaponForm.name"></p>
                                 </div>
                             </template>
                         </div>
@@ -175,17 +181,17 @@
                         formData.append('weapon_forms', weapon_forms);
                 
                         fetch('/users/{{ $user }}/weapon-forms-personnel', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: formData,
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log(data)
-                            window.location.reload();
-                        })
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: formData,
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data)
+                                window.location.reload();
+                            })
                     },
                 }">
                     <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
@@ -200,7 +206,8 @@
                             <template x-for="weaponForm in weapon_forms" :key="weaponForm.id">
                                 <div x-show="shouldShowWeaponForm(weaponForm.id)" x-on:click="addWeaponForm(weaponForm)"
                                     class="p-2 border border-background-100 dark:border-background-700 rounded-lg cursor-pointer">
-                                    <p class="text-sm text-background-500 dark:text-background-300" x-text="weaponForm.name"></p>
+                                    <p class="text-sm text-background-500 dark:text-background-300"
+                                        x-text="weaponForm.name"></p>
                                 </div>
                             </template>
                         </div>
@@ -232,7 +239,8 @@
             </x-modal>
         @endif
     @else
-        @if(in_array($authRole, ['admin', 'rector', 'dean']))
+        @if (in_array($authRole, ['admin', 'rector', 'dean', 'manager']))
+            {{-- l'admin può modificare tutto. il rettore solo le forme da atleta --}}
             <x-modal name="add-weapon-form-modal" :show="$errors->customrole->isNotEmpty()" focusable>
                 <div class="p-6 flex flex-col gap-2" x-data="{
                     weapon_forms: {{ collect($availableWeaponForms) }},
@@ -246,7 +254,7 @@
                         this.selectedWeaponForms.push(weaponForm);
                     },
                     removeWeaponForm(weaponForm) {
-                        if({{$authRole === 'admin' ? 'true' : 'false'}} || !this.userWeaponForms.find(wf => wf.id == weaponForm.id)) {
+                        if ({{ $authRole === 'admin' ? 'true' : 'false' }} || !this.userWeaponForms.find(wf => wf.id == weaponForm.id)) {
                             this.selectedWeaponForms = this.selectedWeaponForms.filter(selectedWeaponForm => selectedWeaponForm.id !== weaponForm.id);
                         } else {
                             FlashMessage.displayCustomMessage('You cannot remove already associated weapon forms', 2000);
@@ -258,18 +266,18 @@
                         const formData = new FormData();
                         formData.append('weapon_forms', weapon_forms);
                 
-                        fetch('{{$authRole === 'admin' ? '' : '/' . $authRole}}/users/{{ $user }}/weapon-forms-athlete', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: formData,
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log(data)
-                            window.location.reload();
-                        })
+                        fetch('{{ $authRole === 'admin' ? '' : '/' . $authRole }}/users/{{ $user }}/weapon-forms-athlete', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: formData,
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data)
+                                window.location.reload();
+                            })
                     },
                 }">
                     <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
@@ -284,7 +292,8 @@
                             <template x-for="weaponForm in weapon_forms" :key="weaponForm.id">
                                 <div x-show="shouldShowWeaponForm(weaponForm.id)" x-on:click="addWeaponForm(weaponForm)"
                                     class="p-2 border border-background-100 dark:border-background-700 rounded-lg cursor-pointer">
-                                    <p class="text-sm text-background-500 dark:text-background-300" x-text="weaponForm.name"></p>
+                                    <p class="text-sm text-background-500 dark:text-background-300"
+                                        x-text="weaponForm.name"></p>
                                 </div>
                             </template>
                         </div>
@@ -317,17 +326,18 @@
         @endif
     @endif
 
-    <x-modal name="edit-{{$type}}-weapon-form-date-modal" :show="false" focusable
-        className="p-6 flex flex-col gap-2"
-    >
-        <form action="{{ route(($authRole == 'admin' ? '' : $authRole . '.') . 'user.weapon-forms-edit-date', $user) }}" method="POST" class="p-6 flex flex-col gap-4">
+    <x-modal name="edit-{{ $type }}-weapon-form-date-modal" :show="false" focusable
+        className="p-6 flex flex-col gap-2">
+        <form
+            action="{{ route(($authRole == 'admin' ? '' : $authRole . '.') . 'user.weapon-forms-edit-date', $user) }}"
+            method="POST" class="p-6 flex flex-col gap-4">
             @csrf
-            <input type="text" name="type" id="type" x-bind:value="'{{$type}}'" hidden>
+            <input type="text" name="type" id="type" x-bind:value="'{{ $type }}'" hidden>
             <input type="text" name="form_id" id="form_id" x-bind:value="updateWeaponFormId" hidden>
-            <x-input-label value="Awarded on" for="{{$type}}-awarded-at" />
-            <input type="date" name="awarded_at" id="{{$type}}-awarded-at" x-bind:value="updateWeaponFormDate"
-                class="disabled:cursor-not-allowed w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm"
-            >
+            <x-input-label value="Awarded on" for="{{ $type }}-awarded-at" />
+            <input type="date" name="awarded_at" id="{{ $type }}-awarded-at"
+                x-bind:value="updateWeaponFormDate"
+                class="disabled:cursor-not-allowed w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
 
             <div class="flex justify-end">
                 <x-primary-button type="submit">

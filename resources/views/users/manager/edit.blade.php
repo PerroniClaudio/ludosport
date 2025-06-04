@@ -8,7 +8,7 @@
     $authRole = $authUser->getRole();
     $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
     // Può modificare l'utente solo se è un atleta della stessa scuola
-    $canEdit = in_array($authUser->primarySchool()->id, $user->schoolAthletes->pluck('id')->toArray());
+$canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray());
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -85,9 +85,10 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                 <form method="POST" action="{{ route('manager.users.update', $user->id) }}">
                     @csrf
-    
+
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                         <h3 class="text-background-800 dark:text-background-200 text-2xl">
                             {{ __('users.personal_details_message') }}</h3>
@@ -102,7 +103,7 @@
                             <x-form.input name="year" label="First subscription year" type="text"
                                 required="{{ true }}" value="{{ $user->subscription_year }}"
                                 placeholder="{{ date('Y') }}" :disabled="!$canEdit" />
-    
+
                             <div>
                                 <x-input-label for="nationality" value="Nationality" />
                                 <select name="nationality" id="nationality" {{ !$canEdit ? 'disabled' : '' }}
@@ -118,17 +119,18 @@
                                     @endforeach
                                 </select>
                             </div>
-    
+
                             <div>
                                 <x-input-label for="" value="Instagram" />
-                                <div class="w-full min-h-10 cursor-not-allowed px-3 py-2 border border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
+                                <div
+                                    class="w-full min-h-10 cursor-not-allowed px-3 py-2 border border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
                                     {{ $user->instagram ?? '' }}
                                 </div>
                             </div>
-    
+
                         </div>
                     </div>
-    
+
                     @if ($canEdit)
                         <div class="fixed bottom-8 right-32">
                             <x-primary-button type="submit">
@@ -136,7 +138,7 @@
                             </x-primary-button>
                         </div>
                     @endif
-    
+
                 </form>
                 <div>
                     <x-user.roles :user="$user" :roles="$user->roles" :availableRoles="$roles" />
@@ -151,7 +153,8 @@
                             {{ __('users.profile_picture') }}
                         </h3>
                         <div class='has-tooltip'>
-                            <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                            <span
+                                class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
                                 {{ __('users.profile_picture_info') }}
                             </span>
                             <x-lucide-info class="h-4 text-background-400" />
@@ -187,6 +190,11 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4">
+
+                <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponForms->map(function ($form) {
+                    $form->awarded_at = explode(' ', $form->awarded_at)[0];
+                    return $form;
+                })" type="athlete" />
 
                 <div
                     class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 text-background-800 dark:text-background-200 ">
@@ -302,7 +310,7 @@
                 </a>
             </div>
 
-            {{-- @if (!$user->is_disabled && ($authRole == 'admin'))
+            {{-- @if (!$user->is_disabled && $authRole == 'admin')
                 <x-user.disable-user-form :user="$user->id" />
             @endif --}}
         </div>

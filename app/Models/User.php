@@ -395,9 +395,9 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'name' => 'manager.announcements.index',
                     ],
                     (object)[
-                        'label' => 'scuola',
-                        'active' => 'schools.*',
-                        'name' => 'manager.school.index',
+                        'label' => 'accademia',
+                        'active' => 'academy.*',
+                        'name' => 'manager.academy.index',
                     ],
                     (object)[
                         'label' => 'clan',
@@ -600,7 +600,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return true;
                 break;
             case 'manager':
-                $primary = $user->primarySchool();
+                $primary = $user->primaryAcademy();
                 if (!$primary) {
                     return false;
                 }

@@ -3,9 +3,11 @@
 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-data="{}">
     <div class="flex justify-between">
         <div class="flex gap-2 items-center">
-            <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.thumbnail') }}  <span class="text-base lg:text-xl"> - {{ __('events.event_thumbnail_tooltip') }}</span></h3>
+            <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.thumbnail') }} <span
+                    class="text-base lg:text-xl"> - {{ __('events.event_thumbnail_tooltip') }}</span></h3>
             <div class='has-tooltip'>
-                <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                <span
+                    class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
                     {{ __('events.thumbnail_info') }}
                 </span>
                 <x-lucide-info class="h-4 text-background-400" />
@@ -16,9 +18,9 @@
                 $authRole = auth()->user()->getRole();
                 $formRoute = $authRole === 'admin' ? 'events.update.thumbnail' : $authRole . '.events.update.thumbnail';
             @endphp
-            @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
-                <form method="POST" action="{{ route($formRoute, $event->id) }}"
-                    enctype="multipart/form-data" x-ref="thumbform">
+            @if ($authRole === 'admin' || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')))
+                <form method="POST" action="{{ route($formRoute, $event->id) }}" enctype="multipart/form-data"
+                    x-ref="thumbform">
                     @csrf
                     @method('PUT')
 

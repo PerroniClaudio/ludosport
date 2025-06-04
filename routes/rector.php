@@ -26,6 +26,7 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
   Route::get('/fees/extimate', [App\Http\Controllers\FeeController::class, 'extimateFeeConsumption'])->name('fees.extimate');
   Route::post('/fees/associate', [App\Http\Controllers\FeeController::class, 'associateFeesToUsers'])->name('fees.associate');
 
+
   /** Users */
 
   Route::group([], function () {

@@ -63,6 +63,7 @@ class UserController extends Controller {
 
 
                 break;
+            case 'manager':
             case 'rector':
 
                 // Utenti di una determinata accademia
@@ -95,7 +96,7 @@ class UserController extends Controller {
 
                 break;
             case 'dean':
-            case 'manager':
+
                 // Utenti di una determinata scuola
 
                 $school_id = $authUser->primarySchool()->id ?? null;
@@ -560,9 +561,19 @@ class UserController extends Controller {
         }
 
         // Possono vedere solo le persone associate alla loro accademia/scuola come atleti o come personale
-        if (($authRole === "rector" && (!in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray()) && !in_array($authUser->primaryAcademy()->id, $user->academies->pluck('id')->toArray())))
-            || (in_array($authRole, ['dean', 'manager']) && (!in_array($authUser->primarySchool()->id, $user->schoolAthletes()->pluck('school_id')->toArray()) && !in_array($authUser->primarySchool()->id, $user->schools()->pluck('school_id')->toArray())))
-        ) {
+        // Controllo permessi per rector, dean e manager
+        $isRectorOrManager = in_array($authRole, ['rector', 'manager']);
+        $isDean = $authRole === 'dean';
+
+        $rectorOrManagerCannotAccess = $isRectorOrManager &&
+            !in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray()) &&
+            !in_array($authUser->primaryAcademy()->id, $user->academies->pluck('id')->toArray());
+
+        $deanCannotAccess = $isDean &&
+            !in_array($authUser->primarySchool()->id, $user->schoolAthletes()->pluck('school_id')->toArray()) &&
+            !in_array($authUser->primarySchool()->id, $user->schools()->pluck('school_id')->toArray());
+
+        if ($rectorOrManagerCannotAccess || $deanCannotAccess) {
             return back()->with('error', 'You are not authorized to access this page!');
         }
 
@@ -1287,7 +1298,7 @@ class UserController extends Controller {
                 }
             }
         }
-        
+
         // Rimuovi i duplicati
         $users = collect($users)->unique('id')->values();
 
@@ -1972,7 +1983,7 @@ class UserController extends Controller {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
-        if (!in_array($authUserRole, ['admin', 'rector', 'dean'])) {
+        if (!in_array($authUserRole, ['admin', 'rector', 'dean', 'manager'])) {
             return response()->json([
                 'error' => 'You are not authorized to edit user\'s weapon forms!',
             ]);
@@ -1983,6 +1994,12 @@ class UserController extends Controller {
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ]);
         }
+        if ($authUserRole == 'manager' && (!$authUser->primaryAcademy() || !$user->academyAthletes->contains($authUser->primaryAcademy()->id))) {
+            return response()->json([
+                'error' => 'You are not authorized to edit this user\'s weapon forms!',
+            ]);
+        }
+
         if ($authUserRole == 'dean' && (!$authUser->primarySchool() || !$user->schoolAthletes->contains($authUser->primarySchool()->id))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!' . 'primarySchool: ' . $authUser->primarySchool()->id . ' - userContainsSchool: ' . ($user->schoolAthletes->contains($authUser->primarySchool()->id) ? 'true' : 'false'),

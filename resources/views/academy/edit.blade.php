@@ -193,57 +193,66 @@
 
             <x-academy.search-users :academy="$academy" :roles="$roles" />
 
-            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.personnel') }}
-                    </h3>
-                    <div class="flex items-center gap-1">
-                        <x-academy.personnel :academy="$academy" :personnel="$personnel" :associatedPersonnel="$associated_personnel" />
-                        <x-academy.create-user academy="{{ $academy->id }}" type="personnel" :roles="$editable_roles" />
+            @if ($authRole === 'admin' || $authRole === 'rector')
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                            {{ __('academies.personnel') }}
+                        </h3>
+                        <div class="flex items-center gap-1">
+
+                            <x-academy.personnel :academy="$academy" :personnel="$personnel" :associatedPersonnel="$associated_personnel" />
+                            <x-academy.create-user academy="{{ $academy->id }}" type="personnel"
+                                :roles="$editable_roles" />
+
+                        </div>
                     </div>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                    <x-table striped="false" :columns="[
+                        [
+                            'name' => 'Id',
+                            'field' => 'id',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
+                            'name' => 'Name',
+                            'field' => 'name',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
+                            'name' => 'Surname',
+                            'field' => 'surname',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
+                            'name' => 'Role',
+                            'field' => 'role',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                    ]" :rows="$associated_personnel">
+                        <x-slot name="tableActions">
+                            <a x-bind:href="'{{ $authRole === 'admin' ? '' : '/' . $authRole }}' + '/users/' + row.id">
+                                <x-lucide-pencil
+                                    class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                            </a>
+                        </x-slot>
+                    </x-table>
                 </div>
-                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                <x-table striped="false" :columns="[
-                    [
-                        'name' => 'Id',
-                        'field' => 'id',
-                        'columnClasses' => '',
-                        'rowClasses' => '',
-                    ],
-                    [
-                        'name' => 'Name',
-                        'field' => 'name',
-                        'columnClasses' => '',
-                        'rowClasses' => '',
-                    ],
-                    [
-                        'name' => 'Surname',
-                        'field' => 'surname',
-                        'columnClasses' => '',
-                        'rowClasses' => '',
-                    ],
-                    [
-                        'name' => 'Role',
-                        'field' => 'role',
-                        'columnClasses' => '',
-                        'rowClasses' => '',
-                    ],
-                ]" :rows="$associated_personnel">
-                    <x-slot name="tableActions">
-                        <a x-bind:href="'{{ $authRole === 'admin' ? '' : '/' . $authRole }}' + '/users/' + row.id">
-                            <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                        </a>
-                    </x-slot>
-                </x-table>
-            </div>
+            @endif
 
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.athletes') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        <x-academy.athletes :academy="$academy" :athletes="$athletes" :associatedAthletes="$associated_athletes" />
-                        <x-academy.create-user academy="{{ $academy->id }}" type="athlete" :roles="$roles" />
+                        @if ($authRole === 'admin' || $authRole === 'rector')
+                            <x-academy.athletes :academy="$academy" :athletes="$athletes" :associatedAthletes="$associated_athletes" />
+                            <x-academy.create-user academy="{{ $academy->id }}" type="athlete" :roles="$roles" />
+                        @endif
                     </div>
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
@@ -317,37 +326,43 @@
                 </x-table>
             </div>
 
-            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.schools') }}
-                    </h3>
-                    <div class="flex items-center gap-1">
-                        {{-- <x-academy.schools :academy="$academy" :schools="$schools" /> --}}
-                        <x-academy.create-school :academy="$academy->id" />
+            @if ($authRole === 'admin' || $authRole === 'rector')
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                            {{ __('academies.schools') }}
+                        </h3>
+                        <div class="flex items-center gap-1">
+
+                            <x-academy.create-school :academy="$academy->id" />
+
+                        </div>
                     </div>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                    <x-table striped="false" :columns="[
+                        [
+                            'name' => 'Id',
+                            'field' => 'id',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
+                            'name' => 'Name',
+                            'field' => 'name',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                    ]" :rows="$academy->schools">
+                        <x-slot name="tableActions">
+                            <a
+                                x-bind:href="'{{ $authRole === 'admin' ? '' : '/' . $authRole }}' + '/schools/' + row.id">
+                                <x-lucide-pencil
+                                    class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                            </a>
+                        </x-slot>
+                    </x-table>
                 </div>
-                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                <x-table striped="false" :columns="[
-                    [
-                        'name' => 'Id',
-                        'field' => 'id',
-                        'columnClasses' => '',
-                        'rowClasses' => '',
-                    ],
-                    [
-                        'name' => 'Name',
-                        'field' => 'name',
-                        'columnClasses' => '',
-                        'rowClasses' => '',
-                    ],
-                ]" :rows="$academy->schools">
-                    <x-slot name="tableActions">
-                        <a x-bind:href="'{{ $authRole === 'admin' ? '' : '/' . $authRole }}' + '/schools/' + row.id">
-                            <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                        </a>
-                    </x-slot>
-                </x-table>
-            </div>
+            @endif
 
             @if ($authRole === 'admin')
                 <x-academy.fees :academy="$academy->id" />

@@ -7,7 +7,7 @@
 
 <script>
     async function saveContent() {
-        @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
+        @if ($authRole === 'admin' || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')))
             const description = document.getElementById('editor-content').value;
             const formDataContent = new FormData();
 
@@ -46,7 +46,7 @@
                 <x-lucide-circle-check class="w-5 h-5 text-primary-500 dark:text-primary-500 cursor-pointer" />
             </div>
         </div>
-        @if ($authRole === 'admin' || (!$event->is_approved && $authRole === 'rector'))
+        @if ($authRole === 'admin' || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')))
             <form method="POST" action={{ route($formRoute, $event->id) }}>
             @else
                 <form>
@@ -61,7 +61,7 @@
         </form>
     </div>
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-    <div x-load x-data="editor('{{ $value }}', {{ $authRole === 'admin' || (!$event->is_approved && $authRole === 'rector') ? 'true' : 'false' }})">
+    <div x-load x-data="editor('{{ $value }}', {{ $authRole === 'admin' || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')) ? 'true' : 'false' }})">
 
         <template x-if="isLoaded()">
             <div class="menu flex items-center justify-between">

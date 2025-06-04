@@ -4,9 +4,9 @@
             <h2 class="font-semibold text-xl text-background-800 dark:text-background-200 leading-tight">
                 {{ __('events.title') }}
             </h2>
-            {{-- <div>
+            <div>
                 <x-create-new-button :href="route('manager.events.create')" />
-            </div> --}}
+            </div>
         </div>
     </x-slot>
     <div class="py-12">

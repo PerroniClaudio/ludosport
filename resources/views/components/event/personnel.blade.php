@@ -16,7 +16,7 @@
     </div>
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        @if ((!$event->is_approved && in_array($authRole, ['admin', 'rector'])) || $authRole === 'admin')
+        @if ((!$event->is_approved && in_array($authRole, ['admin', 'rector', 'manager'])) || $authRole === 'admin')
             <div class="bg-background-100 dark:bg-background-900 p-4 rounded ">
                 <div class="flex justify-between gap-2 items-center">
                     <div class="flex-1">
@@ -129,7 +129,7 @@
                         <th
                             class="px-1 text-left bg-background-50 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
                             {{ __('users.surname') }}</th>
-                        @if ((!$event->is_approved && in_array($authRole, ['admin', 'rector'])) || $authRole === 'admin')
+                        @if ((!$event->is_approved && in_array($authRole, ['admin', 'rector', 'manager'])) || $authRole === 'admin')
                             <th
                                 class="px-1 text-right bg-background-50 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
                                 {{ __('users.actions') }}</th>
@@ -144,7 +144,7 @@
                             </td>
                             <td class="px-1 text-background-500 dark:text-background-300 text-sm"
                                 x-text="personnel.surname"></td>
-                            @if ((!$event->is_approved && in_array($authRole, ['admin', 'rector'])) || $authRole === 'admin')
+                            @if ((!$event->is_approved && in_array($authRole, ['admin', 'rector', 'manager'])) || $authRole === 'admin')
                                 <td class="px-1 text-background-500 dark:text-background-300 text-sm text-right p-1">
                                     <button @click="removePersonnel(personnel.id)">
                                         <x-lucide-minus
