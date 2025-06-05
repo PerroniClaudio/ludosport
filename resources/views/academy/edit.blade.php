@@ -152,24 +152,27 @@
                                         <x-lucide-info class="h-4 text-background-400" />
                                     </div>
                                 </div>
-                                <div>
-                                    <form method="POST" action="{{ route('academies.picture.update', $academy->id) }}"
-                                        enctype="multipart/form-data" x-ref="pfpform">
-                                        @csrf
-                                        @method('PUT')
+                                @if ($authRole === 'admin' || $authRole === 'rector')
+                                    <div>
+                                        <form method="POST"
+                                            action="{{ route('academies.picture.update', $academy->id) }}"
+                                            enctype="multipart/form-data" x-ref="pfpform">
+                                            @csrf
+                                            @method('PUT')
 
-                                        <div class="flex flex-col gap-4">
-                                            <div class="flex flex-col gap-2">
-                                                <input type="file" name="academylogo" id="academylogo" class="hidden"
-                                                    x-on:change="$refs.pfpform.submit()" />
-                                                <x-primary-button type="button"
-                                                    onclick="document.getElementById('academylogo').click()">
-                                                    {{ __('users.upload_picture') }}
-                                                </x-primary-button>
+                                            <div class="flex flex-col gap-4">
+                                                <div class="flex flex-col gap-2">
+                                                    <input type="file" name="academylogo" id="academylogo"
+                                                        class="hidden" x-on:change="$refs.pfpform.submit()" />
+                                                    <x-primary-button type="button"
+                                                        onclick="document.getElementById('academylogo').click()">
+                                                        {{ __('users.upload_picture') }}
+                                                    </x-primary-button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </form>
-                                </div>
+                                        </form>
+                                    </div>
+                                @endif
                             </div>
                             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                             @if ($errors->get('academylogo') != null)

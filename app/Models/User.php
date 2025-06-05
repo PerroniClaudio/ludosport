@@ -400,6 +400,11 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'name' => 'manager.academy.index',
                     ],
                     (object)[
+                        'label' => 'scuole',
+                        'active' => 'schools.*',
+                        'name' => 'manager.schools.index',
+                    ],
+                    (object)[
                         'label' => 'clan',
                         'active' => 'clans.*',
                         'name' => 'manager.clans.index',
@@ -413,6 +418,11 @@ class User extends Authenticatable implements MustVerifyEmail {
                         'label' => 'eventi',
                         'active' => 'events.*',
                         'name' => 'manager.events.index',
+                    ],
+                    (object)[
+                        'label' => 'fees',
+                        'active' => 'fees.*',
+                        'name' => 'manager.fees.index',
                     ],
                     (object)[
                         'label' => 'imports',

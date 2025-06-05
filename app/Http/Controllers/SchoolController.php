@@ -24,7 +24,7 @@ class SchoolController extends Controller {
         // The dean (and maybe others, ex. manager) should only see his school
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
-        if (in_array($authRole, ['dean', 'manager'])) {
+        if (in_array($authRole, ['dean'])) {
             $school = $authUser->primarySchool() ?? null;
             if (!$school) {
                 return redirect()->route('dashboard')->with('error', 'You don\'t have a school assigned!');
@@ -32,7 +32,7 @@ class SchoolController extends Controller {
             return $this->edit($school);
         }
 
-        if ($authRole === 'rector') {
+        if (in_array($authRole, ['rector', 'manager'])) {
             if (!$authUser->validatePrimaryInstitutionPersonnel()) {
                 return redirect()->route('dashboard')->with('error', 'You don\'t have an academy assigned!');
             }
@@ -1135,6 +1135,7 @@ class SchoolController extends Controller {
         switch ($authRole) {
             case 'admin': // sempre autorizzato
                 break;
+            case 'manager':
             case 'rector': // non autorizzato se la scuola non è nella sua accademia
                 // $schoolAcademy = $school->academy;
                 // $academyRector = $schoolAcademy->rector();
@@ -1152,11 +1153,7 @@ class SchoolController extends Controller {
                     $authorized = false;
                 }
                 break;
-            case 'manager': // non autorizzato se la scuola non è associata a lui o se strict è true
-                if ((($authUser->primarySchool()->id ?? null) != $school->id) || $isStrict) {
-                    $authorized = false;
-                }
-                break;
+
             default:
                 $authorized = false;
                 break;

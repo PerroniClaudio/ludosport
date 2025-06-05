@@ -48,6 +48,9 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
     Route::get('/academies/search', [App\Http\Controllers\AcademyController::class, 'search'])->name('manager.academies.search');
 
     Route::get('/academies/{academy}/users-search', [App\Http\Controllers\AcademyController::class, 'searchUsers'])->name('manager.academies.users-search');
+    Route::get('/academies/{academy}/athletes-data', [App\Http\Controllers\AcademyController::class, 'athletesDataForAcademy'])->name('manager.academies.athletes-data');
+    Route::get('/academies/{academy}/athletes-school-data', [App\Http\Controllers\AcademyController::class, 'athletesSchoolDataForAcademy'])->name('manager.academies.athletes-school-data');
+    Route::get('/academies/{academy}/athletes-year-data', [App\Http\Controllers\AcademyController::class, 'getAthletesNumberPerYear'])->name('manager.academies.athletes-year-data');
   });
 
   // Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'show'])->name('manager.academies.show');
@@ -59,7 +62,7 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
   Route::group([], function () {
     Route::get('/schools/all', [App\Http\Controllers\SchoolController::class, 'all'])->name('manager.schools.all');
     Route::get('/schools/academy', [App\Http\Controllers\SchoolController::class, 'getByAcademy'])->name('manager.schools.academy');
-    // Route::get('/schools', [App\Http\Controllers\SchoolController::class, 'index'])->name('manager.schools.index');
+    Route::get('/schools', [App\Http\Controllers\SchoolController::class, 'index'])->name('manager.schools.index');
     // Route::get('/schools/create', [App\Http\Controllers\SchoolController::class, 'create'])->name('manager.schools.create');
     // Route::get('/schools/search', [App\Http\Controllers\SchoolController::class, 'search'])->name('manager.schools.search');
 
