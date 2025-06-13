@@ -73,26 +73,28 @@ class UserController extends Controller {
                     return redirect()->route("dashboard")->with('error', 'You don\'t have an academy assigned!');
                 }
 
-                $users = User::whereHas('academies', function (Builder $query) use ($academy_id) {
-                    $query->where('academy_id', $academy_id);
-                })->orWhereHas('academyAthletes', function (Builder $query) use ($academy_id) {
-                    $query->where('academy_id', $academy_id);
-                })->where('is_disabled', false)->get();
+                $users = User::where('is_disabled', false)
+                    ->where(function ($query) use ($academy_id) {
+                        $query->whereHas('academies', function ($q) use ($academy_id) {
+                            $q->where('academy_id', $academy_id);
+                        })->orWhereHas('academyAthletes', function ($q) use ($academy_id) {
+                            $q->where('academy_id', $academy_id);
+                        });
+                    })->get();
 
                 break;
             case 'instructor':
                 // Utenti di tutte le accademie in cui ha un corso (tanto non può entrare nel dettaglio utente)
-                // $academy_id = $authUser->primaryAcademy()->id ?? null;
-                // if (!$academy_id) {
-                //     return redirect()->route("dashboard")->with('error', 'You don\'t have an academy assigned!');
-                // }
-
                 $academiesIds = $authUser->academies()->pluck('academy_id')->toArray();
-                $users = User::whereHas('academies', function (Builder $query) use ($academiesIds) {
-                    $query->whereIn('academy_id', $academiesIds);
-                })->orWhereHas('academyAthletes', function (Builder $query) use ($academiesIds) {
-                    $query->whereIn('academy_id', $academiesIds);
-                })->where('is_disabled', false)->get();
+
+                $users = User::where('is_disabled', false)
+                    ->where(function ($query) use ($academiesIds) {
+                        $query->whereHas('academies', function ($q) use ($academiesIds) {
+                            $q->whereIn('academy_id', $academiesIds);
+                        })->orWhereHas('academyAthletes', function ($q) use ($academiesIds) {
+                            $q->whereIn('academy_id', $academiesIds);
+                        });
+                    })->get();
 
                 break;
             case 'dean':
@@ -105,11 +107,14 @@ class UserController extends Controller {
                     return redirect()->route("dashboard")->with('error', 'You don\'t have a school assigned!');
                 }
 
-                $users = User::whereHas('schools', function (Builder $query) use ($school_id) {
-                    $query->where('school_id', $school_id);
-                })->orWhereHas('schoolAthletes', function (Builder $query) use ($school_id) {
-                    $query->where('school_id', $school_id);
-                })->where('is_disabled', false)->get();
+                $users = User::where('is_disabled', false)
+                    ->where(function ($query) use ($school_id) {
+                        $query->whereHas('schools', function ($q) use ($school_id) {
+                            $q->where('school_id', $school_id);
+                        })->orWhereHas('schoolAthletes', function ($q) use ($school_id) {
+                            $q->where('school_id', $school_id);
+                        });
+                    })->get();
 
 
                 break;
@@ -1106,6 +1111,7 @@ class UserController extends Controller {
                     ->get();
                 break;
             case 'rector':
+            case 'manager':
                 if (!$authUser->primaryAcademy()) {
                     return back()->with('error', 'You are not authorized to access this page!');
                 }
@@ -1127,7 +1133,6 @@ class UserController extends Controller {
                     ->get();
                 break;
             case 'dean':
-            case 'manager':
                 if (!$authUser->primarySchool()) {
                     return back()->with('error', 'You are not authorized to access this page!');
                 }
@@ -1215,10 +1220,10 @@ class UserController extends Controller {
                 $academies = Academy::where('is_disabled', false)->with('nation')->get();
                 break;
             case 'rector':
+            case 'manager':
                 $academies = collect([$authUser->primaryAcademy()]);
                 break;
             case 'dean':
-            case 'manager':
                 $academies = collect(($authUser->primarySchool()->academy ?? null) ? [$authUser->primarySchool()->academy] : []);
                 break;
             // case 'technician':
@@ -1309,8 +1314,10 @@ class UserController extends Controller {
         // Serve solo per l'istruttore. elenco delle scuole in cui ha un corso.
         $authSchools = $authUser->schools->pluck('id')->toArray();
 
-        // Serve solo per dean e manager. scuola in cui lavora.
+        // Serve solo per dean. scuola in cui lavora.
         $authPrimarySchool = $authUser->primarySchool();
+        // Serve solo per manager. accademia in cui lavora.
+        $authPrimaryAcademy = $authUser->primaryAcademy();
 
         $filteredUsers = [];
 
@@ -1328,10 +1335,21 @@ class UserController extends Controller {
             }
 
             // Il dean e il manager possono vedere solo gli utenti della loro scuola.
-            if (in_array($authUserRole, ['dean', 'manager'])) {
+            if (in_array($authUserRole, ['dean'])) {
                 if (
                     $user->schools->where('id', $authPrimarySchool->id)->isEmpty()
                     && $user->schoolAthletes->where('id', $authPrimarySchool->id)->isEmpty()
+                ) {
+                    $shouldAdd = false;
+                }
+            }
+            
+            // Ho aggiunto il controllo per il manager per il cambio richiesto nel ticket 3437.
+            // Penso che il rettore non abbia limitazioni perchè deve poter trovare utenti che non hanno l'accademia e devono essere aggiunti.
+            if (in_array($authUserRole, ['manager'])) {
+                if (
+                    $user->academies->where('id', $authPrimaryAcademy->id)->isEmpty()
+                    && $user->academyAthletes->where('id', $authPrimaryAcademy->id)->isEmpty()
                 ) {
                     $shouldAdd = false;
                 }
