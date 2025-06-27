@@ -58,6 +58,7 @@
                 });
             });
         }
+        this.page = 1; // Reset to first page after search
     },
     page: 1,
     pageLength: 10,
