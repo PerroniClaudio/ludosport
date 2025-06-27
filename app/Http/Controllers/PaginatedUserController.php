@@ -6,9 +6,17 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Nation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PaginatedUserController extends Controller {
     public function index(Request $request) {
+        $authUser = User::find(Auth::user()->id);
+        $authUserRole = $authUser->getRole();
+
+        if (!in_array($authUserRole, ['admin', 'rector', 'dean', 'manager', 'technician', 'instructor'])) {
+            return redirect()->route("dashboard")->with('error', 'You do not have the required role to access this page!');
+        }
+
         $roles = Role::all();
         $selectedRole = $request->role ? $request->role : 'athlete';
 
@@ -20,6 +28,64 @@ class PaginatedUserController extends Controller {
                     $q->where('label', $request->role);
                 });
             });
+
+        // Apply scope filtering based on auth user role
+        switch ($authUserRole) {
+            case 'admin':
+            case 'technician':
+                // Tutti gli utenti - nessun filtro aggiuntivo
+                break;
+
+            case 'manager':
+            case 'rector':
+                // Utenti di una determinata accademia
+                $academy_id = $authUser->primaryAcademy()->id ?? null;
+                if (!$academy_id) {
+                    return redirect()->route("dashboard")->with('error', 'You don\'t have an academy assigned!');
+                }
+
+                $baseQuery->where(function ($query) use ($academy_id) {
+                    $query->whereHas('academies', function ($q) use ($academy_id) {
+                        $q->where('academy_id', $academy_id);
+                    })->orWhereHas('academyAthletes', function ($q) use ($academy_id) {
+                        $q->where('academy_id', $academy_id);
+                    });
+                });
+                break;
+
+            case 'instructor':
+                // Utenti di tutte le accademie in cui ha un corso
+                $academiesIds = $authUser->academies()->pluck('academy_id')->toArray();
+
+                $baseQuery->where(function ($query) use ($academiesIds) {
+                    $query->whereHas('academies', function ($q) use ($academiesIds) {
+                        $q->whereIn('academy_id', $academiesIds);
+                    })->orWhereHas('academyAthletes', function ($q) use ($academiesIds) {
+                        $q->whereIn('academy_id', $academiesIds);
+                    });
+                });
+                break;
+
+            case 'dean':
+                // Utenti di una determinata scuola
+                $school_id = $authUser->primarySchool()->id ?? null;
+
+                if (!$school_id) {
+                    return redirect()->route("dashboard")->with('error', 'You don\'t have a school assigned!');
+                }
+
+                $baseQuery->where(function ($query) use ($school_id) {
+                    $query->whereHas('schools', function ($q) use ($school_id) {
+                        $q->where('school_id', $school_id);
+                    })->orWhereHas('schoolAthletes', function ($q) use ($school_id) {
+                        $q->where('school_id', $school_id);
+                    });
+                });
+                break;
+
+            default:
+                return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
+        }
 
         // Apply specific relations and selections based on role
         switch ($selectedRole) {
