@@ -31,7 +31,27 @@ use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller {
 
-    public function index() {
+    public function index(Request $request) {
+        $roles = Role::all();
+
+        $users = User::query()
+            ->where('is_disabled', false)
+            ->when($request->role, function ($query) use ($request) {
+                return $query->whereHas('roles', function ($q) use ($request) {
+                    $q->where('label', $request->role);
+                });
+            })
+            ->orderBy('name')
+            ->paginate(30);
+
+        return view('users.paginated', [
+            'roles' => $roles,
+            'selectedRole' => $request->role ? $request->role : 'athlete',
+            'users' => $users,
+        ]);
+    }
+
+    public function _index() {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 

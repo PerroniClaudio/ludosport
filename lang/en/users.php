@@ -30,7 +30,8 @@ return [
     'academies' => 'Academies',
     'select_academy' => 'Select Academy',
     'select_school' => 'Select School',
-
+    'subscription_year' => 'Subscription Year',
+    'nation' => 'Nation',
     'save' => 'Save',
     'create' => 'Create',
     'edit' => 'Edit',
