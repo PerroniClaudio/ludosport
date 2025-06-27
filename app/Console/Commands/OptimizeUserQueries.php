@@ -57,23 +57,23 @@ class OptimizeUserQueries extends Command {
                 'created_at',
                 'nation_id'
             ],
-            'role_user' => [
+            'user_roles' => [
                 'user_id',
                 'role_id'
             ],
-            'user_academy' => [
+            'academies_athletes' => [
                 'user_id',
                 'academy_id'
             ],
-            'user_school' => [
+            'schools_personnel' => [
                 'user_id',
                 'school_id'
             ],
-            'academy_athletes' => [
+            'academies_athletes' => [
                 'user_id',
                 'academy_id'
             ],
-            'school_athletes' => [
+            'schools_athletes' => [
                 'user_id',
                 'school_id'
             ]
