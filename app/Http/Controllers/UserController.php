@@ -2151,13 +2151,13 @@ class UserController extends Controller {
             ]);
         }
         // Se la richiesta è del rettore ed è diversa da athlete o l'utente non è nell'accademia del rettore non si può modificare
-        if (in_array($authUserRole, ['rector', 'manager']) && ($request->type == 'athlete') && !$user->academyAthletes->contains($authUser->primaryAcademy()->id)) {
+        if (in_array($authUserRole, ['rector', 'manager']) && (($request->type != 'athlete') || !$user->academyAthletes->contains($authUser->primaryAcademy()->id))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ]);
         }
         // Se la richiesta è del preside ed è diversa da athlete o l'utente non è nella scuola del preside non si può modificare
-        if ($authUserRole == 'dean' && ($request->type == 'athlete') && !$user->schoolAthletes->contains($authUser->primarySchool()->id)) {
+        if ($authUserRole == 'dean' && (($request->type != 'athlete') || !$user->schoolAthletes->contains($authUser->primarySchool()->id))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ]);
