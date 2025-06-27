@@ -5,10 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Nation;
+use App\Services\UserCacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class PaginatedUserController extends Controller {
+
+    protected UserCacheService $cacheService;
+
+    public function __construct(UserCacheService $cacheService) {
+        $this->cacheService = $cacheService;
+    }
+
     public function index(Request $request) {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
@@ -17,9 +26,44 @@ class PaginatedUserController extends Controller {
             return redirect()->route("dashboard")->with('error', 'You do not have the required role to access this page!');
         }
 
-        $roles = Role::all();
+        // Cache dei ruoli
+        $roles = $this->cacheService->getCachedRoles();
         $selectedRole = $request->role ? $request->role : 'athlete';
+        $page = $request->get('page', 1);
 
+        // Crea una chiave cache unica per questa combinazione di parametri
+        $cacheKey = $this->cacheService->getUserQueryCacheKey(
+            $authUserRole,
+            $authUser->id,
+            $selectedRole,
+            $page
+        );
+
+        // Verifica se la cache è ancora valida
+        if (!$this->cacheService->isQueryCacheValid($cacheKey)) {
+            Cache::forget($cacheKey);
+        }        // Cache della query principale
+        $users = $this->cacheService->getCachedUserQuery(
+            function () use ($authUser, $authUserRole, $selectedRole, $request) {
+                return $this->buildUserQuery($authUser, $authUserRole, $selectedRole, $request);
+            },
+            $authUserRole,
+            $authUser->id,
+            $selectedRole,
+            $page
+        );
+
+        return view('users.paginated', [
+            'roles' => $roles,
+            'selectedRole' => $selectedRole,
+            'users' => $users,
+        ]);
+    }
+
+    /**
+     * Costruisce la query per gli utenti con tutti i filtri e le relazioni
+     */
+    private function buildUserQuery(User $authUser, string $authUserRole, string $selectedRole, Request $request) {
         // Base query with common conditions
         $baseQuery = User::query()
             ->where('is_disabled', false)
@@ -38,10 +82,12 @@ class PaginatedUserController extends Controller {
 
             case 'manager':
             case 'rector':
-                // Utenti di una determinata accademia
-                $academy_id = $authUser->primaryAcademy()->id ?? null;
+                // Usa cache per l'accademia primaria
+                $academy = $this->cacheService->getCachedUserPrimaryAcademy($authUser);
+                $academy_id = $academy->id ?? null;
+
                 if (!$academy_id) {
-                    return redirect()->route("dashboard")->with('error', 'You don\'t have an academy assigned!');
+                    throw new \Exception('You don\'t have an academy assigned!');
                 }
 
                 $baseQuery->where(function ($query) use ($academy_id) {
@@ -54,8 +100,8 @@ class PaginatedUserController extends Controller {
                 break;
 
             case 'instructor':
-                // Utenti di tutte le accademie in cui ha un corso
-                $academiesIds = $authUser->academies()->pluck('academy_id')->toArray();
+                // Usa cache per le accademie dell'istruttore
+                $academiesIds = $this->cacheService->getCachedInstructorAcademies($authUser);
 
                 $baseQuery->where(function ($query) use ($academiesIds) {
                     $query->whereHas('academies', function ($q) use ($academiesIds) {
@@ -67,11 +113,12 @@ class PaginatedUserController extends Controller {
                 break;
 
             case 'dean':
-                // Utenti di una determinata scuola
-                $school_id = $authUser->primarySchool()->id ?? null;
+                // Usa cache per la scuola primaria
+                $school = $this->cacheService->getCachedUserPrimarySchool($authUser);
+                $school_id = $school->id ?? null;
 
                 if (!$school_id) {
-                    return redirect()->route("dashboard")->with('error', 'You don\'t have a school assigned!');
+                    throw new \Exception('You don\'t have a school assigned!');
                 }
 
                 $baseQuery->where(function ($query) use ($school_id) {
@@ -84,7 +131,7 @@ class PaginatedUserController extends Controller {
                 break;
 
             default:
-                return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
+                throw new \Exception('You are not authorized to access this page!');
         }
 
         // Apply specific relations and selections based on role
@@ -178,10 +225,6 @@ class PaginatedUserController extends Controller {
             }
         }
 
-        return view('users.paginated', [
-            'roles' => $roles,
-            'selectedRole' => $selectedRole,
-            'users' => $users,
-        ]);
+        return $users;
     }
 }

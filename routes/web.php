@@ -45,7 +45,9 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 /** Users */
 
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
-    Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('users.index');
+    Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])
+        ->middleware('cache.headers:900')
+        ->name('users.index');
     Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('users.filter');
     Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('users.filter.result');
     Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('users.search');

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CacheHeaders;
 use App\Http\Middleware\SearchThrottleMiddleware;
 use App\Http\Middleware\UserRoleMiddleware;
 use Illuminate\Foundation\Application;
@@ -17,7 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
         //
         $middleware->alias([
             'role' => UserRoleMiddleware::class,
-            'throttle' => SearchThrottleMiddleware::class
+            'throttle' => SearchThrottleMiddleware::class,
+            'cache.headers' => CacheHeaders::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
