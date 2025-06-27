@@ -739,6 +739,7 @@ class UserController extends Controller {
             case 'admin':
                 break;
             case 'rector':
+            case 'manager':
                 if (!in_array(
                     $authUser->primaryAcademy()->id,
                     array_merge(
@@ -750,7 +751,6 @@ class UserController extends Controller {
                 }
                 break;
             case 'dean':
-            case 'manager':
                 if (!in_array(
                     $authUser->primarySchool()->id,
                     array_merge(
@@ -895,6 +895,7 @@ class UserController extends Controller {
             case 'admin':
                 break;
             case 'rector':
+            case 'manager':
                 if (!in_array(
                     $authUser->primaryAcademy()->id,
                     array_merge(
@@ -906,7 +907,6 @@ class UserController extends Controller {
                 }
                 break;
             case 'dean':
-            case 'manager':
                 if (!in_array(
                     $authUser->primarySchool()->id,
                     array_merge(
@@ -2145,13 +2145,13 @@ class UserController extends Controller {
     public function editWeaponFormsAwardingDate(User $user, Request $request) {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
-        if (!in_array($authUserRole, ['admin', 'rector', 'dean'])) {
+        if (!in_array($authUserRole, ['admin', 'rector', 'manager', 'dean'])) {
             return response()->json([
                 'error' => 'You are not authorized to edit user\'s weapon forms!',
             ]);
         }
         // Se la richiesta è del rettore ed è diversa da athlete o l'utente non è nell'accademia del rettore non si può modificare
-        if ($authUserRole == 'rector' && ($request->type == 'athlete') && !$user->academyAthletes->contains($authUser->primaryAcademy()->id)) {
+        if (in_array($authUserRole, ['rector', 'manager']) && ($request->type == 'athlete') && !$user->academyAthletes->contains($authUser->primaryAcademy()->id)) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ]);

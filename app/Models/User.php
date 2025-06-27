@@ -544,10 +544,10 @@ class User extends Authenticatable implements MustVerifyEmail {
             case 'rector':
                 return !in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician']);
                 break;
-            case 'dean':
-                return !in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician', 'dean', 'manager']);
-                break;
             case 'manager':
+                return !in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician', 'manager']);
+                break;
+            case 'dean':
                 return !in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician', 'dean', 'manager']);
                 break;
             default:
@@ -565,10 +565,10 @@ class User extends Authenticatable implements MustVerifyEmail {
             case 'rector':
                 return Role::all()->whereNotIn('name', ['admin', 'rector', 'instructor', 'technician']);
                 break;
-            case 'dean':
-                return Role::all()->whereNotIn('name', ['admin', 'rector', 'instructor', 'technician', 'dean', 'manager']);
-                break;
             case 'manager':
+                return Role::all()->whereNotIn('name', ['admin', 'rector', 'instructor', 'technician', 'manager']);
+                break;
+            case 'dean':
                 return Role::all()->whereNotIn('name', ['admin', 'rector', 'instructor', 'technician', 'dean', 'manager']);
                 break;
             default:
