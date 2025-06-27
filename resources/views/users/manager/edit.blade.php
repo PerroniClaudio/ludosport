@@ -300,7 +300,7 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                 <p class="text-background-600 dark:text-background-200 mb-2">
                     {{ __('users.rank_message', [
-                        'rank' => $user->rank->name,
+                        'rank' => __('users.' . strtolower($user->rank->name)),
                     ]) }}
                 </p>
                 <a href="{{ route('users.rank.request.specific', $user->id) }}">
