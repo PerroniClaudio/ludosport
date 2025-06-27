@@ -810,11 +810,11 @@ class User extends Authenticatable implements MustVerifyEmail {
         if (!$highestRole && $this->hasRole('rector')) {
             $highestRole = 'rector';
         }
-        if (!$highestRole && $this->hasRole('dean')) {
-            $highestRole = 'dean';
-        }
         if (!$highestRole && $this->hasRole('manager')) {
             $highestRole = 'manager';
+        }
+        if (!$highestRole && $this->hasRole('dean')) {
+            $highestRole = 'dean';
         }
         if (!$highestRole && $this->hasRole('instructor')) {
             $highestRole = 'instructor';
