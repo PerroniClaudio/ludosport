@@ -203,10 +203,12 @@ class UserController extends Controller {
                 $primaryAcademy = $authUser->primaryAcademy();
                 $academies = collect([$primaryAcademy]);
                 break;
-            case 'dean':
-                $academies = Academy::where('is_disabled', false)->where('id', ($authUser->primarySchool()->academy->id ?? null))->get();
-                break;
             case 'manager':
+                // $academies = Academy::where('is_disabled', false)->where('id', ($authUser->primarySchool()->academy->id ?? null))->get();
+                $primaryAcademy = $authUser->primaryAcademy();
+                $academies = collect([$primaryAcademy]);
+                break;
+            case 'dean':
                 $academies = Academy::where('is_disabled', false)->where('id', ($authUser->primarySchool()->academy->id ?? null))->get();
                 break;
             default:

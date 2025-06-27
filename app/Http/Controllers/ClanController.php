@@ -556,6 +556,27 @@ class ClanController extends Controller {
         //     return back()->with('error', 'Cannot delete course with associated athletes.');
         // }
 
+        switch ($authRole) {
+            case 'admin':
+                break;
+            case 'rector':
+                $primaryAcademy = $authUser->primaryAcademy();
+                if (!$primaryAcademy || !$primaryAcademy->schools->where('id', $clan->school_id)->first()) {
+                    return redirect()->route('dashboard')->with('error', 'You are not authorized to delete this course.');
+                }
+                break;
+            case 'dean':
+            case 'manager':
+                $school = $authUser->primarySchool();
+                if (!$school || ($school->id != $clan->school_id)) {
+                    return redirect()->route('dashboard')->with('error', 'You are not authorized to delete this course.');
+                }
+                break;
+            default:
+                return redirect()->route('dashboard')->with('error', 'You are not authorized to delete this course.');
+                break;
+        }
+
         $athletes = $clan->users()->pluck('user_id')->toArray();
         $personnel = $clan->personnel()->pluck('user_id')->toArray();
 
@@ -751,16 +772,16 @@ class ClanController extends Controller {
                 // $permitted = $rector && ($rector->id == $authUser->id);
                 $permitted = ($authUser->primaryAcademy()->id ?? null) == $academy->id;
                 break;
+            case 'manager':
+                $school = $clan->school;
+                $primarySchool = $authUser->primarySchool();
+                $permitted = $primarySchool && $school && ($primarySchool->id == $school->id);
+                break;
             case 'dean':
                 $school = $clan->school;
                 // $dean = $school->dean() ?? null;
                 // $permitted = $dean && ($dean->id == $authUser->id);
                 $permitted = ($authUser->primarySchool()->id ?? null) == $school->id;
-                break;
-            case 'manager':
-                $school = $clan->school;
-                $primarySchool = $authUser->primarySchool();
-                $permitted = $primarySchool && $school && ($primarySchool->id == $school->id);
                 break;
             default:
                 break;
