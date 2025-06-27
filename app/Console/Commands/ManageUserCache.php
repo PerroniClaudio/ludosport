@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\PaginatedUserController;
 use App\Services\UserCacheService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -86,6 +87,12 @@ class ManageUserCache extends Command {
 
         $this->withProgressBar($roles, function ($role) {
             // This would require actual requests to warm the cache effectively
+
+            $controller = new PaginatedUserController(
+                $this->cacheService
+            );
+            $controller->warmCache($role);
+
             // For now, we just indicate the structure
             $this->line(" ✓ Ready to warm {$role} queries");
         });

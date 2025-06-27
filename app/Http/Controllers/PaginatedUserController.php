@@ -227,4 +227,19 @@ class PaginatedUserController extends Controller {
 
         return $users;
     }
+
+    public function warmCache(string $selectedRole) {
+        $user = User::find(0);
+        $this->buildUserQuery(
+            $user,
+            'admin',
+            $selectedRole,
+            new Request(
+                [
+                    'role' => $selectedRole,
+                    'page' => 1
+                ]
+            )
+        );
+    }
 }
