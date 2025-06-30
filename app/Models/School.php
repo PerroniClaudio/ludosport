@@ -20,7 +20,8 @@ class School extends Model {
         'zip',
         'country',
         'coordinates',
-        'email'
+        'email',
+        'main_dean',
     ];
 
     public function toSearchableArray() {
@@ -52,23 +53,41 @@ class School extends Model {
         return $this->hasMany(Clan::class)->where('is_disabled', '0');
     }
 
+    // public function dean() {
+    //     $deans = $this->personnel()->whereHas('roles', function ($query) {
+    //         $query->where('name', 'dean');
+    //     })->get();
+    //     // Se lo trova tra quelli che hanno la scuola come principale restituisce quello
+    //     foreach ($deans as $r) {
+    //         if (($r->primarySchool()->id ?? null) == $this->id) {
+    //             return $r;
+    //         }
+    //     }
+    //     // Per ora si considera preside solo chi ha l'accademia come principale.
+    //     // Altrimenti cerca tra tutto il personale (anche se non ha la scuola come principale)
+    //     // foreach ($deans as $r) {
+    //     //     if ($r->schools->firstWhere('id', $this->id)) {
+    //     //         return $r;
+    //     //     }
+    //     // }
+    //     return null;
+    // }
+
+    public function mainDean() {
+        return $this->belongsTo(User::class, 'main_dean', 'id');
+    }
+
     public function dean() {
+        // If main_dean is set, return it
+        if ($this->main_dean) {
+            return $this->mainDean;
+        }
+
+        // Otherwise, find the first dean in the personnel
         $deans = $this->personnel()->whereHas('roles', function ($query) {
             $query->where('name', 'dean');
         })->get();
-        // Se lo trova tra quelli che hanno la scuola come principale restituisce quello
-        foreach ($deans as $r) {
-            if (($r->primarySchool()->id ?? null) == $this->id) {
-                return $r;
-            }
-        }
-        // Per ora si considera preside solo chi ha l'accademia come principale.
-        // Altrimenti cerca tra tutto il personale (anche se non ha la scuola come principale)
-        // foreach ($deans as $r) {
-        //     if ($r->schools->firstWhere('id', $this->id)) {
-        //         return $r;
-        //     }
-        // }
-        return null;
+
+        return $deans->first();
     }
 }

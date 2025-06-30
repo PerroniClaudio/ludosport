@@ -10,6 +10,7 @@ use App\Models\School;
 use App\Models\User;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -163,6 +164,7 @@ class SchoolController extends Controller {
      * Show the form for editing the specified resource.
      */
     public function edit(School $school) {
+
         // Aggiungere i controlli per poter accedere alla pagina di modifica della scuola 
         if (!$this->checkPermission($school)) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
@@ -408,6 +410,7 @@ class SchoolController extends Controller {
             'name' => $request->name,
             'slug' => Str::slug($request->name),
             'academy_id' => $request->academy_id,
+            'main_dean' => $request->main_dean ?? null,
             'email' => $request->email,
         ]);
 
@@ -858,6 +861,35 @@ class SchoolController extends Controller {
         return redirect()->route($redirectRoute, $school)->with('success', 'Athlete removed successfully!');
     }
 
+    public function availableDeans(School $school) {
+        $authUser = User::find(Auth::user()->id);
+        $authRole = $authUser->getRole();
+
+        if (!$this->checkPermission($school)) {
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
+
+        // Si prendono solo i deans che sono associati alla scuola
+        $deans = User::whereHas('roles', function ($query) {
+            $query->where('name', 'dean');
+        })->whereHas('schools', function ($query) use ($school) {
+            $query->where('school_id', $school->id);
+        })->get();
+
+        return response()->json(
+            [
+                'deans' => $deans->map(function ($dean) {
+                    return [
+                        'id' => $dean->id,
+                        'name' => $dean->name,
+                        'surname' => $dean->surname,
+                        'email' => $dean->email,
+                    ];
+                })->toArray()
+            ]
+        );
+    }
+
     public function all(Request $request) {
         $schools = School::where('is_disabled', '0')->with(['academy'])->get();
         $formatted_schools = [];
@@ -1220,7 +1252,7 @@ class SchoolController extends Controller {
 
     public function detail(School $school) {
 
-        $dean = $school->dean() ? $school->dean()->name . " " . $school->dean()->surname : "";
+        $dean = $school->dean ? $school->dean->name . " " . $school->dean->surname : "";
 
         $academy = $school->academy;
 

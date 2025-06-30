@@ -157,6 +157,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/schools/{school}/athlete', [App\Http\Controllers\SchoolController::class, 'addAthlete'])->name('schools.athlete.store');
     Route::post('/schools/{school}/remove-athlete', [App\Http\Controllers\SchoolController::class, 'removeAthlete'])->name('schools.athlete.remove');
 
+    Route::get('/schools/{school}/available-deans', [App\Http\Controllers\SchoolController::class, 'availableDeans'])->name('schools.available-deans');
+
     Route::get('/schools/{school}/users-search', [App\Http\Controllers\SchoolController::class, 'searchUsers'])->name('schools.users-search');
 });
 
