@@ -46,11 +46,18 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
   Route::group([], function () {
     Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('manager.academies.all');
     Route::get('/academies/search', [App\Http\Controllers\AcademyController::class, 'search'])->name('manager.academies.search');
-
-    Route::get('/academies/{academy}/users-search', [App\Http\Controllers\AcademyController::class, 'searchUsers'])->name('manager.academies.users-search');
     Route::get('/academies/{academy}/athletes-data', [App\Http\Controllers\AcademyController::class, 'athletesDataForAcademy'])->name('manager.academies.athletes-data');
     Route::get('/academies/{academy}/athletes-school-data', [App\Http\Controllers\AcademyController::class, 'athletesSchoolDataForAcademy'])->name('manager.academies.athletes-school-data');
     Route::get('/academies/{academy}/athletes-year-data', [App\Http\Controllers\AcademyController::class, 'getAthletesNumberPerYear'])->name('manager.academies.athletes-year-data');
+
+    Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'edit'])->name('manager.academies.edit');
+    Route::post('/academies/{academy}/users/create', [App\Http\Controllers\UserController::class, 'storeForAcademy'])->name('manager.academies.users.create');
+    Route::post('/academies/{academy}/add-personnel', [App\Http\Controllers\AcademyController::class, 'addPersonnel'])->name('manager.academies.personnel.store');
+    Route::post('/academies/{academy}/remove-personnel', [App\Http\Controllers\AcademyController::class, 'removePersonnel'])->name('manager.academies.personnel.remove');
+    Route::post('/academies/{academy}/add-athlete', [App\Http\Controllers\AcademyController::class, 'addAthlete'])->name('manager.academies.athlete.store');
+    Route::post('/academies/{academy}/remove-athlete', [App\Http\Controllers\AcademyController::class, 'removeAthlete'])->name('manager.academies.athlete.remove');
+
+    Route::get('/academies/{academy}/users-search', [App\Http\Controllers\AcademyController::class, 'searchUsers'])->name('manager.academies.users-search');
   });
 
   // Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'show'])->name('manager.academies.show');

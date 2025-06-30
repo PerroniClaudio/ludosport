@@ -394,6 +394,10 @@ class AcademyController extends Controller {
         $authRole = $authUser->getRole();
         $personnel = User::find($request->personnel_id);
 
+        if(!$this->checkPermission($academy)){
+            return back()->with('error', 'Not authorized.');
+        }
+
         $academy->personnel()->syncWithoutDetaching($personnel->id);
 
         // Se il personale non ha l'accademia principale, la assegna
@@ -417,7 +421,7 @@ class AcademyController extends Controller {
 
         // L'admin può farlo sempre, il rettore solo se l'accademia è la sua
         // if ($authRole !== 'admin' && ($authRole !== 'rector' || (($academy->rector()->id ?? null) != $authUser->id))) {
-        if ($authRole !== 'admin' && ($authRole !== 'rector' || (($authUser->primaryAcademy()->id ?? null) != $academy->id))) {
+        if ($authRole !== 'admin' && (!in_array($authRole, ['rector', 'manager']) || (($authUser->primaryAcademy()->id ?? null) != $academy->id))) {
             return back()->with('error', 'Not authorized.');
         }
 
@@ -488,9 +492,9 @@ class AcademyController extends Controller {
 
         // l'atleta può essere associato ad una sola accademia, quindi se si modifica vanno rimossi anche tutti i collegamenti inferiori (scuole e corsi)
 
-        // L'admin può farlo sempre, il rettore solo se l'accademia è la sua
+        // L'admin può farlo sempre, il rettore e il manager solo se l'accademia è la loro
         // if ($authRole !== 'admin' && ($authRole !== 'rector' || (($academy->rector()->id ?? null) != $authUser->id))) {
-        if ($authRole !== 'admin' && ($authRole !== 'rector' || (($authUser->primaryAcademy()->id ?? null) != $academy->id))) {
+        if ($authRole !== 'admin' && (!in_array($authRole, ['rector', 'manager']) || (($authUser->primaryAcademy()->id ?? null) != $academy->id))) {
             return back()->with('error', 'Not authorized.');
         }
 

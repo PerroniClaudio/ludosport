@@ -196,7 +196,7 @@
 
             <x-academy.search-users :academy="$academy" :roles="$roles" />
 
-            @if ($authRole === 'admin' || $authRole === 'rector')
+            @if (in_array($authRole, ['admin', 'rector', 'manager']))
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                     <div class="flex items-center justify-between">
                         <h3 class="text-background-800 dark:text-background-200 text-2xl">
@@ -205,8 +205,10 @@
                         <div class="flex items-center gap-1">
 
                             <x-academy.personnel :academy="$academy" :personnel="$personnel" :associatedPersonnel="$associated_personnel" />
-                            <x-academy.create-user academy="{{ $academy->id }}" type="personnel"
-                                :roles="$editable_roles" />
+                            @if (in_array($authRole, ['admin', 'rector']))
+                                <x-academy.create-user academy="{{ $academy->id }}" type="personnel"
+                                    :roles="$editable_roles" />
+                            @endif
 
                         </div>
                     </div>
@@ -252,7 +254,7 @@
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.athletes') }}
                     </h3>
                     <div class="flex items-center gap-1">
-                        @if ($authRole === 'admin' || $authRole === 'rector')
+                        @if (in_array($authRole, ['admin', 'rector', 'manager']))
                             <x-academy.athletes :academy="$academy" :athletes="$athletes" :associatedAthletes="$associated_athletes" />
                             <x-academy.create-user academy="{{ $academy->id }}" type="athlete" :roles="$roles" />
                         @endif

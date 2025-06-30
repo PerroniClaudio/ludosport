@@ -291,9 +291,9 @@ class UserController extends Controller {
             $user->setPrimaryAcademyAthlete($academy->id);
             // Un atelta senza scuola è associato alla scuola No school
             $noSchool = School::where('slug', 'no-school')->first();
-            // Se creato da dean o manager va associato alla scuola altrimenti non lo possono vedere.
-            // Dato che dean e manager sono abilitati ad una scuola sola, basta recuperare quella.
-            if (in_array($authRole, ['dean', 'manager']) && $authUser->primarySchool()) {
+            // Se creato da dean va associato alla scuola altrimenti non lo possono vedere.
+            // Dato che dean è abilitato ad una scuola sola, basta recuperare quella.
+            if (in_array($authRole, ['dean']) && $authUser->primarySchool()) {
                 $school = $authUser->primarySchool();
                 $school->athletes()->syncWithoutDetaching($user->id);
                 $user->setPrimarySchoolAthlete($school->id);
@@ -1366,16 +1366,16 @@ class UserController extends Controller {
                 }
             }
             
-            // Ho aggiunto il controllo per il manager per il cambio richiesto nel ticket 3437.
-            // Penso che il rettore non abbia limitazioni perchè deve poter trovare utenti che non hanno l'accademia e devono essere aggiunti.
-            if (in_array($authUserRole, ['manager'])) {
-                if (
-                    $user->academies->where('id', $authPrimaryAcademy->id)->isEmpty()
-                    && $user->academyAthletes->where('id', $authPrimaryAcademy->id)->isEmpty()
-                ) {
-                    $shouldAdd = false;
-                }
-            }
+            // Ho aggiunto il controllo per il manager per il cambio richiesto nel ticket 3437. nel ticket 3681 si precisa che manager e rettore devono comportarsi allo stesso modo in questo caso.
+            // Rettore e manager non hanno limitazioni perchè devono poter trovare utenti che non hanno l'accademia e devono essere aggiunti.
+            // if (in_array($authUserRole, ['manager'])) {
+            //     if (
+            //         $user->academies->where('id', $authPrimaryAcademy->id)->isEmpty()
+            //         && $user->academyAthletes->where('id', $authPrimaryAcademy->id)->isEmpty()
+            //     ) {
+            //         $shouldAdd = false;
+            //     }
+            // }
 
             if ($shouldCheckForYear) {
                 if ($user->subscription_year != $request->year) {
@@ -2307,7 +2307,7 @@ class UserController extends Controller {
         $user = User::find($request->user_id);
         $school = School::find($request->school_id);
 
-        if ($authUserRole !== 'admin' && !($authUserRole === "rector" && ($authUser->primaryAcademy()->id === $school->academy->id))) {
+        if ($authUserRole !== 'admin' && !(in_array($authUserRole, ["rector", "manager"]) && ($authUser->primaryAcademy()->id === $school->academy->id))) {
             return response()->json([
                 'error' => 'You are not authorized to associate this user with this school!',
             ]);
