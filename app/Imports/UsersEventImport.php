@@ -49,6 +49,13 @@ class UsersEventImport implements ToCollection {
                 continue;
             }
 
+            // chi ha richiesto l'importazione deve essere admin o della stessa accademia dell'evento
+            if(!$this->importingUser->hasRole('admin') && (!$this->importingUser->primaryAcademy() || ($this->importingUser->primaryAcademy()->id != $event->academy_id))) {
+                $this->log[] = "['Unauthorized to import user to event. email: " . $row[1] . " - event ID: " . $row[0] . "']";
+                $this->is_partial = true;
+                continue;
+            }
+
             if ($user && $event) {
                 if($event->resultType() == 'enabling') {
                     $weaponForm = $event->weaponForm();
