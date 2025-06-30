@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class PaginatedUserController extends Controller {
     public function index(Request $request) {
-        dd($authUserRole);
 
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
