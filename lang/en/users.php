@@ -27,6 +27,7 @@ return [
     'admin_role' => 'Administrators',
     'roles' => 'Roles',
     'academy' => 'Academy',
+    'no_academy' => 'No academy',
     'academies' => 'Academies',
     'select_academy' => 'Select Academy',
     'select_school' => 'Select School',

@@ -25,6 +25,10 @@ class UsersAcademyImport implements ToCollection {
     public function collection(Collection $collection) {
 
         $importingUserRole = $this->importingUser->getHighestRole();
+        // Accademia primaria dell'utente come personale (serve se è rettore o manager)
+        $importingUserPrimaryAcademy = $this->importingUser->primaryAcademy();
+        
+        $noSchool = School::where('slug', 'no-school')->first();
 
         $firstRow = true;
         foreach ($collection as $row) {
@@ -34,7 +38,6 @@ class UsersAcademyImport implements ToCollection {
             }
 
             try {
-                $noSchool = School::where('slug', 'no-school')->first();
 
                 $user = User::where('email', $row[0])->first();
                 $academy = Academy::where('id', $row[1])->first();
@@ -51,9 +54,16 @@ class UsersAcademyImport implements ToCollection {
                     continue;
                 }
 
+                if(in_array($importingUserRole, ["rector", "manager"]) && (!$importingUserPrimaryAcademy || ($importingUserPrimaryAcademy->id != $academy->id))) {
+                    $this->log[] = "['Error: The " . $importingUserRole . " cannot import users to an academy that is not their primary academy. Email: " . $row[0] . "']";
+                    $this->is_partial = true;
+                    continue;
+                }
+
                 if($user->academyAthletes()->first()->id != $academy->id) {
-                    // L'admin può farlo sempre, il rettore solo se l'accademia è no academy, gli altri non hanno accesso alla funzionalità.
-                    if($importingUserRole !== 'admin' && ($importingUserRole !== "rector" || $user->academyAthletes()->first()->id !== 1)) {
+                    // L'admin può farlo sempre, il rettore e il manager solo se l'accademia di provenienza è no academy e quella di destinazione è la loro accademia.
+                    // gli altri non hanno accesso alla funzionalità.
+                    if($importingUserRole !== 'admin' && (!in_array($importingUserRole, ["rector", "manager"]) || $user->academyAthletes()->first()->id !== 1)) {
                         $this->log[] = "['Error: The " . $importingUserRole . " cannot import this user from another academy. Email: " . $row[0] . "']";
                         $this->is_partial = true;
                         continue;

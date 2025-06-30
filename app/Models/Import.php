@@ -41,9 +41,9 @@ class Import extends Model {
             case 'admin':
                 return ['new_users', 'users_course', 'users_academy', 'users_school', 'event_participants', 'event_war', 'event_style', 'event_instructor_results'];
             case 'rector':
+            case 'manager':
                 return ['new_users', 'users_course', 'users_academy', 'users_school', 'event_participants'];
             case 'dean':
-            case 'manager':
                 return ['new_users', 'users_course', 'users_school'];
             case 'technician':
                 return ['event_instructor_results'];
