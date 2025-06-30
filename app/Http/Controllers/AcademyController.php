@@ -263,6 +263,7 @@ class AcademyController extends Controller {
             $academy->update([
                 'name' => $request->name,
                 'email' => $request->email,
+                'main_rector' => $request->main_rector,
                 'nation_id' => $request->nationality,
                 'slug' => Str::slug($request->name),
                 'address' => $request->address,
@@ -282,6 +283,7 @@ class AcademyController extends Controller {
             $academy->update([
                 'name' => $request->name,
                 'email' => $request->email,
+                'main_rector' => $request->main_rector,
                 'nation_id' => $request->nationality,
                 'slug' => Str::slug($request->name),
             ]);
@@ -394,7 +396,7 @@ class AcademyController extends Controller {
         $authRole = $authUser->getRole();
         $personnel = User::find($request->personnel_id);
 
-        if(!$this->checkPermission($academy)){
+        if (!$this->checkPermission($academy)) {
             return back()->with('error', 'Not authorized.');
         }
 
@@ -996,5 +998,34 @@ class AcademyController extends Controller {
         ];
 
         return response($image, 200, $headers);
+    }
+
+    public function availableRectors(Academy $academy) {
+        $authUser = User::find(Auth::user()->id);
+        $authRole = $authUser->getRole();
+
+        if (!$this->checkPermission($academy)) {
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
+
+        // Si prendono solo i rector che sono associati all'accademia
+        $rectors = User::whereHas('roles', function ($query) {
+            $query->where('name', 'rector');
+        })->whereHas('academies', function ($query) use ($academy) {
+            $query->where('academy_id', $academy->id);
+        })->get();
+
+        return response()->json(
+            [
+                'rectors' => $rectors->map(function ($rector) {
+                    return [
+                        'id' => $rector->id,
+                        'name' => $rector->name,
+                        'surname' => $rector->surname,
+                        'email' => $rector->email,
+                    ];
+                })->toArray()
+            ]
+        );
     }
 }

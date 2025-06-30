@@ -20,7 +20,8 @@ class Academy extends Model {
         'country',
         'coordinates',
         'picture',
-        'email'
+        'email',
+        'main_rector',
     ];
 
     public function toSearchableArray() {
@@ -54,7 +55,17 @@ class Academy extends Model {
         return $this->belongsToMany(User::class, 'academies_personnel', 'academy_id', 'user_id')->where('is_disabled', '0')->withPivot('is_primary');
     }
 
+    public function mainRector() {
+        return $this->belongsTo(User::class, 'main_rector', 'id');
+    }
+
     public function rector() {
+        // If main_rector is set, return it
+        if ($this->main_rector) {
+            return $this->mainRector;
+        }
+
+        // Otherwise, find the first rector in the personnel
         $rectors = $this->personnel()->whereHas('roles', function ($query) {
             $query->where('name', 'rector');
         })->get();

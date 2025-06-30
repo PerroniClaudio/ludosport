@@ -126,6 +126,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/academies/{academy}/remove-athlete', [App\Http\Controllers\AcademyController::class, 'removeAthlete'])->name('academies.athlete.remove');
 
     Route::get('/academies/{academy}/users-search', [App\Http\Controllers\AcademyController::class, 'searchUsers'])->name('academies.users-search');
+    Route::get('/academies/{academy}/available-rectors', [App\Http\Controllers\AcademyController::class, 'availableRectors'])->name('academies.available-rectors');
     Route::put('/academies/{academy}/picture', [App\Http\Controllers\AcademyController::class, 'picture'])->name('academies.picture.update');
 });
 

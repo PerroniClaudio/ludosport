@@ -53,10 +53,7 @@
                         <div class="flex flex-col gap-2 ">
                             <x-form.input name="email" label="{{ __('academies.academy_email') }}" type="text"
                                 value="{{ $academy->email ?? '' }}" placeholder="{{ fake()->email() }}" />
-                            <x-form.input name="rector" label="{{ __('academies.academy_rector') }}" type="text"
-                                value="{{ $academy->rector() ? $academy->rector()->name . ' ' . ($academy->rector()->surname ?? '') : '' }}"
-                                placeholder="{{ fake()->name() }}" disabled
-                                description="{{ __('academies.academy_rector_description') }}" />
+                            <x-academy.rector :academy="$academy" />
                         </div>
 
                         {{-- <h1 class="text-background-800 dark:text-background-200 text-lg">{{ __('academies.address') }}

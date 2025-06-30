@@ -45,6 +45,7 @@ return [
     'academy_rector' => 'Academy Rector',
     'academy_rector_description' => 'The rector is the one with this role and the academy as primary academy.',
     // 'academy_rector_description' => 'The rector is the one with this role and the academy as primary academy. If there is more than one, the first one found will be displayed. If there is none, the first rector in the academy personnel will result as rector, even without the academy as primary academy.',
+    'select_rector' => 'Select a Rector',
     'academy_create_fees' => 'Create new fees',
     'fee_number' => 'Fee Number',
 
