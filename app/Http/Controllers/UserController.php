@@ -31,27 +31,7 @@ use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller {
 
-    public function index(Request $request) {
-        $roles = Role::all();
-
-        $users = User::query()
-            ->where('is_disabled', false)
-            ->when($request->role, function ($query) use ($request) {
-                return $query->whereHas('roles', function ($q) use ($request) {
-                    $q->where('label', $request->role);
-                });
-            })
-            ->orderBy('name')
-            ->paginate(30);
-
-        return view('users.paginated', [
-            'roles' => $roles,
-            'selectedRole' => $request->role ? $request->role : 'athlete',
-            'users' => $users,
-        ]);
-    }
-
-    public function _index() {
+    public function index() {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
@@ -1365,7 +1345,7 @@ class UserController extends Controller {
                     $shouldAdd = false;
                 }
             }
-            
+
             // Ho aggiunto il controllo per il manager per il cambio richiesto nel ticket 3437. nel ticket 3681 si precisa che manager e rettore devono comportarsi allo stesso modo in questo caso.
             // Rettore e manager non hanno limitazioni perchè devono poter trovare utenti che non hanno l'accademia e devono essere aggiunti.
             // if (in_array($authUserRole, ['manager'])) {

@@ -10,8 +10,11 @@ use Illuminate\Support\Facades\Auth;
 
 class PaginatedUserController extends Controller {
     public function index(Request $request) {
+        dd($authUserRole);
+
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
+
 
         if (!in_array($authUserRole, ['admin', 'rector', 'dean', 'manager', 'technician', 'instructor'])) {
             return redirect()->route("dashboard")->with('error', 'You do not have the required role to access this page!');
@@ -28,6 +31,8 @@ class PaginatedUserController extends Controller {
                     $q->where('label', $request->role);
                 });
             });
+
+
 
         // Apply scope filtering based on auth user role
         switch ($authUserRole) {
