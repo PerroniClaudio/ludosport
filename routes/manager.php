@@ -71,7 +71,7 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
     Route::get('/schools/academy', [App\Http\Controllers\SchoolController::class, 'getByAcademy'])->name('manager.schools.academy');
     Route::get('/schools', [App\Http\Controllers\SchoolController::class, 'index'])->name('manager.schools.index');
     // Route::get('/schools/create', [App\Http\Controllers\SchoolController::class, 'create'])->name('manager.schools.create');
-    // Route::get('/schools/search', [App\Http\Controllers\SchoolController::class, 'search'])->name('manager.schools.search');
+    Route::get('/schools/search', [App\Http\Controllers\SchoolController::class, 'search'])->name('manager.schools.search');
 
     Route::get('/schools/{school}/athletes-data', [App\Http\Controllers\SchoolController::class, 'athletesDataForSchool'])->name('manager.schools.athletes-data');
     Route::get('/schools/{school}/athletes-clan-data', [App\Http\Controllers\SchoolController::class, 'athletesClanDataForSchool'])->name('manager.schools.athletes-school-data');

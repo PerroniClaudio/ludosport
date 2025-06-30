@@ -1,24 +1,43 @@
-@props([
+<!-- @props([
     'selectedSchoolId' => auth()->user()->primarySchool()->id ?? '0',
     'selectedSchool' => auth()->user()->primarySchool()->name ?? 'Select a school',
+]) -->
+@props([
+    'selectedSchoolId' => '0',
+    'selectedSchool' => 'Select a school',
+    'isCreating' => false,
 ])
 
 
 <div x-data="{
+    currentSchoolId: '{{ $selectedSchoolId }}',
     selectedSchoolId: '{{ $selectedSchoolId }}',
     selectedSchool: '{{ addslashes($selectedSchool) }}',
-    availableSchools: [],
+    availableSchools: {{ auth()->user()->primaryAcademy()->schools ?? [] }},
     paginatedSchools: [],
     currentPage: 1,
     totalPages: 1,
     getavailableSchools: function() {
-        data = [{{ auth()->user()->primarySchool() }}];
+        data = {{ auth()->user()->primaryAcademy()->schools ?? [] }}; 
         this.availableSchools = data;
         this.paginatedSchools = this.availableSchools.slice(0, 5);
         this.totalPages = Math.ceil(this.availableSchools.length / 5);
     },
     searchavailableSchools: function(event) {
-    
+        if (event.target.value.length >= 3) {
+            fetch('/manager/schools/search?search=' + event.target.value)
+                .then(response => response.json())
+                .then(data => {
+                    this.availableSchools = data;
+                    this.paginatedSchools = this.availableSchools.slice(0, 5);
+                    this.totalPages = Math.ceil(this.availableSchools.length / 5);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        } else {
+            this.getavailableSchools();
+        }
     },
     goToPage: function(page) {
         if (page < 1 || page > this.totalPages) {
@@ -39,14 +58,13 @@
     <div class="flex items-center gap-2">
         <input type="hidden" name="school_id" x-model="selectedSchoolId">
         <x-text-input disabled name="School" class="flex-1" type="text" x-model="selectedSchool" />
-        {{-- Si è deciso di non modificare la scuola di appartenenza per evitare problemi con le associazioni degli atleti eventualmente presenti --}}
-        {{-- <div class="text-primary-500 hover:bg-background-500 dark:hover:bg-background-900 p-2 rounded-full cursor-pointer"
+        <div class="text-primary-500 hover:bg-background-500 dark:hover:bg-background-900 p-2 rounded-full cursor-pointer"
             x-on:click.prevent="$dispatch('open-modal', 'selected-school-modal')">
             <x-lucide-search class="w-6 h-6 text-primary-500 dark:text-primary-400" />
-        </div> --}}
+        </div>
     </div>
 
-    {{-- <x-modal name="selected-school-modal" :show="$errors->userId->isNotEmpty()" focusable>
+    <x-modal name="selected-school-modal" :show="$errors->userId->isNotEmpty()" focusable>
         <div class="p-6 flex flex-col gap-2">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
@@ -148,6 +166,30 @@
                 </div>
             </div>
         </div>
-    </x-modal> --}}
+    </x-modal>
+
+    <template x-if="{{!$isCreating}} && (selectedSchoolId != currentSchoolId)">
+        <div class="mt-2">
+            <div class="flex gap-2">
+                <x-input-label for="transfer_athletes" value="{{ __('clan.transfer_athletes') }}" />
+                <div class="has-tooltip">
+                    <x-lucide-info class="h-4 text-background-300" />
+                    <div class="tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full">
+                        {{ __('clan.transfer_athletes_tooltip') }}
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm">
+                <label class="flex items-center w-fit cursor-pointer">
+                    <input type="radio" name="transfer_athletes" value="yes" required>
+                    <span class="ml-2">{{ __('clan.yes') }}</span>
+                </label>
+                <label class="flex items-center w-fit cursor-pointer">
+                    <input type="radio" name="transfer_athletes" value="no" required>
+                    <span class="ml-2">{{ __('clan.no') }}</span>
+                </label>
+            </div>
+        </div>
+    </template>
 
 </div>

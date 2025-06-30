@@ -16,7 +16,7 @@
                         <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                             :value="$clan->name" placeholder="{{ fake()->company() }}" />
 
-                        <x-clan.school :selectedSchoolId="$clan->school_id" :selectedSchool="$clan->school->name" />
+                        <x-clan.manager.school :selectedSchoolId="$clan->school_id" :selectedSchool="$clan->school->name" />
                         <x-clan.weapon-form :selected_weapon="$clan->weaponform" :available_weapons="$available_weapons" />
 
                     </div>
