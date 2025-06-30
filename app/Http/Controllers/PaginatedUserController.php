@@ -87,50 +87,146 @@ class PaginatedUserController extends Controller {
                 return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
         }
 
+        // Handle sorting
+        $sortBy = $request->get('sortedby', 'created_at');
+        $sortDirection = $request->get('direction', 'asc');
+
+        // Ensure valid direction
+        if (!in_array($sortDirection, ['asc', 'desc'])) {
+            $sortDirection = 'asc';
+        }
+
+        // Define valid sort fields for each role
+        $validSortFields = [
+            'athlete' => ['id', 'name', 'surname', 'email', 'subscription_year', 'nation', 'academy', 'school', 'has_paid_fee', 'created_at'],
+            'instructor' => ['id', 'name', 'email', 'weapon_forms', 'created_at'],
+            'technician' => ['id', 'name', 'email', 'weapon_forms', 'created_at'],
+            'rector' => ['id', 'name', 'email', 'academy', 'created_at'],
+            'dean' => ['id', 'name', 'email', 'school', 'created_at'],
+            'default' => ['id', 'name', 'email', 'created_at']
+        ];
+
+        // Get valid fields for current role
+        $currentRoleFields = $validSortFields[$selectedRole] ?? $validSortFields['default'];
+
+        // Validate sort field
+        if (!in_array($sortBy, $currentRoleFields)) {
+            $sortBy = 'created_at';
+        }
+
         // Apply specific relations and selections based on role
         switch ($selectedRole) {
             case 'athlete':
-                $users = $baseQuery
+                $query = $baseQuery
                     ->select('*')
                     ->with([
                         'academyAthletes',
                         'schoolAthletes',
                         'nation'
-                    ])
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(10);
+                    ]);
+
+                // Handle special sorting for athletes
+                switch ($sortBy) {
+                    case 'nation':
+                        $query->leftJoin('nations', 'users.nation_id', '=', 'nations.id')
+                            ->orderBy('nations.name', $sortDirection);
+                        break;
+                    case 'academy':
+                        $query->leftJoin('academy_athletes', 'users.id', '=', 'academy_athletes.athlete_id')
+                            ->leftJoin('academies', function ($join) {
+                                $join->on('academy_athletes.academy_id', '=', 'academies.id')
+                                    ->where('academy_athletes.is_primary', '=', true);
+                            })
+                            ->orderBy('academies.name', $sortDirection);
+                        break;
+                    case 'school':
+                        $query->leftJoin('school_athletes', 'users.id', '=', 'school_athletes.athlete_id')
+                            ->leftJoin('schools', function ($join) {
+                                $join->on('school_athletes.school_id', '=', 'schools.id')
+                                    ->where('school_athletes.is_primary', '=', true);
+                            })
+                            ->orderBy('schools.name', $sortDirection);
+                        break;
+                    default:
+                        $query->orderBy($sortBy, $sortDirection);
+                        break;
+                }
+
+                $users = $query->paginate(10);
                 break;
 
             case 'instructor':
-                $users = $baseQuery
+                $query = $baseQuery
                     ->select('*')
-                    ->with(['weaponFormsPersonnel'])
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(10);
+                    ->with(['weaponFormsPersonnel']);
+
+                // Handle special sorting for instructors
+                if ($sortBy === 'weapon_forms') {
+                    // For weapon forms, we'll sort by the count of weapon forms
+                    $query->withCount('weaponFormsPersonnel')
+                        ->orderBy('weapon_forms_personnel_count', $sortDirection);
+                } else {
+                    $query->orderBy($sortBy, $sortDirection);
+                }
+
+                $users = $query->paginate(10);
                 break;
 
             case 'technician':
-                $users = $baseQuery
+                $query = $baseQuery
                     ->select('*')
-                    ->with(['weaponFormsTechnician'])
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(10);
+                    ->with(['weaponFormsTechnician']);
+
+                // Handle special sorting for technicians
+                if ($sortBy === 'weapon_forms') {
+                    // For weapon forms, we'll sort by the count of weapon forms
+                    $query->withCount('weaponFormsTechnician')
+                        ->orderBy('weapon_forms_technician_count', $sortDirection);
+                } else {
+                    $query->orderBy($sortBy, $sortDirection);
+                }
+
+                $users = $query->paginate(10);
                 break;
 
             case 'rector':
-                $users = $baseQuery
+                $query = $baseQuery
                     ->select('*')
-                    ->with(['academies'])
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(10);
+                    ->with(['academies']);
+
+                // Handle special sorting for rectors
+                if ($sortBy === 'academy') {
+                    $query->leftJoin('academy_users', 'users.id', '=', 'academy_users.user_id')
+                        ->leftJoin('academies', function ($join) {
+                            $join->on('academy_users.academy_id', '=', 'academies.id')
+                                ->where('academy_users.is_primary', '=', true);
+                        })
+                        ->orderBy('academies.name', $sortDirection);
+                } else {
+                    $query->orderBy($sortBy, $sortDirection);
+                }
+
+                $users = $query->paginate(10);
                 break;
 
             case 'dean':
-                $users = $baseQuery
+                $query = $baseQuery
                     ->select('*')
-                    ->with(['schools'])
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(10);
+                    ->with(['schools']);
+
+                // Handle special sorting for deans
+                if ($sortBy === 'school') {
+                    $query->leftJoin('school_users', 'users.id', '=', 'school_users.user_id')
+                        ->leftJoin('schools', function ($join) {
+                            $join->on('school_users.school_id', '=', 'schools.id')
+                                ->where('school_users.is_primary', '=', true);
+                        })
+                        ->orderBy('schools.name', $sortDirection);
+                } else {
+                    $query->orderBy($sortBy, $sortDirection);
+                }
+
+                $users = $query->paginate(10);
                 break;
 
             case 'manager':
@@ -139,7 +235,7 @@ class PaginatedUserController extends Controller {
                 $users = $baseQuery
                     ->select('*')
                     ->with(['roles'])
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy($sortBy, $sortDirection)
                     ->paginate(10);
                 break;
         }
@@ -182,6 +278,8 @@ class PaginatedUserController extends Controller {
             'roles' => $roles,
             'selectedRole' => $selectedRole,
             'users' => $users,
+            'currentSort' => $sortBy,
+            'currentDirection' => $sortDirection,
         ]);
     }
 }

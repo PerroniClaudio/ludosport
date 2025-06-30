@@ -46,102 +46,84 @@
                                         <thead>
                                             <tr class="text-left">
                                                 {{-- ID column always present --}}
-                                                <th
-                                                    class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                <x-sortable-header field="id" :selectedRole="$selectedRole">
                                                     ID
-                                                </th>
+                                                </x-sortable-header>
                                                 {{-- Name column always present --}}
-                                                <th
-                                                    class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                <x-sortable-header field="name" :selectedRole="$selectedRole">
                                                     {{ __('users.name') }}
-                                                </th>
+                                                </x-sortable-header>
 
                                                 @if ($selectedRole == 'athlete')
                                                     {{-- Surname column for athletes --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="surname" :selectedRole="$selectedRole">
                                                         {{ __('users.surname') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                     {{-- Email column for athletes --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="email" :selectedRole="$selectedRole">
                                                         {{ __('users.email') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                     {{-- Year column for athletes --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="subscription_year" :selectedRole="$selectedRole">
                                                         {{ __('users.subscription_year') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                     {{-- Nation column for athletes --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="nation" :selectedRole="$selectedRole">
                                                         {{ __('users.nation') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                     {{-- Academy column for athletes --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="academy" :selectedRole="$selectedRole">
                                                         {{ __('users.academy') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                     {{-- School column for athletes --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="school" :selectedRole="$selectedRole">
                                                         {{ __('users.school') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                     {{-- Fee column for athletes --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="has_paid_fee" :selectedRole="$selectedRole">
                                                         {{ __('users.fee_paid') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                 @elseif ($selectedRole == 'instructor')
                                                     {{-- Email column for instructors --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="email" :selectedRole="$selectedRole">
                                                         {{ __('users.email') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                     {{-- Weapon Forms column for instructors --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="weapon_forms" :selectedRole="$selectedRole">
                                                         {{ __('users.weapons_forms') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                 @elseif ($selectedRole == 'technician')
                                                     {{-- Email column for technicians --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="email" :selectedRole="$selectedRole">
                                                         {{ __('users.email') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                     {{-- Weapon Forms column for technicians --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="weapon_forms" :selectedRole="$selectedRole">
                                                         {{ __('users.weapons_forms') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                 @elseif ($selectedRole == 'rector')
                                                     {{-- Email column for rectors --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="email" :selectedRole="$selectedRole">
                                                         {{ __('users.email') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                     {{-- Academy column for rectors --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="academy" :selectedRole="$selectedRole">
                                                         {{ __('users.academy') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                 @elseif ($selectedRole == 'dean')
                                                     {{-- Email column for deans --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="email" :selectedRole="$selectedRole">
                                                         {{ __('users.email') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                     {{-- School column for deans --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="school" :selectedRole="$selectedRole">
                                                         {{ __('users.school') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                 @else
                                                     {{-- Email column for other roles --}}
-                                                    <th
-                                                        class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    <x-sortable-header field="email" :selectedRole="$selectedRole">
                                                         {{ __('users.email') }}
-                                                    </th>
+                                                    </x-sortable-header>
                                                 @endif
 
                                                 {{-- Actions column always present --}}
@@ -187,7 +169,7 @@
                                                         {{-- Nation column for athletes --}}
                                                         <td
                                                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                                            {{ $user->nation->name ?? '' }}
+                                                            {{ $user->nation }}
                                                         </td>
                                                         {{-- Academy column for athletes --}}
                                                         <td
