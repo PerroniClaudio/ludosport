@@ -69,12 +69,14 @@
         ],
     ]" :rows="$forms">
 
-        <x-slot name="tableActions">
-            <button type="button"
-                x-on:click.prevent="()=>openEditWeaponFormModal('{{ $type }}', row.id, row.awarded_at)">
-                <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-            </button>
-        </x-slot>
+        @if($authRole == 'admin' || (in_array($type, ['athlete']) && in_array($authRole, ['admin', 'rector', 'dean', 'manager'])))
+            <x-slot name="tableActions">
+                <button type="button"
+                    x-on:click.prevent="()=>openEditWeaponFormModal('{{ $type }}', row.id, row.awarded_at)">
+                    <x-lucide-pencil class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                </button>
+            </x-slot>
+        @endif
 
     </x-table>
 

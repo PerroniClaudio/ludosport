@@ -190,12 +190,20 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-
-                <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponForms->map(function ($form) {
-                    $form->awarded_at = explode(' ', $form->awarded_at)[0];
-                    return $form;
-                })" type="athlete" />
-
+                @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponForms->map(function ($form) {
+                        $form->awarded_at = explode(' ', $form->awarded_at)[0];
+                        return $form;
+                    })" type="athlete" />
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsPersonnel->map(function ($form) {
+                        $form->awarded_at = explode(' ', $form->awarded_at)[0];
+                        return $form;
+                    })" type="personnel" />
+                    <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponFormsTechnician->map(function ($form) {
+                        $form->awarded_at = explode(' ', $form->awarded_at)[0];
+                        return $form;
+                    })" type="technician" />
+                @endif
                 <div
                     class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 text-background-800 dark:text-background-200 ">
                     <h3 class="text-2xl">

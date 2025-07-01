@@ -2006,24 +2006,24 @@ class UserController extends Controller {
         if (!in_array($authUserRole, ['admin', 'rector', 'dean', 'manager'])) {
             return response()->json([
                 'error' => 'You are not authorized to edit user\'s weapon forms!',
-            ]);
+            ], 401);
         }
 
         if ($authUserRole == 'rector' && (!$authUser->primaryAcademy() || !$user->academyAthletes->contains($authUser->primaryAcademy()->id))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
-            ]);
+            ], 401);
         }
         if ($authUserRole == 'manager' && (!$authUser->primaryAcademy() || !$user->academyAthletes->contains($authUser->primaryAcademy()->id))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
-            ]);
+            ], 401);
         }
 
         if ($authUserRole == 'dean' && (!$authUser->primarySchool() || !$user->schoolAthletes->contains($authUser->primarySchool()->id))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!' . 'primarySchool: ' . $authUser->primarySchool()->id . ' - userContainsSchool: ' . ($user->schoolAthletes->contains($authUser->primarySchool()->id) ? 'true' : 'false'),
-            ]);
+            ], 401);
         }
 
         $previousForms = $user->weaponForms;
@@ -2033,7 +2033,7 @@ class UserController extends Controller {
         if ($authUserRole != 'admin' && !$toRemove->isEmpty()) {
             return response()->json([
                 'error' => 'You are not authorized to remove already associated weapon forms!',
-            ]);
+            ], 401);
         }
         foreach ($toRemove as $form) {
             Log::channel('weapon_form')->info('Athlete weapon form removed', [
@@ -2070,7 +2070,7 @@ class UserController extends Controller {
         if ($authUserRole !== 'admin') {
             return response()->json([
                 'error' => 'You are not authorized to edit user\'s weapon forms!',
-            ]);
+            ], 401);
         }
 
         $previousForms = $user->weaponFormsPersonnel;
@@ -2111,7 +2111,7 @@ class UserController extends Controller {
         if ($authUserRole !== 'admin') {
             return response()->json([
                 'error' => 'You are not authorized to edit user\'s weapon forms!',
-            ]);
+            ], 401);
         }
         $previousForms = $user->weaponFormsTechnician;
         $requestForms = explode(',', $request->weapon_forms);
@@ -2150,19 +2150,19 @@ class UserController extends Controller {
         if (!in_array($authUserRole, ['admin', 'rector', 'manager', 'dean'])) {
             return response()->json([
                 'error' => 'You are not authorized to edit user\'s weapon forms!',
-            ]);
+            ], 401);
         }
         // Se la richiesta è del rettore ed è diversa da athlete o l'utente non è nell'accademia del rettore non si può modificare
         if (in_array($authUserRole, ['rector', 'manager']) && (($request->type != 'athlete') || !$user->academyAthletes->contains($authUser->primaryAcademy()->id))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
-            ]);
+            ], 401);
         }
         // Se la richiesta è del preside ed è diversa da athlete o l'utente non è nella scuola del preside non si può modificare
         if ($authUserRole == 'dean' && (($request->type != 'athlete') || !$user->schoolAthletes->contains($authUser->primarySchool()->id))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
-            ]);
+            ], 401);
         }
 
         $request->validate([
@@ -2209,7 +2209,7 @@ class UserController extends Controller {
         if ($authUserRole !== 'admin') {
             return response()->json([
                 'error' => 'You are not authorized to associate user with academy!',
-            ]);
+            ], 401);
         }
 
         $user = User::find($request->user_id);
@@ -2290,7 +2290,7 @@ class UserController extends Controller {
         if ($authUserRole !== 'admin' && !(in_array($authUserRole, ["rector", "manager"]) && ($authUser->primaryAcademy()->id === $school->academy->id))) {
             return response()->json([
                 'error' => 'You are not authorized to associate this user with this school!',
-            ]);
+            ], 401);
         }
 
         if ($request->type == 'personnel') {
@@ -2338,7 +2338,7 @@ class UserController extends Controller {
         if ($authUserRole !== 'admin') {
             return response()->json([
                 'error' => 'You are not authorized to remove user from academy!',
-            ]);
+            ], 401);
         }
 
         $user = User::find($request->user_id);
@@ -2443,7 +2443,7 @@ class UserController extends Controller {
         if ($authUserRole !== 'admin' && !($authUserRole === "rector" && ($authUser->primaryAcademy()->id === $school->academy->id))) {
             return response()->json([
                 'error' => 'You are not authorized to remove this user from this school!',
-            ]);
+            ], 401);
         }
 
         if (!$school) {
