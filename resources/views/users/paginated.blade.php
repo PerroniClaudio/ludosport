@@ -45,18 +45,47 @@
                                         class="border-collapse table-auto w-full whitespace-no-wrap bg-white dark:bg-background-900 table-striped relative">
                                         <thead>
                                             <tr class="text-left">
-                                                {{-- ID column always present --}}
-                                                <x-sortable-header field="id" :selectedRole="$selectedRole">
-                                                    ID
-                                                </x-sortable-header>
+                                                
+                                                {{-- Actions + Name + Surname on Desktop column always present --}}
+                                                <th
+                                                    class="hidden xl:flex sticky left-0 z-30 bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate"
+                                                >
+                                                    <div class="w-[70px] min-w-[70px] max-w[70px]">
+                                                        {{ __('users.actions') }}
+                                                    </div>
+                                                    <x-sortable-header field="name" :selectedRole="$selectedRole" 
+                                                        class="px-6 w-[200px] min-w-[200px] max-w[200px]"
+                                                        :noHeaderTag="true"
+                                                    >
+                                                        {{ __('users.name') }}
+                                                    </x-sortable-header>
+                                                    @if ($selectedRole == 'athlete')
+                                                        <!-- <div class="px-6 w-[200px] min-w-[200px] max-w[200px]">
+                                                            {{ __('users.surname') }}
+                                                        </div> -->
+                                                        <x-sortable-header field="surname" :selectedRole="$selectedRole" 
+                                                            class="px-6 w-[200px] min-w-[200px] max-w[200px]"
+                                                            :noHeaderTag="true"
+                                                        >
+                                                            {{ __('users.surname') }}
+                                                        </x-sortable-header>
+                                                    @endif
+                                                </th>
+
+                                                {{-- Actions column always present --}}
+                                                <th
+                                                    class="xl:hidden w-[70px] min-w-[70px] max-w[70px] sticky left-0 z-30 bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                    {{ __('users.actions') }}
+                                                </th>
+
                                                 {{-- Name column always present --}}
-                                                <x-sortable-header field="name" :selectedRole="$selectedRole">
+                                                <x-sortable-header field="name" :selectedRole="$selectedRole" class="xl:hidden">
                                                     {{ __('users.name') }}
                                                 </x-sortable-header>
 
                                                 @if ($selectedRole == 'athlete')
                                                     {{-- Surname column for athletes --}}
-                                                    <x-sortable-header field="surname" :selectedRole="$selectedRole">
+                                                    <x-sortable-header field="surname" :selectedRole="$selectedRole" class="xl:hidden">
                                                         {{ __('users.surname') }}
                                                     </x-sortable-header>
                                                     {{-- Email column for athletes --}}
@@ -125,25 +154,69 @@
                                                         {{ __('users.email') }}
                                                     </x-sortable-header>
                                                 @endif
-
-                                                {{-- Actions column always present --}}
-                                                <th
-                                                    class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                                                    {{ __('users.actions') }}
-                                                </th>
+                                                
+                                                {{-- ID column always present --}}
+                                                <x-sortable-header field="id" :selectedRole="$selectedRole">
+                                                    ID
+                                                </x-sortable-header>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($users as $user)
                                                 <tr class="bg-background-200 dark:bg-background-900">
-                                                    {{-- ID column always present --}}
+                                                    
+                                                    <!-- {{-- Actions + Name + Surname on Desktop column always present --}}
+                                                    <th
+                                                        class="hidden xl:flex sticky left-0 z-30 bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate"
+                                                    >
+                                                        <div class="w-[70px] min-w-[70px] max-w[70px]">
+                                                            {{ __('users.actions') }}
+                                                        </div>
+                                                        <div class="px-6 w-[200px] min-w-[200px] max-w[200px]">
+                                                            {{ __('users.name') }}
+                                                        </div>
+                                                        @if ($selectedRole == 'athlete')
+                                                            <div class="px-6 w-[200px] min-w-[200px] max-w[200px]">
+                                                                {{ __('users.surname') }}
+                                                            </div>
+                                                        @endif
+                                                    </th> -->
+
+                                                    {{-- Actions + Name + Surname on Desktop column always present --}}
                                                     <td
-                                                        class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                                        {{ $user->id }}
+                                                        class="hidden xl:flex text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700
+                                                            sticky left-0 z-30 bg-background-200 dark:bg-background-900"
+                                                    >
+                                                        <a href="/users/{{ $user->id }}"  class="w-[70px] min-w-[70px] max-w[70px]">
+                                                            <x-lucide-pencil
+                                                                class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                                                        </a>
+                                                        <div class="px-6 w-[200px] min-w-[200px] max-w[200px]">
+                                                             {{ $user->name }}
+                                                            @if ($selectedRole != 'athlete')
+                                                                {{ $user->surname }}
+                                                            @endif
+                                                        </div>
+                                                        @if ($selectedRole == 'athlete')
+                                                            <div class="px-6 w-[200px] min-w-[200px] max-w[200px]">
+                                                                {{ $user->surname }}
+                                                            </div>
+                                                        @endif
+                                                    </td>
+
+                                                    {{-- Actions column always present --}}
+                                                    <td
+                                                        class="xl:hidden text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap
+                                                            w-[70px] min-w-[70px] max-w[70px] sticky left-0 z-30 bg-background-200 dark:bg-background-900"
+                                                    >
+                                                        <a href="/users/{{ $user->id }}">
+                                                            <x-lucide-pencil
+                                                                class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                                                        </a>
                                                     </td>
                                                     {{-- Name column always present --}}
                                                     <td
-                                                        class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
+                                                        class="xl:hidden text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
                                                         {{ $user->name }}
                                                         @if ($selectedRole != 'athlete')
                                                             {{ $user->surname }}
@@ -153,7 +226,7 @@
                                                     @if ($selectedRole == 'athlete')
                                                         {{-- Surname column for athletes --}}
                                                         <td
-                                                            class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
+                                                             class="xl:hidden text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
                                                             {{ $user->surname }}
                                                         </td>
                                                         {{-- Email column for athletes --}}
@@ -249,13 +322,10 @@
                                                         </td>
                                                     @endif
 
-                                                    {{-- Actions column always present --}}
+                                                    {{-- ID column always present --}}
                                                     <td
                                                         class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                                        <a href="/users/{{ $user->id }}">
-                                                            <x-lucide-pencil
-                                                                class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                                                        </a>
+                                                        {{ $user->id }}
                                                     </td>
                                                 </tr>
                                             @endforeach

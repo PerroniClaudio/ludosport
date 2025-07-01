@@ -151,6 +151,11 @@ class PaginatedUserController extends Controller {
                             })
                             ->orderBy('schools.name', $sortDirection);
                         break;
+                    case 'name':
+                    case 'surname':
+                    case 'email':
+                        $query->orderByRaw("LOWER($sortBy) $sortDirection");
+                        break;
                     default:
                         $query->orderBy($sortBy, $sortDirection);
                         break;
@@ -169,6 +174,9 @@ class PaginatedUserController extends Controller {
                     // For weapon forms, we'll sort by the count of weapon forms
                     $query->withCount('weaponFormsPersonnel')
                         ->orderBy('weapon_forms_personnel_count', $sortDirection);
+                } else if (in_array($sortBy, ['name', 'surname', 'email'])) {
+                    // Make sorting case-insensitive for string columns
+                    $query->orderByRaw("LOWER($sortBy) $sortDirection");
                 } else {
                     $query->orderBy($sortBy, $sortDirection);
                 }
@@ -186,6 +194,9 @@ class PaginatedUserController extends Controller {
                     // For weapon forms, we'll sort by the count of weapon forms
                     $query->withCount('weaponFormsTechnician')
                         ->orderBy('weapon_forms_technician_count', $sortDirection);
+                } else if (in_array($sortBy, ['name', 'surname', 'email'])) {
+                    // Make sorting case-insensitive for string columns
+                    $query->orderByRaw("LOWER($sortBy) $sortDirection");
                 } else {
                     $query->orderBy($sortBy, $sortDirection);
                 }
@@ -206,6 +217,9 @@ class PaginatedUserController extends Controller {
                                 ->where('academy_users.is_primary', '=', true);
                         })
                         ->orderBy('academies.name', $sortDirection);
+                } else if (in_array($sortBy, ['name', 'surname', 'email'])) {
+                    // Make sorting case-insensitive for string columns
+                    $query->orderByRaw("LOWER($sortBy) $sortDirection");
                 } else {
                     $query->orderBy($sortBy, $sortDirection);
                 }
@@ -226,6 +240,9 @@ class PaginatedUserController extends Controller {
                                 ->where('school_users.is_primary', '=', true);
                         })
                         ->orderBy('schools.name', $sortDirection);
+                } else if (in_array($sortBy, ['name', 'surname', 'email'])) {
+                    // Make sorting case-insensitive for string columns
+                    $query->orderByRaw("LOWER($sortBy) $sortDirection");
                 } else {
                     $query->orderBy($sortBy, $sortDirection);
                 }
@@ -236,11 +253,20 @@ class PaginatedUserController extends Controller {
             case 'manager':
             case 'admin':
             default:
-                $users = $baseQuery
-                    ->select('*')
-                    ->with(['roles'])
-                    ->orderBy($sortBy, $sortDirection)
-                    ->paginate(10);
+                // Make sorting case-insensitive for string columns
+                if (in_array($sortBy, ['name', 'surname', 'email'])) {
+                    $users = $baseQuery
+                        ->select('*')
+                        ->with(['roles'])
+                        ->orderByRaw("LOWER($sortBy) $sortDirection")
+                        ->paginate(10);
+                } else {
+                    $users = $baseQuery
+                        ->select('*')
+                        ->with(['roles'])
+                        ->orderBy($sortBy, $sortDirection)
+                        ->paginate(10);
+                }
                 break;
         }
 

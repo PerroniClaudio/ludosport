@@ -146,10 +146,10 @@
                                                     sticky left-0 bg-white dark:bg-background-900 flex"
                                                     :class="rowIndex === 0 ? 'border-transparent  dark:border-transparent' : ''">
                                                     <div class="w-[70px] min-w-[70px] max-w[70px]">
-                                                    <a x-bind:href="'/manager/users/' + row.id">
-                                                        <x-lucide-pencil
-                                                        class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                                                    </a>
+                                                        <a x-bind:href="'/manager/users/' + row.id">
+                                                            <x-lucide-pencil
+                                                            class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                                                        </a>
                                                     </div>
                                                     <div class="px-6 w-[200px] min-w-[200px] max-w[200px]" x-text="row.name"></div>
                                                     <div class="px-6 w-[200px] min-w-[200px] max-w[200px]" x-text="row.surname"></div>

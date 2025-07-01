@@ -1,4 +1,6 @@
-@props(['field', 'selectedRole'])
+@props(['field', 'selectedRole', 'noHeaderTag' => false])
+
+{{-- If noHeaderTag is true, the component will not render the <th> tag --}}
 
 @php
     $currentSort = request('sortedby');
@@ -17,17 +19,33 @@
     $isCurrentSort = $currentSort === $field;
 @endphp
 
-<th
-    {{ $attributes->merge(['class' => 'bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate']) }}>
-    <a href="{{ $sortUrl }}"
-        class="text-primary-500 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex items-center gap-1">
-        {{ $slot }}
-        @if ($isCurrentSort)
-            @if ($currentDirection === 'asc')
-                <x-lucide-chevron-up class="w-3 h-3 inline" />
-            @else
-                <x-lucide-chevron-down class="w-3 h-3 inline" />
+@if (!$noHeaderTag)
+    <th
+        {{ $attributes->merge(['class' => 'bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate']) }}>
+        <a href="{{ $sortUrl }}"
+            class="text-primary-500 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex items-center gap-1">
+            {{ $slot }}
+            @if ($isCurrentSort)
+                @if ($currentDirection === 'asc')
+                    <x-lucide-chevron-up class="w-3 h-3 inline" />
+                @else
+                    <x-lucide-chevron-down class="w-3 h-3 inline" />
+                @endif
             @endif
-        @endif
-    </a>
-</th>
+        </a>
+    </th>
+@else
+    <div {{ $attributes->merge(['class' => 'px-6 w-[200px] min-w-[200px] max-w[200px]']) }}>
+        <a href="{{ $sortUrl }}"
+            class="text-primary-500 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex items-center gap-1">
+            {{ $slot }}
+            @if ($isCurrentSort)
+                @if ($currentDirection === 'asc')
+                    <x-lucide-chevron-up class="w-3 h-3 inline" />
+                @else
+                    <x-lucide-chevron-down class="w-3 h-3 inline" />
+                @endif
+            @endif
+        </a>
+    </div>
+@endif
