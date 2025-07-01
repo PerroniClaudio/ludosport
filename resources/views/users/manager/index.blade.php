@@ -67,26 +67,6 @@
 
                                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                                    <!-- [
-                                        'name' => 'Action',
-                                        'field' => 'action',
-                                        'columnClasses' => 'sticky left-0 z-30', // classes to style table th
-                                        'rowClasses' => '', // classes to style table td
-                                        'dontSort' => true, // if true, the column will not be sortable
-                                    ],
-                                    [
-                                        'name' => 'Name',
-                                        'field' => 'name',
-                                        'columnClasses' => '', // classes to style table th
-                                        'rowClasses' => '', // classes to style table td
-                                    ],
-                                    [
-                                        'name' => 'Surname',
-                                        'field' => 'surname',
-                                        'columnClasses' => '', // classes to style table th
-                                        'rowClasses' => '', // classes to style table td
-                                    ], -->
-
                                     <!-- Per desktop le prime tre colonne sono bloccate (sticky) -->
                                     <div class="hidden min-[1300px]:block">
                                         <x-table striped="false" :columns="[
@@ -266,10 +246,9 @@
                                             ],
                                         ]" :rows="$role">
                                             <x-slot name="tableRows">
-                                                <td
-                                                    class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap
-                                                        sticky left-0 bg-white dark:bg-background-900
-                                                    ">
+                                                <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap
+                                                    sticky left-0 bg-white dark:bg-background-900"
+                                                >
                                                     <a x-bind:href="'/manager/users/' + row.id">
                                                         <x-lucide-pencil
                                                             class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />

@@ -79,6 +79,12 @@
                             'columnClasses' => '',
                             'rowClasses' => '',
                         ],
+                        [
+                            'name' => 'ID',
+                            'field' => 'id',
+                            'columnClasses' => '', // classes to style table th
+                            'rowClasses' => '', // classes to style table td
+                        ],
                     ]" :rows="$users">
                         <x-slot name="tableRows">
                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
@@ -102,18 +108,9 @@
                                 <x-lucide-badge-info class="w-5 h-5 text-red-800 dark:text-red-500"
                                     x-show="row.has_paid_fee == 0" />
                             </td>
-                            {{-- <td
-                                class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                <a x-bind:href="'/instructor/users/' + row.id">
-                                    <x-lucide-pencil
-                                        class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                                </a>
-                            </td> --}}
+                            <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
+                                x-text="row.id"></td>
                         </x-slot>
-
-                        {{-- <x-slot name="tableActions">
-
-                        </x-slot> --}}
 
                     </x-table>
                 </div>
