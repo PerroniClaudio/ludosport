@@ -2440,7 +2440,7 @@ class UserController extends Controller {
         $user = User::find($request->user_id);
         $school = School::find($request->school_id);
 
-        if ($authUserRole !== 'admin' && !($authUserRole === "rector" && ($authUser->primaryAcademy()->id === $school->academy->id))) {
+        if ($authUserRole !== 'admin' && !(in_array($authUserRole, ["rector", "manager"]) && ($authUser->primaryAcademy()->id === $school->academy->id))) {
             return response()->json([
                 'error' => 'You are not authorized to remove this user from this school!',
             ], 401);

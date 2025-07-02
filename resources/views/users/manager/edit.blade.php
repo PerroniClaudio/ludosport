@@ -189,7 +189,19 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
 
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4" x-data="{
+                institutionType: 'academy',
+                roleType: 'personnel',
+                selectedAcademy: '',
+                selectedSchool: '',
+                setInstitutionType(type) {
+                    this.institutionType = type;
+                },
+                setRoleType(type) {
+                    this.roleType = type;
+                }
+            
+            }">
                 @if ($user->hasRole('instructor') || $user->hasRole('technician') || $user->hasRole('athlete'))
                     <x-user.weapon-forms :availableWeaponForms="$allWeaponForms" :user="$user->id" :forms="$user->weaponForms->map(function ($form) {
                         $form->awarded_at = explode(' ', $form->awarded_at)[0];
@@ -279,7 +291,19 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
 
                     </div>
 
-                    <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
+                    <div class="flex justify-between">
+                        <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
+
+                        <div class="flex gap-2">
+                            <x-primary-button :disabled="$user->schoolAthletes()->count() < 1 || ($authRole === 'admin' ? false : ($authUser->primaryAcademy()->id == $user->primaryAcademyAthlete()->id ? false : true))"
+                                x-on:click.prevent="setInstitutionType('school'), setRoleType('athlete'), $dispatch('open-modal', 'set-main-institution-modal')">
+                                <span>{{ __('users.set_main_athletes_school') }}</span>
+                            </x-primary-button>
+
+                            <x-user.select-institutions type="school-athlete" :user="$user" :schools="$filteredSchoolsAthlete"
+                                :selectedSchools="$user->schoolAthletes" />
+                        </div>
+                    </div>
 
                     <div class="flex flex-col gap-2">
                         @php
@@ -299,6 +323,115 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                         @endforeach
                     </div>
                 </div>
+
+                {{-- Modal con form dinamico per modifica accademia/scuola principale --}}
+                <x-modal name="set-main-institution-modal" :show="$errors->get('name') || $errors->get('go_to_edit')" focusable>
+                    <form method="POST"
+                        action="{{ route(($authRole === 'admin' ? '' : $authRole . '.') . 'users.set-main-institution') }}"
+                        class="p-6 flex flex-col gap-4" x-ref="edituserform" enctype="multipart/form-data">
+                        @csrf
+
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
+                                    <div x-show="institutionType == 'academy' && roleType == 'personnel'">
+                                        {{ __('users.set_main_personnel_academy') }}
+                                    </div>
+                                    <div x-show="institutionType == 'academy' && roleType == 'athlete'">
+                                        {{ __('users.set_main_athletes_academy') }}
+                                    </div>
+                                    <div x-show="institutionType == 'school' && roleType == 'personnel'">
+                                        {{ __('users.set_main_personnel_school') }}
+                                    </div>
+                                    <div x-show="institutionType == 'school' && roleType == 'athlete'">
+                                        {{ __('users.set_main_athletes_school') }}
+                                    </div>
+                                </h2>
+                                <div>
+                                    <x-lucide-x
+                                        class="w-6 h-6 text-background-500 dark:text-background-300 cursor-pointer"
+                                        x-on:click="$dispatch('close-modal', 'set-main-institution-modal')" />
+                                </div>
+                            </div>
+                            <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                        </div>
+
+                        <input type="hidden" name="institution_type" :value="institutionType">
+                        <input type="hidden" name="role_type" :value="roleType">
+                        <input type="hidden" name="user_id" value="{{ $user->id }}">
+
+                        <template x-if="institutionType == 'academy' && roleType == 'personnel'">
+                            @php
+                                $academiesPersonnelOptions = $user->academies->map(function ($academy) {
+                                    return ['value' => $academy->id, 'label' => $academy->name];
+                                });
+                                $selectedAcademy = [
+                                    'value' => $user->primaryAcademy()->id ?? null,
+                                    'label' => $user->primaryAcademy()->name ?? null,
+                                ];
+                            @endphp
+                            <x-form.select name="academy_id" label="{{ __('academies.academy') }}" :options="$academiesPersonnelOptions"
+                                x-model="selectedAcademy" />
+                        </template>
+
+                        <template x-if="institutionType == 'academy' && roleType == 'athlete'">
+                            @php
+                                $academiesAthleteOptions = $user->academyAthletes->map(function ($academy) {
+                                    return ['value' => $academy->id, 'label' => $academy->name];
+                                });
+                                $selectedAcademy = [
+                                    'value' => $user->primaryAcademyAthlete()->id ?? null,
+                                    'label' => $user->primaryAcademyAthlete()->name ?? null,
+                                ];
+                            @endphp
+                            <x-form.select name="academy_id" label="{{ __('academies.academy') }}"
+                                :options="$academiesAthleteOptions" />
+                        </template>
+
+                        <template x-if="institutionType == 'school' && roleType == 'personnel'">
+                            @php
+                                $schoolsPersonnelOptions = [];
+                                if ($authRole == 'admin') {
+                                    $schoolsPersonnelOptions = $user->schools->map(function ($school) {
+                                        return ['value' => $school->id, 'label' => $school->name];
+                                    });
+                                } else {
+                                    $schoolsPersonnelOptions = $user->schools
+                                        ->whereIn('academy_id', $authUser->primaryAcademy()->id)
+                                        ->map(function ($school) {
+                                            return ['value' => $school->id, 'label' => $school->name];
+                                        });
+                                }
+                                $selectedSchool = [
+                                    'value' => $user->primarySchool()->id ?? null,
+                                    'label' => $user->primarySchool()->name ?? null,
+                                ];
+                            @endphp
+                            <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsPersonnelOptions" />
+                        </template>
+
+                        <template x-if="institutionType == 'school' && roleType == 'athlete'">
+                            @php
+                                $schoolsAthleteOptions = $user->schoolAthletes->map(function ($school) {
+                                    return ['value' => $school->id, 'label' => $school->name];
+                                });
+                                $selectedSchool = [
+                                    'value' => $user->primarySchoolAthlete()->id ?? null,
+                                    'label' => $user->primarySchoolAthlete()->name ?? null,
+                                ];
+                            @endphp
+                            <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsAthleteOptions" />
+                        </template>
+
+
+                        <div class="flex justify-end">
+                            <x-primary-button x-on:click.prevent="$refs.edituserform.submit()">
+                                <span>{{ __('users.confirm') }}</span>
+                            </x-primary-button>
+                        </div>
+
+                    </form>
+                </x-modal>
 
             </div>
 

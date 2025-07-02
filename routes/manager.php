@@ -12,6 +12,10 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
   /** Users */
 
   Route::group([], function () {
+    Route::post('/users/associate-school', [App\Http\Controllers\UserController::class, 'associateSchool'])->name('manager.users.associate-school');
+    Route::post('/users/remove-school', [App\Http\Controllers\UserController::class, 'removeSchool'])->name('manager.users.remove-school');
+    Route::post('/users/set-main-institution', [App\Http\Controllers\UserController::class, 'setMainInstitution'])->name('manager.users.set-main-institution');
+    
     Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('manager.users.index');
     Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('manager.users.filter');
     Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('manager.users.filter.result');
