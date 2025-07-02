@@ -1,3 +1,9 @@
+@php
+    $authUser = auth()->user();
+    $authRole = $authUser->getRole();
+    $pathPrefix = $authRole === 'admin' ? '' : '/' . $authRole;
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -5,7 +11,7 @@
                 {{ __('users.title') }}
             </h2>
             <div>
-                <x-create-new-button :href="route('users.create')" />
+                <x-create-new-button href="{{ $authUserRole === 'admin' ? route('users.create') : route($authUserRole . '.users.create') }}" />
             </div>
         </div>
     </x-slot>
@@ -46,7 +52,7 @@
                                     </h3>
                                     @if ($selectedRole == 'athlete')
                                         <div>
-                                            <a href="{{ route('users.filter') }}">
+                                            <a href="{{ $authUserRole === 'admin' ? route('users.filter') : route($authUserRole . '.users.filter') }}">
                                                 <x-primary-button>
                                                     {{ __('users.filter_by') }}
                                                 </x-primary-button>
@@ -200,7 +206,7 @@
                                                     <td
                                                         class="hidden xl:flex text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700
                                                             sticky left-0 z-30 bg-white dark:bg-background-900">
-                                                        <a href="/users/{{ $user->id }}"
+                                                        <a href="{{ $pathPrefix }}/users/{{ $user->id }}"
                                                             class="w-[70px] min-w-[70px] max-w[70px]">
                                                             <x-lucide-pencil
                                                                 class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
@@ -222,7 +228,7 @@
                                                     <td
                                                         class="xl:hidden text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap
                                                             w-[70px] min-w-[70px] max-w[70px] sticky left-0 z-30 bg-white dark:bg-background-900">
-                                                        <a href="/users/{{ $user->id }}">
+                                                        <a href="{{ $pathPrefix }}/users/{{ $user->id }}">
                                                             <x-lucide-pencil
                                                                 class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
                                                         </a>
