@@ -405,7 +405,6 @@ class ClanController extends Controller {
      */
     public function update(Request $request, Clan $clan) {
         //
-        return back()->with('error', 'This method is not implemented yet.');
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
