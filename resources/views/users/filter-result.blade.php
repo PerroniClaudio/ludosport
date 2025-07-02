@@ -28,6 +28,13 @@
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <x-table striped="false" :columns="[
                         [
+                            'name' => 'Actions',
+                            'field' => 'actions',
+                            'columnClasses' => 'sticky left-0 z-30', // classes to style table th
+                            'rowClasses' => '', // classes to style table td
+                            'dontSort' => true, // if true, the column will not be sortable
+                        ],
+                        [
                             'name' => 'Name',
                             'field' => 'name',
                             'columnClasses' => '', // classes to style table th
@@ -77,6 +84,15 @@
                         ],
                     ]" :rows="$users">
                         <x-slot name="tableRows">
+                            <td
+                                class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap
+                                    sticky left-0 z-30 bg-white dark:bg-background-900"
+                            >
+                                <a x-bind:href="'/users/' + row.id">
+                                    <x-lucide-pencil
+                                        class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                                </a>
+                            </td>
                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                 x-text="row.name"></td>
                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
@@ -98,17 +114,6 @@
                                 <x-lucide-badge-info class="w-5 h-5 text-red-800 dark:text-red-500"
                                     x-show="row.has_paid_fee == 0" />
                             </td>
-                            <td
-                                class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                <a x-bind:href="'/users/' + row.id">
-                                    <x-lucide-pencil
-                                        class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                                </a>
-                            </td>
-                        </x-slot>
-
-                        <x-slot name="tableActions">
-
                         </x-slot>
 
                     </x-table>
