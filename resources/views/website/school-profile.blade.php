@@ -39,16 +39,13 @@
                             <span class="text-sm text-background-500 dark:text-background-400">
                                 {{ __('users.rector') }}:
 
-                                @foreach ($rectors as $rector)
-                                    <span
-                                        class="text-sm text-background-500 dark:text-background-400 hover:text-primary-500">
-                                        {{ $rector->name }} {{ $rector->surname }}
-                                    </span>
 
-                                    @if (!$loop->last)
-                                        ,
-                                    @endif
-                                @endforeach
+                                <span
+                                    class="text-sm text-background-500 dark:text-background-400 hover:text-primary-500">
+                                    {{ $academy->mainRector->name }} {{ $academy->mainRector->surname }}
+                                </span>
+
+
 
                             </span>
                         </div>

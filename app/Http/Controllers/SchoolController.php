@@ -406,6 +406,14 @@ class SchoolController extends Controller {
             }
         }
 
+        // Update main dean's primary school if a new main dean is set
+        if ($request->main_dean && $request->main_dean != $school->main_dean) {
+            $newMainDean = User::find($request->main_dean);
+            if ($newMainDean) {
+                $newMainDean->setPrimarySchool($school->id);
+            }
+        }
+
         $school->update([
             'name' => $request->name,
             'slug' => Str::slug($request->name),

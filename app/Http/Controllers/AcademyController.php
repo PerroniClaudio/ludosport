@@ -260,6 +260,14 @@ class AcademyController extends Controller {
                 }
             }
 
+            // Update the main_rector's primary academy if specified
+            if ($request->main_rector) {
+                $mainRector = User::find($request->main_rector);
+                if ($mainRector) {
+                    $mainRector->setPrimaryAcademy($academy->id);
+                }
+            }
+
             $academy->update([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -1014,6 +1022,8 @@ class AcademyController extends Controller {
         })->whereHas('academies', function ($query) use ($academy) {
             $query->where('academy_id', $academy->id);
         })->get();
+
+
 
         return response()->json(
             [
