@@ -145,7 +145,7 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4"
+            <!-- <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4"
                 x-data="{}">
                 <div class="flex justify-between">
                     <div class="flex gap-2 items-center">
@@ -187,9 +187,9 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                     <img src="{{ $user->profile_picture }}" alt="{{ $user->name }}" class="w-1/3 rounded-lg">
                 @endif
 
-            </div>
+            </div> -->
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4" x-data="{
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 py-4" x-data="{
                 institutionType: 'academy',
                 roleType: 'personnel',
                 selectedAcademy: '',
@@ -216,8 +216,52 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                         return $form;
                     })" type="technician" />
                 @endif
-                <div
-                    class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 text-background-800 dark:text-background-200 ">
+
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8"
+                    x-data="{}">
+                    <div class="flex justify-between">
+                        <div class="flex gap-2 items-center">
+                            <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                {{ __('users.profile_picture') }}
+                            </h3>
+                            <div class='has-tooltip'>
+                                <span
+                                    class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                    {{ __('users.profile_picture_info') }}
+                                </span>
+                                <x-lucide-info class="h-4 text-background-400" />
+                            </div>
+                        </div>
+                        <div>
+                            <form method="POST" action="{{ route('manager.users.picture.update', $user->id) }}"
+                                enctype="multipart/form-data" x-ref="pfpform">
+                                @csrf
+                                @method('PUT')
+
+                                <div class="flex flex-col gap-4">
+                                    <div class="flex flex-col gap-2">
+                                        @if ($canEdit)
+                                            <input type="file" name="profilepicture" id="profilepicture" class="hidden"
+                                                x-on:change="$refs.pfpform.submit()" />
+                                            <x-primary-button type="button"
+                                                onclick="document.getElementById('profilepicture').click()">
+                                                {{ __('users.upload_picture') }}
+                                            </x-primary-button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+
+                    @if ($user->profile_picture)
+                        <img src="{{ $user->profile_picture }}" alt="{{ $user->name }}" class="w-1/3 rounded-lg">
+                    @endif
+
+                </div>
+
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 text-background-800 dark:text-background-200 ">
                     <h3 class="text-2xl">
                         {{ __('users.academies') }}</h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
@@ -264,36 +308,43 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                     </div>
                 </div>
 
-                <div
-                    class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4 text-background-800 dark:text-background-200">
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 text-background-800 dark:text-background-200">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">
                         {{ __('users.schools') }}</h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                    <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
-
+                    <div class="flex justify-between">
+                        <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
+                        <div class="flex gap-2">
+                            {{-- <x-primary-button :disabled="$user->schools()->count() < 1" --}}
+                            <x-primary-button :disabled="$user->schools()->count() < 1 || ($authRole === 'admin' ? false : (in_array($authUser->primaryAcademy()->id, $user->academies()->pluck('academy_id')->toArray()) ? false : true))"
+                                x-on:click.prevent="setInstitutionType('school'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
+                                <span>{{ __('users.set_main_personnel_school') }}</span>
+                            </x-primary-button>
+                            <x-user.select-institutions type="school-personnel" :user="$user" :schools="$filteredSchoolsPersonnel"
+                                :selectedSchools="$user->schools" />
+                        </div>
+                    </div>
                     <div class="flex flex-col gap-2">
                         @php
-                            $mainSchoolPersonnel = $user->primarySchool();
+                            $mainSchool = $user->primarySchool();
                         @endphp
                         @foreach ($user->schools as $school)
-                            <div
+                            <a href="{{ route('schools.edit', $school->id) }}"
                                 class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
                                 <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                 <span>
                                     {{ $school->name }}
-                                    @if (($mainSchoolPersonnel->id ?? null) == $school->id)
+                                    @if (($mainSchool->id ?? null) == $school->id)
                                         ({{ __('users.main_school') }})
                                     @endif
                                 </span>
-                            </div>
+                            </a>
                         @endforeach
-
                     </div>
 
-                    <div class="flex justify-between">
+                    <div class="flex justify-between mt-2">
                         <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
-
                         <div class="flex gap-2">
                             <x-primary-button :disabled="$user->schoolAthletes()->count() < 1 || ($authRole === 'admin' ? false : ($authUser->primaryAcademy()->id == $user->primaryAcademyAthlete()->id ? false : true))"
                                 x-on:click.prevent="setInstitutionType('school'), setRoleType('athlete'), $dispatch('open-modal', 'set-main-institution-modal')">
@@ -304,7 +355,6 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                                 :selectedSchools="$user->schoolAthletes" />
                         </div>
                     </div>
-
                     <div class="flex flex-col gap-2">
                         @php
                             $mainSchoolAthlete = $user->primarySchoolAthlete();
@@ -322,6 +372,7 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                             </div>
                         @endforeach
                     </div>
+
                 </div>
 
                 {{-- Modal con form dinamico per modifica accademia/scuola principale --}}
@@ -435,7 +486,7 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
 
             </div>
 
-            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 my-4">
+            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                 <h3 class="text-background-800 dark:text-background-200 text-2xl">
                     {{ __('users.rank') }}</h3>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
