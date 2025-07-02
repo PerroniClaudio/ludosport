@@ -12,7 +12,7 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
   /** Users */
 
   Route::group([], function () {
-    Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('manager.users.index');
+    Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('manager.users.index');
     Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('manager.users.filter');
     Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('manager.users.filter.result');
     Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('manager.users.search');

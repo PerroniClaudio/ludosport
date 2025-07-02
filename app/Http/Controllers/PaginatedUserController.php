@@ -310,6 +310,7 @@ class PaginatedUserController extends Controller {
             'users' => $users,
             'currentSort' => $sortBy,
             'currentDirection' => $sortDirection,
+            'authUserRole' => $authUserRole,
         ]);
     }
 }

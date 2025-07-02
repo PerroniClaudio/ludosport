@@ -8,7 +8,7 @@ Route::prefix('technician')->middleware('auth')->middleware('role:admin,technici
     /** Users */
 
     Route::group([], function () {
-        Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('technician.users.index');
+        Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('technician.users.index');
         Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('technician.users.filter');
         Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('technician.users.filter.result');
         Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('technician.users.search');

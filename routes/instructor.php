@@ -8,7 +8,7 @@ Route::prefix('instructor')->middleware('auth')->middleware('role:admin,instruct
     /** Users */
 
     Route::group([], function () {
-        Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('instructor.users.index');
+        Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('instructor.users.index');
         Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('instructor.users.filter');
         Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('instructor.users.filter.result');
         Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('instructor.users.search');
