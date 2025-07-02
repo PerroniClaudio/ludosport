@@ -163,7 +163,7 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($users as $user)
-                                                <tr class="bg-background-200 dark:bg-background-900">
+                                                <tr class="bg-white dark:bg-background-900">
                                                     
                                                     <!-- {{-- Actions + Name + Surname on Desktop column always present --}}
                                                     <th
@@ -185,7 +185,7 @@
                                                     {{-- Actions + Name + Surname on Desktop column always present --}}
                                                     <td
                                                         class="hidden xl:flex text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700
-                                                            sticky left-0 z-30 bg-background-200 dark:bg-background-900"
+                                                            sticky left-0 z-30 bg-white dark:bg-background-900"
                                                     >
                                                         <a href="/users/{{ $user->id }}"  class="w-[70px] min-w-[70px] max-w[70px]">
                                                             <x-lucide-pencil
@@ -207,7 +207,7 @@
                                                     {{-- Actions column always present --}}
                                                     <td
                                                         class="xl:hidden text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap
-                                                            w-[70px] min-w-[70px] max-w[70px] sticky left-0 z-30 bg-background-200 dark:bg-background-900"
+                                                            w-[70px] min-w-[70px] max-w[70px] sticky left-0 z-30 bg-white dark:bg-background-900"
                                                     >
                                                         <a href="/users/{{ $user->id }}">
                                                             <x-lucide-pencil

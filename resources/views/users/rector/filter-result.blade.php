@@ -34,7 +34,7 @@
                         [
                             'name' => 'Action',
                             'field' => 'action',
-                            'columnClasses' => '', // classes to style table th
+                            'columnClasses' => 'sticky left-0 z-30', // classes to style table th
                             'rowClasses' => '', // classes to style table td
                             'dontSort' => true, // if true, the column will not be sortable
                         ],
@@ -94,8 +94,9 @@
                         ],
                     ]" :rows="$users">
                         <x-slot name="tableRows">
-                            <td
-                                class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
+                            <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap
+                                    sticky left-0 z-30 bg-white dark:bg-background-900"
+                            >
                                 <a x-bind:href="'/rector/users/' + row.id">
                                     <x-lucide-pencil
                                         class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
