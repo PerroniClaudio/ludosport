@@ -121,7 +121,7 @@
                     <div class="flex-1">
                         <h3 class="text-2xl">{{ __('website.user_profile_bio') }}</h3>
                         <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                        <pre class="font-sans text-background-800 dark:text-background-200">{{ $user->bio }}</pre>
+                        <pre class="font-sans text-background-800 dark:text-background-200 whitespace-pre-wrap">{{ $user->bio }}</pre>
                     </div>
                 </section>
             @endif
