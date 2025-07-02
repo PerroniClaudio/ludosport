@@ -65,7 +65,7 @@
                                         <div class="flex flex-col gap-2">
                                             <x-form.input name="dean" label="{{ __('school.school_dean') }}"
                                                 type="text"
-                                                value="{{ $school->dean ? $school->dean->name . ' ' . ($school->dean->surname ?? '') : '' }}"
+                                                value="{{ $school->dean() ? $school->dean()->name . ' ' . ($school->dean()->surname ?? '') : '' }}"
                                                 placeholder="{{ fake()->name() }}" disabled
                                                 description="{{ __('school.school_dean_description') }}" />
                                             <x-form.input name="email" label="{{ __('school.school_email') }}"
@@ -131,7 +131,7 @@
                                         <div class="flex flex-col gap-2 w-full lg:w-1/2">
                                             <x-form.input name="dean" label="{{ __('school.school_dean') }}"
                                                 type="text"
-                                                value="{{ $school->dean ? $school->dean->name . ' ' . ($school->dean->surname ?? '') : '' }}"
+                                                value="{{ $school->dean() ? $school->dean()->name . ' ' . ($school->dean()->surname ?? '') : '' }}"
                                                 placeholder="{{ fake()->name() }}" disabled
                                                 description="{{ __('school.school_dean_description') }}" />
                                             <x-form.input name="email" label="{{ __('school.school_email') }}"

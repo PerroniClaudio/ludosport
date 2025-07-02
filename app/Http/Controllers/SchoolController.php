@@ -1252,7 +1252,7 @@ class SchoolController extends Controller {
 
     public function detail(School $school) {
 
-        $dean = $school->dean ? $school->dean->name . " " . $school->dean->surname : "";
+        $dean = $school->dean() ? $school->dean()->name . " " . $school->dean()->surname : "";
 
         $academy = $school->academy;
 
