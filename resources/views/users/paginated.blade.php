@@ -10,9 +10,11 @@
             <h2 class="font-semibold text-xl text-background-800 dark:text-background-200 leading-tight">
                 {{ __('users.title') }}
             </h2>
-            <div>
-                <x-create-new-button href="{{ $authUserRole === 'admin' ? route('users.create') : route($authUserRole . '.users.create') }}" />
-            </div>
+            @if(!in_array($authRole, ['instructor', 'technician']))
+                <div>
+                    <x-create-new-button href="{{ $authUserRole === 'admin' ? route('users.create') : route($authUserRole . '.users.create') }}" />
+                </div>
+            @endif
         </div>
     </x-slot>
 
@@ -71,9 +73,11 @@
                                                 {{-- Actions + Name + Surname on Desktop column always present --}}
                                                 <th
                                                     class="hidden xl:flex sticky left-0 z-30 bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                                                    <div class="w-[70px] min-w-[70px] max-w[70px]">
-                                                        {{ __('users.actions') }}
-                                                    </div>
+                                                    @if(!in_array($authRole, ['instructor', 'technician']))
+                                                        <div class="w-[70px] min-w-[70px] max-w[70px]">
+                                                            {{ __('users.actions') }}
+                                                        </div>
+                                                    @endif
                                                     <x-sortable-header field="name" :selectedRole="$selectedRole"
                                                         class="px-6 w-[200px] min-w-[200px] max-w[200px]"
                                                         :noHeaderTag="true">
@@ -92,10 +96,12 @@
                                                 </th>
 
                                                 {{-- Actions column always present --}}
-                                                <th
-                                                    class="xl:hidden w-[70px] min-w-[70px] max-w[70px] sticky left-0 z-30 bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                                                    {{ __('users.actions') }}
-                                                </th>
+                                                @if(!in_array($authRole, ['instructor', 'technician']))
+                                                    <th
+                                                        class="xl:hidden w-[70px] min-w-[70px] max-w[70px] sticky left-0 z-30 bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+                                                        {{ __('users.actions') }}
+                                                    </th>
+                                                @endif
 
                                                 {{-- Name column always present --}}
                                                 <x-sortable-header field="name" :selectedRole="$selectedRole" class="xl:hidden">
@@ -206,11 +212,13 @@
                                                     <td
                                                         class="hidden xl:flex text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700
                                                             sticky left-0 z-30 bg-white dark:bg-background-900">
-                                                        <a href="{{ $pathPrefix }}/users/{{ $user->id }}"
-                                                            class="w-[70px] min-w-[70px] max-w[70px]">
-                                                            <x-lucide-pencil
-                                                                class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                                                        </a>
+                                                        @if(!in_array($authRole, ['instructor', 'technician']))
+                                                            <a href="{{ $pathPrefix }}/users/{{ $user->id }}"
+                                                                class="w-[70px] min-w-[70px] max-w[70px]">  
+                                                                <x-lucide-pencil
+                                                                    class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                                                            </a>
+                                                        @endif
                                                         <div class="px-6 w-[200px] min-w-[200px] max-w[200px]">
                                                             {{ $user->name }}
                                                             @if ($selectedRole != 'athlete')
@@ -225,14 +233,16 @@
                                                     </td>
 
                                                     {{-- Actions column always present --}}
-                                                    <td
-                                                        class="xl:hidden text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap
-                                                            w-[70px] min-w-[70px] max-w[70px] sticky left-0 z-30 bg-white dark:bg-background-900">
-                                                        <a href="{{ $pathPrefix }}/users/{{ $user->id }}">
-                                                            <x-lucide-pencil
-                                                                class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
-                                                        </a>
-                                                    </td>
+                                                    @if(!in_array($authRole, ['instructor', 'technician']))
+                                                        <td
+                                                            class="xl:hidden text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap
+                                                                w-[70px] min-w-[70px] max-w[70px] sticky left-0 z-30 bg-white dark:bg-background-900">
+                                                            <a href="{{ $pathPrefix }}/users/{{ $user->id }}">
+                                                                <x-lucide-pencil
+                                                                    class="w-5 h-5 text-primary-800 dark:text-primary-500 cursor-pointer" />
+                                                            </a>
+                                                        </td>
+                                                    @endif
                                                     {{-- Name column always present --}}
                                                     <td
                                                         class="xl:hidden text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
