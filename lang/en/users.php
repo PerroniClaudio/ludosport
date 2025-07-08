@@ -59,6 +59,8 @@ return [
     'selected_roles' => 'Selected Roles',
     'select_roles' => 'Select Roles',
     'select_role' => 'Select Role',
+    'select_institution' => 'Select Institution',
+    'select_institution_tooltip' => 'Select the institution you want to login with',
     'select_role_tooltip' => 'Select the role you want to login with',
     'continue' => 'Continue',
     'as_personnel' => 'As Personnel',

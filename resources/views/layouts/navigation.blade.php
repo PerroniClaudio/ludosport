@@ -133,6 +133,11 @@
                                 {{ __('users.select_role') }}
                             </x-dropdown-link>
                         @endif
+                        @if (count(Auth::user()->allowedInstitutions()) > 1)
+                            <x-dropdown-link :href="route('institution-selector')">
+                                {{ __('users.select_institution') }}
+                            </x-dropdown-link>
+                        @endif
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
@@ -217,9 +222,9 @@
                     {{ __('navigation.deleted_elements') }}
                 </x-responsive-nav-link>
             @endif
-                <x-responsive-nav-link :href="route('homepage')" :active="request()->routeIs('homepage')">
-                    {{ __('navigation.website') }}
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('homepage')" :active="request()->routeIs('homepage')">
+                {{ __('navigation.website') }}
+            </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->

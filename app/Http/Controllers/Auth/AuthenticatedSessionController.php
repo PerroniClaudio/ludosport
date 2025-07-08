@@ -39,6 +39,21 @@ class AuthenticatedSessionController extends Controller {
         if ($roles->count() > 1) {
             return redirect()->intended(route('role-selector', absolute: false));
         } else {
+
+            if ($user->getRole() === 'rector' || $user->getRole() === 'manager') {
+
+                $primaryAcademies = $user->academies->where('pivot.is_primary', 1);
+                if ($primaryAcademies->count() > 1) {
+                    return redirect()->intended(route('institution-selector', absolute: false));
+                }
+            } else if ($user->getRole() === 'dean') {
+
+                $primaryAcademies = $user->schools->where('pivot.is_primary', 1);
+                if ($primaryAcademies->count() > 1) {
+                    return redirect()->intended(route('institution-selector', absolute: false));
+                }
+            }
+
             return redirect()->intended(route('dashboard', absolute: false));
         }
     }
