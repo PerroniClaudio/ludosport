@@ -11,6 +11,12 @@
 
     <x-table striped="false" :columns="[
         [
+            'name' => 'Rank',
+            'field' => 'rank',
+            'columnClasses' => '', // classes to style table th
+            'rowClasses' => '', // classes to style table td
+        ],
+        [
             'name' => 'User',
             'field' => 'user_fullname',
             'columnClasses' => '', // classes to style table th

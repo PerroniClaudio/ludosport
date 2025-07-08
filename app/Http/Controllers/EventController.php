@@ -206,10 +206,19 @@ class EventController extends Controller {
             );
         }
 
-        $rankingResults = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
+        // Ordina i risultati per punti totali (war_points + style_points) in ordine decrescente, poi per nome e cognome dell'utente
+        $rankingResults = $event->results()
+            ->with('user')
+            ->orderByRaw('(total_war_points + total_style_points) DESC')
+            ->leftJoin('users', 'event_results.user_id', '=', 'users.id')
+            ->orderByRaw('(total_war_points + total_style_points) DESC')
+            ->orderBy('users.name')
+            ->orderBy('users.surname')
+            ->get();
 
         foreach ($rankingResults as $key => $result) {
             $rankingResults[$key]['user_fullname'] = $result->user['name'] . ' ' . $result->user['surname'];
+            $rankingResults[$key]['rank'] = $key + 1;
         }
 
         $enablingResults = $event->instructorResults()->with(['user', 'weaponForm'])->orderBy('stage', 'asc')->get();
@@ -1045,20 +1054,17 @@ class EventController extends Controller {
                 return response()->json($events);
             }
         }
-
+        
         $events = Event::where([
             ['is_approved', '=', 1],
             ['is_published', '=', 1],
             ['end_date', '<=', $date->format('Y-m-d')],
             ['is_disabled', '=', 0],
-        ])->get();
-
-        $events_to_exclude = EventType::where('name', 'Training Course')->first()->events()->pluck('id')->toArray();
-
-        $events = $events->filter(function ($event) use ($events_to_exclude) {
-            return !in_array($event->id, $events_to_exclude);
-        });
-
+        ])
+        ->whereHas('type', function ($query) {
+            $query->where('name', '!=', 'Training Course');
+        })
+        ->get();
 
         return response()->json($events);
     }
@@ -1071,7 +1077,7 @@ class EventController extends Controller {
         $results = [];
 
         foreach ($events as $event) {
-            $event_result = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
+            $event_result = $event->results()->with('user')->get();
 
             foreach ($event_result as $key => $value) {
 
@@ -1097,8 +1103,14 @@ class EventController extends Controller {
             }
         }
 
+        // Ordina i risultati per punti totali (war_points + style_points) in ordine decrescente e poi per nome utente
         usort($results, function ($a, $b) {
-            return $b['total_war_points'] - $a['total_war_points'];
+            $aTotal = $a['total_war_points'] + $a['total_style_points'];
+            $bTotal = $b['total_war_points'] + $b['total_style_points'];
+            if ($bTotal === $aTotal) {
+                return strcasecmp($a['user_name'], $b['user_name']);
+            }
+            return $bTotal - $aTotal;
         });
 
         return response()->json($results);
@@ -1142,8 +1154,14 @@ class EventController extends Controller {
             }
         }
 
+        // Ordina i risultati per punti totali (war_points + style_points) in ordine decrescente e poi per nome utente
         usort($results, function ($a, $b) {
-            return $b['total_war_points'] - $a['total_war_points'];
+            $aTotal = $a['total_war_points'] + $a['total_style_points'];
+            $bTotal = $b['total_war_points'] + $b['total_style_points'];
+            if ($bTotal === $aTotal) {
+                return strcasecmp($a['user_name'], $b['user_name']);
+            }
+            return $bTotal - $aTotal;
         });
 
         return response()->json([
@@ -1180,8 +1198,14 @@ class EventController extends Controller {
             $results[$value->user_id]['total_style_points'] += $value->total_style_points;
         }
 
+        // Ordina i risultati per punti totali (war_points + style_points) in ordine decrescente e poi per nome utente
         usort($results, function ($a, $b) {
-            return $b['total_war_points'] - $a['total_war_points'];
+            $aTotal = $a['total_war_points'] + $a['total_style_points'];
+            $bTotal = $b['total_war_points'] + $b['total_style_points'];
+            if ($bTotal === $aTotal) {
+                return strcasecmp($a['user_name'], $b['user_name']);
+            }
+            return $bTotal - $aTotal;
         });
 
         return response()->json($results);

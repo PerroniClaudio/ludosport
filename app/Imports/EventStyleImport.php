@@ -25,10 +25,10 @@ class EventStyleImport implements ToCollection {
     public function collection(Collection $collection) {
         //
 
-        $usersCount = count($collection);
+        $usersCount = count($collection) - 1; // Exclude the header row
 
         // Check if the number of participants in the file matches the number of participants in the event
-        if (($usersCount - 1) != EventResult::where('event_id', $collection[1][0])->count()) {
+        if ($usersCount != EventResult::where('event_id', $collection[1][0])->count()) {
             $this->log[] = "['Number of participants in the file does not match the number of participants in the event. event ID: " . $collection[1][0] . "']";
             throw new \Exception('Number of participants in the file does not match the number of participants in the event.');
             return;

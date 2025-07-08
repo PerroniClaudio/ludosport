@@ -178,20 +178,24 @@ export const rankingschart = () => {
                 const column = this.columns[columnIndex];
                 const aValue = String(a[column.field]);
                 const bValue = String(b[column.field]);
-
-                if (this.sortDirection === "asc") {
-                    return aValue.localeCompare(bValue);
+                if (!isNaN(aValue) && !isNaN(bValue)) {
+                    return this.sortDirection === "asc"
+                        ? aValue - bValue
+                        : bValue - aValue;
                 } else {
-                    return bValue.localeCompare(aValue);
+                    return this.sortDirection === "asc"
+                        ? String(aValue).localeCompare(String(bValue))
+                        : String(bValue).localeCompare(String(aValue));
                 }
+
             });
         },
         searchByValue: function (e) {
             const search = e.target.value.toLowerCase();
             if (search === "") {
-                this.rows = athletesData;
+                this.rows = this.athletesData;
             } else {
-                this.rows = athletesData.filter((row) => {
+                this.rows = this.athletesData.filter((row) => {
                     return Object.values(row).some((value) => {
                         return String(value).toLowerCase().includes(search);
                     });

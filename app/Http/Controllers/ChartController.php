@@ -94,8 +94,20 @@ class ChartController extends Controller {
         }
 
         usort($results, function ($a, $b) {
-            return $b['total_war_points'] - $a['total_war_points'];
+            $aTotal = $a['total_war_points'] + $a['total_style_points'];
+            $bTotal = $b['total_war_points'] + $b['total_style_points'];
+            if ($bTotal === $aTotal) {
+                return strcasecmp($a['user_name'], $b['user_name']);
+            }
+            return $bTotal - $aTotal;
         });
+
+        // Add the rank to each user
+        $rank = 1;
+        foreach ($results as $key => $value) {
+            $results[$key]['rank'] = $rank;
+            $rank++;
+        }
 
         $chart = Chart::create([
             'note' => Carbon::now()->year . " chart",

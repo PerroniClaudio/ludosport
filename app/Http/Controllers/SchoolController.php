@@ -418,7 +418,7 @@ class SchoolController extends Controller {
             'name' => $request->name,
             'slug' => Str::slug($request->name),
             'academy_id' => $request->academy_id,
-            'main_dean' => $request->main_dean ?? null,
+            'main_dean' => $request->main_dean ? $request->main_dean : null,
             'email' => $request->email,
         ]);
 

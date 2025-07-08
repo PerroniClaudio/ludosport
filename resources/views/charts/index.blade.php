@@ -13,6 +13,12 @@
 
                     <x-table striped="false" :columns="[
                         [
+                            'name' => 'Rank',
+                            'field' => 'rank',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
                             'name' => 'Name',
                             'field' => 'user_name',
                             'columnClasses' => '',

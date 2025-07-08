@@ -15,9 +15,9 @@
 
             @if (in_array($authRole, ['admin', 'rector', 'dean', 'manager']))
                 <div x-data="{
-                    address: '{{ $school->address }}',
-                    city: '{{ $school->city }}',
-                    zip: '{{ $school->zip }}',
+                    address: @js($school->address),
+                    city: @js($school->city),
+                    zip: @js($school->zip),
                     verdict: '',
                     state: 0,
                     to_correct: '',
@@ -198,16 +198,19 @@
                             <div class="flex flex-col gap-2 w-full">
 
                                 <x-form.input-model x-model="address" name="address" label="Address" type="text"
-                                    required="{{ true }}" value="{{ $school->address }}"
-                                    placeholder="{{ fake()->address() }}" />
+                                    required="{{ true }}" x-model="address"
+                                    placeholder="{{ fake()->address() }}"
+                                />
 
                                 <x-form.input-model x-model="city" name="city" label="City" type="text"
-                                    required="{{ true }}" value="{{ $school->city }}"
-                                    placeholder="{{ fake()->city() }}" />
+                                    required="{{ true }}" x-model="city"
+                                    placeholder="{{ fake()->city() }}"
+                                />
 
                                 <x-form.input-model x-model="zip" name="zip" label="Zip" type="text"
-                                    required="{{ true }}" value="{{ $school->zip }}"
-                                    placeholder="{{ fake()->postcode() }}" />
+                                    required="{{ true }}" x-model="zip"
+                                    placeholder="{{ fake()->postcode() }}"
+                                />
 
                                 <div class="flex gap-2 items-start">
                                     <div class="flex-shrink-0 mt-1">
