@@ -1415,21 +1415,9 @@ class UserController extends Controller {
         ]);
     }
 
-    public function setUserRoleForSession(Request $request) {
-        $request->validate([
-            'role' => 'required|string|exists:roles,label',
-        ]);
 
-        $authUser = User::find(Auth::user()->id);
 
-        if ($authUser->hasRole($request->role)) {
-            session(['role' => $request->role]);
-        } else {
-            return back()->with('error', 'You do not have the required role to access this page!');
-        }
 
-        return redirect()->route('dashboard');
-    }
 
     public function picture($id, Request $request) {
         $authRole = $request->user()->getRole();
@@ -1819,12 +1807,11 @@ class UserController extends Controller {
 
     public function setMainInstitution(Request $request) {
 
+
         $validator = Validator::make($request->all(), [
             'institution_type' => 'required|string|in:academy,school',
             'role_type' => 'required|string|in:personnel,athlete',
             'user_id' => 'required|integer',
-            'academy_id' => 'integer',
-            'school_id' => 'integer',
         ]);
 
         if ($validator->fails()) {
@@ -1833,39 +1820,56 @@ class UserController extends Controller {
 
         $user = User::find($request->user_id);
 
-        if ($request->institution_type == 'academy') {
-            $academy = Academy::find($request->academy_id);
-            if (!$academy) {
-                return back()->with('error', 'Academy not found!');
-            }
-            if ($request->role_type == 'personnel') {
-                // Logica per modificare l'ordine delle accademie - personale
-                $user->setPrimaryAcademy($academy->id);
+        if ($request->role_type == "personnel") {
 
-                if ($academy->id != 1 && ($user->academies()->count() > 1) && ($user->academies->where('id', 1)->count() > 0)) {
-                    $user->academies()->detach(1);
+            if ($request->institution_type == "academy") {
+                foreach ($user->academies as $academy) {
+                    $user->academies()->updateExistingPivot($academy->id, ['is_primary' => false]);
+                }
+
+                foreach ($request->all() as $key => $value) {
+                    if (str_contains($key, 'academy_id')) {
+                        if ($value == "on") {
+                            $selectedAcademyId = str_replace('academy_id_', '', $key);
+                            $user->academies()->updateExistingPivot($selectedAcademyId, ['is_primary' => true]);
+                        }
+                    }
                 }
             } else {
-                // Logica per modificare l'ordine delle accademie - atleti
+                foreach ($user->schools as $school) {
+                    $user->schools()->updateExistingPivot($school->id, ['is_primary' => false]);
+                }
+
+                foreach ($request->all() as $key => $value) {
+                    if (str_contains($key, 'school_id')) {
+                        if ($value == "on") {
+                            $selectedSchoolId = str_replace('school_id_', '', $key);
+                            $user->schools()->updateExistingPivot($selectedSchoolId, ['is_primary' => true]);
+                        }
+                    }
+                }
+            }
+        } else {
+            if ($request->institution_type == "academy") {
+                $academy = Academy::find($request->academy_id);
+                if (!$academy) {
+                    return back()->with('error', 'Academy not found!');
+                }
                 $user->setPrimaryAcademyAthlete($academy->id);
 
                 if ($academy->id != 1 && ($user->academyAthletes()->count() > 1) && ($user->academyAthletes->where('id', 1)->count() > 0)) {
                     $user->academyAthletes()->detach(1);
                 }
-            }
-        }
-
-        if ($request->institution_type == 'school') {
-            $school = School::find($request->school_id);
-            if (!$school) {
-                return back()->with('error', 'School not found!');
-            }
-            if ($request->role_type == 'personnel') {
-                // Logica per modificare l'ordine delle scuole - personale
-                $user->setPrimarySchool($school->id);
             } else {
-                // Logica per modificare l'ordine delle scuole - atleti
+                $school = School::find($request->school_id);
+                if (!$school) {
+                    return back()->with('error', 'School not found!');
+                }
                 $user->setPrimarySchoolAthlete($school->id);
+
+                if ($school->id != 1 && ($user->schoolAthletes()->count() > 1) && ($user->schoolAthletes->where('id', 1)->count() > 0)) {
+                    $user->schoolAthletes()->detach(1);
+                }
             }
         }
 
@@ -1873,14 +1877,80 @@ class UserController extends Controller {
     }
 
     public function roleSelector() {
-        $user = auth()->user();
-        $user = User::find($user->id);
+        $user = User::find(Auth::user()->id);
         $roles = $user->roles()->get();
 
         return view('role-selector', [
             'roles' => $roles
         ]);
     }
+
+    public function setUserRoleForSession(Request $request) {
+        $request->validate([
+            'role' => 'required|string|exists:roles,label',
+        ]);
+
+        $authUser = User::find(Auth::user()->id);
+
+        if ($authUser->hasRole($request->role)) {
+            session(['role' => $request->role]);
+        } else {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
+
+        return redirect()->route('dashboard');
+    }
+
+    public function institutionSelector() {
+        $user = User::find(Auth::user()->id);
+
+        if ($user->getRole() === 'rector' || $user->getRole() === 'manager') {
+            $academies = $user->academies()->wherePivot('is_primary', 1)->get();
+        } else if ($user->getRole() === 'dean') {
+            $schools = $user->schools()->wherePivot('is_primary', 1)->get();
+        }
+        return view('institution-selector', [
+            'user' => $user,
+            'academies' => $academies ?? [],
+            'schools' => $schools ?? [],
+        ]);
+    }
+
+    public function setUserInstitutionForSession(Request $request) {
+        $user = User::find(Auth::user()->id);
+
+        if ($user->getRole() === 'rector' || $user->getRole() === 'manager') {
+
+            $request->validate([
+                'institution_id' => 'required|exists:academies,id',
+            ]);
+
+            $authUser = User::find(Auth::user()->id);
+            $academy = Academy::find($request->institution_id);
+
+            if ($authUser->academies()->where('academies.id', $academy->id)->exists()) {
+                session(['institution' => $academy]);
+            } else {
+                return back()->with('error', 'You do not have the required institution to access this page!');
+            }
+        } else if ($user->getRole() === 'dean') {
+            $request->validate([
+                'institution_id' => 'required|exists:schools,id',
+            ]);
+
+            $authUser = User::find(Auth::user()->id);
+            $school = School::find($request->institution_id);
+
+            if ($authUser->schools()->where('schools.id', $school->id)->exists()) {
+                session(['institution' => $school]);
+            } else {
+                return back()->with('error', 'You do not have the required institution to access this page!');
+            }
+        }
+
+        return redirect()->route('dashboard');
+    }
+
 
     public function athletesDataForWorld() {
         $athletes = User::where('is_disabled', false)->whereHas('roles', function ($q) {

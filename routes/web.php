@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/role-select', [App\Http\Controllers\UserController::class, 'roleSelector'])->middleware(['auth', 'verified'])->name('role-selector');
+Route::get('/institution-select', [App\Http\Controllers\UserController::class, 'institutionSelector'])->middleware(['auth', 'verified'])->name('institution-selector');
 
 /** Assets */
 
@@ -26,6 +27,8 @@ Route::get('/user/{user}/profile-picture', [App\Http\Controllers\UserController:
 
 Route::middleware('auth')->group(function () {
     Route::post('/profile/role', [App\Http\Controllers\UserController::class, 'setUserRoleForSession'])->name('profile.role.update');
+    Route::post('/profile/institution', [App\Http\Controllers\UserController::class, 'setUserInstitutionForSession'])->name('profile.institution.update');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

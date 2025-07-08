@@ -113,9 +113,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <form method="POST" action="{{ route('users.update', $user->id) }}"
-                    {{-- class="grid grid-cols-1 md:grid-cols-2 gap-4" --}}
-                >
+                <form method="POST" action="{{ route('users.update', $user->id) }}" {{-- class="grid grid-cols-1 md:grid-cols-2 gap-4" --}}>
                     @csrf
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                         <h3 class="text-background-800 dark:text-background-200 text-2xl">
@@ -134,7 +132,7 @@
                                 required="{{ true }}" value="{{ $user->subscription_year }}"
                                 placeholder="{{ date('Y') }}"
                                 description="The year of the first registration to LudoSport" />
-    
+
                             <div>
                                 <x-input-label for="nationality" value="Nationality" />
                                 <select name="nationality" id="nationality"
@@ -155,35 +153,38 @@
                                 <select name="rank" id="rank"
                                     class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
                                     @foreach ($ranks as $id => $rank)
-                                        <option value="{{ $id }}" {{ $id == $user->rank_id ? 'selected' : '' }}>
+                                        <option value="{{ $id }}"
+                                            {{ $id == $user->rank_id ? 'selected' : '' }}>
                                             {{ __('users.' . strtolower($rank)) }}</option>
                                     @endforeach
                                 </select>
                             </div>
-    
+
                             <div>
                                 <x-input-label for="" value="Instagram" />
-                                <div class="w-full min-h-10 cursor-not-allowed px-3 py-2 border border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
+                                <div
+                                    class="w-full min-h-10 cursor-not-allowed px-3 py-2 border border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
                                     {{ $user->instagram ?? '' }}
                                 </div>
                             </div>
                             <div>
                                 <x-input-label for="" value="Telegram" />
-                                <div class="w-full min-h-10 cursor-not-allowed px-3 py-2 border border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
+                                <div
+                                    class="w-full min-h-10 cursor-not-allowed px-3 py-2 border border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
                                     {{ $user->telegram ?? '' }}
                                 </div>
                             </div>
-    
-    
+
+
                         </div>
                     </div>
-                    
+
                     <div class="fixed bottom-8 right-32 z-10">
                         <x-primary-button type="submit">
                             <x-lucide-save class="w-6 h-6 text-white" />
                         </x-primary-button>
                     </div>
-                    
+
                 </form>
                 <div>
                     <x-user.roles :user="$user" :roles="$user->roles" :availableRoles="$roles" />
@@ -216,7 +217,8 @@
                                 {{ __('users.profile_picture') }}
                             </h3>
                             <div class='has-tooltip'>
-                                <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                <span
+                                    class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
                                     {{ __('users.profile_picture_info') }}
                                 </span>
                                 <x-lucide-info class="h-4 text-background-400" />
@@ -453,18 +455,45 @@
                         <input type="hidden" name="role_type" :value="roleType">
                         <input type="hidden" name="user_id" value="{{ $user->id }}">
 
+
+
                         <template x-if="institutionType == 'academy' && roleType == 'personnel'">
-                            @php
-                                $academiesPersonnelOptions = $user->academies->map(function ($academy) {
-                                    return ['value' => $academy->id, 'label' => $academy->name];
-                                });
-                                $selectedAcademy = [
-                                    'value' => $user->primaryAcademy()->id ?? null,
-                                    'label' => $user->primaryAcademy()->name ?? null,
-                                ];
-                            @endphp
-                            <x-form.select name="academy_id" label="{{ __('academies.academy') }}" :options="$academiesPersonnelOptions"
-                                x-model="selectedAcademy" />
+                            <div>
+                                <table
+                                    class="border-collapse table-auto w-full whitespace-no-wrap bg-white dark:bg-background-900 table-striped relative flex-1 rounded-lg shadow overflow-hidden">
+
+                                    <thead>
+                                        <tr class="text-left">
+                                            <th
+                                                class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+
+                                                {{ __('academies.academy') }}</th>
+
+                                            <th
+                                                class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+
+                                                {{ __('users.set_main_personnel_academy') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($user->academies as $academy)
+                                            <tr
+                                                class="hover:bg-background-200 dark:hover:bg-background-900 cursor-pointer">
+                                                <td
+                                                    class="px-6 py-4 whitespace-nowrap text-sm text-background-500 dark:text-background-300">
+                                                    {{ $academy->name }}</td>
+
+                                                <td
+                                                    class="px-6 py-4 whitespace-nowrap text-sm text-background-500 dark:text-background-300">
+
+                                                    <x-form.checkbox :id="$academy->id" :name="'academy_id_' . $academy->id"
+                                                        label="Primary" :isChecked="$academy->pivot->is_primary" />
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </template>
 
                         <template x-if="institutionType == 'academy' && roleType == 'athlete'">
@@ -482,16 +511,42 @@
                         </template>
 
                         <template x-if="institutionType == 'school' && roleType == 'personnel'">
-                            @php
-                                $schoolsPersonnelOptions = $user->schools->map(function ($school) {
-                                    return ['value' => $school->id, 'label' => $school->name];
-                                });
-                                $selectedSchool = [
-                                    'value' => $user->primarySchool()->id ?? null,
-                                    'label' => $user->primarySchool()->name ?? null,
-                                ];
-                            @endphp
-                            <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsPersonnelOptions" />
+                            <div>
+                                <table
+                                    class="border-collapse table-auto w-full whitespace-no-wrap bg-white dark:bg-background-900 table-striped relative flex-1 rounded-lg shadow overflow-hidden">
+
+                                    <thead>
+                                        <tr class="text-left">
+                                            <th
+                                                class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+
+                                                {{ __('school.school') }}</th>
+
+                                            <th
+                                                class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+
+                                                {{ __('users.set_main_personnel_school') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($user->schools as $school)
+                                            <tr
+                                                class="hover:bg-background-200 dark:hover:bg-background-900 cursor-pointer">
+                                                <td
+                                                    class="px-6 py-4 whitespace-nowrap text-sm text-background-500 dark:text-background-300">
+                                                    {{ $school->name }}</td>
+
+                                                <td
+                                                    class="px-6 py-4 whitespace-nowrap text-sm text-background-500 dark:text-background-300">
+
+                                                    <x-form.checkbox :id="$school->id" :name="'school_id_' . $school->id"
+                                                        label="Primary" :isChecked="$school->pivot->is_primary" />
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </template>
 
                         <template x-if="institutionType == 'school' && roleType == 'athlete'">
@@ -520,7 +575,7 @@
 
             </div>
 
-            @if (!$user->is_disabled && ($authRole == 'admin'))
+            @if (!$user->is_disabled && $authRole == 'admin')
                 <x-user.disable-user-form :user="$user->id" />
             @endif
         </div>

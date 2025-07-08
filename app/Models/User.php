@@ -498,6 +498,23 @@ class User extends Authenticatable implements MustVerifyEmail {
         })->toArray();
     }
 
+    public function allowedInstitutions() {
+        $authRole = $this->getRole();
+
+        switch ($authRole) {
+            case 'manager':
+            case 'rector':
+                return $this->academies()->wherePivot('is_primary', 1)->get();
+                break;
+            case 'dean':
+                return $this->schools()->wherePivot('is_primary', 1)->get();
+                break;
+
+            default:
+                return collect([]);
+        }
+    }
+
     public function allowedRoleIds(): array {
         return $this->roles()->get()->map(function ($role) {
             return $role->id;
