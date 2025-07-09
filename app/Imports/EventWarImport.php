@@ -144,7 +144,7 @@ class EventWarImport implements ToCollection {
 
             if (!$this->event || ($this->event->resultType() != 'ranking')) continue;
 
-            $pointsEarned = round((($usersCount - $userPosition) + 1) * $this->event->eventMultiplier(), 0, PHP_ROUND_HALF_UP);
+            $pointsEarned = round((($usersCount - $userPosition) + 1) * $this->event->eventMultiplier(), 0, PHP_ROUND_HALF_UP) ?? 0;
 
             $participation = EventResult::where('event_id', $this->event->id)->where('user_id', $user->id)->first();
             if (!$participation) continue;
@@ -194,6 +194,7 @@ class EventWarImport implements ToCollection {
             }
             $result['participation']->save();
         }
+        
     }
 
     public function getLogArray() {
