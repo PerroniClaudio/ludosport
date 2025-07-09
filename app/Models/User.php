@@ -10,6 +10,7 @@ use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -126,7 +127,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->academies()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
     }
 
-    // Imposta accademia primaria (per il personale)
+    // Imposta accademia primaria (per il personale) non più usato.
     public function setPrimaryAcademy($academyId) {
         // Rimuove l'attuale accademia principale del personale e imposta la nuova
         if ($this->primaryAcademy()) {
@@ -607,54 +608,6 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $now->diffInDays($expirationDate) < 30;
     }
 
-    public function validatePrimaryInstitutionPersonnel() {
-        $user = User::find(auth()->user()->id);
-        $role = $user->getRole();
-        $primary = null;
-        switch ($role) {
-            case 'admin':
-                return true;
-                break;
-            case 'rector':
-                $primary = $user->primaryAcademy();
-                if (!$primary || $primary->id == 1) {
-                    return false;
-                }
-                return true;
-                break;
-            case 'dean':
-                $primary = $user->primarySchool();
-                if (!$primary) {
-                    return false;
-                }
-                return true;
-                break;
-            case 'manager':
-                $primary = $user->primaryAcademy();
-                if (!$primary) {
-                    return false;
-                }
-                return true;
-                break;
-            case 'instructor':
-                $primary = $user->clansPersonnel()->count() > 0;
-                if (!$primary) {
-                    return false;
-                }
-                return true;
-                break;
-            case 'technician':
-                $primary = $user->primaryAcademy();
-                if (!$primary || $primary->id == 1) {
-                    return false;
-                }
-                return true;
-                break;
-            default:
-                return false;
-                break;
-        }
-    }
 
     // Rimuove tutte le associazioni dell'atleta con tutte le accademie (escluso quella indicata) e le rispettive scuole e corsi
     public function removeAcademiesAthleteAssociations($academyExeption = null, $importingUserId = null, $executedByJobName = false) {
@@ -853,5 +806,71 @@ class User extends Authenticatable implements MustVerifyEmail {
             $tempBattleName = $this->name . $this->surname . $number;
         }
         return $tempBattleName;
+    }
+
+
+    public function validatePrimaryInstitutionPersonnel() {
+        $user = User::find(Auth::user()->id);
+        $role = $user->getRole();
+        $primary = null;
+        switch ($role) {
+            case 'admin':
+                return true;
+                break;
+            case 'rector':
+                $primary = $user->academies()->wherePivot('is_primary', true)->count() > 0;
+                if (!$primary) {
+                    return false;
+                }
+                // Check if user has at least one primary academy that is not academy ID 1
+                $validPrimary = $user->academies()->wherePivot('is_primary', true)->where('academy_id', '!=', 1)->count() > 0;
+                return $validPrimary;
+                break;
+            case 'dean':
+                $primary = $user->schools()->wherePivot('is_primary', true)->count() > 0;
+                return $primary;
+                break;
+            case 'manager':
+                $primary = $user->academies()->wherePivot('is_primary', true)->count() > 0;
+                return $primary;
+                break;
+            case 'instructor':
+                $primary = $user->clansPersonnel()->count() > 0;
+                return $primary;
+                break;
+            case 'technician':
+                $primary = $user->academies()->wherePivot('is_primary', true)->count() > 0;
+                if (!$primary) {
+                    return false;
+                }
+                // Check if user has at least one primary academy that is not academy ID 1
+                $validPrimary = $user->academies()->wherePivot('is_primary', true)->where('academy_id', '!=', 1)->count() > 0;
+                return $validPrimary;
+                break;
+            default:
+                return false;
+                break;
+        }
+    }
+
+    public function getActiveInstitutionId() {
+        return session('institution');
+    }
+
+    public function getActivePrimaryAcademy() {
+        $active_academy_id = session('institution');
+
+        if ($active_academy_id) {
+            $academy = Academy::find($active_academy_id);
+            if ($academy && !$academy->is_disabled) {
+                return $academy;
+            }
+        } else {
+            // Se non c'è un'istituzione attiva, prendo la prima accademia primaria
+            $primaryAcademy = $this->primaryAcademy();
+            if ($primaryAcademy) {
+                return $primaryAcademy;
+            }
+        }
     }
 }

@@ -431,7 +431,7 @@ class AcademyController extends Controller {
 
         // L'admin può farlo sempre, il rettore solo se l'accademia è la sua
         // if ($authRole !== 'admin' && ($authRole !== 'rector' || (($academy->rector()->id ?? null) != $authUser->id))) {
-        if ($authRole !== 'admin' && (!in_array($authRole, ['rector', 'manager']) || (($authUser->primaryAcademy()->id ?? null) != $academy->id))) {
+        if ($authRole !== 'admin' && (!in_array($authRole, ['rector', 'manager']) || (($authUser->getActiveInstitutionId() ?? null) != $academy->id))) {
             return back()->with('error', 'Not authorized.');
         }
 
@@ -504,7 +504,7 @@ class AcademyController extends Controller {
 
         // L'admin può farlo sempre, il rettore e il manager solo se l'accademia è la loro
         // if ($authRole !== 'admin' && ($authRole !== 'rector' || (($academy->rector()->id ?? null) != $authUser->id))) {
-        if ($authRole !== 'admin' && (!in_array($authRole, ['rector', 'manager']) || (($authUser->primaryAcademy()->id ?? null) != $academy->id))) {
+        if ($authRole !== 'admin' && (!in_array($authRole, ['rector', 'manager']) || (($authUser->getActiveInstitutionId() ?? null) != $academy->id))) {
             return back()->with('error', 'Not authorized.');
         }
 
@@ -920,7 +920,7 @@ class AcademyController extends Controller {
             case 'rector':
             case 'manager':
                 // if (!$isStrict && ($academy->rector() && ($academy->rector()->id == $authUser->id))) {
-                if (!$isStrict && (($authUser->primaryAcademy()->id ?? null) == $academy->id)) {
+                if (!$isStrict && (($authUser->getActiveInstitutionId() ?? null) == $academy->id)) {
                     $authorized = true;
                 }
                 break;

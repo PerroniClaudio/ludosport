@@ -48,7 +48,7 @@ class EventController extends Controller {
             case 'dean':
             case 'manager':
 
-                $academy_id = $authUser->primaryAcademy() ? $authUser->primaryAcademy()->id : null;
+                $academy_id = $authUser->primaryAcademy() ? $authUser->getActiveInstitutionId() : null;
 
                 $events = Event::where('academy_id', $academy_id)
                     ->where('start_date', '>=', Carbon::now()->format('Y-m-d'))
@@ -275,7 +275,7 @@ class EventController extends Controller {
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
         if (!($authRole === 'admin' ||
-            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->primaryAcademy()->id : null))) ||
+            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->getActiveInstitutionId() : null))) ||
             $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
@@ -298,7 +298,7 @@ class EventController extends Controller {
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
         if (!($authRole === 'admin' ||
-            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->primaryAcademy()->id : null))) ||
+            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->getActiveInstitutionId() : null))) ||
             $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
@@ -434,7 +434,7 @@ class EventController extends Controller {
 
     public function checkEditPermission($authRole, $event, $authUser) {
         if (!($authRole === 'admin' ||
-            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->primaryAcademy()->id : null))) ||
+            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->getActiveInstitutionId() : null))) ||
             $event->user_id === $authUser->id)) {
             return false;
         }

@@ -8,7 +8,7 @@
     $authRole = $authUser->getRole();
     $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
     // Può modificare l'utente solo se è un atleta della stessa scuola
-$canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray());
+$canEdit = in_array($authUser->getActiveInstitutionId(), $user->academyAthletes->pluck('id')->toArray());
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -169,13 +169,13 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                             <div class="flex flex-col gap-4">
                                 <div class="flex flex-col gap-2">
                                     @if ($canEdit)
-                                        <input type="file" name="profilepicture" id="profilepicture" class="hidden"
+<input type="file" name="profilepicture" id="profilepicture" class="hidden"
                                             x-on:change="$refs.pfpform.submit()" />
                                         <x-primary-button type="button"
                                             onclick="document.getElementById('profilepicture').click()">
                                             {{ __('users.upload_picture') }}
                                         </x-primary-button>
-                                    @endif
+@endif
                                 </div>
                             </div>
                         </form>
@@ -184,8 +184,8 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
                 @if ($user->profile_picture)
-                    <img src="{{ $user->profile_picture }}" alt="{{ $user->name }}" class="w-1/3 rounded-lg">
-                @endif
+<img src="{{ $user->profile_picture }}" alt="{{ $user->name }}" class="w-1/3 rounded-lg">
+@endif
 
             </div> -->
 
@@ -241,8 +241,8 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                                 <div class="flex flex-col gap-4">
                                     <div class="flex flex-col gap-2">
                                         @if ($canEdit)
-                                            <input type="file" name="profilepicture" id="profilepicture" class="hidden"
-                                                x-on:change="$refs.pfpform.submit()" />
+                                            <input type="file" name="profilepicture" id="profilepicture"
+                                                class="hidden" x-on:change="$refs.pfpform.submit()" />
                                             <x-primary-button type="button"
                                                 onclick="document.getElementById('profilepicture').click()">
                                                 {{ __('users.upload_picture') }}
@@ -261,7 +261,8 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
 
                 </div>
 
-                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 text-background-800 dark:text-background-200 ">
+                <div
+                    class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 text-background-800 dark:text-background-200 ">
                     <h3 class="text-2xl">
                         {{ __('users.academies') }}</h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
@@ -308,7 +309,8 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 text-background-800 dark:text-background-200">
+                <div
+                    class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 text-background-800 dark:text-background-200">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">
                         {{ __('users.schools') }}</h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
@@ -317,7 +319,7 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                         <h5 class="text-lg">{{ __('users.as_personnel') }}</h5>
                         <div class="flex gap-2">
                             {{-- <x-primary-button :disabled="$user->schools()->count() < 1" --}}
-                            <x-primary-button :disabled="$user->schools()->count() < 1 || ($authRole === 'admin' ? false : (in_array($authUser->primaryAcademy()->id, $user->academies()->pluck('academy_id')->toArray()) ? false : true))"
+                            <x-primary-button :disabled="$user->schools()->count() < 1 || ($authRole === 'admin' ? false : (in_array($authUser->getActiveInstitutionId(), $user->academies()->pluck('academy_id')->toArray()) ? false : true))"
                                 x-on:click.prevent="setInstitutionType('school'), setRoleType('personnel'), $dispatch('open-modal', 'set-main-institution-modal')">
                                 <span>{{ __('users.set_main_personnel_school') }}</span>
                             </x-primary-button>
@@ -346,7 +348,7 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                     <div class="flex justify-between mt-2">
                         <h5 class="text-lg">{{ __('users.as_athlete') }}</h5>
                         <div class="flex gap-2">
-                            <x-primary-button :disabled="$user->schoolAthletes()->count() < 1 || ($authRole === 'admin' ? false : ($authUser->primaryAcademy()->id == $user->primaryAcademyAthlete()->id ? false : true))"
+                            <x-primary-button :disabled="$user->schoolAthletes()->count() < 1 || ($authRole === 'admin' ? false : ($authUser->getActiveInstitutionId() == $user->primaryAcademyAthlete()->id ? false : true))"
                                 x-on:click.prevent="setInstitutionType('school'), setRoleType('athlete'), $dispatch('open-modal', 'set-main-institution-modal')">
                                 <span>{{ __('users.set_main_athletes_school') }}</span>
                             </x-primary-button>
@@ -417,7 +419,7 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                                     return ['value' => $academy->id, 'label' => $academy->name];
                                 });
                                 $selectedAcademy = [
-                                    'value' => $user->primaryAcademy()->id ?? null,
+                                    'value' => $user->getActiveInstitutionId() ?? null,
                                     'label' => $user->primaryAcademy()->name ?? null,
                                 ];
                             @endphp
@@ -448,7 +450,7 @@ $canEdit = in_array($authUser->primaryAcademy()->id, $user->academyAthletes->plu
                                     });
                                 } else {
                                     $schoolsPersonnelOptions = $user->schools
-                                        ->whereIn('academy_id', $authUser->primaryAcademy()->id)
+                                        ->whereIn('academy_id', $authUser->getActiveInstitutionId())
                                         ->map(function ($school) {
                                             return ['value' => $school->id, 'label' => $school->name];
                                         });

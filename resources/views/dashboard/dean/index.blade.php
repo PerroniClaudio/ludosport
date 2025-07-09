@@ -11,7 +11,7 @@
             <div class="flex flex-col gap-4">
 
                 @if (Auth()->user()->primarySchool())
-                    <x-dashboard.user-school-numbers schoolId="{{ Auth()->user()->primarySchool()->id }}" />
+                    <x-dashboard.user-school-numbers schoolId="{{ Auth()->user()->getActiveInstitutionId() }}" />
 
                     <div class="grid lg:grid-cols-2 gap-4">
 
@@ -65,7 +65,7 @@
                         </div>
 
                     </div>
-                    <x-dashboard.user-clan-graph schoolId="{{ Auth()->user()->primarySchool()->id }}" />
+                    <x-dashboard.user-clan-graph schoolId="{{ Auth()->user()->getActiveInstitutionId() }}" />
                 @else
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6 text-background-900 dark:text-background-100">
