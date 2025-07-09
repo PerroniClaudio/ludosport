@@ -1,5 +1,5 @@
 @props([
-    'selectedSchoolId' => auth()->user()->primarySchool()->id ?? '0',
+    'selectedSchoolId' => auth()->user()->getActiveInstitutionId() ?? '0',
     'selectedSchool' => auth()->user()->primarySchool()->name ?? 'Select a school',
 ])
 
@@ -18,7 +18,7 @@
         this.totalPages = Math.ceil(this.availableSchools.length / 5);
     },
     searchavailableSchools: function(event) {
-    
+
     },
     goToPage: function(page) {
         if (page < 1 || page > this.totalPages) {

@@ -25,7 +25,7 @@ class FeeController extends Controller {
         //
 
         $user = User::find(Auth::user()->id);
-        $academy_id = $user->primaryAcademy()->id ?? null;
+        $academy_id = $user->getActiveInstitutionId() ?? null;
 
         if (!$user->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'Main academy not found');
@@ -56,7 +56,7 @@ class FeeController extends Controller {
         //
 
         $user = User::find(Auth::user()->id);
-        $academy = $user->primaryAcademy()->id ?? null;
+        $academy = $user->getActiveInstitutionId() ?? null;
 
         if (!$academy) {
             return redirect()->route('dashboard')->with('error', 'Main academy academy not found');
@@ -74,7 +74,7 @@ class FeeController extends Controller {
         //
 
         $user = User::find(Auth::user()->id);
-        $academy_id = $user->primaryAcademy()->id ?? null;
+        $academy_id = $user->getActiveInstitutionId() ?? null;
 
         if (!$academy_id) {
             return redirect()->route('dashboard')->with('error', 'Main academy academy not found');
@@ -151,7 +151,7 @@ class FeeController extends Controller {
     public function extimateFeeConsumption(Request $request) {
 
         $user = User::find(Auth::user()->id);
-        $academy_id = $user->primaryAcademy()->id ?? null;
+        $academy_id = $user->getActiveInstitutionId() ?? null;
 
         $available_fees = Fee::where('academy_id', $academy_id)
             ->where('used', 0)
@@ -187,7 +187,7 @@ class FeeController extends Controller {
             $availableFee = Fee::where([
                 ['used', '=', 0],
                 ['end_date', '>', now()->format('Y-m-d')],
-                ['academy_id', '=', $authuser->primaryAcademy()->id ?? 1],
+                ['academy_id', '=', $authuser->getActiveInstitutionId() ?? 1],
             ])->first();
 
             if ($availableFee) {
@@ -413,7 +413,7 @@ class FeeController extends Controller {
                 for ($i = 0; $i < $item->quantity; $i++) {
                     Fee::create([
                         'user_id' => $order->user_id,
-                        'academy_id' => $order->user->primaryAcademy()->id ?? 1,
+                        'academy_id' => $order->user->getActiveInstitutionId() ?? 1,
                         'type' => 3,
                         'start_date' => now(),
                         'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
@@ -831,7 +831,7 @@ class FeeController extends Controller {
                 for ($i = 0; $i < $item->quantity; $i++) {
                     Fee::create([
                         'user_id' => $order->user_id,
-                        'academy_id' => $order->user->primaryAcademy()->id ?? 1,
+                        'academy_id' => $order->user->getActiveInstitutionId() ?? 1,
                         'type' => 3,
                         'start_date' => now(),
                         'end_date' => now()->addYear(),

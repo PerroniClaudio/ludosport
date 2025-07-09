@@ -1,7 +1,3 @@
-<!-- @props([
-    'selectedSchoolId' => auth()->user()->primarySchool()->id ?? '0',
-    'selectedSchool' => auth()->user()->primarySchool()->name ?? 'Select a school',
-]) -->
 @props([
     'selectedSchoolId' => '0',
     'selectedSchool' => 'Select a school',
@@ -18,7 +14,7 @@
     currentPage: 1,
     totalPages: 1,
     getavailableSchools: function() {
-        data = {{ auth()->user()->primaryAcademy()->schools ?? [] }}; 
+        data = {{ auth()->user()->primaryAcademy()->schools ?? [] }};
         this.availableSchools = data;
         this.paginatedSchools = this.availableSchools.slice(0, 5);
         this.totalPages = Math.ceil(this.availableSchools.length / 5);
@@ -168,13 +164,14 @@
         </div>
     </x-modal>
 
-    <template x-if="{{!$isCreating}} && (selectedSchoolId != currentSchoolId)">
+    <template x-if="{{ !$isCreating }} && (selectedSchoolId != currentSchoolId)">
         <div class="mt-2">
             <div class="flex gap-2">
                 <x-input-label for="transfer_athletes" value="{{ __('clan.transfer_athletes') }}" />
                 <div class="has-tooltip">
                     <x-lucide-info class="h-4 text-background-300" />
-                    <div class="tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full">
+                    <div
+                        class="tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full">
                         {{ __('clan.transfer_athletes_tooltip') }}
                     </div>
                 </div>

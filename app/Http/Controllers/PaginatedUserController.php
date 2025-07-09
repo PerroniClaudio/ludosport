@@ -43,7 +43,7 @@ class PaginatedUserController extends Controller {
             case 'manager':
             case 'rector':
                 // Utenti di una determinata accademia
-                $academy_id = $authUser->primaryAcademy()->id ?? null;
+                $academy_id = $authUser->getActiveInstitutionId() ?? null;
                 if (!$academy_id) {
                     return redirect()->route("dashboard")->with('error', 'You don\'t have an academy assigned!');
                 }
@@ -72,7 +72,7 @@ class PaginatedUserController extends Controller {
 
             case 'dean':
                 // Utenti di una determinata scuola
-                $school_id = $authUser->primarySchool()->id ?? null;
+                $school_id = $authUser->getActiveInstitutionId() ?? null;
 
                 if (!$school_id) {
                     return redirect()->route("dashboard")->with('error', 'You don\'t have a school assigned!');

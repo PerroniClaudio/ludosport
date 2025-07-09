@@ -1,9 +1,9 @@
 @props([
-    'nationality' => auth()->user()->primaryAcademy()->nation_id ?? '',
-    'selectedAcademyId' => auth()->user()->primaryAcademy()->id ??'',
-    'selectedAcademy' => auth()->user()->primaryAcademy()->name ??'',
-    'nations' => [auth()->user()->primaryAcademy()->nation],
-    'academies' => [auth()->user()->primaryAcademy()],
+    'nationality' => auth()->user()->getActivePrimaryAcademy()->nation_id ?? '',
+    'selectedAcademyId' => auth()->user()->getActivePrimaryAcademy()->id ?? '',
+    'selectedAcademy' => auth()->user()->getActivePrimaryAcademy()->name ?? '',
+    'nations' => [auth()->user()->getActivePrimaryAcademy()->nation],
+    'academies' => [auth()->user()->getActivePrimaryAcademy()],
 ])
 @php
     $authRole = auth()->user()->getRole();

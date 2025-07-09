@@ -161,7 +161,6 @@
                             selectedAcademyData="selectedAcademyData"
                             @school-selected.window="setSelectedSchool($event.detail)" />
                     </template>
-                    {{-- <x-dashboard.user-school-graph academyId="{{ Auth()->user()->primaryAcademy()->id ?? null }}" /> --}}
 
                     <!-- Grafico a torta per vedere la divisione di utenti tra i corsi + Confronto tra iscritti anno precedente e iscritti anno corrente  -->
                     <template x-if="selectedNation && selectedAcademy && selectedSchool">

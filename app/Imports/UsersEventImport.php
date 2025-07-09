@@ -16,8 +16,7 @@ class UsersEventImport implements ToCollection {
     private $log = [];
     private $is_partial = false;
 
-    public function __construct($user)
-    {
+    public function __construct($user) {
         $this->importingUser = $user;
     }
 
@@ -36,30 +35,30 @@ class UsersEventImport implements ToCollection {
 
             $user = User::where('email', $row[1])->first();
             $event = Event::find($row[0]);
-            
-            if(!$event) {
+
+            if (!$event) {
                 $this->log[] = "['Event not found. email: " . $row[1] . " - event ID: " . $row[0] . "']";
                 $this->is_partial = true;
                 continue;
             }
 
-            if(!$event->isFree() && !User::find($this->importingUser->id)->hasRole('admin')) {
+            if (!$event->isFree() && !User::find($this->importingUser->id)->hasRole('admin')) {
                 $this->log[] = "['Unauthorized to import user to paid event. email: " . $row[1] . " - event ID: " . $row[0] . "']";
                 $this->is_partial = true;
                 continue;
             }
 
             // chi ha richiesto l'importazione deve essere admin o della stessa accademia dell'evento
-            if(!$this->importingUser->hasRole('admin') && (!$this->importingUser->primaryAcademy() || ($this->importingUser->primaryAcademy()->id != $event->academy_id))) {
+            if (!$this->importingUser->hasRole('admin') && !$this->importingUser->academies()->wherePivot('is_primary', 1)->pluck('id')->contains($event->academy_id)) {
                 $this->log[] = "['Unauthorized to import user to event. email: " . $row[1] . " - event ID: " . $row[0] . "']";
                 $this->is_partial = true;
                 continue;
             }
 
             if ($user && $event) {
-                if($event->resultType() == 'enabling') {
+                if ($event->resultType() == 'enabling') {
                     $weaponForm = $event->weaponForm();
-                    if($event->max_participants > 0 && (($event->instructorResults()->count() + $event->waitingList->count()) >= $event->max_participants)){
+                    if ($event->max_participants > 0 && (($event->instructorResults()->count() + $event->waitingList->count()) >= $event->max_participants)) {
                         $this->log[] = "['Event is full. Cannot add participant. email: " . $row[1] . " - event ID: " . $row[0] . "']";
                         $this->is_partial = true;
                         continue;
@@ -72,12 +71,12 @@ class UsersEventImport implements ToCollection {
                         ]);
                     }
                 } else if ($event->resultType() == 'ranking') {
-                    if($event->max_participants > 0 && (($event->results()->count() + $event->waitingList->count()) >= $event->max_participants)){
+                    if ($event->max_participants > 0 && (($event->results()->count() + $event->waitingList->count()) >= $event->max_participants)) {
                         $this->log[] = "['Event is full. Cannot add participant. email: " . $row[1] . " - event ID: " . $row[0] . "']";
                         $this->is_partial = true;
                         continue;
                     }
-                    if(!EventResult::where('event_id', $row[0])->where('user_id', $user->id)->exists()) {
+                    if (!EventResult::where('event_id', $row[0])->where('user_id', $user->id)->exists()) {
                         $eventResult = EventResult::create([
                             'event_id' => $row[0],
                             'user_id' => $user->id,
