@@ -97,7 +97,12 @@ class ChartController extends Controller {
             $aTotal = $a['total_war_points'] + $a['total_style_points'];
             $bTotal = $b['total_war_points'] + $b['total_style_points'];
             if ($bTotal === $aTotal) {
-                return strcasecmp($a['user_name'], $b['user_name']);
+                if($a['total_style_points'] === $b['total_style_points']) {
+                    // If total points are equal, sort by user name
+                    return strcasecmp($a['user_name'], $b['user_name']);
+                }
+                // If total points are equal, sort by style points
+                return $b['total_style_points'] - $a['total_style_points'];
             }
             return $bTotal - $aTotal;
         });

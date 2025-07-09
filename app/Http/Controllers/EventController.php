@@ -209,9 +209,9 @@ class EventController extends Controller {
         // Ordina i risultati per punti totali (war_points + style_points) in ordine decrescente, poi per nome e cognome dell'utente
         $rankingResults = $event->results()
             ->with('user')
-            ->orderByRaw('(total_war_points + total_style_points) DESC')
             ->leftJoin('users', 'event_results.user_id', '=', 'users.id')
             ->orderByRaw('(total_war_points + total_style_points) DESC')
+            ->orderBy('total_style_points', 'DESC')
             ->orderBy('users.name')
             ->orderBy('users.surname')
             ->get();
@@ -1108,7 +1108,12 @@ class EventController extends Controller {
             $aTotal = $a['total_war_points'] + $a['total_style_points'];
             $bTotal = $b['total_war_points'] + $b['total_style_points'];
             if ($bTotal === $aTotal) {
-                return strcasecmp($a['user_name'], $b['user_name']);
+                if($a['total_style_points'] === $b['total_style_points']) {
+                    // If total points are equal, sort by user name
+                    return strcasecmp($a['user_name'], $b['user_name']);
+                }
+                // If total points are equal, sort by style points
+                return $b['total_style_points'] - $a['total_style_points'];
             }
             return $bTotal - $aTotal;
         });
@@ -1159,7 +1164,12 @@ class EventController extends Controller {
             $aTotal = $a['total_war_points'] + $a['total_style_points'];
             $bTotal = $b['total_war_points'] + $b['total_style_points'];
             if ($bTotal === $aTotal) {
-                return strcasecmp($a['user_name'], $b['user_name']);
+                if($a['total_style_points'] === $b['total_style_points']) {
+                    // If total points are equal, sort by user name
+                    return strcasecmp($a['user_name'], $b['user_name']);
+                }
+                // If total points are equal, sort by style points
+                return $b['total_style_points'] - $a['total_style_points'];
             }
             return $bTotal - $aTotal;
         });
@@ -1203,7 +1213,12 @@ class EventController extends Controller {
             $aTotal = $a['total_war_points'] + $a['total_style_points'];
             $bTotal = $b['total_war_points'] + $b['total_style_points'];
             if ($bTotal === $aTotal) {
-                return strcasecmp($a['user_name'], $b['user_name']);
+                if($a['total_style_points'] === $b['total_style_points']) {
+                    // If total points are equal, sort by user name
+                    return strcasecmp($a['user_name'], $b['user_name']);
+                }
+                // If total points are equal, sort by style points
+                return $b['total_style_points'] - $a['total_style_points'];
             }
             return $bTotal - $aTotal;
         });
