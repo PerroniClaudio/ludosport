@@ -253,4 +253,20 @@ class NationController extends Controller {
         ]);
     }
 
+    public function all(Request $request) {
+        $nations = Nation::all();
+        $formatted_nations = [];
+
+        foreach ($nations as $nation) {
+            $formatted_nations[] = [
+                'id' => $nation->id,
+                'name' => $nation->name,
+                'code' => $nation->code,
+                'continent' => $nation->continent,
+            ];
+        }
+
+        return response()->json($formatted_nations);
+    }
+
 }

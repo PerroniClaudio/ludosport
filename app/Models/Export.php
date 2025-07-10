@@ -20,9 +20,10 @@ class Export extends Model {
     private $export_types = [
         'users',
         'user_roles',
-        'users_course',
+        'users_nation',
         'users_academy',
         'users_school',
+        'users_course',
         'event_participants',
         'instructor_event_results',
         'event_war',
@@ -42,12 +43,12 @@ class Export extends Model {
     public static function getAvailableExportsByRole($role) {
         switch ($role) {
             case 'admin':
-                return ['users', 'user_roles', 'users_course', 'users_academy', 'users_school', 'event_participants', 'instructor_event_results', 'event_war', 'event_style', 'orders'];
+                return ['users', 'user_roles', 'users_nation', 'users_academy', 'users_school', 'users_course', 'event_participants', 'instructor_event_results', 'event_war', 'event_style', 'orders'];
             case 'rector':
             case 'manager':
-                return ['users', 'user_roles', 'users_course', 'users_academy', 'users_school', 'event_participants'];
+                return ['users', 'user_roles', 'users_academy', 'users_school', 'users_course', 'event_participants'];
             case 'dean':
-                return ['users', 'user_roles', 'users_course', 'users_school', 'event_participants'];
+                return ['users', 'user_roles', 'users_school', 'users_course', 'event_participants'];
             case 'technician':
                 return ['event_participants', 'instructor_event_results'];
             default:

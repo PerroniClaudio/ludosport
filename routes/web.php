@@ -86,6 +86,7 @@ Route::post('/users/{user}/languages', [App\Http\Controllers\UserController::cla
 
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/nations', [App\Http\Controllers\NationController::class, 'index'])->name('nations.index');
+    Route::get('/nations/all', [App\Http\Controllers\NationController::class, 'all'])->name('nations.all');
     Route::get('/nations/{nation}', [App\Http\Controllers\NationController::class, 'edit'])->name('nations.edit');
     Route::post('/nations/{nation}', [App\Http\Controllers\NationController::class, 'update'])->name('nations.update');
 

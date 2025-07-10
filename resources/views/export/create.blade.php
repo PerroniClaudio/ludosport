@@ -28,16 +28,20 @@
                             <x-exports.user-roles :roles="$roles" />
                         </div>
 
-                        <div x-show="selectedType == 'users_course'">
-                            <x-exports.user-course />
+                        <div x-show="selectedType == 'users_nation'">
+                            <x-exports.user-nation />
                         </div>
-
+                        
                         <div x-show="selectedType == 'users_academy'">
                             <x-exports.user-academy />
                         </div>
-
+                        
                         <div x-show="selectedType == 'users_school'">
                             <x-exports.user-school />
+                        </div>
+                        
+                        <div x-show="selectedType == 'users_course'">
+                            <x-exports.user-course />
                         </div>
 
                         <div x-show="selectedType == 'event_participants'">

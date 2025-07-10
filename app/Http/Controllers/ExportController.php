@@ -10,6 +10,7 @@ use App\Exports\OrdersExport;
 use App\Exports\UsersAcademyExport;
 use App\Exports\UsersCourseExport;
 use App\Exports\UsersExport;
+use App\Exports\UsersNationExport;
 use App\Exports\UsersRoleExport;
 use App\Exports\UsersSchoolExport;
 use App\Models\Export;
@@ -121,10 +122,10 @@ class ExportController extends Controller {
                     'selected_roles' => json_decode($request->selected_roles, true),
                 ];
                 break;
-            case 'users_course':
+            case 'users_nation':
                 $filters = [
                     "users_type" => $request->users_type,
-                    "courses" => json_decode($request->filters, true),
+                    "nations" => json_decode($request->filters, true),
                 ];
                 break;
             case 'users_academy':
@@ -137,6 +138,12 @@ class ExportController extends Controller {
                 $filters = [
                     "users_type" => $request->users_type,
                     "schools" => json_decode($request->filters, true),
+                ];
+                break;
+            case 'users_course':
+                $filters = [
+                    "users_type" => $request->users_type,
+                    "courses" => json_decode($request->filters, true),
                 ];
                 break;
 
@@ -235,6 +242,13 @@ class ExportController extends Controller {
                         $log[] = "['Exporting users course']";
                         $file_path = 'exports/' . $export->id . '/users_course.xlsx';
                         Excel::store(new UsersCourseExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'users_nation':
+                        $log[] = "['Exporting users nation']";
+                        $file_path = 'exports/' . $export->id . '/users_nation.xlsx';
+                        Excel::store(new UsersNationExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
                         $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
                         break;
