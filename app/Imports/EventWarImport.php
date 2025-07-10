@@ -72,60 +72,8 @@ class EventWarImport implements ToCollection {
 
         $firstRow = true;
 
-        // foreach ($collection as $row) {
-        //     if ($firstRow) {
-        //         $firstRow = false;
-        //         continue;
-        //     }
-
-        //     $userPosition = $row[2];
-
-        //     if ($this->event == null) {
-        //         $this->event = Event::find($row[0]);
-        //     } else if ($this->event->id != $row[0]) {
-        //         $this->event = Event::find($row[0]);
-        //     }
-
-        //     if (!$this->event || $this->event->resultType() != 'ranking') {
-        //         continue;
-        //     }
-
-        //     $user = User::where('email', $row[1])->first();
-
-        //     if (!$user) {
-        //         continue;
-        //     }
-
-        //     $pointsEarned = round((($usersCount - $userPosition) + 1) * $this->event->eventMultiplier(), 0, PHP_ROUND_HALF_UP);
-        //     $participation = EventResult::where('event_id', $this->event->id)->where('user_id', $user->id)->first();
-
-        //     if (!$participation) {
-        //         continue;
-        //     }
-
-        //     $participation->war_points = $pointsEarned ?? 0;
-
-        //     switch ($userPosition) {
-        //         case 1:
-        //             $participation->bonus_war_points = $this->event->eventBonusPoints("FIRST_IN_WAR");
-        //             break;
-        //         case 2:
-        //             $participation->bonus_war_points = $this->event->eventBonusPoints("SECOND_IN_WAR");
-        //             break;
-        //         case 3:
-        //             $participation->bonus_war_points = $this->event->eventBonusPoints("THIRD_IN_WAR");
-        //             break;
-        //         default:
-        //             $participation->bonus_war_points = 0;
-        //             break;
-        //     }
-
-        //     $participation->total_war_points = $participation->war_points + $participation->bonus_war_points;
-        //     $participation->save();
-        // }
-
-        
-        $results = [];
+        $calculationBase = $usersCount > 64 ? 64 : $usersCount; // Base for calculation, max 64 even if there are more participants.
+        $partecipationPoints = 1; // Punti di partecipazione da assegnare a tutti i partecipanti (al momento fisso a 1)
 
         foreach ($collection as $row) {
             if ($firstRow) {
@@ -144,10 +92,13 @@ class EventWarImport implements ToCollection {
 
             if (!$this->event || ($this->event->resultType() != 'ranking')) continue;
 
-            $pointsEarned = round((($usersCount - $userPosition) + 1) * $this->event->eventMultiplier(), 0, PHP_ROUND_HALF_UP) ?? 0;
-
             $participation = EventResult::where('event_id', $this->event->id)->where('user_id', $user->id)->first();
             if (!$participation) continue;
+
+            // Assegna i punti arena (war points) in base alla posizione nell'excel.
+            $pointsEarned = $userPosition > 64 
+                ? 0
+                : (round((($calculationBase - $userPosition) + 1) * $this->event->eventMultiplier(), 0, PHP_ROUND_HALF_UP) ?? 0);
 
             // Calcola bonus
             $bonus = 0;
@@ -161,38 +112,16 @@ class EventWarImport implements ToCollection {
                 case 3:
                     $bonus = $this->event->eventBonusPoints("THIRD_IN_WAR");
                     break;
+                default:
+                    break;
             }
 
-            $results[] = [
-                'participation' => $participation,
+            // Aggiorna i risultati aggiungendo i punti di partecipazione 
+            $participation->update([
                 'war_points' => $pointsEarned,
                 'bonus_war_points' => $bonus,
-                'total_war_points' => $pointsEarned + $bonus,
-            ];
-        }
-
-        // Ordina per total_war_points discendente, poi per nome e cognome ascendente
-        usort($results, function($a, $b) {
-            if ($a['total_war_points'] == $b['total_war_points']) {
-                return strcmp($a['participation']->user->name . ' ' . $a['participation']->user->surname, $b['participation']->user->name . ' ' . $b['participation']->user->surname);
-            }
-            return $b['total_war_points'] <=> $a['total_war_points'];
-        });
-
-        $partecipationPoints = 1; // Punti di partecipazione da assegnare a tutti i partecipanti (al momento fisso a 1)
-
-        // Azzeramento dal 65° in poi
-        foreach ($results as $index => $result) {
-            if ($index >= 64) { // 0-based index, quindi 64 = 65esimo
-                $result['participation']->war_points = 0;
-                $result['participation']->bonus_war_points = 0;
-                $result['participation']->total_war_points = $partecipationPoints;
-            } else {
-                $result['participation']->war_points = $result['war_points'];
-                $result['participation']->bonus_war_points = $result['bonus_war_points'];
-                $result['participation']->total_war_points = $result['total_war_points'] + $partecipationPoints;
-            }
-            $result['participation']->save();
+                'total_war_points' => $pointsEarned + $bonus + $partecipationPoints
+            ]);
         }
         
     }

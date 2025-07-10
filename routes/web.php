@@ -370,17 +370,6 @@ Route::group([], function () {
 
 Route::group([], function () {
     Route::get('/test', function () {
-        // $results = \App\Models\EventResult::where('event_id', 14)
-        //     ->orderByRaw('total_war_points + total_style_points desc')
-        //     ->get();
-        // $results->each(function ($result) {
-        //     echo $result->user_id . ' - ' . $result->user->name . ' ' . $result->user->surname . ' - ' . $result->total_war_points . ' - ' . $result->total_style_points . '<br>';
-        // });
-        // $results->where('user_id', 9)->first()->update(['total_style_points' => 10]);
-        // $results->where('user_id', 10)->first()->update(['total_style_points' => 11]);
-        // $results->where('user_id', 11)->first()->update(['total_style_points' => 11]);
-        // $results->where('user_id', 15)->first()->update(['total_style_points' => 11]);
-        // $results->where('user_id', 16)->first()->update(['total_style_points' => 11]);
         return 'test';
     });
 });

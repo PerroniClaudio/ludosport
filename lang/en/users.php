@@ -155,6 +155,7 @@ return [
     'sas_academy_search_label' => 'Academy Search',
     'sas_academy_search_placeholder' => 'Search for Academy',
     'sas_academy_search_no_results' => 'No results found for Academy',
+    'sas_school_search_no_results' => 'No results found for School',
     'sas_available_schools' => 'Available Schools',
     'sas_select_school_placeholder' => 'Select School',
     'sas_select_school' => 'Select School',

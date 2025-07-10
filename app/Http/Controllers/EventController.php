@@ -1130,7 +1130,7 @@ class EventController extends Controller {
 
         foreach ($events as $event) {
 
-            $event_result = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
+            $event_result = $event->results()->with('user')->get();
 
             foreach ($event_result as $key => $value) {
 
@@ -1184,7 +1184,7 @@ class EventController extends Controller {
 
         $results = [];
 
-        $event_results = $event->results()->with('user')->orderBy('war_points', 'desc')->get();
+        $event_results = $event->results()->with('user')->get();
 
         foreach ($event_results as $key => $value) {
 

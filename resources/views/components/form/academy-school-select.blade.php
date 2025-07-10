@@ -65,12 +65,11 @@
     </div>
     <x-input-error :messages="$errors->get('academy')" class="mt-2" />
 
-    <div class="modal" role="dialog" tabindex="-1" x-show="isDialogOpen" x-on:click.away="isDialogOpen = false"
+    <div class="modal" role="dialog" tabindex="-1" x-show="isDialogOpen"
         x-cloak x-transition>
-
         <div class="fixed inset-0 z-10 overflow-y-auto bg-black bg-opacity-50 ">
             <div class="flex items-center justify-center min-h-screen">
-                <div
+                <div  x-on:click.away="isDialogOpen = false"
                     class="bg-background-100 dark:bg-background-800 dark:text-background-300 rounded-lg shadow-lg p-6 w-full max-w-3xl">
                     <div class="flex justify-between items-center">
                         <h2 class="text-xl font-semibold text-background-500 dark:text-background-300">
@@ -119,7 +118,7 @@
                             </div>
 
                             <div class="p-4 flex items-center justify-center" x-show="schools.length == 0">
-                                <p>{{ __('users.sas_academy_search_no_results') }}</p>
+                                <p>{{ __('users.sas_school_search_no_results') }}</p>
                             </div>
 
                             <div class="mt-4" x-show="schools.length > 0">
