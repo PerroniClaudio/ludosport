@@ -39,7 +39,7 @@
     <input name="selected_roles" type="hidden" x-model="selectedRolesJson">
 
     <div class="grid grid-cols-2 gap-2">
-        <div class="bg-background-900 p-4 rounded">
+        <div class="bg-background-100 dark:bg-background-900 p-4 rounded">
             <h4 class="text-background-800 dark:text-background-200 text-lg">{{ __('exports.available_roles') }}</h4>
             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
             <table
@@ -70,7 +70,7 @@
             </table>
         </div>
 
-        <div class="bg-background-900 p-4 rounded">
+        <div class="bg-background-100 dark:bg-background-900 p-4 rounded">
             <h4 class="text-background-800 dark:text-background-200 text-lg">{{ __('exports.selected_roles') }}</h4>
             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
             <table

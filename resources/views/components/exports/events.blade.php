@@ -94,7 +94,7 @@
     <input name="filters" type="hidden" x-model="filtersJson">
 
     <div class="grid grid-cols-2 gap-2 my-4">
-        <div class="bg-background-900 p-4 rounded">
+        <div class="bg-background-100 dark:bg-background-900 p-4 rounded">
             <div class="flex justify-between gap-2 items-center">
                 <div class="flex-1">
                     <h4 class="text-background-800 dark:text-background-200 text-lg">
@@ -174,7 +174,7 @@
 
         </div>
 
-        <div class="bg-background-900 p-4 rounded">
+        <div class="bg-background-100 dark:bg-background-900 p-4 rounded">
             <div class="flex justify-between gap-2 items-center">
                 <div class="flex-1">
                     <h4 class="text-background-800 dark:text-background-200 text-lg">

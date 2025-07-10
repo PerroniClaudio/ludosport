@@ -100,7 +100,7 @@
     <p class="my-4">Seleziona una o più nazioni per esportare gli utenti delle relative accademie.</p>
 
     <div class="grid grid-cols-2 gap-2">
-        <div class="bg-background-900 p-4 rounded">
+        <div class="bg-background-100 dark:bg-background-900 p-4 rounded">
             <div class="flex justify-between gap-2 items-center">
                 <div class="flex-1">
                     <h4 class="text-background-800 dark:text-background-200 text-lg">
@@ -169,7 +169,7 @@
             </div>
         </div>
 
-        <div class="bg-background-900 p-4 rounded">
+        <div class="bg-background-100 dark:bg-background-900 p-4 rounded">
             <div class="flex justify-between gap-2 items-center">
                 <div class="flex-1">
                     <h4 class="text-background-800 dark:text-background-200 text-lg">
