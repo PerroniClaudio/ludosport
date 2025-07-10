@@ -97,8 +97,8 @@ class EventWarImport implements ToCollection {
 
             // Assegna i punti arena (war points) in base alla posizione nell'excel.
             $pointsEarned = $userPosition > 64 
-                ? 0
-                : (round((($calculationBase - $userPosition) + 1) * $this->event->eventMultiplier(), 0, PHP_ROUND_HALF_UP) ?? 0);
+                ?  $partecipationPoints
+                :  $partecipationPoints + (round((($calculationBase - $userPosition) + 1) * $this->event->eventMultiplier(), 0, PHP_ROUND_HALF_UP) ?? 0);
 
             // Calcola bonus
             $bonus = 0;
@@ -120,7 +120,7 @@ class EventWarImport implements ToCollection {
             $participation->update([
                 'war_points' => $pointsEarned,
                 'bonus_war_points' => $bonus,
-                'total_war_points' => $pointsEarned + $bonus + $partecipationPoints
+                'total_war_points' => $pointsEarned + $bonus
             ]);
         }
         

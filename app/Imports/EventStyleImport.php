@@ -99,8 +99,8 @@ class EventStyleImport implements ToCollection {
 
             // Assegna i punti stile (style points) in base alla posizione nell'excel.
             $pointsEarned = $userPosition > 64 
-                ? 0
-                : (round((($calculationBase - $userPosition) + 1) * $this->event->eventMultiplier(), 0, PHP_ROUND_HALF_UP) ?? 0);
+                ? $partecipationPoints
+                : $partecipationPoints + (round((($calculationBase - $userPosition) + 1) * $this->event->eventMultiplier(), 0, PHP_ROUND_HALF_UP) ?? 0);
             
 
             // Calcola bonus
@@ -123,7 +123,7 @@ class EventStyleImport implements ToCollection {
             $participation->update([
                 'style_points' => $pointsEarned,
                 'bonus_style_points' => $bonus,
-                'total_style_points' => $pointsEarned + $bonus + $partecipationPoints,
+                'total_style_points' => $pointsEarned + $bonus,
             ]);
         }
 
