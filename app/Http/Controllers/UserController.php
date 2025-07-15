@@ -1255,7 +1255,6 @@ class UserController extends Controller {
         if (strlen($request->selectedCoursesJson) > 0) {
             $selectedCourses = json_decode($request->selectedCoursesJson);
 
-
             foreach ($selectedCourses as $course) {
                 $course = Clan::find($course);
 
@@ -1268,7 +1267,6 @@ class UserController extends Controller {
                 }
             }
         } else {
-
             if (strlen($request->selectedSchoolsJson) > 0) {
                 $selectedSchools = json_decode($request->selectedSchoolsJson);
 
@@ -1299,7 +1297,6 @@ class UserController extends Controller {
                         }
                     }
                 } else {
-
                     // Applica solo gli altri filtri 
                     $users = User::where('is_disabled', false)->get();
                 }
@@ -1312,6 +1309,18 @@ class UserController extends Controller {
         $shouldCheckForYear = $request->year != null;
         $shouldCheckForCreationDateFrom = $request->from != null;
         $shouldCheckForCreationDateTo = $request->to != null;
+        $feeStatus = $request->fee_status;
+
+        // Filtro per fee_status
+        if ($feeStatus === 'fee') {
+            $users = $users->filter(function($user) {
+                return $user->has_paid_fee == true;
+            })->values();
+        } elseif ($feeStatus === 'fee_not_paid') {
+            $users = $users->filter(function($user) {
+                return $user->has_paid_fee == false;
+            })->values();
+        }
 
         // Serve solo per l'istruttore. elenco delle scuole in cui ha un corso.
         $authSchools = $authUser->schools->pluck('id')->toArray();

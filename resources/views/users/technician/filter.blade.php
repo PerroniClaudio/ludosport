@@ -290,7 +290,7 @@
                         </h3>
                         <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                        <x-form.checkbox id="fee" name="fee" label="Paid" />
+                        <x-form.radio-group name="fee_status" label="{{ __('users.filter_by_fee') }}" :options="['fee' => 'Pagato', 'fee_not_paid' => 'Non pagato']" selected="" />
                     </div>
                 </div>
 

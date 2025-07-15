@@ -73,13 +73,13 @@
                 @csrf
                 <div class="flex items-center justify-between">
                     <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('events.info') }}</h3>
-                    {{-- @if (!$event->is_approved) --}}
-                    <div class="fixed bottom-8 right-32 z-[9999]">
-                        <x-primary-button type="submit">
-                            <x-lucide-save class="w-6 h-6 text-white" />
-                        </x-primary-button>
-                    </div>
-                    {{-- @endif --}}
+                    @if (!$event->is_approved)
+                        <div class="fixed bottom-8 right-32 z-[9999]">
+                            <x-primary-button type="submit">
+                                <x-lucide-save class="w-6 h-6 text-white" />
+                            </x-primary-button>
+                        </div>
+                    @endif
                 </div>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 

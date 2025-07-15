@@ -160,7 +160,7 @@ class TemplateExport implements FromArray {
                     "Result (Green/Yellow/Red) *",
                     "Internship Duration (* If result is Yellow)",
                     "Notes on the Internship (* If result is Yellow, max 100 chars)",
-                    "Retake Exam / Retake Course (* If result is Red)",
+                    "Retake Exam or retake Course? (write only 'Exam' or 'Course') (* If result is Red)",
                     "Notes (max 100 chars)",
                     "Name",
                     "Surname",
