@@ -165,6 +165,15 @@
                                                     <x-sortable-header field="academy" :selectedRole="$selectedRole">
                                                         {{ __('users.academy') }}
                                                     </x-sortable-header>
+                                                @elseif ($selectedRole == 'manager')
+                                                    {{-- Email column for managers --}}
+                                                    <x-sortable-header field="email" :selectedRole="$selectedRole">
+                                                        {{ __('users.email') }}
+                                                    </x-sortable-header>
+                                                    {{-- Academy column for managers --}}
+                                                    <x-sortable-header field="academy" :selectedRole="$selectedRole">
+                                                        {{ __('users.academy') }}
+                                                    </x-sortable-header>
                                                 @elseif ($selectedRole == 'dean')
                                                     {{-- Email column for deans --}}
                                                     <x-sortable-header field="email" :selectedRole="$selectedRole">
@@ -328,6 +337,17 @@
                                                             {{ $user->email }}
                                                         </td>
                                                         {{-- Academy column for rectors --}}
+                                                        <td
+                                                            class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
+                                                            {{ $user->primary_academy ?? '' }}
+                                                        </td>
+                                                    @elseif ($selectedRole == 'manager')
+                                                        {{-- Email column for managers --}}
+                                                        <td
+                                                            class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
+                                                            {{ $user->email }}
+                                                        </td>
+                                                        {{-- Academy column for managers --}}
                                                         <td
                                                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
                                                             {{ $user->primary_academy ?? '' }}

@@ -82,7 +82,7 @@ class ChartController extends Controller {
                         'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
                         'user_school' => $value->user->primarySchoolAthlete()->name ?? '',
                         'school_slug' => $value->user->primarySchoolAthlete()->slug ?? '',
-                        'nation' => $value->user->nation->name,
+                        'nation' => $value->user->primaryAcademyAthlete() ? $value->user->primaryAcademyAthlete()->nation->name : $value->user->nation->name,
                         'total_war_points' => 0,
                         'total_style_points' => 0,
                     ];

@@ -145,9 +145,10 @@ class User extends Authenticatable implements MustVerifyEmail {
 
         $academy = $this->academyAthletes()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
 
-        if (!$academy) {
-            $academy = $this->academyAthletes()->where('is_disabled', false)->first();
-        }
+        // Rimosso fallback perchè interferisce coi controlli quando si cerca di capire se l'utente ha l'accademia primaria
+        // if (!$academy) {
+        //     $academy = $this->academyAthletes()->where('is_disabled', false)->first();
+        // }
 
         return $academy;
     }
@@ -639,8 +640,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Rimuove tutte le associazioni dell'atleta con tutte le accademie (escluso quella indicata) e le rispettive scuole e corsi
-    public function removeAcademiesAthleteAssociations($academyExeption = null, $importingUserId = null) {
-        $authUser = User::find($importingUserId ? $importingUserId : auth()->user()->id);
+    public function removeAcademiesAthleteAssociations($academyExeption = null, $importingUserId = null, $executedByJobName = false) {
+        $madeBy = $executedByJobName ? ('job - ' . $executedByJobName) : ($importingUserId ? $importingUserId : (auth()->check() ? auth()->user()->id : null));
         // Chi usa la funzione ha già il controllo sull'autorizzazione
         // $authRole = $authUser->getRole();
 
@@ -663,7 +664,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         $removedAcademiesIds = $removedAcademies->pluck('id')->toArray();
         // Metto tutti i dati su tutti e tre i canali. Si può modificare in futuro
         Log::channel('user')->info('Removed athlete associations', [
-            'made_by' => $authUser->id,
+            'made_by' => $madeBy,
             'athlete' => $this->id,
             'academies' => $removedAcademiesIds,
             'schools' => $removedSchoolsIds,

@@ -24,7 +24,7 @@ class PaginatedUserController extends Controller {
 
         // Base query with common conditions
         $baseQuery = User::query()
-            ->where('is_disabled', false)
+            ->where('users.is_disabled', false)
             ->when($request->role, function ($query) use ($request) {
                 return $query->whereHas('roles', function ($q) use ($request) {
                     $q->where('label', $request->role);
@@ -106,6 +106,7 @@ class PaginatedUserController extends Controller {
             'instructor' => ['id', 'name', 'email', 'weapon_forms', 'created_at'],
             'technician' => ['id', 'name', 'email', 'weapon_forms', 'created_at'],
             'rector' => ['id', 'name', 'email', 'academy', 'created_at'],
+            'manager' => ['id', 'name', 'email', 'academy', 'created_at'],
             'dean' => ['id', 'name', 'email', 'school', 'created_at'],
             'default' => ['id', 'name', 'email', 'created_at']
         ];
@@ -132,29 +133,46 @@ class PaginatedUserController extends Controller {
                 // Handle special sorting for athletes
                 switch ($sortBy) {
                     case 'nation':
-                        $query->leftJoin('nations', 'users.nation_id', '=', 'nations.id')
-                            ->orderBy('nations.name', $sortDirection);
+                        $query->leftJoin('academies_athletes', function ($join) {
+                                $join->on('users.id', '=', 'academies_athletes.user_id')
+                                    ->where('academies_athletes.is_primary', '=', true);
+                            })
+                            ->leftJoin('academies', function ($join) {
+                                $join->on('academies_athletes.academy_id', '=', 'academies.id');
+                            })
+                            ->leftJoin('nations', function ($join) {
+                                $join->on('academies.nation_id', '=', 'nations.id');
+                            })
+                            ->orderBy('nations.name', $sortDirection)
+                            ->select('users.*');
                         break;
                     case 'academy':
-                        $query->leftJoin('academy_athletes', 'users.id', '=', 'academy_athletes.athlete_id')
+                        // La query ordina per nome accademia primaria atleta (che è una sola per ogni utente)
+                        $query->leftJoin('academies_athletes', function ($join) {
+                                $join->on('users.id', '=', 'academies_athletes.user_id')
+                                    ->where('academies_athletes.is_primary', '=', true);
+                            })
                             ->leftJoin('academies', function ($join) {
-                                $join->on('academy_athletes.academy_id', '=', 'academies.id')
-                                    ->where('academy_athletes.is_primary', '=', true);
+                                $join->on('academies_athletes.academy_id', '=', 'academies.id')
+                                    ->where('academies.is_disabled', '=', false);
                             })
-                            ->orderBy('academies.name', $sortDirection);
-                        break;
+                            ->orderByRaw('LOWER(TRIM(academies.name)) ' . $sortDirection)
+                            ->select('users.*');
                     case 'school':
-                        $query->leftJoin('school_athletes', 'users.id', '=', 'school_athletes.athlete_id')
+                        // Per evitare la perdita di dati, seleziona esplicitamente i campi della tabella users e aggiungi quelli delle join
+                        $query->leftJoin('schools_athletes', 'users.id', '=', 'schools_athletes.user_id')
                             ->leftJoin('schools', function ($join) {
-                                $join->on('school_athletes.school_id', '=', 'schools.id')
-                                    ->where('school_athletes.is_primary', '=', true);
+                                $join->on('schools_athletes.school_id', '=', 'schools.id')
+                                    ->where('schools_athletes.is_primary', '=', true);
                             })
-                            ->orderBy('schools.name', $sortDirection);
+                            ->orderBy('schools.name', $sortDirection)
+                            ->select('users.*'); // <-- aggiungi questa riga per mantenere tutti i dati dell'utente
                         break;
                     case 'name':
                     case 'surname':
                     case 'email':
-                        $query->orderByRaw("LOWER($sortBy) $sortDirection");
+                        $query->orderByRaw("LOWER(TRIM($sortBy)) $sortDirection")
+                        ->select('users.*');
                         break;
                     default:
                         $query->orderBy($sortBy, $sortDirection);
@@ -176,7 +194,7 @@ class PaginatedUserController extends Controller {
                         ->orderBy('weapon_forms_personnel_count', $sortDirection);
                 } else if (in_array($sortBy, ['name', 'surname', 'email'])) {
                     // Make sorting case-insensitive for string columns
-                    $query->orderByRaw("LOWER($sortBy) $sortDirection");
+                    $query->orderByRaw("LOWER(TRIM($sortBy)) $sortDirection");
                 } else {
                     $query->orderBy($sortBy, $sortDirection);
                 }
@@ -196,7 +214,7 @@ class PaginatedUserController extends Controller {
                         ->orderBy('weapon_forms_technician_count', $sortDirection);
                 } else if (in_array($sortBy, ['name', 'surname', 'email'])) {
                     // Make sorting case-insensitive for string columns
-                    $query->orderByRaw("LOWER($sortBy) $sortDirection");
+                    $query->orderByRaw("LOWER(TRIM($sortBy)) $sortDirection");
                 } else {
                     $query->orderBy($sortBy, $sortDirection);
                 }
@@ -205,21 +223,25 @@ class PaginatedUserController extends Controller {
                 break;
 
             case 'rector':
+            case 'manager':
                 $query = $baseQuery
                     ->select('*')
                     ->with(['academies']);
 
                 // Handle special sorting for rectors
                 if ($sortBy === 'academy') {
-                    $query->leftJoin('academy_users', 'users.id', '=', 'academy_users.user_id')
-                        ->leftJoin('academies', function ($join) {
-                            $join->on('academy_users.academy_id', '=', 'academies.id')
-                                ->where('academy_users.is_primary', '=', true);
-                        })
-                        ->orderBy('academies.name', $sortDirection);
+                    $query->leftJoin('academies_personnel', function ($join) {
+                        $join->on('users.id', '=', 'academies_personnel.user_id')
+                             ->where('academies_personnel.is_primary', '=', true);
+                    })
+                    ->leftJoin('academies', function ($join) {
+                        $join->on('academies_personnel.academy_id', '=', 'academies.id');
+                    })
+                    ->orderByRaw("LOWER(TRIM(academies.name)) $sortDirection")
+                    ->select('users.*');
                 } else if (in_array($sortBy, ['name', 'surname', 'email'])) {
                     // Make sorting case-insensitive for string columns
-                    $query->orderByRaw("LOWER($sortBy) $sortDirection");
+                    $query->orderByRaw("LOWER(TRIM($sortBy)) $sortDirection");
                 } else {
                     $query->orderBy($sortBy, $sortDirection);
                 }
@@ -234,15 +256,18 @@ class PaginatedUserController extends Controller {
 
                 // Handle special sorting for deans
                 if ($sortBy === 'school') {
-                    $query->leftJoin('school_users', 'users.id', '=', 'school_users.user_id')
-                        ->leftJoin('schools', function ($join) {
-                            $join->on('school_users.school_id', '=', 'schools.id')
-                                ->where('school_users.is_primary', '=', true);
-                        })
-                        ->orderBy('schools.name', $sortDirection);
+                    $query->leftJoin('schools_personnel', function ($join) {
+                        $join->on('users.id', '=', 'schools_personnel.user_id')
+                             ->where('schools_personnel.is_primary', '=', true);
+                    })
+                    ->leftJoin('schools', function ($join) {
+                        $join->on('schools_personnel.school_id', '=', 'schools.id');
+                    })
+                    ->orderByRaw("LOWER(TRIM(schools.name)) $sortDirection")
+                    ->select('users.*');
                 } else if (in_array($sortBy, ['name', 'surname', 'email'])) {
                     // Make sorting case-insensitive for string columns
-                    $query->orderByRaw("LOWER($sortBy) $sortDirection");
+                    $query->orderByRaw("LOWER(TRIM($sortBy)) $sortDirection");
                 } else {
                     $query->orderBy($sortBy, $sortDirection);
                 }
@@ -250,7 +275,6 @@ class PaginatedUserController extends Controller {
                 $users = $query->paginate(10);
                 break;
 
-            case 'manager':
             case 'admin':
             default:
                 // Make sorting case-insensitive for string columns
@@ -258,7 +282,7 @@ class PaginatedUserController extends Controller {
                     $users = $baseQuery
                         ->select('*')
                         ->with(['roles'])
-                        ->orderByRaw("LOWER($sortBy) $sortDirection")
+                        ->orderByRaw("LOWER(TRIM($sortBy)) $sortDirection")
                         ->paginate(10);
                 } else {
                     $users = $baseQuery
@@ -274,9 +298,10 @@ class PaginatedUserController extends Controller {
         foreach ($users as $user) {
             switch ($selectedRole) {
                 case 'athlete':
-                    // Format nation name
-                    if ($user->nation_id === null) {
-                        $user->nation = "Not set";
+                    // Usa la nazione dell'accademia primaria atleta se esiste, altrimenti quella dell'utente
+                    $primaryAcademyAthlete = $user->primaryAcademyAthlete();
+                    if ($primaryAcademyAthlete && $primaryAcademyAthlete->nation) {
+                        $user->nation = $primaryAcademyAthlete->nation->name;
                     } else {
                         $user->nation = $user->nation ? $user->nation->name : "Not set";
                     }
@@ -293,6 +318,7 @@ class PaginatedUserController extends Controller {
                     break;
 
                 case 'rector':
+                case 'manager':
                     // Format primary academy for rectors
                     $user->primary_academy = $user->primaryAcademy() ? $user->primaryAcademy()->name : "No academy";
                     break;

@@ -7,8 +7,11 @@
     $currentDirection = request('direction', 'asc');
     $newDirection = $currentSort === $field && $currentDirection === 'asc' ? 'desc' : 'asc';
 
+    $authUser = auth()->user();
+    $authUserRole = $authUser ? $authUser->getRole() : null;
+
     $sortUrl = route(
-        'users.index',
+        $authUserRole === 'admin' ? 'users.index' : $authUserRole . '.users.index',
         array_merge(request()->query(), [
             'sortedby' => $field,
             'role' => $selectedRole,

@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\CheckPrimaryAcademyJob;
 use App\Jobs\CheckWaitingListJob;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Foundation\Inspiring;
@@ -10,6 +11,8 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 Schedule::job(new CheckWaitingListJob())->daily();
+
+// Schedule::job(new CheckPrimaryAcademyJob())->daily();
 
 Schedule::call(function () {
     $importController = new \App\Http\Controllers\ImportController();

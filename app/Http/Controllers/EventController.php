@@ -1092,7 +1092,7 @@ class EventController extends Controller {
                         'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
                         'user_school' => $value->user->primarySchoolAthlete()->name ?? '',
                         'school_slug' => $value->user->primarySchoolAthlete()->slug ?? '',
-                        'nation' => $value->user->nation->name,
+                        'nation' => $primaryAcademyAthlete ? $primaryAcademyAthlete->nation->name : $value->user->nation->name,
                         'total_war_points' => 0,
                         'total_style_points' => 0,
                     ];
@@ -1123,40 +1123,47 @@ class EventController extends Controller {
 
     public function nation(Request $request) {
 
-        $date = Carbon::parse($request->date);
-        $events = Event::where('end_date', '<', $date->format('Y-m-d'))->where('is_disabled', false)->get();
-
+        $nation_id = $request['nation_id'];
         $results = [];
 
-        foreach ($events as $event) {
+        // Prendi tutte le accademie della nazione
+        $academies = \App\Models\Academy::where('nation_id', $nation_id)->get();
 
-            $event_result = $event->results()->with('user')->get();
-
-            foreach ($event_result as $key => $value) {
-
-                if ($value->user->nation_id == $request['nation_id']) {
-
-                    if (!isset($results[$value->user_id])) {
-
-                        $primaryAcademyAthlete = $value->user->primaryAcademyAthlete();
-
-                        $results[$value->user_id] = [
-                            'user_id' => $value->user_id,
-                            'user_name' => $value->user->name . ' ' . $value->user->surname,
-                            'user_battle_name' => $value->user->battle_name ?? '',
-                            'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
-                            'user_school' => $value->user->primarySchoolAthlete()->name ?? '',
-                            'school_slug' => $value->user->primarySchoolAthlete()->slug ?? '',
-                            'nation' => $value->user->nation->name,
-                            'total_war_points' => 0,
-                            'total_style_points' => 0,
-                        ];
-                    }
-
-                    $results[$value->user_id]['total_war_points'] += $value->total_war_points;
-                    $results[$value->user_id]['total_style_points'] += $value->total_style_points;
-                }
+        // Prendi tutti gli utenti atleti delle accademie
+        $users = collect();
+        foreach ($academies as $academy) {
+            foreach ($academy->athletes as $user) {
+                $users->put($user->id, $user);
             }
+        }
+
+        // Usa la data fornita, se presente, altrimenti now()
+        $date = $request->date ? \Carbon\Carbon::parse($request->date) : now();
+
+        foreach ($users as $user) {
+            $primaryAcademyAthlete = $user->primaryAcademyAthlete();
+
+            // Calcola i punti totali filtrando per la data richiesta
+            $eventResults = $user->eventResults()
+                ->whereHas('event', function ($query) use ($date) {
+                    $query->where('end_date', '<', $date->format('Y-m-d'))
+                        ->where('is_disabled', false);
+                })
+                ->get();
+            $total_war_points = $eventResults->sum('total_war_points');
+            $total_style_points = $eventResults->sum('total_style_points');
+
+            $results[$user->id] = [
+                'user_id' => $user->id,
+                'user_name' => $user->name . ' ' . $user->surname,
+                'user_battle_name' => $user->battle_name ?? '',
+                'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
+                'user_school' => $user->primarySchoolAthlete()->name ?? '',
+                'school_slug' => $user->primarySchoolAthlete()->slug ?? '',
+                'nation' => $primaryAcademyAthlete ? $primaryAcademyAthlete->nation->name : $user->nation->name,
+                'total_war_points' => $total_war_points,
+                'total_style_points' => $total_style_points,
+            ];
         }
 
         // Ordina i risultati per punti totali (war_points + style_points) in ordine decrescente e poi per nome utente
@@ -1176,7 +1183,7 @@ class EventController extends Controller {
 
         return response()->json([
             'results' => $results,
-            'nation' => Nation::find($request['nation_id']),
+            'nation' => \App\Models\Nation::find($nation_id),
         ]);
     }
 
@@ -1198,7 +1205,7 @@ class EventController extends Controller {
                     'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
                     'user_school' => $value->user->primarySchoolAthlete()->name ?? '',
                     'school_slug' => $value->user->primarySchoolAthlete()->slug ?? '',
-                    'nation' => $value->user->nation->name,
+                    'nation' => $primaryAcademyAthlete ? $primaryAcademyAthlete->nation->name : $value->user->nation->name,
                     'total_war_points' => 0,
                     'total_style_points' => 0,
                 ];

@@ -66,13 +66,13 @@
                         ],
                         [
                             'name' => 'Academy',
-                            'field' => 'academy',
+                            'field' => 'academy_name',
                             'columnClasses' => '',
                             'rowClasses' => '',
                         ],
                         [
                             'name' => 'School',
-                            'field' => 'school',
+                            'field' => 'school_name',
                             'columnClasses' => '',
                             'rowClasses' => '',
                         ],
@@ -104,9 +104,9 @@
                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
                                 x-text="row.nation"></td>
                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
-                                x-text="row.academy.name"></td>
+                                x-text="row.academy_name"></td>
                             <td class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap"
-                                x-text="row.school.name"></td>
+                                x-text="row.school_name"></td>
                             <td
                                 class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
                                 <x-lucide-badge-check class="w-5 h-5 text-primary-800 dark:text-primary-500"

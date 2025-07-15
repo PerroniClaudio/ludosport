@@ -1383,7 +1383,11 @@ class UserController extends Controller {
         foreach ($filteredUsers as $user) {
 
             $user->academy = $user->primaryAcademyAthlete();
+            $user->academy_name = $user->academy ? $user->academy->name : 'No Academy';
+
             $user->school = $user->primarySchoolAthlete();
+            $user->school_name = $user->school ? $user->school->name : 'No School';
+
             if ($user->academy) {
                 $user->nation = $user->academy->nation->name;
             } else {
