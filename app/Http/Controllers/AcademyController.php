@@ -920,6 +920,8 @@ class AcademyController extends Controller {
             case 'rector':
             case 'manager':
                 // if (!$isStrict && ($academy->rector() && ($academy->rector()->id == $authUser->id))) {
+
+
                 if (!$isStrict && (($authUser->getActiveInstitutionId() ?? null) == $academy->id)) {
                     $authorized = true;
                 }
