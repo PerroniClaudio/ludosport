@@ -160,10 +160,22 @@ class PaginatedUserController extends Controller {
                             ->select('users.*');
                     case 'school':
                         // Per evitare la perdita di dati, seleziona esplicitamente i campi della tabella users e aggiungi quelli delle join
-                        $query->leftJoin('schools_athletes', 'users.id', '=', 'schools_athletes.user_id')
+                        // $query->leftJoin('schools_athletes', 'users.id', '=', 'schools_athletes.user_id')
+                        //     ->leftJoin('schools', function ($join) {
+                        //         $join->on('schools_athletes.school_id', '=', 'schools.id')
+                        //             ->where('schools_athletes.is_primary', '=', true);
+                        //     })
+                        $query->leftJoin('schools_athletes', function ($join) {
+                                $join->on('users.id', '=', 'schools_athletes.user_id')
+                                    ->whereRaw('schools_athletes.id = (
+                                        SELECT id FROM schools_athletes sa
+                                        WHERE sa.user_id = users.id
+                                        ORDER BY sa.is_primary DESC, sa.id ASC
+                                        LIMIT 1
+                                    )');
+                            })
                             ->leftJoin('schools', function ($join) {
-                                $join->on('schools_athletes.school_id', '=', 'schools.id')
-                                    ->where('schools_athletes.is_primary', '=', true);
+                                $join->on('schools_athletes.school_id', '=', 'schools.id');
                             })
                             ->orderBy('schools.name', $sortDirection)
                             ->select('users.*'); // <-- aggiungi questa riga per mantenere tutti i dati dell'utente
