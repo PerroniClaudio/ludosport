@@ -26,7 +26,7 @@ class SchoolController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
         if (in_array($authRole, ['dean'])) {
-            $school = $authUser->primarySchool() ?? null;
+            $school = $authUser->getActiveInstitution();
             if (!$school) {
                 return redirect()->route('dashboard')->with('error', 'You don\'t have a school assigned!');
             }

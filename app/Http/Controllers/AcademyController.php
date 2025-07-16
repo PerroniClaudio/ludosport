@@ -26,7 +26,7 @@ class AcademyController extends Controller {
         $authRole = $authUser->getRole();
         if (in_array($authRole, ['rector', 'manager'])) {
 
-            $academy = $authUser->primaryAcademy();
+            $academy = $authUser->getActiveInstitution();
             if ($authUser->validatePrimaryInstitutionPersonnel()) {
 
                 return $this->edit($academy);
@@ -920,6 +920,8 @@ class AcademyController extends Controller {
             case 'rector':
             case 'manager':
                 // if (!$isStrict && ($academy->rector() && ($academy->rector()->id == $authUser->id))) {
+
+
                 if (!$isStrict && (($authUser->getActiveInstitutionId() ?? null) == $academy->id)) {
                     $authorized = true;
                 }

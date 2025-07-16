@@ -854,6 +854,10 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function getActiveInstitutionId() {
+        return session('institution')->id;
+    }
+
+    public function getActiveInstitution() {
         return session('institution');
     }
 
