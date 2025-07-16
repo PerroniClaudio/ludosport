@@ -30,3 +30,4 @@ start.sh
 docker/nginx/nginx.prod.conf
 docker-compose.prod.yml
 /public/vendor
+dump.rdb
