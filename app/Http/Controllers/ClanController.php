@@ -41,7 +41,7 @@ class ClanController extends Controller {
                 break;
             case 'dean':
                 $authUserSchool = $authUser->primarySchool() ?? null;
-                if(!$authUserSchool){
+                if (!$authUserSchool) {
                     return redirect()->route('dashboard')->with('error', 'You don\'t have a school assigned!');
                 }
                 $clans = $authUser->primarySchool() ? $authUser->primarySchool()->clan : [];
@@ -272,7 +272,7 @@ class ClanController extends Controller {
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'instructor'])) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
         }
-        if(!$clan){
+        if (!$clan) {
             return redirect()->route('dashboard')->with('error', 'Course not found.');
         }
         if ($clan->is_disabled && $authRole !== 'admin') {
@@ -291,10 +291,10 @@ class ClanController extends Controller {
                 $schools = $authUser->primaryAcademy()->schools;
                 break;
             case 'dean':
-                if ($clan->school_id !== ($authUser->primarySchool()->id ?? null)) {
+                if ($clan->school_id !== ($authUser->getActiveInstitutionId() ?? null)) {
                     return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page.');
                 }
-                $schools = $authUser->schools->where('id', ($authUser->primarySchool()->id ?? null));
+                $schools = $authUser->schools->where('id', ($authUser->getActiveInstitutionId() ?? null));
                 break;
             case 'instructor':
                 $academies = $authUser->academies;
@@ -419,7 +419,7 @@ class ClanController extends Controller {
             $request->validate([
                 'transfer_athletes' => 'required'
             ]);
-            if(!in_array($authRole, ['admin', 'rector'])){
+            if (!in_array($authRole, ['admin', 'rector'])) {
                 return redirect()->route('dashboard')->with('error', 'You are not authorized to move courses between schools.');
             }
         }
@@ -450,10 +450,10 @@ class ClanController extends Controller {
         if ($request->weapon_form_id == 0) {
             $request->weapon_form_id = null;
         }
-        
+
         // Qunado viene modificata la scuola del corso, si devono gestire anche le associazioni con gli atleti e gli istruttori
-        if($request->school_id != $clan->school_id){
-            if(!in_array($request->transfer_athletes, ['yes', 'no'])){
+        if ($request->school_id != $clan->school_id) {
+            if (!in_array($request->transfer_athletes, ['yes', 'no'])) {
                 return back()->with('error', 'Invalid value for transfer_athletes.');
             }
             Log::channel('clan')->info('Moving clan to another school', [
@@ -467,7 +467,7 @@ class ClanController extends Controller {
                 'clan_athletes' => $clan->users()->pluck('user_id')->toArray(),
                 'clan_personnel' => $clan->personnel()->pluck('user_id')->toArray(),
             ]);
-            if($request->transfer_athletes == 'yes'){
+            if ($request->transfer_athletes == 'yes') {
                 // La scuola cambia e si vogliono spostare anche gli atleti
                 $oldSchool = School::find($clan->school_id);
                 $newSchool = School::find($request->school_id);
@@ -478,11 +478,11 @@ class ClanController extends Controller {
                     'school_id' => $request->school_id,
                 ]);
 
-                if($oldSchool->academy->id != $newSchool->academy->id){
+                if ($oldSchool->academy->id != $newSchool->academy->id) {
                     // Cambia anche l'accademia, quindi si eliminano associazioni con accademie, scuole e corsi
-                    foreach($athletes as $athlete){
+                    foreach ($athletes as $athlete) {
                         // Mettiamo l'eccezione per evitare di rimuovere le associazioni col corso spostato.
-                        $athlete->removeAcademiesAthleteAssociations($newSchool->academy); 
+                        $athlete->removeAcademiesAthleteAssociations($newSchool->academy);
                         $athlete->academyAthletes()->syncWithoutDetaching($newSchool->academy->id);
                         if (!$athlete->primaryAcademyAthlete()) {
                             $athlete->setPrimaryAcademyAthlete($newSchool->academy->id);
@@ -504,7 +504,7 @@ class ClanController extends Controller {
                     }
                 } else {
                     // L'accademia non cambia, quindi si aggiungono solo le associazioni con la nuova scuola
-                    foreach($athletes as $athlete){
+                    foreach ($athletes as $athlete) {
                         if (!$athlete->schoolAthletes->contains($newSchool->id)) {
                             $athlete->schoolAthletes()->syncWithoutDetaching($newSchool->id);
                             Log::channel('user')->info('Athlete associated with school - moving clan', [
@@ -516,18 +516,18 @@ class ClanController extends Controller {
                         }
                     }
                 }
-            }else{
+            } else {
                 // La scuola cambia e non si vogliono spostare gli atleti
 
                 $clanAthletes = $clan->users;
-                if($clanAthletes->count() > 0){
+                if ($clanAthletes->count() > 0) {
                     Log::channel('clan')->info('Removed athletes associations - moving clan no athletes', [
                         'made_by' => $authUser->id,
                         'athletes' => $clanAthletes->pluck('id')->toArray(),
                         'clan' => $clan->id,
                     ]);
                 }
-                foreach($clanAthletes as $athlete){
+                foreach ($clanAthletes as $athlete) {
                     $clan->users()->detach($athlete->id);
                     Log::channel('user')->info('Removed athlete associations - moving clan no athletes', [
                         'made_by' => $authUser->id,
@@ -540,14 +540,14 @@ class ClanController extends Controller {
             // In ogni caso si rimuove il personale associato al corso
 
             $clanPersonnel = $clan->personnel;
-            if($clanPersonnel->count() > 0){
+            if ($clanPersonnel->count() > 0) {
                 Log::channel('clan')->info('Removed personnel associations - moving clan', [
                     'made_by' => $authUser->id,
                     'personnel' => $clanPersonnel->pluck('id')->toArray(),
                     'clan' => $clan->id,
                 ]);
             }
-            foreach($clanPersonnel as $person){
+            foreach ($clanPersonnel as $person) {
                 $clan->personnel()->detach($person->id);
                 Log::channel('user')->info('Removed personnel associations - moving clan', [
                     'made_by' => $authUser->id,
@@ -555,7 +555,6 @@ class ClanController extends Controller {
                     'clans' => [$clan->id],
                 ]);
             }
-
         }
 
         $clan->update([
@@ -657,7 +656,7 @@ class ClanController extends Controller {
         $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
         return redirect()->route($redirectRoute, $clan)->with('success', 'Instructor added successfully.');
     }
-    
+
     public function removeInstructor(Clan $clan, Request $request) {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
@@ -714,7 +713,7 @@ class ClanController extends Controller {
         $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
         return redirect()->route($redirectRoute, $clan)->with('success', 'Athlete added successfully.');
     }
-    
+
     public function removeAthlete(Clan $clan, Request $request) {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
@@ -786,7 +785,7 @@ class ClanController extends Controller {
         return response()->json($formatted_clans);
     }
 
-    public function checkPermission(Clan $clan){
+    public function checkPermission(Clan $clan) {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
         $permitted = false;
@@ -796,7 +795,7 @@ class ClanController extends Controller {
                 break;
             case 'rector':
                 $academy = $clan->academy;
-                $permitted = ($authUser->primaryAcademy()->id ?? null) == $academy->id;
+                $permitted = ($authUser->getActiveInstitutionId() ?? null) == $academy->id;
                 break;
             case 'manager':
                 // $school = $clan->school;
@@ -804,13 +803,13 @@ class ClanController extends Controller {
                 // $permitted = $primarySchool && $school && ($primarySchool->id == $school->id);
                 // Modificato per essere come il rettore. (ticket 3681)
                 $academy = $clan->academy;
-                $permitted = ($authUser->primaryAcademy()->id ?? null) == $academy->id;
+                $permitted = ($authUser->getActiveInstitutionId() ?? null) == $academy->id;
                 break;
             case 'dean':
                 $school = $clan->school;
                 // $dean = $school->dean() ?? null;
                 // $permitted = $dean && ($dean->id == $authUser->id);
-                $permitted = ($authUser->primarySchool()->id ?? null) == $school->id;
+                $permitted = ($authUser->getActiveInstitutionId() ?? null) == $school->id;
                 break;
             default:
                 break;

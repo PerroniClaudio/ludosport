@@ -26,7 +26,7 @@ class SchoolController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
         if (in_array($authRole, ['dean'])) {
-            $school = $authUser->primarySchool() ?? null;
+            $school = $authUser->getActiveInstitution();
             if (!$school) {
                 return redirect()->route('dashboard')->with('error', 'You don\'t have a school assigned!');
             }
@@ -702,7 +702,7 @@ class SchoolController extends Controller {
         $personnel = $school->personnel->pluck('id')->toArray();
 
         $primaryPersonnel = $school->personnel->filter(function ($person) use ($school) {
-            return ($person->primarySchool() && ($person->primarySchool()->id == $school->id));
+            return ($person->primarySchool() && ($person->getActiveInstitutionId() == $school->id));
         })->pluck('id')->toArray();
 
         $school->athletes()->detach();
@@ -1189,7 +1189,7 @@ class SchoolController extends Controller {
                 break;
             case 'dean':
                 // if (($authUser->id != ($school->dean()->id ?? null)) || $isStrict) {
-                if ((($authUser->primarySchool()->id ?? null) != $school->id) || $isStrict) {
+                if ((($authUser->getActiveInstitutionId() ?? null) != $school->id) || $isStrict) {
                     $authorized = false;
                 }
                 break;

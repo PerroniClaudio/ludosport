@@ -68,10 +68,7 @@ class UserController extends Controller {
 
                 // Utenti di una determinata accademia
 
-                $academy_id = $authUser->primaryAcademy()->id ?? null;
-                if (!$academy_id) {
-                    return redirect()->route("dashboard")->with('error', 'You don\'t have an academy assigned!');
-                }
+                $academy_id = $authUser->getActiveInstitutionId();
 
                 $users = User::where('is_disabled', false)
                     ->where(function ($query) use ($academy_id) {
@@ -101,7 +98,7 @@ class UserController extends Controller {
 
                 // Utenti di una determinata scuola
 
-                $school_id = $authUser->primarySchool()->id ?? null;
+                $school_id = $authUser->$authUser->getActiveInstitutionId();
 
                 if (!$school_id) {
                     return redirect()->route("dashboard")->with('error', 'You don\'t have a school assigned!');
@@ -199,17 +196,15 @@ class UserController extends Controller {
             case 'admin':
                 $academies = Academy::where('is_disabled', false)->get();
                 break;
-            case 'rector':
-                $primaryAcademy = $authUser->primaryAcademy();
-                $academies = collect([$primaryAcademy]);
-                break;
             case 'manager':
-                // $academies = Academy::where('is_disabled', false)->where('id', ($authUser->primarySchool()->academy->id ?? null))->get();
-                $primaryAcademy = $authUser->primaryAcademy();
+            case 'rector':
+                $primaryAcademy = Academy::find($authUser->getActiveInstitutionId());
                 $academies = collect([$primaryAcademy]);
                 break;
+
             case 'dean':
-                $academies = Academy::where('is_disabled', false)->where('id', ($authUser->primarySchool()->academy->id ?? null))->get();
+                $userSchool = School::find($authUser->getActiveInstitutionId());
+                $academies = Academy::where('is_disabled', false)->where('id', ($userSchool->academy->id ?? null))->get();
                 break;
             default:
                 return back()->with('error', 'You do not have the required role to access this page!');
@@ -572,13 +567,20 @@ class UserController extends Controller {
         $isRectorOrManager = in_array($authRole, ['rector', 'manager']);
         $isDean = $authRole === 'dean';
 
-        $rectorOrManagerCannotAccess = $isRectorOrManager &&
-            !in_array($authUser->primaryAcademy()->id, $user->academyAthletes->pluck('id')->toArray()) &&
-            !in_array($authUser->primaryAcademy()->id, $user->academies->pluck('id')->toArray());
+        $rectorOrManagerCannotAccess = false;
+        $deanCannotAccess = false;
 
-        $deanCannotAccess = $isDean &&
-            !in_array($authUser->primarySchool()->id, $user->schoolAthletes()->pluck('school_id')->toArray()) &&
-            !in_array($authUser->primarySchool()->id, $user->schools()->pluck('school_id')->toArray());
+        if ($isRectorOrManager) {
+            $rectorOrManagerCannotAccess = $isRectorOrManager &&
+                !in_array($authUser->getActiveInstitutionId(), $user->academyAthletes->pluck('id')->toArray()) &&
+                !in_array($authUser->getActiveInstitutionId(), $user->academies->pluck('id')->toArray());
+        }
+
+        if ($isDean) {
+            $deanCannotAccess = $isDean &&
+                !in_array($authUser->getActiveInstitutionId(), $user->schoolAthletes()->pluck('school_id')->toArray()) &&
+                !in_array($authUser->getActiveInstitutionId(), $user->schools()->pluck('school_id')->toArray());
+        }
 
         if ($rectorOrManagerCannotAccess || $deanCannotAccess) {
             return back()->with('error', 'You are not authorized to access this page!');
@@ -743,7 +745,7 @@ class UserController extends Controller {
             case 'rector':
             case 'manager':
                 if (!in_array(
-                    $authUser->primaryAcademy()->id,
+                    $authUser->getActiveInstitutionId(),
                     array_merge(
                         $user->academies()->pluck('academy_id')->toArray(),
                         [$user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->id : null]
@@ -754,7 +756,7 @@ class UserController extends Controller {
                 break;
             case 'dean':
                 if (!in_array(
-                    $authUser->primarySchool()->id,
+                    $authUser->getActiveInstitutionId(),
                     array_merge(
                         $user->schools()->pluck('school_id')->toArray(),
                         [$user->primarySchoolAthlete() ? $user->primarySchoolAthlete()->id : null]
@@ -899,7 +901,7 @@ class UserController extends Controller {
             case 'rector':
             case 'manager':
                 if (!in_array(
-                    $authUser->primaryAcademy()->id,
+                    $authUser->getActiveInstitutionId(),
                     array_merge(
                         $user->academies()->pluck('academy_id')->toArray(),
                         [$user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->id : null]
@@ -910,7 +912,7 @@ class UserController extends Controller {
                 break;
             case 'dean':
                 if (!in_array(
-                    $authUser->primarySchool()->id,
+                    $authUser->getActiveInstitutionId(),
                     array_merge(
                         $user->schools()->pluck('school_id')->toArray(),
                         [$user->primarySchoolAthlete() ? $user->primarySchoolAthlete()->id : null]
@@ -1125,9 +1127,9 @@ class UserController extends Controller {
                         return $q->whereIn('id', User::search($value)->keys());
                     })->where(function ($query) use ($authUser) {
                         $query->whereHas('academies', function ($q) use ($authUser) {
-                            return $q->where('academies.id', $authUser->primaryAcademy()->id);
+                            return $q->where('academies.id', $authUser->getActiveInstitutionId());
                         })->orWhereHas('academyAthletes', function ($q) use ($authUser) {
-                            return $q->where('academies.id', $authUser->primaryAcademy()->id);
+                            return $q->where('academies.id', $authUser->getActiveInstitutionId());
                         });
                     })
                     ->where('is_disabled', false)
@@ -1146,9 +1148,9 @@ class UserController extends Controller {
                         return $q->whereIn('id', User::search($value)->keys());
                     })->where(function ($query) use ($authUser) {
                         $query->whereHas('schools', function ($q) use ($authUser) {
-                            return $q->where('schools.id', $authUser->primarySchool()->id);
+                            return $q->where('schools.id', $authUser->getActiveInstitutionId());
                         })->orWhereHas('schoolAthletes', function ($q) use ($authUser) {
-                            return $q->where('schools.id', $authUser->primarySchool()->id);
+                            return $q->where('schools.id', $authUser->getActiveInstitutionId());
                         });
                     })
                     ->where('is_disabled', false)
@@ -1415,21 +1417,9 @@ class UserController extends Controller {
         ]);
     }
 
-    public function setUserRoleForSession(Request $request) {
-        $request->validate([
-            'role' => 'required|string|exists:roles,label',
-        ]);
 
-        $authUser = User::find(Auth::user()->id);
 
-        if ($authUser->hasRole($request->role)) {
-            session(['role' => $request->role]);
-        } else {
-            return back()->with('error', 'You do not have the required role to access this page!');
-        }
 
-        return redirect()->route('dashboard');
-    }
 
     public function picture($id, Request $request) {
         $authRole = $request->user()->getRole();
@@ -1620,7 +1610,7 @@ class UserController extends Controller {
                     }
                     if (array_intersect($user->roles->where('id', '!=', $athleteRoleId)->pluck('id')->toArray(), $allowed_roles)) {
                         // $allAcademiesPersonnel = $user->academies->pluck('id')->toArray();
-                        $primaryAcademyPersonnel = $user->primaryAcademy() ? $user->primaryAcademy()->id : null;
+                        $primaryAcademyPersonnel = $user->primaryAcademy() ? $user->getActiveInstitutionId() : null;
                         if (in_array($primaryAcademyPersonnel, $academies)) {
                             $canSee = true;
                         }
@@ -1819,12 +1809,11 @@ class UserController extends Controller {
 
     public function setMainInstitution(Request $request) {
 
+
         $validator = Validator::make($request->all(), [
             'institution_type' => 'required|string|in:academy,school',
             'role_type' => 'required|string|in:personnel,athlete',
             'user_id' => 'required|integer',
-            'academy_id' => 'integer',
-            'school_id' => 'integer',
         ]);
 
         if ($validator->fails()) {
@@ -1833,39 +1822,56 @@ class UserController extends Controller {
 
         $user = User::find($request->user_id);
 
-        if ($request->institution_type == 'academy') {
-            $academy = Academy::find($request->academy_id);
-            if (!$academy) {
-                return back()->with('error', 'Academy not found!');
-            }
-            if ($request->role_type == 'personnel') {
-                // Logica per modificare l'ordine delle accademie - personale
-                $user->setPrimaryAcademy($academy->id);
+        if ($request->role_type == "personnel") {
 
-                if ($academy->id != 1 && ($user->academies()->count() > 1) && ($user->academies->where('id', 1)->count() > 0)) {
-                    $user->academies()->detach(1);
+            if ($request->institution_type == "academy") {
+                foreach ($user->academies as $academy) {
+                    $user->academies()->updateExistingPivot($academy->id, ['is_primary' => false]);
+                }
+
+                foreach ($request->all() as $key => $value) {
+                    if (str_contains($key, 'academy_id')) {
+                        if ($value == "on") {
+                            $selectedAcademyId = str_replace('academy_id_', '', $key);
+                            $user->academies()->updateExistingPivot($selectedAcademyId, ['is_primary' => true]);
+                        }
+                    }
                 }
             } else {
-                // Logica per modificare l'ordine delle accademie - atleti
+                foreach ($user->schools as $school) {
+                    $user->schools()->updateExistingPivot($school->id, ['is_primary' => false]);
+                }
+
+                foreach ($request->all() as $key => $value) {
+                    if (str_contains($key, 'school_id')) {
+                        if ($value == "on") {
+                            $selectedSchoolId = str_replace('school_id_', '', $key);
+                            $user->schools()->updateExistingPivot($selectedSchoolId, ['is_primary' => true]);
+                        }
+                    }
+                }
+            }
+        } else {
+            if ($request->institution_type == "academy") {
+                $academy = Academy::find($request->academy_id);
+                if (!$academy) {
+                    return back()->with('error', 'Academy not found!');
+                }
                 $user->setPrimaryAcademyAthlete($academy->id);
 
                 if ($academy->id != 1 && ($user->academyAthletes()->count() > 1) && ($user->academyAthletes->where('id', 1)->count() > 0)) {
                     $user->academyAthletes()->detach(1);
                 }
-            }
-        }
-
-        if ($request->institution_type == 'school') {
-            $school = School::find($request->school_id);
-            if (!$school) {
-                return back()->with('error', 'School not found!');
-            }
-            if ($request->role_type == 'personnel') {
-                // Logica per modificare l'ordine delle scuole - personale
-                $user->setPrimarySchool($school->id);
             } else {
-                // Logica per modificare l'ordine delle scuole - atleti
+                $school = School::find($request->school_id);
+                if (!$school) {
+                    return back()->with('error', 'School not found!');
+                }
                 $user->setPrimarySchoolAthlete($school->id);
+
+                if ($school->id != 1 && ($user->schoolAthletes()->count() > 1) && ($user->schoolAthletes->where('id', 1)->count() > 0)) {
+                    $user->schoolAthletes()->detach(1);
+                }
             }
         }
 
@@ -1873,14 +1879,80 @@ class UserController extends Controller {
     }
 
     public function roleSelector() {
-        $user = auth()->user();
-        $user = User::find($user->id);
+        $user = User::find(Auth::user()->id);
         $roles = $user->roles()->get();
 
         return view('role-selector', [
             'roles' => $roles
         ]);
     }
+
+    public function setUserRoleForSession(Request $request) {
+        $request->validate([
+            'role' => 'required|string|exists:roles,label',
+        ]);
+
+        $authUser = User::find(Auth::user()->id);
+
+        if ($authUser->hasRole($request->role)) {
+            session(['role' => $request->role]);
+        } else {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
+
+        return redirect()->route('dashboard');
+    }
+
+    public function institutionSelector() {
+        $user = User::find(Auth::user()->id);
+
+        if ($user->getRole() === 'rector' || $user->getRole() === 'manager') {
+            $academies = $user->academies()->wherePivot('is_primary', 1)->get();
+        } else if ($user->getRole() === 'dean') {
+            $schools = $user->schools()->wherePivot('is_primary', 1)->get();
+        }
+        return view('institution-selector', [
+            'user' => $user,
+            'academies' => $academies ?? [],
+            'schools' => $schools ?? [],
+        ]);
+    }
+
+    public function setUserInstitutionForSession(Request $request) {
+        $user = User::find(Auth::user()->id);
+
+        if ($user->getRole() === 'rector' || $user->getRole() === 'manager') {
+
+            $request->validate([
+                'institution_id' => 'required|exists:academies,id',
+            ]);
+
+            $authUser = User::find(Auth::user()->id);
+            $academy = Academy::find($request->institution_id);
+
+            if ($authUser->academies()->where('academies.id', $academy->id)->exists()) {
+                session(['institution' => $academy]);
+            } else {
+                return back()->with('error', 'You do not have the required institution to access this page!');
+            }
+        } else if ($user->getRole() === 'dean') {
+            $request->validate([
+                'institution_id' => 'required|exists:schools,id',
+            ]);
+
+            $authUser = User::find(Auth::user()->id);
+            $school = School::find($request->institution_id);
+
+            if ($authUser->schools()->where('schools.id', $school->id)->exists()) {
+                session(['institution' => $school]);
+            } else {
+                return back()->with('error', 'You do not have the required institution to access this page!');
+            }
+        }
+
+        return redirect()->route('dashboard');
+    }
+
 
     public function athletesDataForWorld() {
         $athletes = User::where('is_disabled', false)->whereHas('roles', function ($q) {
@@ -2022,20 +2094,20 @@ class UserController extends Controller {
             ], 401);
         }
 
-        if ($authUserRole == 'rector' && (!$authUser->primaryAcademy() || !$user->academyAthletes->contains($authUser->primaryAcademy()->id))) {
+        if ($authUserRole == 'rector' && (!$authUser->primaryAcademy() || !$user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ], 401);
         }
-        if ($authUserRole == 'manager' && (!$authUser->primaryAcademy() || !$user->academyAthletes->contains($authUser->primaryAcademy()->id))) {
+        if ($authUserRole == 'manager' && (!$authUser->primaryAcademy() || !$user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ], 401);
         }
 
-        if ($authUserRole == 'dean' && (!$authUser->primarySchool() || !$user->schoolAthletes->contains($authUser->primarySchool()->id))) {
+        if ($authUserRole == 'dean' && (!$authUser->primarySchool() || !$user->schoolAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
-                'error' => 'You are not authorized to edit this user\'s weapon forms!' . 'primarySchool: ' . $authUser->primarySchool()->id . ' - userContainsSchool: ' . ($user->schoolAthletes->contains($authUser->primarySchool()->id) ? 'true' : 'false'),
+                'error' => 'You are not authorized to edit this user\'s weapon forms!' . 'primarySchool: ' . $authUser->getActiveInstitutionId() . ' - userContainsSchool: ' . ($user->schoolAthletes->contains($authUser->getActiveInstitutionId()) ? 'true' : 'false'),
             ], 401);
         }
 
@@ -2166,13 +2238,13 @@ class UserController extends Controller {
             ], 401);
         }
         // Se la richiesta è del rettore ed è diversa da athlete o l'utente non è nell'accademia del rettore non si può modificare
-        if (in_array($authUserRole, ['rector', 'manager']) && (($request->type != 'athlete') || !$user->academyAthletes->contains($authUser->primaryAcademy()->id))) {
+        if (in_array($authUserRole, ['rector', 'manager']) && (($request->type != 'athlete') || !$user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ], 401);
         }
         // Se la richiesta è del preside ed è diversa da athlete o l'utente non è nella scuola del preside non si può modificare
-        if ($authUserRole == 'dean' && (($request->type != 'athlete') || !$user->schoolAthletes->contains($authUser->primarySchool()->id))) {
+        if ($authUserRole == 'dean' && (($request->type != 'athlete') || !$user->schoolAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ], 401);
@@ -2300,7 +2372,7 @@ class UserController extends Controller {
         $user = User::find($request->user_id);
         $school = School::find($request->school_id);
 
-        if ($authUserRole !== 'admin' && !(in_array($authUserRole, ["rector", "manager"]) && ($authUser->primaryAcademy()->id === $school->academy->id))) {
+        if ($authUserRole !== 'admin' && !(in_array($authUserRole, ["rector", "manager"]) && ($authUser->getActiveInstitutionId() === $school->academy->id))) {
             return response()->json([
                 'error' => 'You are not authorized to associate this user with this school!',
             ], 401);
@@ -2453,7 +2525,7 @@ class UserController extends Controller {
         $user = User::find($request->user_id);
         $school = School::find($request->school_id);
 
-        if ($authUserRole !== 'admin' && !(in_array($authUserRole, ["rector", "manager"]) && ($authUser->primaryAcademy()->id === $school->academy->id))) {
+        if ($authUserRole !== 'admin' && !(in_array($authUserRole, ["rector", "manager"]) && ($authUser->getActiveInstitutionId() === $school->academy->id))) {
             return response()->json([
                 'error' => 'You are not authorized to remove this user from this school!',
             ], 401);

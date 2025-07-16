@@ -43,7 +43,7 @@ class PaginatedUserController extends Controller {
             case 'manager':
             case 'rector':
                 // Utenti di una determinata accademia
-                $academy_id = $authUser->primaryAcademy()->id ?? null;
+                $academy_id = $authUser->getActiveInstitutionId() ?? null;
                 if (!$academy_id) {
                     return redirect()->route("dashboard")->with('error', 'You don\'t have an academy assigned!');
                 }
@@ -72,7 +72,7 @@ class PaginatedUserController extends Controller {
 
             case 'dean':
                 // Utenti di una determinata scuola
-                $school_id = $authUser->primarySchool()->id ?? null;
+                $school_id = $authUser->getActiveInstitutionId() ?? null;
 
                 if (!$school_id) {
                     return redirect()->route("dashboard")->with('error', 'You don\'t have a school assigned!');
@@ -160,10 +160,22 @@ class PaginatedUserController extends Controller {
                             ->select('users.*');
                     case 'school':
                         // Per evitare la perdita di dati, seleziona esplicitamente i campi della tabella users e aggiungi quelli delle join
-                        $query->leftJoin('schools_athletes', 'users.id', '=', 'schools_athletes.user_id')
+                        // $query->leftJoin('schools_athletes', 'users.id', '=', 'schools_athletes.user_id')
+                        //     ->leftJoin('schools', function ($join) {
+                        //         $join->on('schools_athletes.school_id', '=', 'schools.id')
+                        //             ->where('schools_athletes.is_primary', '=', true);
+                        //     })
+                        $query->leftJoin('schools_athletes', function ($join) {
+                                $join->on('users.id', '=', 'schools_athletes.user_id')
+                                    ->whereRaw('schools_athletes.id = (
+                                        SELECT id FROM schools_athletes sa
+                                        WHERE sa.user_id = users.id
+                                        ORDER BY sa.is_primary DESC, sa.id ASC
+                                        LIMIT 1
+                                    )');
+                            })
                             ->leftJoin('schools', function ($join) {
-                                $join->on('schools_athletes.school_id', '=', 'schools.id')
-                                    ->where('schools_athletes.is_primary', '=', true);
+                                $join->on('schools_athletes.school_id', '=', 'schools.id');
                             })
                             ->orderBy('schools.name', $sortDirection)
                             ->select('users.*'); // <-- aggiungi questa riga per mantenere tutti i dati dell'utente

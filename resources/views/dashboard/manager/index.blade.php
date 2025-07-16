@@ -11,7 +11,7 @@
             <div class="flex flex-col gap-4">
 
                 @if (Auth()->user()->primaryAcademy())
-                    <x-dashboard.user-academy-numbers academyId="{{ Auth()->user()->primaryAcademy()->id }}" />
+                    <x-dashboard.user-academy-numbers academyId="{{ Auth()->user()->getActiveInstitutionId() }}" />
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6 text-background-900 dark:text-background-100">
                             <h3 class="text-background-800 dark:text-background-200 text-2xl">
@@ -29,7 +29,7 @@
                         </div>
                     </div>
                     <x-dashboard.user-school-graph
-                        academyId="{{ Auth()->user()->primaryAcademy() ? Auth()->user()->primaryAcademy()->id : null }}" />
+                        academyId="{{ Auth()->user()->primaryAcademy() ? Auth()->user()->getActiveInstitutionId() : null }}" />
                 @else
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6 text-background-900 dark:text-background-100">

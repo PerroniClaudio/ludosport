@@ -359,7 +359,7 @@ class AnnouncementController extends Controller {
                     }
                     if (array_intersect($user->roles->where('id', '!=', $athleteRoleId)->pluck('id')->toArray(), $allowed_roles)) {
                         // $allAcademiesPersonnel = $user->academies->pluck('id')->toArray();
-                        $primaryAcademyPersonnel = $user->primaryAcademy() ? $user->primaryAcademy()->id : null;
+                        $primaryAcademyPersonnel = $user->primaryAcademy() ? $user->getActiveInstitutionId() : null;
                         if (in_array($primaryAcademyPersonnel, $academies)) {
                             $canSee = true;
                         }
