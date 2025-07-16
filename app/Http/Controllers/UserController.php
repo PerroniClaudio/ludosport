@@ -1900,6 +1900,35 @@ class UserController extends Controller {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
+        // Stesso codice anche in authenticatedSessionController store (cambia solo authUser)
+        if ($authUser->getRole() === 'rector' || $authUser->getRole() === 'manager') {
+
+            $primaryAcademies = $authUser->academies->where('pivot.is_primary', 1);
+            if ($primaryAcademies->count() > 1) {
+                return redirect()->intended(route('institution-selector', absolute: false));
+            } else {
+                $primaryAcademy = $primaryAcademies->first();
+                if ($primaryAcademy) {
+                    session(['institution' => $primaryAcademy]);
+                } else {
+                    return redirect()->intended(route('institution-selector', absolute: false));
+                }
+            }
+        } else if ($authUser->getRole() === 'dean') {
+
+            $primarySchools = $authUser->schools->where('pivot.is_primary', 1);
+            if ($primarySchools->count() > 1) {
+                return redirect()->intended(route('institution-selector', absolute: false));
+            } else {
+                $primarySchool = $primarySchools->first();
+                if ($primarySchool) {
+                        session(['institution' => $primarySchool]);
+                } else {
+                    return redirect()->intended(route('institution-selector', absolute: false));
+                }
+            }
+        }
+
         return redirect()->route('dashboard');
     }
 
