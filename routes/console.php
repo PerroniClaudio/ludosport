@@ -14,7 +14,7 @@ Artisan::command('inspire', function () {
 
 Schedule::job(new CheckWaitingListJob())->daily();
 
-// Schedule::job(new CheckPrimaryAcademyJob())->daily();
+Schedule::job(new CheckPrimaryAcademyJob())->daily();
 
 Schedule::call(function () {
     $importController = new \App\Http\Controllers\ImportController();
