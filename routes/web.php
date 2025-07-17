@@ -49,6 +49,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('users.index');
+    Route::get('/filtered-by-dashboard', [App\Http\Controllers\PaginatedUserController::class, 'usersFilteredByActiveAndCoursePagination'])->name('users.filtered-by-active-and-course');
     Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('users.filter');
     Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('users.filter.result');
     Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('users.search');

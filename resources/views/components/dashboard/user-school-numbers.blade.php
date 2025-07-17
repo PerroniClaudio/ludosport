@@ -2,6 +2,8 @@
 @php
     $authRole = auth()->user()->getRole();
     $addToRoute = $authRole === 'admin' ? '' : '/' . $authRole;
+
+    $pathNamePrefix = $authRole === 'admin' ? '' : $authRole . '.';
 @endphp
 
 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8" x-data="{
@@ -36,23 +38,27 @@
         <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg">
             <h4 class="text-background-800 dark:text-background-200  xl:text-lg">
                 {{ __('dashboard.rector_active_users') }}</h4>
-            <p class="text-primary-600 dark:text-primary-500 text-3xl" x-text="active_users"></p>
+            <span class="text-primary-600 dark:text-primary-500 text-3xl" x-text="active_users"></span>
         </div>
 
         <!-- Utenti attivi ma non associati a un corso -->
 
         <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg">
-            <h4 class="text-background-800 dark:text-background-200  xl:text-lg">
-                {{ __('dashboard.rector_active_users_no_course') }}</h4>
-            <p class="text-primary-600 dark:text-primary-500 text-3xl" x-text="active_users_no_course"></p>
+            <a href="{{ route($pathNamePrefix . 'users.filtered-by-active-and-course', ['active' => 'active', 'clans' => 'without']) }}" rel="noopener noreferrer">
+                <h4 class="text-background-800 dark:text-background-200  xl:text-lg">
+                    {{ __('dashboard.rector_active_users_no_course') }}</h4>
+                <span class="text-primary-600 dark:text-primary-500 text-3xl" x-text="active_users_no_course"></span>
+            </a>
         </div>
 
         <!-- Utenti associati a un corso ma non attivi -->
 
         <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg">
-            <h4 class="text-background-800 dark:text-background-200  xl:text-lg">
-                {{ __('dashboard.rector_inactive_users') }}</h4>
-            <p class="text-primary-600 dark:text-primary-500 text-3xl" x-text="users_course_not_active"></p>
+            <a href="{{ route($pathNamePrefix . 'users.filtered-by-active-and-course', ['active' => 'inactive', 'clans' => 'with']) }}" rel="noopener noreferrer">
+                <h4 class="text-background-800 dark:text-background-200  xl:text-lg">
+                    {{ __('dashboard.rector_inactive_users') }}</h4>
+                <span class="text-primary-600 dark:text-primary-500 text-3xl" x-text="users_course_not_active"></span>
+            </a>
         </div>
 
         <!-- Utenti iscritti quest'anno per la prima volta -->
@@ -60,7 +66,7 @@
         <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg">
             <h4 class="text-background-800 dark:text-background-200  xl:text-lg">
                 {{ __('dashboard.rector_new_users') }}</h4>
-            <p class="text-primary-600 dark:text-primary-500 text-3xl" x-text="new_users_this_year"></p>
+            <span class="text-primary-600 dark:text-primary-500 text-3xl" x-text="new_users_this_year"></span>
         </div>
     </div>
 </div>

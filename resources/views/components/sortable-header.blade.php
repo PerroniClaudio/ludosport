@@ -1,4 +1,4 @@
-@props(['field', 'selectedRole', 'noHeaderTag' => false])
+@props(['field', 'selectedRole' => 'athlete', 'urlName' => 'users.index', 'noHeaderTag' => false])
 
 {{-- If noHeaderTag is true, the component will not render the <th> tag --}}
 
@@ -11,7 +11,7 @@
     $authUserRole = $authUser ? $authUser->getRole() : null;
 
     $sortUrl = route(
-        $authUserRole === 'admin' ? 'users.index' : $authUserRole . '.users.index',
+        $authUserRole === 'admin' ? $urlName : $authUserRole . '.' . $urlName,
         array_merge(request()->query(), [
             'sortedby' => $field,
             'role' => $selectedRole,

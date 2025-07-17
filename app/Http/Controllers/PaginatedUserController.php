@@ -25,9 +25,9 @@ class PaginatedUserController extends Controller {
         // Base query with common conditions
         $baseQuery = User::query()
             ->where('users.is_disabled', false)
-            ->when($request->role, function ($query) use ($request) {
-                return $query->whereHas('roles', function ($q) use ($request) {
-                    $q->where('label', $request->role);
+            ->when($selectedRole, function ($query) use ($selectedRole) {
+                return $query->whereHas('roles', function ($q) use ($selectedRole) {
+                    $q->where('label', $selectedRole);
                 });
             });
 
@@ -350,5 +350,162 @@ class PaginatedUserController extends Controller {
             'currentDirection' => $sortDirection,
             'authUserRole' => $authUserRole,
         ]);
+    }
+
+    // Recupera gli utenti attivi senza un corso. Active users sarebbero quelli non disabilitati. 
+    public function usersFilteredByActiveAndCoursePagination(Request $request) {
+        $authUser = User::find(Auth::user()->id);
+        $authUserRole = $authUser->getRole();
+
+        if (!in_array($authUserRole, ['admin', 'rector', 'dean', 'manager'])) {
+            return redirect()->route("dashboard")->with('error', 'You do not have the required role to access this page!');
+        }
+
+        // Handle sorting
+        $sortBy = $request->get('sortedby', 'created_at');
+        $sortDirection = $request->get('direction', 'asc');
+
+        // Ensure valid direction
+        if (!in_array($sortDirection, ['asc', 'desc'])) {
+            $sortDirection = 'asc';
+        }
+
+        // Validate sort field
+        if (!in_array($sortBy, ['id', 'name', 'surname', 'email', 'subscription_year', 'nation', 'academy', 'school', 'has_paid_fee', 'created_at'])) {
+            $sortBy = 'created_at';
+        }
+        
+        $baseQuery = User::query()->where('users.is_disabled', false)->whereHas('roles', function ($query) {
+                $query->where('label', 'athlete');
+            });
+
+        // Filtro attivo inattivo
+        switch ($request->get('active', 'active')) {
+            case 'active':
+                $baseQuery->where('users.has_paid_fee', true);
+                break;
+            case 'inactive':
+                $baseQuery->where('users.has_paid_fee', false);
+                break;
+            default:
+                return redirect()->route("dashboard")->with('error', 'Invalid filter option!');
+        }
+
+        // Filtro con/senza corsi
+        switch ($request->get('clans', 'without')) {
+            case 'with':
+                $baseQuery->whereHas('clans');
+                break;
+            case 'without':
+                $baseQuery->whereDoesntHave('clans');
+                break;
+            default:
+                return redirect()->route("dashboard")->with('error', 'Invalid filter option!');
+        }
+
+        // Filtro per ruolo del richiedente
+        switch ($authUserRole) {
+            case 'admin':
+                break;
+            case 'manager':
+            case 'rector':
+                // Utenti di una determinata accademia
+                $academy_id = $authUser->getActiveInstitutionId() ?? null;
+                if (!$academy_id) {
+                    return redirect()->route("dashboard")->with('error', 'You don\'t have an academy assigned or didn\'t select one!');
+                }
+
+                $baseQuery->where(function ($query) use ($academy_id) {
+                    $query->whereHas('academyAthletes', function ($q) use ($academy_id) {
+                        $q->where('academy_id', $academy_id);
+                    });
+                });
+                break;
+
+            case 'dean':
+                // Utenti di una determinata scuola
+                $school_id = $authUser->getActiveInstitutionId() ?? null;
+
+                if (!$school_id) {
+                    return redirect()->route("dashboard")->with('error', 'You don\'t have a school assigned or didn\'t select one!');
+                }
+
+                $baseQuery->where(function ($query) use ($school_id) {
+                    $query->whereHas('schoolAthletes', function ($q) use ($school_id) {
+                        $q->where('school_id', $school_id);
+                    });
+                });
+                break;
+
+            default:
+                return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
+        }
+        
+        // Apply sorting
+        switch ($sortBy){
+            case 'name':
+            case 'surname':
+            case 'email':
+                $baseQuery->orderByRaw("LOWER(TRIM($sortBy)) $sortDirection");
+                break;
+            case 'nation':
+                $baseQuery->leftJoin('academies_athletes', function ($join) {
+                        $join->on('users.id', '=', 'academies_athletes.user_id')
+                            ->where('academies_athletes.is_primary', '=', true);
+                    })
+                    ->leftJoin('academies', function ($join) {
+                        $join->on('academies_athletes.academy_id', '=', 'academies.id');
+                    })
+                    ->leftJoin('nations', function ($join) {
+                        $join->on('academies.nation_id', '=', 'nations.id');
+                    })
+                    ->orderBy('nations.name', $sortDirection);
+                break;
+            case 'academy':
+                $baseQuery->leftJoin('academies_athletes', function ($join) {
+                        $join->on('users.id', '=', 'academies_athletes.user_id')
+                            ->where('academies_athletes.is_primary', '=', true);
+                    })
+                    ->leftJoin('academies', function ($join) {
+                        $join->on('academies_athletes.academy_id', '=', 'academies.id');
+                    })
+                    ->orderByRaw('LOWER(TRIM(academies.name)) ' . $sortDirection);
+                break;
+            case 'school':
+                $baseQuery->leftJoin('schools_athletes', function ($join) {
+                        $join->on('users.id', '=', 'schools_athletes.user_id')
+                            ->whereRaw('schools_athletes.id = (
+                                SELECT id FROM schools_athletes sa
+                                WHERE sa.user_id = users.id
+                                ORDER BY sa.is_primary DESC, sa.id ASC
+                                LIMIT 1
+                            )');
+                    })
+                    ->leftJoin('schools', function ($join) {
+                        $join->on('schools_athletes.school_id', '=', 'schools.id');
+                    })
+                    ->orderBy('schools.name', $sortDirection);
+                break;
+            default:
+                $baseQuery->orderBy($sortBy, $sortDirection);
+                break;
+        } 
+
+        $users = $baseQuery->select('users.*')->paginate(10);
+
+        // Format additional data
+        foreach ($users as $user) {
+            $user->primary_academy = $user->primaryAcademy() ? $user->primaryAcademy()->name : "No academy";
+            $user->primary_school = $user->primarySchool() ? $user->primarySchool()->name : "No school";
+            $user->nation = $user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->nation->name : $user->nation->name ?? "Not set";
+        }
+
+        return view('users.filtered_by_active_and_course', [
+            'users' => $users,
+            'currentSort' => $sortBy,
+            'currentDirection' => $sortDirection,
+            'authUserRole' => $authUserRole,
+        ]);
+        
     }
 }

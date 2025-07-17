@@ -35,6 +35,7 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
     Route::post('/users/set-main-institution', [App\Http\Controllers\UserController::class, 'setMainInstitution'])->name('rector.users.set-main-institution');
 
     Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('rector.users.index');
+    Route::get('/filtered-by-dashboard', [App\Http\Controllers\PaginatedUserController::class, 'usersFilteredByActiveAndCoursePagination'])->name('rector.users.filtered-by-active-and-course');
     Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('rector.users.filter');
     Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('rector.users.filter.result');
     Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('rector.users.search');

@@ -17,6 +17,7 @@ Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->
     Route::post('/users/set-main-institution', [App\Http\Controllers\UserController::class, 'setMainInstitution'])->name('manager.users.set-main-institution');
     
     Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('manager.users.index');
+    Route::get('/filtered-by-dashboard', [App\Http\Controllers\PaginatedUserController::class, 'usersFilteredByActiveAndCoursePagination'])->name('manager.users.filtered-by-active-and-course');
     Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('manager.users.filter');
     Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('manager.users.filter.result');
     Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('manager.users.search');

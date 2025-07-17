@@ -53,23 +53,24 @@
                                     <div
                                         class="mt-1 text-sm text-background-600 dark:text-background-200 flex flex-row items-center gap-2">
                                         <x-lucide-check-circle class="w-6 h-6 text-green-500" />
-                                        <span>{{ __('users.fee_paid') }}</span>
+                                        <span>{{ __('users.active_fee_paid') }}</span>
                                     </div>
                                 @else
                                     <div
                                         class="mt-1 text-sm text-background-600 dark:text-background-200 flex flex-row items-center gap-2">
                                         <x-lucide-x-circle class="w-6 h-6 text-red-500" />
-                                        <span>{{ __('users.fee_not_paid') }}</span>
+                                        <span>{{ __('users.inactive_fee_not_paid') }}</span>
                                     </div>
                                 @endif
                             @endif
                         </div>
-                        <div>
+                        <!-- Non gli interessa più vedere questo dato -->
+                        <!-- <div>
                             @if (!$user->is_disabled)
                                 <div
                                     class="mt-1 text-sm text-background-600 dark:text-background-200 flex flex-row items-center gap-2">
                                     <x-lucide-check-circle class="w-6 h-6 text-green-500" />
-                                    <span>{{ __('users.active') }}</span>
+                                    <span>{{ __('users.registered') }}</span>
                                 </div>
                             @else
                                 <div
@@ -78,7 +79,7 @@
                                     <span>{{ __('users.disabled') }}</span>
                                 </div>
                             @endif
-                        </div>
+                        </div> -->
                         <div>
                             @if ($user->is_verified)
                                 <div

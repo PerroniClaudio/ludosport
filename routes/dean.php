@@ -9,6 +9,7 @@ Route::prefix('dean')->middleware('auth')->middleware('role:admin,dean')->group(
 
   Route::group([], function () {
     Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('dean.users.index');
+    Route::get('/filtered-by-dashboard', [App\Http\Controllers\PaginatedUserController::class, 'usersFilteredByActiveAndCoursePagination'])->name('dean.users.filtered-by-active-and-course');
     Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('dean.users.filter');
     Route::get('/users/filter/result', [App\Http\Controllers\UserController::class, 'filterResult'])->name('dean.users.filter.result');
     Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('dean.users.search');
