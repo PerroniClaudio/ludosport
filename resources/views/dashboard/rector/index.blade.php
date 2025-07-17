@@ -15,7 +15,7 @@
             @if ($primaryAcademy != null && $primaryAcademy->id != 1)
                 <div class="flex flex-col gap-4">
 
-                    <x-dashboard.user-academy-numbers academyId="{{ $primaryAcademy ? $primaryAcademy->id : null }}" />
+                    <x-dashboard.user-academy-numbers academyId="{{ Auth()->user()->getActiveInstitutionId() }}" />
 
                     <!-- Paga in bulk le fee degli utenti non attivi -->
 
@@ -93,7 +93,7 @@
 
                     <!-- Grafico a torta per vedere la divisione di utenti tra le school + Confronto tra iscritti anno precedente e iscritti anno corrente  -->
 
-                    <x-dashboard.user-school-graph academyId="{{ $primaryAcademy ? $primaryAcademy->id : null }}" />
+                    <x-dashboard.user-school-graph academyId="{{ Auth()->user()->getActiveInstitutionId() }}" />
 
                     <!-- Richieste di promozione a Preside delle school -->
                     <!-- Richiesta di promozione a cavaliere -->
