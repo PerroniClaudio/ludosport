@@ -660,7 +660,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         $removedSchools = $this->schools()->where('academy_id', $academyToRemove->id)->get();
         foreach ($removedSchools as $school) {
             $this->schools()->detach($school->id);
-        }
+        } 
         $removedSchoolsIds = $removedSchools->pluck('id')->toArray();
 
         $removedAcademies = $this->academies()->where('academy_id', $academyToRemove->id)->get();
