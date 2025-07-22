@@ -14,7 +14,7 @@
                 <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
                         <div class="flex flex-col gap-2">
                             <h3 class="text-background-800 dark:text-background-200 text-2xl">
