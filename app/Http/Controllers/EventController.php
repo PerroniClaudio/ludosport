@@ -665,7 +665,7 @@ class EventController extends Controller {
         } else {
             $users = $query->get();
         }
-        return response()->json($users);
+        return response()->json($users); 
     }
 
     public function availablePersonnel(Event $event) {
