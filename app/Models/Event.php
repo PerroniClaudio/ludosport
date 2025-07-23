@@ -128,7 +128,7 @@ class Event extends Model {
 
     public function eventMultiplier() {
         switch ($this->event_type) {
-            case 3:
+            case 4:
                 return 2;
                 break;
             default:
