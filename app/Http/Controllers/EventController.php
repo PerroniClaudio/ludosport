@@ -1093,8 +1093,7 @@ class EventController extends Controller
                     ['is_disabled', '=', 0],
                 ])->get();
 
-                Log:
-                info("events", ['events' => $events]);
+                Log::info("events", ['events' => $events]);
                 return response()->json($events);
             }
         }
