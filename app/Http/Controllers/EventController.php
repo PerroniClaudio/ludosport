@@ -29,11 +29,13 @@ use Srmklive\PayPal\Services\PayPal as PaypalClient;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
 
-class EventController extends Controller {
+class EventController extends Controller
+{
     /**
      * Display a listing of the resource.
      */
-    public function index() {
+    public function index()
+    {
         //
 
         $authUser = User::find(auth()->user()->id);
@@ -94,14 +96,15 @@ class EventController extends Controller {
         $viewPath = $authRole === 'admin' ? 'event.index' : 'event.' . $authRole . '.index';
         return view($viewPath, [
             'approved_events' => $approved,
-            'pending_events' =>  $pending,
+            'pending_events' => $pending,
         ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create() {
+    public function create()
+    {
         //
 
         $authUser = User::find(auth()->user()->id);
@@ -126,7 +129,8 @@ class EventController extends Controller {
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
@@ -181,7 +185,8 @@ class EventController extends Controller {
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Event $event) {
+    public function edit(Event $event)
+    {
 
 
         //
@@ -199,9 +204,11 @@ class EventController extends Controller {
         }
         // Questa parte si può spostare in una funzione tipo checkPermission
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato. dean e manager interni all'accademia e tecnici possono aggiungere partecipanti. 
-        if (!($authRole === 'admin' ||
-            (in_array($authRole, ['rector', 'dean', 'manager']) && isset($event->academy_id) && ($event->academy_id === ($primaryAcademy ? $primaryAcademy->id : null))) ||
-            ($event->personnel()->where('user_id', $authUser->id)->exists()))) {
+        if (
+            !($authRole === 'admin' ||
+                (in_array($authRole, ['rector', 'dean', 'manager']) && isset($event->academy_id) && ($event->academy_id === ($primaryAcademy ? $primaryAcademy->id : null))) ||
+                ($event->personnel()->where('user_id', $authUser->id)->exists()))
+        ) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
         if ($event->is_approved && !in_array($authRole, ['admin', 'rector', 'dean', 'manager', 'technician'])) {
@@ -283,7 +290,8 @@ class EventController extends Controller {
         ]);
     }
 
-    public function saveDescription(Request $request, Event $event) {
+    public function saveDescription(Request $request, Event $event)
+    {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
@@ -306,7 +314,8 @@ class EventController extends Controller {
         return redirect()->route($redirectRoute, $event->id)->with('success', 'Description saved successfully');
     }
 
-    public function saveLocation(Request $request, Event $event) {
+    public function saveLocation(Request $request, Event $event)
+    {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
@@ -343,7 +352,8 @@ class EventController extends Controller {
      * Update the specified resource in storage.
      */
 
-    public function update(Request $request, Event $event) {
+    public function update(Request $request, Event $event)
+    {
 
 
         $authUser = User::find(auth()->user()->id);
@@ -461,7 +471,8 @@ class EventController extends Controller {
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Event $event) {
+    public function destroy(Event $event)
+    {
         //
 
         $event->is_disabled = true;
@@ -470,7 +481,8 @@ class EventController extends Controller {
         return redirect()->route('events.index')->with('success', 'Event deleted successfully');
     }
 
-    public function getLocationData(Request $request) {
+    public function getLocationData(Request $request)
+    {
 
         $coordinates = json_decode($request->location, true);
 
@@ -488,7 +500,8 @@ class EventController extends Controller {
         return response()->json($json['results'][0]);
     }
 
-    private function getCoordinates($address) {
+    private function getCoordinates($address)
+    {
         $address = str_replace(" ", "+", $address);
         $url = "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=" . config('app.google.maps_key');
         $response = file_get_contents($url);
@@ -500,13 +513,15 @@ class EventController extends Controller {
         ];
     }
 
-    public function coordinates(Request $request) {
+    public function coordinates(Request $request)
+    {
         $coordinates = $this->getCoordinates($request->address);
 
         return response()->json($coordinates);
     }
 
-    public function updateThumbnail($id, Request $request) {
+    public function updateThumbnail($id, Request $request)
+    {
         //
         $authRole = User::find(auth()->user()->id)->getRole();
         $redirectRoute = $authRole === 'admin' ? 'events.edit' : $authRole . '.events.edit';
@@ -536,7 +551,8 @@ class EventController extends Controller {
         }
     }
 
-    public function calendar(Request $request) {
+    public function calendar(Request $request)
+    {
 
         header('Content-Type: application/json');
 
@@ -618,7 +634,8 @@ class EventController extends Controller {
         return response()->json($events_data);
     }
 
-    public function review(Event $event) {
+    public function review(Event $event)
+    {
 
         if ($event->is_approved) {
             return redirect()->route('events.edit', $event->id)->with('error', 'This event has already been approved!');
@@ -629,14 +646,16 @@ class EventController extends Controller {
         ]);
     }
 
-    public function approve(Event $event) {
+    public function approve(Event $event)
+    {
         $event->is_approved = true;
         $event->save();
 
         return redirect()->route('events.edit', $event->id)->with('success', 'Event approved successfully!');
     }
 
-    public function reject(Event $event) {
+    public function reject(Event $event)
+    {
 
         $announcement = Announcement::create([
             'object' => 'Event Rejected',
@@ -651,14 +670,16 @@ class EventController extends Controller {
         return redirect()->route('events.index')->with('success', 'Event rejected successfully!');
     }
 
-    public function publish(Event $event) {
+    public function publish(Event $event)
+    {
         $event->is_published = true;
         $event->save();
 
         return redirect()->route('events.edit', $event->id)->with('success', 'Event published successfully!');
     }
 
-    public function available(Event $event) {
+    public function available(Event $event)
+    {
         // hanno chiesto per il rettore (quindi anche eventuali altri ruoli sottostanti) che nel caso l'evento fosse "School Tournament", "Academy Tournament", "National Tournament", devono essere visualizzati solo utenti con membership attiva.
         // Poi negli "School Tournament" e "Academy Tournament" solo utenti appartenenti alla stessa accademia dell'evento e nei "National Tournament" solo quelli della nazione dell'accademia associata all'evento.
         // Si potrebbe usare resultType() per escludere solo gli eventi enabling, ma non sappiamo se ci sono altri tipi di eventi che non devono essere inclusi.
@@ -687,10 +708,11 @@ class EventController extends Controller {
         } else {
             $users = $query->get();
         }
-        return response()->json($users); 
+        return response()->json($users);
     }
 
-    public function availablePersonnel(Event $event) {
+    public function availablePersonnel(Event $event)
+    {
         // Per l'evento istruttore solo tecnici (anche esterni all'accademia), per gli altri tutto il personale dell'accademia.
         $query = User::query()->where(['is_disabled' => '0', "has_paid_fee" => '1']);
         if ($event->resultType() === "enabling") {
@@ -707,12 +729,14 @@ class EventController extends Controller {
         return response()->json($users);
     }
 
-    public function personnel(Event $event) {
+    public function personnel(Event $event)
+    {
         $users = $event->personnel;
         return response()->json($users);
     }
 
-    public function addPersonnel(Request $request) {
+    public function addPersonnel(Request $request)
+    {
         $authRole = User::find(auth()->user()->id)->getRole();
         if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return response()->json(['error' => 'You are not authorized to add personnel']);
@@ -739,7 +763,8 @@ class EventController extends Controller {
         return response()->json(['success' => 'Personnel added successfully!']);
     }
 
-    public function participants(Event $event) {
+    public function participants(Event $event)
+    {
         if ($event->resultType() === 'enabling') {
             $participants = $event->instructorResults()->with('user')->get();
         } else if ($event->resultType() === 'ranking') {
@@ -755,7 +780,8 @@ class EventController extends Controller {
         return response()->json($users);
     }
 
-    public function selectParticipants(Request $request) {
+    public function selectParticipants(Request $request)
+    {
         $authRole = User::find(auth()->user()->id)->getRole();
         $event = Event::find($request->event_id);
 
@@ -828,7 +854,8 @@ class EventController extends Controller {
         return response()->json(['success' => 'Participants modified successfully!']);
     }
 
-    public function confirmEventInstructorResult(Event $event, Request $request) {
+    public function confirmEventInstructorResult(Event $event, Request $request)
+    {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
         if ($authRole !== 'admin') {
@@ -886,13 +913,15 @@ class EventController extends Controller {
         ]);
     }
 
-    public function exportParticipants(Event $event) {
+    public function exportParticipants(Event $event)
+    {
         $name = "event_" . $event->name . '-' . $event->resultType() . '_participants.xlsx';
 
         return Excel::download(new EventParticipantsExport($event->id, $event->resultType()), $name);
     }
 
-    public function all() {
+    public function all()
+    {
         $events = Event::where('is_approved', 1)->get();
 
         $formatted_events = [];
@@ -908,7 +937,8 @@ class EventController extends Controller {
         return response()->json($events);
     }
 
-    public function dashboardEvents() {
+    public function dashboardEvents()
+    {
         $events = Event::where('is_approved', 1)
             ->whereHas('personnel', function ($query) {
                 $query->where('user_id', auth()->user()->id);
@@ -943,7 +973,8 @@ class EventController extends Controller {
         return response()->json($formatted_events);
     }
 
-    public function search(Request $request) {
+    public function search(Request $request)
+    {
 
         $events = Event::query()->when($request->search, function ($q, $search) {
             return $q->where('id', Event::search($search)->keys());
@@ -964,7 +995,8 @@ class EventController extends Controller {
 
     // Sito web 
 
-    public function eventsList(Request $request) {
+    public function eventsList(Request $request)
+    {
 
         /*
 
@@ -1042,7 +1074,7 @@ class EventController extends Controller {
             //     continue;
             // }
 
-            $events[$key]['full_address'] = $value['address'] . ", " .  $value['postal_code'] . ", " .  $value['city'] . ", " .  $value['nation']['name'];
+            $events[$key]['full_address'] = $value['address'] . ", " . $value['postal_code'] . ", " . $value['city'] . ", " . $value['nation']['name'];
             $nations[] = [
                 'label' => $value['nation']['name'],
                 'value' => $value['nation']['id']
@@ -1059,7 +1091,8 @@ class EventController extends Controller {
         ]);
     }
 
-    public function list(Request $request) {
+    public function list(Request $request)
+    {
 
         $date = Carbon::parse($request->date);
 
@@ -1075,30 +1108,36 @@ class EventController extends Controller {
                     ['is_disabled', '=', 0],
                 ])->get();
 
-                Log:
-                info("events", ['events' => $events]);
+                Log::info("events", ['events' => $events]);
                 return response()->json($events);
             }
         }
-        
+
         $events = Event::where([
             ['is_approved', '=', 1],
             ['is_published', '=', 1],
             ['end_date', '<=', $date->format('Y-m-d')],
             ['is_disabled', '=', 0],
         ])
-        ->whereHas('type', function ($query) {
-            $query->where('name', '!=', 'Training Course');
-        })
-        ->get();
+            ->whereHas('type', function ($query) {
+                $query->where('name', '!=', 'Training Course');
+            })
+            ->get();
 
         return response()->json($events);
     }
 
-    public function general(Request $request) {
+    public function general(Request $request)
+    {
 
         $date = Carbon::parse($request->date);
         $events = Event::where('end_date', '<', $date->format('Y-m-d'))->where('is_disabled', false)->get();
+
+        $events_to_exclude = EventType::where('name', 'Training Course')->first()->events()->pluck('id')->toArray();
+
+        $events = $events->filter(function ($event) use ($events_to_exclude) {
+            return !in_array($event->id, $events_to_exclude);
+        });
 
         $results = [];
 
@@ -1134,7 +1173,7 @@ class EventController extends Controller {
             $aTotal = $a['total_war_points'] + $a['total_style_points'];
             $bTotal = $b['total_war_points'] + $b['total_style_points'];
             if ($bTotal === $aTotal) {
-                if($a['total_style_points'] === $b['total_style_points']) {
+                if ($a['total_style_points'] === $b['total_style_points']) {
                     // If total points are equal, sort by user name
                     return strcasecmp($a['user_name'], $b['user_name']);
                 }
@@ -1147,7 +1186,8 @@ class EventController extends Controller {
         return response()->json($results);
     }
 
-    public function nation(Request $request) {
+    public function nation(Request $request)
+    {
 
         $nation_id = $request['nation_id'];
         $results = [];
@@ -1197,7 +1237,7 @@ class EventController extends Controller {
             $aTotal = $a['total_war_points'] + $a['total_style_points'];
             $bTotal = $b['total_war_points'] + $b['total_style_points'];
             if ($bTotal === $aTotal) {
-                if($a['total_style_points'] === $b['total_style_points']) {
+                if ($a['total_style_points'] === $b['total_style_points']) {
                     // If total points are equal, sort by user name
                     return strcasecmp($a['user_name'], $b['user_name']);
                 }
@@ -1213,7 +1253,8 @@ class EventController extends Controller {
         ]);
     }
 
-    public function eventResult(Event $event) {
+    public function eventResult(Event $event)
+    {
 
         $results = [];
 
@@ -1246,7 +1287,7 @@ class EventController extends Controller {
             $aTotal = $a['total_war_points'] + $a['total_style_points'];
             $bTotal = $b['total_war_points'] + $b['total_style_points'];
             if ($bTotal === $aTotal) {
-                if($a['total_style_points'] === $b['total_style_points']) {
+                if ($a['total_style_points'] === $b['total_style_points']) {
                     // If total points are equal, sort by user name
                     return strcasecmp($a['user_name'], $b['user_name']);
                 }
@@ -1263,7 +1304,8 @@ class EventController extends Controller {
      * Display the specified resource.
      */
 
-    public function show(Event $event) {
+    public function show(Event $event)
+    {
         //
 
         $canpurchase = false;
@@ -1314,7 +1356,8 @@ class EventController extends Controller {
         ]);
     }
 
-    public function purchase(Event $event) {
+    public function purchase(Event $event)
+    {
 
         $user = User::find(Auth()->user()->id);
 
@@ -1374,11 +1417,11 @@ class EventController extends Controller {
                         'city' => '',
                         'country' => 'Italy',
                     ])) : json_encode([
-                        'address' => '',
-                        'zip' => '',
-                        'city' => '',
-                        'country' => 'Italy',
-                    ]),
+                            'address' => '',
+                            'zip' => '',
+                            'city' => '',
+                            'country' => 'Italy',
+                        ]),
                     'vat' => $lastInvoice ? ($lastInvoice->vat ?: '') : '',
                     'sdi' => $lastInvoice ? ($lastInvoice->sdi ?: '') : '',
                 ]);
@@ -1395,11 +1438,11 @@ class EventController extends Controller {
                     'city' => '',
                     'country' => 'Italy',
                 ])) : json_encode([
-                    'address' => '',
-                    'zip' => '',
-                    'city' => '',
-                    'country' => 'Italy',
-                ]),
+                        'address' => '',
+                        'zip' => '',
+                        'city' => '',
+                        'country' => 'Italy',
+                    ]),
                 'vat' => $lastInvoice ? ($lastInvoice->vat ?: '') : '',
                 'sdi' => $lastInvoice ? ($lastInvoice->sdi ?: '') : '',
             ]);
@@ -1449,7 +1492,8 @@ class EventController extends Controller {
     // }
 
     // Checkout evento interno gratuito
-    public function userCheckoutFree(Event $event, Request $request) {
+    public function userCheckoutFree(Event $event, Request $request)
+    {
         $authUser = User::find(auth()->user()->id);
         $order_id = $request->session()->get('order_id');
         $order = Order::findOrFail($order_id);
@@ -1507,14 +1551,16 @@ class EventController extends Controller {
     }
 
     // Successo acquisto free. In questo caso non si deve fare niente e basta restituire la view
-    public function successUserFree(Event $event) {
+    public function successUserFree(Event $event)
+    {
         return view('website.shop.event-free-success', [
             'event' => $event,
         ]);
     }
 
     // Errore acquisto free
-    public function cancelUserFree(Request $request) {
+    public function cancelUserFree(Request $request)
+    {
 
         $orderId = $request->order_id;
 
@@ -1531,7 +1577,8 @@ class EventController extends Controller {
     }
 
     // Checkout waiting list
-    public function userCheckoutWaitingList(Event $event, Request $request) {
+    public function userCheckoutWaitingList(Event $event, Request $request)
+    {
         // Deve aggiungere l'utente alla waiting list se non c'è già.
 
         $order_id = $request->session()->get('order_id');
@@ -1575,7 +1622,8 @@ class EventController extends Controller {
     }
 
     // Successo waiting list
-    public function successUserWaitingList(Request $request) {
+    public function successUserWaitingList(Request $request)
+    {
         $orderId = $request->order_id;
         $order = Order::findOrFail($orderId);
         $event = Event::find($order->items->first()->product_code);
@@ -1586,7 +1634,8 @@ class EventController extends Controller {
     }
 
     // Errore waiting list
-    public function cancelUserWaitingList(Request $request) {
+    public function cancelUserWaitingList(Request $request)
+    {
         $orderId = $request->order_id;
         $order = Order::findOrFail($orderId);
         $order->update([
@@ -1600,7 +1649,8 @@ class EventController extends Controller {
     // STRIPE - Acquisto
 
     // l'utente ha scelto stripe per pagare l'iscrizione all'evento
-    public function userCheckoutStripe(Event $event, Request $request) {
+    public function userCheckoutStripe(Event $event, Request $request)
+    {
         $user = User::find(Auth()->user()->id);
 
         $order_id = $request->session()->get('order_id');
@@ -1613,13 +1663,14 @@ class EventController extends Controller {
 
         return $request->user()->checkoutCharge(($event->price * 100), $event->name, 1, [
             'success_url' => route('shop.event.success') . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('shop.event.cancel')  . '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('shop.event.cancel') . '?session_id={CHECKOUT_SESSION_ID}',
             'metadata' => ['order_id' => $order->id],
         ]);
     }
 
     // L'utente ha completato l'acquisto con stripe
-    public function successUser(Request $request) {
+    public function successUser(Request $request)
+    {
 
         $sessionId = $request->get('session_id');
 
@@ -1676,7 +1727,8 @@ class EventController extends Controller {
     }
 
     // Errore acquisto con stripe
-    public function cancelUser(Request $request) {
+    public function cancelUser(Request $request)
+    {
         $sessionId = $request->get('session_id');
 
         if ($sessionId === null) {
@@ -1699,7 +1751,8 @@ class EventController extends Controller {
     // PAYPAL - Acquisto
 
     // L'utente ha scelto paypal per pagare l'iscrizione all'evento
-    public function userCheckoutPaypal(Event $event, Request $request) {
+    public function userCheckoutPaypal(Event $event, Request $request)
+    {
 
         $provider = new PaypalClient;
         $provider->setApiCredentials(config('paypal'));
@@ -1762,7 +1815,8 @@ class EventController extends Controller {
     }
 
     // L'utente ha completato l'acquisto con paypal
-    public function successUserPaypal(Request $request) {
+    public function successUserPaypal(Request $request)
+    {
         $orderId = $request->order_id;
 
         $provider = new PaypalClient;
@@ -1814,7 +1868,8 @@ class EventController extends Controller {
     }
 
     // Errore acquisto con paypal
-    public function cancelUserPaypal(Request $request) {
+    public function cancelUserPaypal(Request $request)
+    {
 
         $orderId = $request->order_id;
 
@@ -1837,7 +1892,8 @@ class EventController extends Controller {
         return view('website.shop.event-cancel');
     }
 
-    public function rankings() {
+    public function rankings()
+    {
 
         $countries = Nation::all();
         $continents = [];

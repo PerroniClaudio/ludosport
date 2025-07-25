@@ -10,6 +10,17 @@ export const mapsearcher = (academies) => {
         nationFilter: "",
         markers: [],
         searchChanged: async function () {
+            if (this.search.length === 0) {
+                // Rimuovi tutti i marker dalla mappa
+                this.markers.forEach((m) => m.marker.setMap(null));
+                this.markers = [];
+                // Ripristina risultati e paginazione
+                this.results = this.allResults;
+                this.currentPage = 1;
+                this.paginateResults();
+                return;
+            }
+
             if (this.search.length < 3) return;
 
             const response = await fetch(
@@ -17,6 +28,11 @@ export const mapsearcher = (academies) => {
             );
 
             this.results = await response.json();
+            this.paginateResults();
+
+            // Rimuovi i marker precedenti
+            this.markers.forEach((m) => m.marker.setMap(null));
+            this.markers = [];
 
             this.results.forEach((result) => {
                 let latLng = JSON.parse(result.coordinates);
@@ -24,6 +40,10 @@ export const mapsearcher = (academies) => {
                 let marker = new google.maps.Marker({
                     position: latLng,
                     map: this.map,
+                });
+
+                marker.addListener("click", () => {
+                    this.zoomToMarker(result.id);
                 });
 
                 this.markers.push({
@@ -98,7 +118,9 @@ export const mapsearcher = (academies) => {
                     map: this.map,
                 });
 
-                console.log(result.nation_id);
+                marker.addListener("click", () => {
+                    this.zoomToMarker(result.id);
+                });
 
                 this.markers.push({
                     id: result.id,
