@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('dean')->middleware('auth')->middleware('role:admin,dean')->group(function () {
+Route::prefix('dean')->middleware(['auth', 'role.institution.selected'])->middleware('role:admin,dean')->group(function () {
   // Sblocco una route alla volta, mano a mano che le implemento
 
   /** Users */

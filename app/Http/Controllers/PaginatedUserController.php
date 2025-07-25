@@ -331,13 +331,17 @@ class PaginatedUserController extends Controller {
 
                 case 'rector':
                 case 'manager':
-                    // Format primary academy for rectors
+                    // Format primary academy for rectors.
+                    // Adesso possono esserci più primary academy per rettori e manager. Restituisco sia la main unica che la lista di primary. poi decide il frontend cosa usare.
                     $user->primary_academy = $user->primaryAcademy() ? $user->primaryAcademy()->name : "No academy";
+                    $user->primary_academies = $user->academies()->wherePivot('is_primary', true)->pluck('name')->join(', ') ?: "No academy";
                     break;
 
                 case 'dean':
                     // Format primary school for deans
+                    // Adesso possono esserci più primary school per i deani. Restituisco sia la main unica che la lista di primary. poi decide il frontend cosa usare.
                     $user->primary_school = $user->primarySchool() ? $user->primarySchool()->name : "No school";
+                    $user->primary_schools = $user->schools()->wherePivot('is_primary', true)->pluck('name')->join(', ') ?: "No school";
                     break;
             }
         }
@@ -496,7 +500,9 @@ class PaginatedUserController extends Controller {
         // Format additional data
         foreach ($users as $user) {
             $user->primary_academy = $user->primaryAcademy() ? $user->primaryAcademy()->name : "No academy";
+            $user->primary_academies = $user->academies()->wherePivot('is_primary', true)->pluck('name')->join(', ') ?: "No academy";
             $user->primary_school = $user->primarySchool() ? $user->primarySchool()->name : "No school";
+            $user->primary_schools = $user->schools()->wherePivot('is_primary', true)->pluck('name')->join(', ') ?: "No school";
             $user->nation = $user->primaryAcademyAthlete() ? $user->primaryAcademyAthlete()->nation->name : $user->nation->name ?? "Not set";
         }
 

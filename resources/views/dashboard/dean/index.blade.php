@@ -10,7 +10,7 @@
 
             <div class="flex flex-col gap-4">
 
-                @if (Auth()->user()->primarySchool())
+                @if (Auth()->user()->getActiveInstitution())
                     <x-dashboard.user-school-numbers schoolId="{{ Auth()->user()->getActiveInstitutionId() }}" />
 
                     <div class="grid lg:grid-cols-2 gap-4">

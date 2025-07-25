@@ -8,12 +8,12 @@
     currentSchoolId: '{{ $selectedSchoolId }}',
     selectedSchoolId: '{{ $selectedSchoolId }}',
     selectedSchool: '{{ addslashes($selectedSchool) }}',
-    availableSchools: {{ auth()->user()->primaryAcademy()->schools ?? [] }},
+    availableSchools: {{ auth()->user()->getActiveInstitution()->schools ?? [] }},
     paginatedSchools: [],
     currentPage: 1,
     totalPages: 1,
     getavailableSchools: function() {
-        data = {{ auth()->user()->primaryAcademy()->schools ?? [] }}; 
+        data = {{ auth()->user()->getActiveInstitution()->schools ?? [] }};
         this.availableSchools = data;
         this.paginatedSchools = this.availableSchools.slice(0, 5);
         this.totalPages = Math.ceil(this.availableSchools.length / 5);   

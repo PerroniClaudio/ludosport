@@ -405,7 +405,7 @@ class FeeController extends Controller {
             $user = User::find($order->user_id);
 
             foreach ($order->items as $item) {
-                $primaryAcademy = $user->primaryAcademy();
+                $primaryAcademy = $user->getActiveInstitution();
                 if (!$primaryAcademy) {
                     Log::error('Primary academy not found. Check for fees created for this order. - Order ID: ' . $order->id . ' - Item ID: ' . $item->id);
                 }

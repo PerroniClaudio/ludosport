@@ -35,7 +35,9 @@ Route::middleware('guest')->group(function () {
                 ->name('password.store');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
+// Qui non so se usare il middleware 'role.institution.selected' o meno. per ora non lo uso per evitare di rompere qualche route in cui non dovrebbe esserci
+// Route::middleware(['auth', 'role.institution.selected'])->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)
                 ->name('verification.notice');
 
@@ -48,7 +50,7 @@ Route::middleware('auth')->group(function () {
                 ->name('verification.send');
 
     Route::post('email/verification-notification/{user}', [EmailVerificationNotificationController::class, 'verifyForUser'])
-                ->middleware(['auth', 'role:admin,rector,dean,manager'])
+                ->middleware(['auth', 'role.institution.selected', 'role:admin,rector,dean,manager'])
                 ->name('verification.send-for-user');
 
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])

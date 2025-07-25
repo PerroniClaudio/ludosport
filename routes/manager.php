@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('manager')->middleware('auth')->middleware('role:admin,manager')->group(function () {
+Route::prefix('manager')->middleware(['auth', 'role.institution.selected'])->middleware('role:admin,manager')->group(function () {
   // Sblocco una route alla volta, mano a mano che le implemento
 
   Route::get('/fees', [App\Http\Controllers\FeeController::class, 'index'])->name('manager.fees.index');

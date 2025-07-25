@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 // Route::prefix('instructor')->middleware('auth')->middleware('role:tecnico')->group(function () {
-Route::prefix('instructor')->middleware('auth')->middleware('role:admin,instructor')->group(function () {
+Route::prefix('instructor')->middleware(['auth', 'role.institution.selected'])->middleware('role:admin,instructor')->group(function () {
 
     /** Users */
 

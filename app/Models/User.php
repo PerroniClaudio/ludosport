@@ -854,7 +854,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function getActiveInstitutionId() {
-        return session('institution')->id;
+        return session('institution')->id ?: null;
     }
 
     public function getActiveInstitution() {
@@ -862,7 +862,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function getActivePrimaryAcademy() {
-        $active_academy_id = session('institution');
+        $active_academy_id = session('institution')->id ?: null;
 
         if ($active_academy_id) {
             $academy = Academy::find($active_academy_id);
@@ -876,5 +876,7 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return $primaryAcademy;
             }
         }
+
+        return null;
     }
 }

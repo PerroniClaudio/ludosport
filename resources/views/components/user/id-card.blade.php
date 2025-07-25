@@ -25,7 +25,7 @@
             </div>
             <div class="flex flex-row justify-end w-[45%] p-2">
                 {{-- Precedenza all'accademia da personale, poi se quella da personale non c'è o è no academy, viene quella da atleta. 
-                    se è non c'è o è no academy usa l'immagine di no academy. --}}
+                    se non c'è o è no academy usa l'immagine di no academy. --}}
                 @if ($user->primaryAcademy() && ($user->primaryAcademy()->id != 1))
                     <img class="h-24 aspect-square object-cover object-center" src="/academy-image/{{ $user->primaryAcademy()->id }}"
                         alt="{{ $user->primaryAcademy()->name }}">

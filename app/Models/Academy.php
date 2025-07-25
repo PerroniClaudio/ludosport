@@ -64,25 +64,12 @@ class Academy extends Model {
         if ($this->main_rector) {
             return $this->mainRector;
         }
-
+        
         // Otherwise, find the first rector in the personnel
-        $rectors = $this->personnel()->whereHas('roles', function ($query) {
-            $query->where('name', 'rector');
-        })->get();
-        // Se lo trova tra quelli che hanno l'accademia come principale restituisce quello
-        foreach ($rectors as $r) {
-            $primaryAcademy = $r->primaryAcademy();
-            if ($primaryAcademy && ($primaryAcademy->id == $this->id)) {
-                return $r;
-            }
-        }
-        // Per ora si considera rettore solo chi ha l'accademia come principale.
-        // Altrimenti cerca tra tutto il personale (anche se non ha l'accademia come principale)
-        // foreach ($rectors as $r) {
-        //     if ($r->academies->firstWhere('id', $this->id)) {
-        //         return $r;
-        //     }
-        // }
-        return null;
+        return $this->personnel()->wherePivot('is_primary', true)
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'rector');
+            })->first();
+
     }
 }

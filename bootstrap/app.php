@@ -17,7 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         //
         $middleware->alias([
             'role' => UserRoleMiddleware::class,
-            'throttle' => SearchThrottleMiddleware::class
+            'throttle' => SearchThrottleMiddleware::class,
+            'role.institution.selected' => \App\Http\Middleware\EnsureRoleAndInstitutionSelectedMiddleware::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

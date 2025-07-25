@@ -6,7 +6,7 @@
     </x-slot>
 
     @php
-        $primaryAcademy = Auth()->user()->primaryAcademy();
+        $primaryAcademy = Auth()->user()->getActiveInstitution();
     @endphp
 
     <div class="py-12">

@@ -31,152 +31,152 @@ use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller {
 
-    public function index() {
-        $authUser = User::find(Auth::user()->id);
-        $authUserRole = $authUser->getRole();
+    // public function index() {
+    //     $authUser = User::find(Auth::user()->id);
+    //     $authUserRole = $authUser->getRole();
 
-        if (!in_array($authUserRole, ['admin', 'rector', 'dean', 'manager', 'technician', 'instructor'])) {
-            return redirect()->route("dashboard")->with('error', 'You do not have the required role to access this page!');
-        }
+    //     if (!in_array($authUserRole, ['admin', 'rector', 'dean', 'manager', 'technician', 'instructor'])) {
+    //         return redirect()->route("dashboard")->with('error', 'You do not have the required role to access this page!');
+    //     }
 
-        $roles = Role::all();
-        $users_sorted_by_role = [];
-        $users = [];
-        $users_without_roles = [];
+    //     $roles = Role::all();
+    //     $users_sorted_by_role = [];
+    //     $users = [];
+    //     $users_without_roles = [];
 
-        switch ($authUserRole) {
-            case 'admin':
-            case 'technician':
+    //     switch ($authUserRole) {
+    //         case 'admin':
+    //         case 'technician':
 
-                // Tutti gli utenti
+    //             // Tutti gli utenti
 
-                $users = User::all()->where('is_disabled', false);
+    //             $users = User::all()->where('is_disabled', false);
 
-                // put all users without roles in a no-role array inside the users_sorted_by_role array
-                $no_roles_users = $users->filter(function ($user) {
-                    return $user->roles->isEmpty();
-                });
-                $users_without_roles = [];
-                foreach ($no_roles_users as $user) {
-                    $users_without_roles[] = $user;
-                }
-
-
-                break;
-            case 'manager':
-            case 'rector':
-
-                // Utenti di una determinata accademia
-
-                $academy_id = $authUser->getActiveInstitutionId();
-
-                $users = User::where('is_disabled', false)
-                    ->where(function ($query) use ($academy_id) {
-                        $query->whereHas('academies', function ($q) use ($academy_id) {
-                            $q->where('academy_id', $academy_id);
-                        })->orWhereHas('academyAthletes', function ($q) use ($academy_id) {
-                            $q->where('academy_id', $academy_id);
-                        });
-                    })->get();
-
-                break;
-            case 'instructor':
-                // Utenti di tutte le accademie in cui ha un corso (tanto non può entrare nel dettaglio utente)
-                $academiesIds = $authUser->academies()->pluck('academy_id')->toArray();
-
-                $users = User::where('is_disabled', false)
-                    ->where(function ($query) use ($academiesIds) {
-                        $query->whereHas('academies', function ($q) use ($academiesIds) {
-                            $q->whereIn('academy_id', $academiesIds);
-                        })->orWhereHas('academyAthletes', function ($q) use ($academiesIds) {
-                            $q->whereIn('academy_id', $academiesIds);
-                        });
-                    })->get();
-
-                break;
-            case 'dean':
-
-                // Utenti di una determinata scuola
-
-                $school_id = $authUser->$authUser->getActiveInstitutionId();
-
-                if (!$school_id) {
-                    return redirect()->route("dashboard")->with('error', 'You don\'t have a school assigned!');
-                }
-
-                $users = User::where('is_disabled', false)
-                    ->where(function ($query) use ($school_id) {
-                        $query->whereHas('schools', function ($q) use ($school_id) {
-                            $q->where('school_id', $school_id);
-                        })->orWhereHas('schoolAthletes', function ($q) use ($school_id) {
-                            $q->where('school_id', $school_id);
-                        });
-                    })->get();
+    //             // put all users without roles in a no-role array inside the users_sorted_by_role array
+    //             $no_roles_users = $users->filter(function ($user) {
+    //                 return $user->roles->isEmpty();
+    //             });
+    //             $users_without_roles = [];
+    //             foreach ($no_roles_users as $user) {
+    //                 $users_without_roles[] = $user;
+    //             }
 
 
-                break;
-            default:
-                return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
-                break;
-        }
+    //             break;
+    //         case 'manager':
+    //         case 'rector':
 
-        $viewPath = $authUserRole === 'admin' ? 'users.index' : 'users.' . $authUserRole . '.index';
+    //             // Utenti di una determinata accademia
+
+    //             $academy_id = $authUser->getActiveInstitutionId();
+
+    //             $users = User::where('is_disabled', false)
+    //                 ->where(function ($query) use ($academy_id) {
+    //                     $query->whereHas('academies', function ($q) use ($academy_id) {
+    //                         $q->where('academy_id', $academy_id);
+    //                     })->orWhereHas('academyAthletes', function ($q) use ($academy_id) {
+    //                         $q->where('academy_id', $academy_id);
+    //                     });
+    //                 })->get();
+
+    //             break;
+    //         case 'instructor':
+    //             // Utenti di tutte le accademie in cui ha un corso (tanto non può entrare nel dettaglio utente)
+    //             $academiesIds = $authUser->academies()->pluck('academy_id')->toArray();
+
+    //             $users = User::where('is_disabled', false)
+    //                 ->where(function ($query) use ($academiesIds) {
+    //                     $query->whereHas('academies', function ($q) use ($academiesIds) {
+    //                         $q->whereIn('academy_id', $academiesIds);
+    //                     })->orWhereHas('academyAthletes', function ($q) use ($academiesIds) {
+    //                         $q->whereIn('academy_id', $academiesIds);
+    //                     });
+    //                 })->get();
+
+    //             break;
+    //         case 'dean':
+
+    //             // Utenti di una determinata scuola
+
+    //             $school_id = $authUser->$authUser->getActiveInstitutionId();
+
+    //             if (!$school_id) {
+    //                 return redirect()->route("dashboard")->with('error', 'You don\'t have a school assigned!');
+    //             }
+
+    //             $users = User::where('is_disabled', false)
+    //                 ->where(function ($query) use ($school_id) {
+    //                     $query->whereHas('schools', function ($q) use ($school_id) {
+    //                         $q->where('school_id', $school_id);
+    //                     })->orWhereHas('schoolAthletes', function ($q) use ($school_id) {
+    //                         $q->where('school_id', $school_id);
+    //                     });
+    //                 })->get();
+
+
+    //             break;
+    //         default:
+    //             return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
+    //             break;
+    //     }
+
+    //     $viewPath = $authUserRole === 'admin' ? 'users.index' : 'users.' . $authUserRole . '.index';
 
 
 
-        foreach ($roles as $role) {
-            $filtered = $users->filter(function ($user) use ($role) {
-                return $user->hasRole($role->label);
-            });
+    //     foreach ($roles as $role) {
+    //         $filtered = $users->filter(function ($user) use ($role) {
+    //             return $user->hasRole($role->label);
+    //         });
 
-            if ($filtered->isEmpty()) {
-                $users_sorted_by_role[$role->label] = [];
-            } else {
-                foreach ($filtered as $user) {
+    //         if ($filtered->isEmpty()) {
+    //             $users_sorted_by_role[$role->label] = [];
+    //         } else {
+    //             foreach ($filtered as $user) {
 
-                    if ($role->label === 'athlete') {
-                        $user->academy = $user->primaryAcademyAthlete();
-                        $user->school = $user->primarySchoolAthlete();
-                        if ($user->academy) {
-                            $user->nation = $user->academy->nation->name;
-                        } else {
+    //                 if ($role->label === 'athlete') {
+    //                     $user->academy = $user->primaryAcademyAthlete();
+    //                     $user->school = $user->primarySchoolAthlete();
+    //                     if ($user->academy) {
+    //                         $user->nation = $user->academy->nation->name;
+    //                     } else {
 
-                            if ($user->nation_id === null) {
-                                $user->nation = "Not set";
-                            } else {
-                                $nation = Nation::find($user->nation_id);
-                                $user->nation = $nation->name;
-                            }
-                        }
-                    }
+    //                         if ($user->nation_id === null) {
+    //                             $user->nation = "Not set";
+    //                         } else {
+    //                             $nation = Nation::find($user->nation_id);
+    //                             $user->nation = $nation->name;
+    //                         }
+    //                     }
+    //                 }
 
-                    if ($role->label === 'instructor') {
-                        $user->weapon_forms_instructor_formatted = $user->weaponFormsPersonnel()->pluck('name')->toArray();
-                    }
+    //                 if ($role->label === 'instructor') {
+    //                     $user->weapon_forms_instructor_formatted = $user->weaponFormsPersonnel()->pluck('name')->toArray();
+    //                 }
 
-                    if ($role->label === 'technician') {
-                        $user->weapon_forms_technician_formatted = $user->weaponFormsTechnician()->pluck('name')->toArray();
-                    }
+    //                 if ($role->label === 'technician') {
+    //                     $user->weapon_forms_technician_formatted = $user->weaponFormsTechnician()->pluck('name')->toArray();
+    //                 }
 
-                    if ($role->label === 'rector') {
-                        $user->primary_academy = $user->primaryAcademy() ? $user->primaryAcademy()->name : "No academy";
-                    }
+    //                 if ($role->label === 'rector') {
+    //                     $user->primary_academy = $user->primaryAcademy() ? $user->primaryAcademy()->name : "No academy";
+    //                 }
 
-                    if ($role->label === 'dean') {
-                        $user->primary_school = $user->primarySchool() ? $user->primarySchool()->name : "No school";
-                    }
+    //                 if ($role->label === 'dean') {
+    //                     $user->primary_school = $user->primarySchool() ? $user->primarySchool()->name : "No school";
+    //                 }
 
-                    $users_sorted_by_role[$role->label][] = $user;
-                }
-            }
-        }
+    //                 $users_sorted_by_role[$role->label][] = $user;
+    //             }
+    //         }
+    //     }
 
-        return view($viewPath, [
-            'users' => $users_sorted_by_role,
-            'users_without_roles' => $users_without_roles ?? [],
-            'roles' => $roles,
-        ]);
-    }
+    //     return view($viewPath, [
+    //         'users' => $users_sorted_by_role,
+    //         'users_without_roles' => $users_without_roles ?? [],
+    //         'roles' => $roles,
+    //     ]);
+    // }
 
     public function create() {
         $authUser = User::find(Auth::user()->id);
@@ -267,9 +267,9 @@ class UserController extends Controller {
             // Un atelta senza scuola è associato alla scuola No school
             $noSchool = School::where('slug', 'no-school')->first();
             // Se creato da dean va associato alla scuola altrimenti non lo possono vedere.
-            // Dato che dean è abilitato ad una scuola sola, basta recuperare quella.
-            if (in_array($authRole, ['dean']) && $authUser->primarySchool()) {
-                $school = $authUser->primarySchool();
+            // Dato che dean seleziona la scuola sulla quale agire, basta recuperare quella.
+            if (in_array($authRole, ['dean']) && $authUser->getActiveInstitution()) {
+                $school = $authUser->getActiveInstitution();
                 $school->athletes()->syncWithoutDetaching($user->id);
                 $user->setPrimarySchoolAthlete($school->id);
             } else if ($noSchool) {
@@ -283,6 +283,7 @@ class UserController extends Controller {
         foreach ($user->allowedRoles() as $role) {
             if (in_array($role, ['rector', 'dean', 'instructor', 'manager', 'technician'])) {
                 $academy->personnel()->syncWithoutDetaching($user->id);
+                // Se non c'è nessuna accademia segnata come primary, la si imposta.
                 if (!$user->primaryAcademy()) {
                     $user->setPrimaryAcademy($academy->id);
                 }
@@ -980,7 +981,8 @@ class UserController extends Controller {
                 }
             }
 
-            // Se ha un ruolo da personale deve avere almeno un'accademia associata (anche se non primaria), altrimenti si associa a no academy
+            // Se ha un ruolo da personale deve avere almeno un'accademia associata (anche se non primaria).
+            // Cerca prima tra le associazioni da personale, poi da atleta, altrimenti si associa a no academy
             if (array_intersect($rolesToAdd, ['rector', 'dean', 'manager', 'instructor', 'technician'])) {
                 if (!$user->primaryAcademy()) {
                     if (!!$user->academies()->first()) {
@@ -996,6 +998,7 @@ class UserController extends Controller {
                 // Nel caso di dean, manager e instructor si assegna anche la scuola in automatico
                 if (array_intersect($rolesToAdd, ['dean', 'manager', 'instructor'])) {
                     if (!$user->primarySchool()) {
+                        // Se ne ha già una da personale imposta quella come primaria, altrimenti prende quella da atleta e la imposta come primaria anche da personale.
                         if (!!$user->schools()->first()) {
                             $user->setPrimarySchool($user->schools()->first()->id);
                         } else if (!!$user->primarySchoolAthlete()) {
@@ -1116,7 +1119,7 @@ class UserController extends Controller {
                 break;
             case 'rector':
             case 'manager':
-                if (!$authUser->primaryAcademy()) {
+                if (!$authUser->getActiveInstitution()) {
                     return back()->with('error', 'You are not authorized to access this page!');
                 }
                 $users = User::query()
@@ -1137,7 +1140,7 @@ class UserController extends Controller {
                     ->get();
                 break;
             case 'dean':
-                if (!$authUser->primarySchool()) {
+                if (!$authUser->getActiveInstitution()) {
                     return back()->with('error', 'You are not authorized to access this page!');
                 }
                 $users = User::query()
@@ -1225,10 +1228,10 @@ class UserController extends Controller {
                 break;
             case 'rector':
             case 'manager':
-                $academies = collect([$authUser->primaryAcademy()]);
+                $academies = collect([$authUser->getActiveInstitution()]);
                 break;
             case 'dean':
-                $academies = collect(($authUser->primarySchool()->academy ?? null) ? [$authUser->primarySchool()->academy] : []);
+                $academies = collect(($authUser->getActiveInstitution()->academy ?? null) ? [$authUser->getActiveInstitution()->academy] : []);
                 break;
             // case 'technician':
             //     $academies = Academy::where('is_disabled', false)->with('nation')->get();
@@ -1328,9 +1331,9 @@ class UserController extends Controller {
         $authSchools = $authUser->schools->pluck('id')->toArray();
 
         // Serve solo per dean. scuola in cui lavora.
-        $authPrimarySchool = $authUser->primarySchool();
+        $authPrimarySchool = $authUserRole === 'dean' ? $authUser->getActiveInstitution() : null;
         // Serve solo per manager. accademia in cui lavora.
-        $authPrimaryAcademy = $authUser->primaryAcademy();
+        $authPrimaryAcademy = $authUserRole === 'manager' ? $authUser->getActiveInstitution() : null;
 
         $filteredUsers = [];
 
@@ -1610,7 +1613,7 @@ class UserController extends Controller {
                     }
                     if (array_intersect($user->roles->where('id', '!=', $athleteRoleId)->pluck('id')->toArray(), $allowed_roles)) {
                         // $allAcademiesPersonnel = $user->academies->pluck('id')->toArray();
-                        $primaryAcademyPersonnel = $user->primaryAcademy() ? $user->getActiveInstitutionId() : null;
+                        $primaryAcademyPersonnel = $user->getActiveInstitution() ? $user->getActiveInstitutionId() : null;
                         if (in_array($primaryAcademyPersonnel, $academies)) {
                             $canSee = true;
                         }
@@ -1808,7 +1811,11 @@ class UserController extends Controller {
     }
 
     public function setMainInstitution(Request $request) {
-
+        $authUser = User::find(Auth::user()->id);
+        $authRole = $authUser->getRole();
+        if (!in_array($authRole, ['admin', 'rector', 'manager'])) {
+            return back()->with('error', 'You do not have the required role to access this page!');
+        }
 
         $validator = Validator::make($request->all(), [
             'institution_type' => 'required|string|in:academy,school',
@@ -1824,6 +1831,7 @@ class UserController extends Controller {
 
         if ($request->role_type == "personnel") {
 
+            // In teoria queste le setta solo l'admin. quindi può restare così, perchè lui vede tutte le accademie.
             if ($request->institution_type == "academy") {
                 foreach ($user->academies as $academy) {
                     $user->academies()->updateExistingPivot($academy->id, ['is_primary' => false]);
@@ -1838,8 +1846,25 @@ class UserController extends Controller {
                     }
                 }
             } else {
-                foreach ($user->schools as $school) {
-                    $user->schools()->updateExistingPivot($school->id, ['is_primary' => false]);
+                // Questa funzione non la usa solo l'admin. Quindi non si possono togliere tutte le scuole primarie, perchè verrebbero tolte tutte quelle che l'utente (es. il rettore) non può vedere.
+                switch($authRole) {
+                    case 'manager':
+                    case 'rector':
+                        $academy = $authUser->getActiveInstitution();
+                        if (!$academy) {
+                            return back()->with('error', 'Academy not found!');
+                        }
+                        foreach ($academy->schools as $school) {
+                            $user->schools()->updateExistingPivot($school->id, ['is_primary' => false]);
+                        }
+                        break;
+                    case 'admin':
+                        foreach ($user->schools as $school) {
+                            $user->schools()->updateExistingPivot($school->id, ['is_primary' => false]);
+                        }
+                        break;
+                    default:
+                        return back()->with('error', 'You do not have the required role to access this page!');
                 }
 
                 foreach ($request->all() as $key => $value) {
@@ -1959,7 +1984,7 @@ class UserController extends Controller {
             $authUser = User::find(Auth::user()->id);
             $academy = Academy::find($request->institution_id);
 
-            if ($authUser->academies()->where('academies.id', $academy->id)->exists()) {
+            if ($authUser->academies()->wherePivot('is_primary', 1)->where('academies.id', $academy->id)->exists()) {
                 session(['institution' => $academy]);
             } else {
                 return back()->with('error', 'You do not have the required institution to access this page!');
@@ -1972,7 +1997,7 @@ class UserController extends Controller {
             $authUser = User::find(Auth::user()->id);
             $school = School::find($request->institution_id);
 
-            if ($authUser->schools()->where('schools.id', $school->id)->exists()) {
+            if ($authUser->schools()->wherePivot('is_primary', 1)->where('schools.id', $school->id)->exists()) {
                 session(['institution' => $school]);
             } else {
                 return back()->with('error', 'You do not have the required institution to access this page!');
@@ -2123,18 +2148,18 @@ class UserController extends Controller {
             ], 401);
         }
 
-        if ($authUserRole == 'rector' && (!$authUser->primaryAcademy() || !$user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
+        if ($authUserRole == 'rector' && (!$authUser->getActiveInstitution() || !$user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ], 401);
         }
-        if ($authUserRole == 'manager' && (!$authUser->primaryAcademy() || !$user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
+        if ($authUserRole == 'manager' && (!$authUser->getActiveInstitution() || !$user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ], 401);
         }
 
-        if ($authUserRole == 'dean' && (!$authUser->primarySchool() || !$user->schoolAthletes->contains($authUser->getActiveInstitutionId()))) {
+        if ($authUserRole == 'dean' && (!$authUser->getActiveInstitution() || !$user->schoolAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!' . 'primarySchool: ' . $authUser->getActiveInstitutionId() . ' - userContainsSchool: ' . ($user->schoolAthletes->contains($authUser->getActiveInstitutionId()) ? 'true' : 'false'),
             ], 401);
@@ -2414,9 +2439,9 @@ class UserController extends Controller {
                 'school_id' => $school->id,
                 'made_by' => $authUser->id,
             ]);
-            // Se l'atleta non ha la scuola principale, la assegna
+            // Se l'utente (personale) non ha la scuola principale, la assegna
             if (!$user->primarySchool()) {
-                $user->setPrimarySchool($school->id);
+                $user->schools()->updateExistingPivot($school->id, ['is_primary' => true]);
             }
         } else if ($request->type == 'athlete') {
             $user->schoolAthletes()->syncWithoutDetaching($school->id);

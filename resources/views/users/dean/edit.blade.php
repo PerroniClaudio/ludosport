@@ -8,7 +8,7 @@
     $authRole = $authUser->getRole();
     $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
     // Può modificare l'utente solo se è un atleta della stessa scuola
-    $canEdit = in_array($authUser->primarySchool()->id, $user->schoolAthletes->pluck('id')->toArray());
+    $canEdit = in_array($authUser->getActiveInstitutionId(), $user->schoolAthletes->pluck('id')->toArray());
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -267,17 +267,26 @@
                     <div class="flex flex-col gap-2">
                         @php
                             $mainAcademyPersonnel = $user->primaryAcademy();
+                            $allPrimaryAcademiesIds = $user->academies()->wherePivot('is_primary', true)->pluck('academies.id')->toArray();
                         @endphp
                         @foreach ($user->academies as $academy)
                             <div
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>
+                                class="flex flex-row items-center gap-2 justify-between hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <span class="flex items-center gap-2">
+                                    <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                     {{ $academy->name }}
                                     @if (($mainAcademyPersonnel->id ?? null) == $academy->id)
                                         ({{ __('users.main_academy') }})
                                     @endif
                                 </span>
+                                @if (in_array($academy->id, $allPrimaryAcademiesIds))
+                                    <span class='has-tooltip'>
+                                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                            {{ __('academies.set_as_primary_tooltip') }}
+                                        </span>
+                                        <x-lucide-check class="w-6 h-6 text-green-500" />
+                                    </span>
+                                @endif
                             </div>
                         @endforeach
 
@@ -315,17 +324,26 @@
                     <div class="flex flex-col gap-2">
                         @php
                             $mainSchoolPersonnel = $user->primarySchool();
+                            $allPrimarySchoolsIds = $user->schools()->wherePivot('is_primary', true)->pluck('schools.id')->toArray();
                         @endphp
                         @foreach ($user->schools as $school)
                             <div
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>
+                                class="flex flex-row items-center gap-2 justify-between hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <span class="flex items-center gap-2">
+                                    <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                     {{ $school->name }}
                                     @if (($mainSchoolPersonnel->id ?? null) == $school->id)
                                         ({{ __('users.main_school') }})
                                     @endif
                                 </span>
+                                @if (in_array($school->id, $allPrimarySchoolsIds))
+                                    <span class='has-tooltip'>
+                                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                            {{ __('school.set_as_primary_tooltip') }}
+                                        </span>
+                                        <x-lucide-check class="w-6 h-6 text-green-500" />
+                                    </span>
+                                @endif
                             </div>
                         @endforeach
 

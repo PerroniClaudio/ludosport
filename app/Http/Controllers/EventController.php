@@ -45,10 +45,16 @@ class EventController extends Controller {
 
         switch ($authRole) {
             case 'rector':
-            case 'dean':
             case 'manager':
+                $academy_id = $authUser->getActiveInstitutionId();
 
-                $academy_id = $authUser->primaryAcademy() ? $authUser->getActiveInstitutionId() : null;
+                $events = Event::where('academy_id', $academy_id)
+                    ->where('start_date', '>=', Carbon::now()->format('Y-m-d'))
+                    ->where('is_disabled', false)
+                    ->get();
+                break;
+            case 'dean':
+                $academy_id = $authUser->getActiveInstitution()->academy_id;
 
                 $events = Event::where('academy_id', $academy_id)
                     ->where('start_date', '>=', Carbon::now()->format('Y-m-d'))
@@ -182,7 +188,15 @@ class EventController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        $primaryAcademy = $authUser->primaryAcademy();
+        if (in_array($authRole, ['rector', 'manager'])) {
+            $primaryAcademy = $authUser->getActiveInstitution();
+        } else if ($authRole === 'dean') {
+            // i dean sono associabili a più scuole, non obbligatoriamente nella stessa accademia.
+            // quindi, visto che i dean interni all'accademia possono aggiungere partecipanti, qui va selezionata l'accademia associata alla scuola selezionata.
+            $primaryAcademy = $authUser->getActiveInstitution()->academy;
+        } else {
+            $primaryAcademy = $authUser->primaryAcademy();
+        }
         // Questa parte si può spostare in una funzione tipo checkPermission
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato. dean e manager interni all'accademia e tecnici possono aggiungere partecipanti. 
         if (!($authRole === 'admin' ||
@@ -275,7 +289,7 @@ class EventController extends Controller {
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
         if (!($authRole === 'admin' ||
-            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->getActiveInstitutionId() : null))) ||
+            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === $authUser->getActiveInstitutionId())) ||
             $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
@@ -298,7 +312,7 @@ class EventController extends Controller {
 
         // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
         if (!($authRole === 'admin' ||
-            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->getActiveInstitutionId() : null))) ||
+            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === $authUser->getActiveInstitutionId())) ||
             $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
@@ -434,7 +448,7 @@ class EventController extends Controller {
 
     public function checkEditPermission($authRole, $event, $authUser) {
         if (!($authRole === 'admin' ||
-            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === ($authUser->primaryAcademy() ? $authUser->getActiveInstitutionId() : null))) ||
+            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === $authUser->getActiveInstitutionId())) ||
             $event->user_id === $authUser->id)) {
             return false;
         }
@@ -538,9 +552,17 @@ class EventController extends Controller {
                     ->get();
                 break;
             case 'rector':
-            case 'dean':
             case 'manager':
-                $primaryAcademy = $authUser->primaryAcademy();
+                $primaryAcademy = $authUser->getActiveInstitution();
+                $events = Event::where('academy_id', ($primaryAcademy ? $primaryAcademy->id : null))
+                    ->where('start_date', '>=', $request->start)
+                    ->where('end_date', '<=', $request->end)
+                    ->where('is_disabled', false)
+                    ->with('user')
+                    ->get();
+                break;
+            case 'dean':
+                $primaryAcademy = $authUser->getActiveInstitution()->academy;
                 $events = Event::where('academy_id', ($primaryAcademy ? $primaryAcademy->id : null))
                     ->where('start_date', '>=', $request->start)
                     ->where('end_date', '<=', $request->end)

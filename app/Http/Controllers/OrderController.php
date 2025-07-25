@@ -135,22 +135,23 @@ class OrderController extends Controller {
 
         // Definire l'id dell'accademia da attribuire
 
-        $personnelAcademy = $order->user->primaryAcademy();
+        // Al momento wire transfer possono usarlo solo gli atleti.
+        // Se dovranno usarlo anche i docenti, bisognerà aggiungere il campo academy_id, perchè il valore non può più essere recuperato con $order->user->primaryAcademy().
         $athleteAcademy = $order->user->primaryAcademyAthlete();
 
-        $academyId = $personnelAcademy ? $personnelAcademy->id : ($athleteAcademy ? $athleteAcademy->id : 1);
+        $academyId = $athleteAcademy ? $athleteAcademy->id : 1;
 
         // Capire cosa c'è dentro l'ordine
 
         if (count($order->items) > 1) {
 
-            // Sono fee multiple
+            // Sono fee multiple. (dal momento che è limitato agli atleti qui non dovrebbe entrarci mai)
 
             foreach ($order->items as $item) {
                 Fee::create([
                     'user_id' => $order->user_id,
                     'academy_id' => $academyId,
-                    'type' => $item->product_name == 'senior_fee' ? 1 : 2,
+                    'type' => 3,
                     'start_date' => now(),
                     'end_date' => now()->addYear(),
                     'auto_renew' => 0,
@@ -170,7 +171,7 @@ class OrderController extends Controller {
                 Fee::create([
                     'user_id' => $order->user_id,
                     'academy_id' => $academyId,
-                    'type' => $item->product_name == 'senior_fee' ? 1 : 2,
+                    'type' => 3,
                     'start_date' => now(),
                     'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
                     'auto_renew' => 1,

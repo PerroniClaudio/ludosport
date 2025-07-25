@@ -48,6 +48,6 @@ return [
     'select_rector' => 'Select a Rector',
     'academy_create_fees' => 'Create new fees',
     'fee_number' => 'Fee Number',
-
+    'set_as_primary_tooltip' => 'Set as primary academy',
 
 ];

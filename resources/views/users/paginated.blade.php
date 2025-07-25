@@ -343,7 +343,8 @@
                                                         {{-- Academy column for rectors --}}
                                                         <td
                                                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                                            {{ $user->primary_academy ?? '' }}
+                                                            {{-- {{ $user->primary_academy ?? '' }} --}}
+                                                            {{ $user->primary_academies ?? '' }}
                                                         </td>
                                                     @elseif ($selectedRole == 'manager')
                                                         {{-- Email column for managers --}}
@@ -354,7 +355,8 @@
                                                         {{-- Academy column for managers --}}
                                                         <td
                                                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                                            {{ $user->primary_academy ?? '' }}
+                                                            {{-- {{ $user->primary_academy ?? '' }} --}}
+                                                            {{ $user->primary_academies ?? '' }}
                                                         </td>
                                                     @elseif ($selectedRole == 'dean')
                                                         {{-- Email column for deans --}}
@@ -365,7 +367,8 @@
                                                         {{-- School column for deans --}}
                                                         <td
                                                             class="text-background-500 dark:text-background-300 px-6 py-3 border-t border-background-100 dark:border-background-700 whitespace-nowrap">
-                                                            {{ $user->primary_school ?? '' }}
+                                                            {{-- {{ $user->primary_school ?? '' }} --}}
+                                                            {{ $user->primary_schools ?? '' }}
                                                         </td>
                                                     @else
                                                         {{-- Email column for other roles --}}

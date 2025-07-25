@@ -8,7 +8,7 @@
 @php
     $authRole = auth()->user()->getRole();
     $addToRoute = $authRole === 'admin' ? '' : '/' . $authRole;
-    $academy = auth()->user()->primaryAcademy();
+    $academy = auth()->user()->getActiveInstitution();
     $nation = $academy->nation;
 @endphp
 <div x-data="{

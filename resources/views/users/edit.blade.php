@@ -301,17 +301,26 @@
                     <div class="flex flex-col gap-2">
                         @php
                             $mainAcademyPersonnel = $user->primaryAcademy();
+                            $allPrimaryAcademiesIds = $user->academies()->wherePivot('is_primary', true)->pluck('academies.id')->toArray();
                         @endphp
                         @foreach ($user->academies as $academy)
                             <a href="{{ route('academies.edit', $academy->id) }}"
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>
+                                class="flex flex-row items-center gap-2 justify-between hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <span class="flex items-center gap-2">
+                                    <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                     {{ $academy->name }}
                                     @if (($mainAcademyPersonnel->id ?? null) == $academy->id)
                                         ({{ __('users.main_academy') }})
                                     @endif
                                 </span>
+                                @if (in_array($academy->id, $allPrimaryAcademiesIds))
+                                    <span class='has-tooltip'>
+                                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                            {{ __('academies.set_as_primary_tooltip') }}
+                                        </span>
+                                        <x-lucide-check class="w-6 h-6 text-green-500" />
+                                    </span>
+                                @endif
                             </a>
                         @endforeach
 
@@ -371,17 +380,26 @@
                     <div class="flex flex-col gap-2">
                         @php
                             $mainSchoolPersonnel = $user->primarySchool();
+                            $allPrimarySchoolsIds = $user->schools()->wherePivot('is_primary', true)->pluck('schools.id')->toArray();
                         @endphp
                         @foreach ($user->schools as $school)
                             <a href="{{ route('schools.edit', $school->id) }}"
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>
+                                class="flex flex-row items-center gap-2 justify-between hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <span class="flex items-center gap-2">
+                                    <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                     {{ $school->name }}
                                     @if (($mainSchoolPersonnel->id ?? null) == $school->id)
                                         ({{ __('users.main_school') }})
                                     @endif
                                 </span>
+                                @if (in_array($school->id, $allPrimarySchoolsIds))
+                                    <span class='has-tooltip'>
+                                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                            {{ __('school.set_as_primary_tooltip') }}
+                                        </span>
+                                        <x-lucide-check class="w-6 h-6 text-green-500" />
+                                    </span>
+                                @endif
                             </a>
                         @endforeach
 
@@ -468,12 +486,13 @@
                                             <th
                                                 class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
 
-                                                {{ __('academies.academy') }}</th>
-
+                                                {{ __('academies.academy') }}
+                                            </th>
                                             <th
                                                 class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
 
-                                                {{ __('users.set_main_personnel_academy') }}</th>
+                                                {{ __('users.set_main_personnel_academy') }}
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -482,8 +501,8 @@
                                                 class="hover:bg-background-200 dark:hover:bg-background-900 cursor-pointer">
                                                 <td
                                                     class="px-6 py-4 whitespace-nowrap text-sm text-background-500 dark:text-background-300">
-                                                    {{ $academy->name }}</td>
-
+                                                    {{ $academy->name }}
+                                                </td>
                                                 <td
                                                     class="px-6 py-4 whitespace-nowrap text-sm text-background-500 dark:text-background-300">
 

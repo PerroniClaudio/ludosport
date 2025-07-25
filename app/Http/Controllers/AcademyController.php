@@ -236,66 +236,63 @@ class AcademyController extends Controller {
      */
     public function update(Request $request, Academy $academy) {
         //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'nationality' => 'required|exists:nations,id',
+        ]);
 
-        if ($request->address) {
-            $address = $request->address . " " . $request->city . " "  . $request->zip;
-            $location = $this->getLocation($address);
-
-            if (!$location) {
-                return back()->with('error', 'Invalid address. Please check the address and try again.');
+        if ($academy->nation_id != $request->nationality) {
+            $schools = $academy->schools;
+            foreach ($schools as $school) {
+                $school->nation_id = $request->nationality;
+                $school->save();
             }
-
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'nationality' => 'required|exists:nations,id',
-            ]);
-
-            if ($academy->nation_id != $request->nationality) {
-
-                $schools = $academy->schools;
-
-                foreach ($schools as $school) {
-                    $school->nation_id = $request->nationality;
-                    $school->save();
-                }
-            }
-
-            // Update the main_rector's primary academy if specified
-            if ($request->main_rector) {
-                $mainRector = User::find($request->main_rector);
-                if ($mainRector) {
-                    $mainRector->setPrimaryAcademy($academy->id);
-                }
-            }
-
-            $academy->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'main_rector' => $request->main_rector,
-                'nation_id' => $request->nationality,
-                'slug' => Str::slug($request->name),
-                'address' => $request->address,
-                'city' => $location['city'],
-                'state' => $location['state'],
-                'zip' => $request->zip,
-                'country' => $location['country'],
-                'coordinates' => json_encode(['lat' => $location['lat'], 'lng' => $location['lng']]),
-            ]);
-        } else {
-
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'nationality' => 'required|exists:nations,id',
-            ]);
-
-            $academy->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'main_rector' => $request->main_rector,
-                'nation_id' => $request->nationality,
-                'slug' => Str::slug($request->name),
-            ]);
         }
+
+        // Update the main_rector's primary academy if specified
+        if ($request->main_rector) {
+            $mainRector = User::find($request->main_rector);
+            if (!$mainRector) {
+                return back()->with('error', 'Main rector not found.');
+            }
+            if (!$mainRector->academies()->wherePivot('is_primary', true)->where('academy_id', $academy->id)->exists()) {
+                return back()->with('error', 'Main rector does not have this academy as primary.');
+            }
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'nationality' => 'required|exists:nations,id',
+        ]);
+
+        // Aggiorna campi, esclusi quelli dell'indirizzo
+        $academy->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'main_rector' => $request->main_rector,
+            'nation_id' => $request->nationality,
+            'slug' => Str::slug($request->name),
+        ]);
+
+        // L'indirizzo non viene più usato nelle accademie.
+        // if ($request->address) {
+        //     $address = $request->address . " " . $request->city . " "  . $request->zip;
+        //     $location = $this->getLocation($address);
+
+        //     if (!$location) {
+        //         return back()->with('error', 'Invalid address. Please check the address and try again.');
+        //     }
+            
+        //     // Aggiorna i campi dell'indirizzo
+        //     $academy->update([
+        //         'address' => $request->address,
+        //         'city' => $location['city'],
+        //         'state' => $location['state'],
+        //         'zip' => $request->zip,
+        //         'country' => $location['country'],
+        //         'coordinates' => json_encode(['lat' => $location['lat'], 'lng' => $location['lng']]),
+        //     ]);
+        // }
 
         return redirect()->route('academies.edit', $academy->id)->with('success', 'Academy updated successfully!');
     }
@@ -410,7 +407,7 @@ class AcademyController extends Controller {
 
         $academy->personnel()->syncWithoutDetaching($personnel->id);
 
-        // Se il personale non ha l'accademia principale, la assegna
+        // Se il personale non ha almeno un'accademia principale, la assegna
         if (!$personnel->primaryAcademy()) {
             $personnel->setPrimaryAcademy($academy->id);
         }
@@ -802,12 +799,12 @@ class AcademyController extends Controller {
     public function searchUsers(Academy $academy, Request $request) {
         //
 
-        $roles = json_decode($request->roles);
+        $roles = json_decode($request->roles) ?: [];
 
 
         $users = User::query()
             ->when($request->search, function (Builder $q, $value) {
-                return $q->whereIn('id', User::search($value)->keys());
+                return $q->whereIn('id', User::search($value)->keys() ?? []);
             })->with(['roles', 'academies', 'academyAthletes'])->get();
 
         $users = $users->filter(function ($user) use ($academy) {

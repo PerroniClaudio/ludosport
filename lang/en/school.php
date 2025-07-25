@@ -53,4 +53,5 @@ return [
     'yes' => 'Yes',
     'no' => 'No',
     'select_dean' => 'Select a Dean',
+    'set_as_primary_tooltip' => 'Set as primary school',
 ];

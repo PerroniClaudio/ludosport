@@ -273,17 +273,26 @@ $canEdit = in_array($authUser->getActiveInstitutionId(), $user->academyAthletes-
                     <div class="flex flex-col gap-2">
                         @php
                             $mainAcademyPersonnel = $user->primaryAcademy();
+                            $allPrimaryAcademiesIds = $user->academies()->wherePivot('is_primary', true)->pluck('academies.id')->toArray();
                         @endphp
                         @foreach ($user->academies as $academy)
                             <div
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>
+                                class="flex flex-row items-center gap-2 justify-between hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <span class="flex items-center gap-2">
+                                    <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                     {{ $academy->name }}
                                     @if (($mainAcademyPersonnel->id ?? null) == $academy->id)
                                         ({{ __('users.main_academy') }})
                                     @endif
                                 </span>
+                                @if (in_array($academy->id, $allPrimaryAcademiesIds))
+                                    <span class='has-tooltip'>
+                                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                            {{ __('academies.set_as_primary_tooltip') }}
+                                        </span>
+                                        <x-lucide-check class="w-6 h-6 text-green-500" />
+                                    </span>
+                                @endif
                             </div>
                         @endforeach
 
@@ -331,17 +340,26 @@ $canEdit = in_array($authUser->getActiveInstitutionId(), $user->academyAthletes-
                     <div class="flex flex-col gap-2">
                         @php
                             $mainSchool = $user->primarySchool();
+                            $allPrimarySchoolsIds = $user->schools()->wherePivot('is_primary', true)->pluck('schools.id')->toArray();
                         @endphp
                         @foreach ($user->schools as $school)
                             <a href="{{ route('schools.edit', $school->id) }}"
-                                class="flex flex-row items-center gap-2 hover:text-primary-500 hover:bg-background-900 p-2 rounded">
-                                <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
-                                <span>
+                                class="flex flex-row items-center gap-2 justify-between hover:text-primary-500 hover:bg-background-900 p-2 rounded">
+                                <span class="flex items-center gap-2">
+                                    <x-lucide-briefcase class="w-6 h-6 text-primary-500" />
                                     {{ $school->name }}
                                     @if (($mainSchool->id ?? null) == $school->id)
                                         ({{ __('users.main_school') }})
                                     @endif
                                 </span>
+                                @if (in_array($school->id, $allPrimarySchoolsIds))
+                                    <span class='has-tooltip'>
+                                        <span class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-6 -translate-y-full'>
+                                            {{ __('school.set_as_primary_tooltip') }}
+                                        </span>
+                                        <x-lucide-check class="w-6 h-6 text-green-500" />
+                                    </span>
+                                @endif
                             </a>
                         @endforeach
                     </div>
@@ -414,13 +432,16 @@ $canEdit = in_array($authUser->getActiveInstitutionId(), $user->academyAthletes-
                         <input type="hidden" name="role_type" :value="roleType">
                         <input type="hidden" name="user_id" value="{{ $user->id }}">
 
+                        {{-- Il manager non può modificare l'accademia principale --}}
                         <template x-if="institutionType == 'academy' && roleType == 'personnel'">
                             @php
                                 $academiesPersonnelOptions = $user->academies->map(function ($academy) {
                                     return ['value' => $academy->id, 'label' => $academy->name];
                                 });
+                                // $user non ha accesso alla funzione getActiveInstitutionId() perché non è l'utente loggato.
+                                // Per ora il manager non può modificare l'accademia principale, quindi se servirà in futuro vedremo come fare.
                                 $selectedAcademy = [
-                                    'value' => $user->getActiveInstitutionId() ?? null,
+                                    'value' => $user->primaryAcademy() ?? null,
                                     'label' => $user->primaryAcademy()->name ?? null,
                                 ];
                             @endphp
@@ -446,22 +467,49 @@ $canEdit = in_array($authUser->getActiveInstitutionId(), $user->academyAthletes-
                             @php
                                 $schoolsPersonnelOptions = [];
                                 if ($authRole == 'admin') {
-                                    $schoolsPersonnelOptions = $user->schools->map(function ($school) {
-                                        return ['value' => $school->id, 'label' => $school->name];
-                                    });
+                                    $schoolsPersonnelOptions = $user->schools;
                                 } else {
                                     $schoolsPersonnelOptions = $user->schools
-                                        ->whereIn('academy_id', $authUser->getActiveInstitutionId())
-                                        ->map(function ($school) {
-                                            return ['value' => $school->id, 'label' => $school->name];
-                                        });
+                                        ->whereIn('academy_id', $authUser->getActiveInstitutionId());
                                 }
-                                $selectedSchool = [
-                                    'value' => $user->primarySchool()->id ?? null,
-                                    'label' => $user->primarySchool()->name ?? null,
-                                ];
                             @endphp
-                            <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsPersonnelOptions" />
+                            {{-- <x-form.select name="school_id" label="{{ __('school.school') }}" :options="$schoolsPersonnelOptions" /> --}}
+                            <div>
+                                <table
+                                    class="border-collapse table-auto w-full whitespace-no-wrap bg-white dark:bg-background-900 table-striped relative flex-1 rounded-lg shadow overflow-hidden">
+
+                                    <thead>
+                                        <tr class="text-left">
+                                            <th
+                                                class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+
+                                                {{ __('school.school') }}</th>
+
+                                            <th
+                                                class="bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 px-6 py-3 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
+
+                                                {{ __('users.set_main_personnel_school') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($schoolsPersonnelOptions as $school)
+                                            <tr
+                                                class="hover:bg-background-200 dark:hover:bg-background-900 cursor-pointer">
+                                                <td
+                                                    class="px-6 py-4 whitespace-nowrap text-sm text-background-500 dark:text-background-300">
+                                                    {{ $school->name }}</td>
+
+                                                <td
+                                                    class="px-6 py-4 whitespace-nowrap text-sm text-background-500 dark:text-background-300">
+
+                                                    <x-form.checkbox :id="$school->id" :name="'school_id_' . $school->id"
+                                                        label="Primary" :isChecked="$school->pivot->is_primary" />
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </template>
 
                         <template x-if="institutionType == 'school' && roleType == 'athlete'">

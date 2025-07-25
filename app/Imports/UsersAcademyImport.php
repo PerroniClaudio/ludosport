@@ -26,7 +26,7 @@ class UsersAcademyImport implements ToCollection {
 
         $importingUserRole = $this->importingUser->getHighestRole();
         // Accademia primaria dell'utente come personale (serve se è rettore o manager)
-        $importingUserPrimaryAcademy = $this->importingUser->primaryAcademy();
+        $importingUserPrimaryAcademiesIds = $this->importingUser->academies()->wherePivot('is_primary', true)->pluck('id')->toArray();
         
         $noSchool = School::where('slug', 'no-school')->first();
 
@@ -54,7 +54,7 @@ class UsersAcademyImport implements ToCollection {
                     continue;
                 }
 
-                if(in_array($importingUserRole, ["rector", "manager"]) && (!$importingUserPrimaryAcademy || ($importingUserPrimaryAcademy->id != $academy->id))) {
+                if(in_array($importingUserRole, ["rector", "manager"]) && (!in_array($academy->id, $importingUserPrimaryAcademiesIds))) {
                     $this->log[] = "['Error: The " . $importingUserRole . " cannot import users to an academy that is not their primary academy. Email: " . $row[0] . "']";
                     $this->is_partial = true;
                     continue;

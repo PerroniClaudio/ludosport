@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(function () {
+Route::prefix('rector')->middleware(['auth', 'role.institution.selected', 'role:admin,rector'])->group(function () {
   Route::get('/fees', [App\Http\Controllers\FeeController::class, 'index'])->name('rector.fees.index');
   Route::get('/fees/purchase', [App\Http\Controllers\FeeController::class, 'create'])->name('rector.fees.purchase');
   Route::get('/fees/renew', [App\Http\Controllers\FeeController::class, 'renew'])->name('rector.fees.renew');
@@ -63,7 +63,7 @@ Route::prefix('rector')->middleware(['auth', 'role:admin,rector'])->group(functi
 
   /** Accademie */
 
-  Route::group(['middleware' => ['auth', 'role:admin,rector']], function () {
+  Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin,rector']], function () {
     Route::get('/academies', [App\Http\Controllers\AcademyController::class, 'index'])->name('rector.academies.index');
     // Route::get('/academies/create', [App\Http\Controllers\AcademyController::class, 'create'])->name('rector.academies.create');
     Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('rector.academies.all');
