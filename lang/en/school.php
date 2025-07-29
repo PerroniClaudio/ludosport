@@ -54,4 +54,5 @@ return [
     'no' => 'No',
     'select_dean' => 'Select a Dean',
     'set_as_primary_tooltip' => 'Set as primary school',
+    'disabled_text' => 'This school has been disabled.',
 ];

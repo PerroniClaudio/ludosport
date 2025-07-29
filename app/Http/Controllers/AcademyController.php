@@ -895,10 +895,11 @@ class AcademyController extends Controller {
 
         $authRole = User::find(Auth::user()->id)->getRole();
         $viewPath = $authRole === 'admin' ? 'users.filter-result' : 'users.' . $authRole . '.filter-result';
+        $backUrl = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
 
         return view($viewPath, [
             'users' => $filteredUsers,
-            'backUrl' => route('academies.edit', $academy->id),
+            'backUrl' => route($backUrl, $academy->id),
         ]);
     }
 

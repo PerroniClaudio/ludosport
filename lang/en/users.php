@@ -170,4 +170,5 @@ return [
     'sas_select_school' => 'Select School',
     'sas_select_school_label' => 'Schools',
     'sas_save_selection' => 'Save Selection',
+    'disabled_text' => 'This user has been disabled.',
 ];

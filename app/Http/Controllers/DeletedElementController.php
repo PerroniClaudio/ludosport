@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Academy;
 use App\Models\Clan;
+use App\Models\Event;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -17,12 +18,14 @@ class DeletedElementController extends Controller {
         $deleted_schools = School::where('is_disabled', true)->get();
         $deleted_academies = Academy::where('is_disabled', true)->get();
         $deleted_courses = Clan::where('is_disabled', true)->get();
+        $deleted_events = Event::where('is_disabled', true)->get();
 
         return view('deleted_elements.index', [
             'deleted_users' => $deleted_users,
             'deleted_schools' => $deleted_schools,
             'deleted_academies' => $deleted_academies,
             'deleted_courses' => $deleted_courses,
+            'deleted_events' => $deleted_events,
         ]);
     }
 
@@ -41,6 +44,9 @@ class DeletedElementController extends Controller {
                 break;
             case 'course':
                 $element = Clan::find($request->element_id);
+                break;
+            case 'event':
+                $element = Event::find($request->element_id);
                 break;
             default:
                 return redirect()->route('deleted-elements.index')->with('error', 'Element type not found');

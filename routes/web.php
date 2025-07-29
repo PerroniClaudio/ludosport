@@ -119,6 +119,7 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
     Route::get('/academies/{academy}/athletes-no-fee', [App\Http\Controllers\AcademyController::class, 'athletesWithNoFee'])->name('academies.athletes-no-fee');
     Route::get('/academies/available-fees', [App\Http\Controllers\FeeController::class, 'academyAvailableFees'])->name('academies.available-fees');
     Route::post('/academies/generate-fees', [App\Http\Controllers\FeeController::class, 'createFreeFeesForAcademy'])->name('academies.generate-fees');
+    Route::post('/academies/delete-fees', [App\Http\Controllers\FeeController::class, 'deleteFreeFeesForAcademy'])->name('academies.delete-fees');
 
     Route::get('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'edit'])->name('academies.edit');
     Route::delete('/academies/{academy}', [App\Http\Controllers\AcademyController::class, 'destroy'])->name('academies.disable');

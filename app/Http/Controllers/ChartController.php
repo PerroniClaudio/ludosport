@@ -61,7 +61,14 @@ class ChartController extends Controller {
         $events = Event::whereBetween('start_date', [
             $start_date,
             $end_date,
-        ])->where('is_disabled', false)->get();
+        ])->where('is_disabled', false)
+        ->whereHas('type', function ($q) {
+            $q->whereIn('name', [
+                'School Tournament',
+                'Academy Tournament',
+                'National Tournament'
+            ]);
+        })->get();
 
 
         $results = [];
@@ -165,7 +172,16 @@ class ChartController extends Controller {
             $current_year = date('Y') . "-0{$i}";
 
             $data = [];
-            $events = Event::where('start_date', '<', "{$current_year}-01")->get();
+            // Aggiungo la condizione anche se sembra che questa funzione non venga usata
+            $events = Event::where('start_date', '<', "{$current_year}-01")
+                ->whereHas('type', function ($q) {
+                    $q->whereIn('name', [
+                        'School Tournament',
+                        'Academy Tournament',
+                        'National Tournament'
+                    ]);
+                })
+                ->get();
 
             foreach ($events as $event) {
                 $event_results = EventResult::where('event_id', $event->id)->get();

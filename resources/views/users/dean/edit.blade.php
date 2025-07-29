@@ -85,6 +85,14 @@
                 </div>
             </div>
 
+            @if ($user->is_disabled)
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8 mb-4">
+                    <p class="text-background-800 dark:text-background-200 text-xl">
+                        {{ __('users.disabled_text') }}
+                    </p>
+                </div>
+            @endif
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <form method="POST" action="{{ route('dean.users.update', $user->id) }}">
                     @csrf

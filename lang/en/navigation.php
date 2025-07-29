@@ -38,4 +38,5 @@ return [
     'fees' => 'Fees',
     'rank_requests' => 'Rank Requests',
     'deleted_elements' => 'Deleted Elements',
+    'marker_directions' => 'Get directions on Google Maps',
 ];

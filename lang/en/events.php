@@ -97,4 +97,5 @@ return [
     'event_thumbnail_tooltip' => 'Save other information before uploading. Unsaved changes will be lost.',
     'thumbnail_info' => 'The picture must be less than 8MB',
     'error_thumbnail_size' => 'The picture must be less than 8MB',
+    'disabled_text' => 'This event has been disabled.',
 ];

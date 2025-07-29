@@ -240,4 +240,33 @@ class Event extends Model {
                 break;
         }
     }
+
+    // Recupera la posizione dell'utente nel ranking di questo evento
+    public function getUserRankPosition (User $user) {
+        if (!$user || !$this->results()->where('user_id', $user->id)->exists()) {
+            return null; // Se l'utente non è fornito, ritorna null
+        }
+        if(!in_array($this->type->name, ['School Tournament', 'Academy Tournament', 'National Tournament'])) {
+            return null; // Se il tipo di evento non è tra quelli che hanno un ranking, ritorna null
+        }
+        if ( $this->results->where('total_war_points', '>', 0)->count() == 0 && $this->results->where('total_style_points', '>', 0)->count() == 0 ) {
+            return null; // Se non ci sono risultati con punti > 0, ritorna null
+        }
+
+        // Ordina i risultati in base al punteggio e poi per nome e cognome utente
+        $sortedResults = $this->results()
+            ->with('user')
+            ->leftJoin('users', 'event_results.user_id', '=', 'users.id')
+            ->orderByRaw('(total_war_points + total_style_points) DESC')
+            ->orderBy('total_style_points', 'DESC')
+            ->orderBy('users.name')
+            ->orderBy('users.surname')
+            ->get();
+
+        // Trova la posizione dell'utente
+        $index = $sortedResults->search(function($result) use ($user) {
+            return $result->user_id == $user->id;
+        });
+        return $index !== false ? $index + 1 : null;
+    }
 }

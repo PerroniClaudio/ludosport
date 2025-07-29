@@ -4,12 +4,12 @@
     "name": "auto"
   },
   "resources/css/app.css": {
-    "file": "assets/app-B7LkbwPS.css",
+    "file": "assets/app-BotgPEyg.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-Sz-_rYnq.js",
+    "file": "assets/app-C4g3BPu4.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -71,7 +71,7 @@
     "isDynamicEntry": true
   },
   "resources/js/mapsearcher.js": {
-    "file": "assets/mapsearcher-C3PB4uzj.js",
+    "file": "assets/mapsearcher-D9QzDYTa.js",
     "name": "mapsearcher",
     "src": "resources/js/mapsearcher.js",
     "isDynamicEntry": true

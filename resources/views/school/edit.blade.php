@@ -43,7 +43,13 @@
                     }
                 }" class="flex flex-col gap-4">
 
-
+                    @if ($school->is_disabled)
+                        <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                            <p class="text-background-800 dark:text-background-200 text-xl">
+                                {{ __('school.disabled_text') }}
+                            </p>
+                        </div>
+                    @endif
 
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-4 lg:p-8">
                         <h3 class="text-background-800 dark:text-background-200 text-xl lg:text-2xl">

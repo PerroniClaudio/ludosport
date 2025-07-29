@@ -1041,47 +1041,34 @@ class EventController extends Controller
 
         $date = Carbon::parse(now());
 
+        $eventsQuery = Event::query()
+            ->where('is_approved', 1)
+            ->where('is_published', 1)
+            ->where('end_date', '>=', $date->format('Y-m-d'))
+            ->where('is_disabled', 0)
+            ->whereHas('type', function ($q) {
+                $q->whereIn('name', [
+                    'School Tournament',
+                    'Academy Tournament',
+                    'National Tournament'
+                ]);
+            })
+            ;
+
         if (isset($request->nation)) {
-            $events = Event::where([
-                ['is_approved', '=', 1],
-                ['is_published', '=', 1],
-                ['end_date', '>=', $date->format('Y-m-d')],
-                ['nation_id', '=', $request->nation],
-                ['is_disabled', '=', 0],
-            ])->get();
-        } else {
-            $events = Event::where([
-                ['is_approved', '=', 1],
-                ['is_published', '=', 1],
-                ['end_date', '>=', $date->format('Y-m-d')],
-                ['is_disabled', '=', 0],
-            ])->get();
+            $eventsQuery->where('nation_id', $request->nation);
         }
+
+        $events = $eventsQuery->with('nation')->get();
 
         $nations = [];
-        $nations_ids = [];
 
-        $events_to_exclude = EventType::where('name', 'Training Course')->first()->events()->pluck('id')->toArray();
-
-        $events = $events->filter(function ($event) use ($events_to_exclude) {
-            return !in_array($event->id, $events_to_exclude);
-        });
-
-        foreach ($events as $key => $value) {
-
-            // Non so perchè c'era questo controllo, ma lo tolgo perchè blocca la generazione degli indirizzi
-            // if (in_array($value['nation']['id'], $nations_ids)) {
-            //     continue;
-            // }
-
-            $events[$key]['full_address'] = $value['address'] . ", " . $value['postal_code'] . ", " . $value['city'] . ", " . $value['nation']['name'];
-            $nations[] = [
-                'label' => $value['nation']['name'],
-                'value' => $value['nation']['id']
+        $nations = $events->pluck('nation')->unique('id')->map(function($nation) {
+            return [
+                'label' => $nation['name'],
+                'value' => $nation['id']
             ];
-
-            $nations_ids[] = $value['nation']['id'];
-        }
+        })->values()->toArray();
 
 
         return view('website.events-list', [
@@ -1096,33 +1083,28 @@ class EventController extends Controller
 
         $date = Carbon::parse($request->date);
 
+        $eventsQuery = Event::query()
+            ->where('is_approved', 1)
+            ->where('is_published', 1)
+            ->where('end_date', '<=', $date->format('Y-m-d'))
+            ->where('is_disabled', 0)
+            ->whereHas('type', function ($q) {
+                $q->whereIn('name', [
+                    'School Tournament',
+                    'Academy Tournament',
+                    'National Tournament'
+                ]);
+            })
+            ;
+
         if ($request->nation) {
             $nation = Nation::find($request->nation);
             if ($nation) {
-                Log::info("nation esiste", ['nation' => $nation]);
-                $events = Event::where([
-                    ['is_approved', '=', 1],
-                    ['is_published', '=', 1],
-                    ['end_date', '<=', $date->format('Y-m-d')],
-                    ['nation_id', '=', $nation->id],
-                    ['is_disabled', '=', 0],
-                ])->get();
-
-                Log::info("events", ['events' => $events]);
-                return response()->json($events);
+                $eventsQuery->where('nation_id', $nation->id);
             }
         }
 
-        $events = Event::where([
-            ['is_approved', '=', 1],
-            ['is_published', '=', 1],
-            ['end_date', '<=', $date->format('Y-m-d')],
-            ['is_disabled', '=', 0],
-        ])
-            ->whereHas('type', function ($query) {
-                $query->where('name', '!=', 'Training Course');
-            })
-            ->get();
+        $events = $eventsQuery->get();
 
         return response()->json($events);
     }
@@ -1131,13 +1113,17 @@ class EventController extends Controller
     {
 
         $date = Carbon::parse($request->date);
-        $events = Event::where('end_date', '<', $date->format('Y-m-d'))->where('is_disabled', false)->get();
 
-        $events_to_exclude = EventType::where('name', 'Training Course')->first()->events()->pluck('id')->toArray();
-
-        $events = $events->filter(function ($event) use ($events_to_exclude) {
-            return !in_array($event->id, $events_to_exclude);
-        });
+        $events = Event::where('end_date', '<=', $date->format('Y-m-d'))
+            ->where('is_disabled', false)
+            ->whereHas('type', function ($q) {
+                $q->whereIn('name', [
+                    'School Tournament',
+                    'Academy Tournament',
+                    'National Tournament'
+                ]);
+            })
+            ->get();
 
         $results = [];
 
@@ -1212,8 +1198,15 @@ class EventController extends Controller
             // Calcola i punti totali filtrando per la data richiesta
             $eventResults = $user->eventResults()
                 ->whereHas('event', function ($query) use ($date) {
-                    $query->where('end_date', '<', $date->format('Y-m-d'))
-                        ->where('is_disabled', false);
+                    $query->where('end_date', '<=', $date->format('Y-m-d'))
+                        ->where('is_disabled', false)
+                        ->whereHas('type', function ($q) {
+                            $q->whereIn('name', [
+                                'School Tournament',
+                                'Academy Tournament',
+                                'National Tournament'
+                            ]);
+                        });
                 })
                 ->get();
             $total_war_points = $eventResults->sum('total_war_points');

@@ -406,4 +406,18 @@ hr {
     flex: 1 1 100%;
 }
 
+.gm-ui-hover-effect {
+    /* width: 20px !important;
+    height: 20px !important; */
+    width: fit-content !important;
+    height: fit-content !important;
+    top: 4px !important;
+    right: -8px !important;
+}
+.gm-ui-hover-effect > span {
+    font-size: 16px !important;
+    position: relative !important;
+    margin: 0 !important;
+}
+
 /* Flash */

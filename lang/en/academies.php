@@ -47,7 +47,10 @@ return [
     // 'academy_rector_description' => 'The rector is the one with this role and the academy as primary academy. If there is more than one, the first one found will be displayed. If there is none, the first rector in the academy personnel will result as rector, even without the academy as primary academy.',
     'select_rector' => 'Select a Rector',
     'academy_create_fees' => 'Create new fees',
+    'academy_delete_fees' => 'Remove fees',
+    'academy_delete_fees_with_count' => 'Remove fees (:count can be removed)',
+    'removable_fees_info' => 'Only fees given by admin can be removed.',
     'fee_number' => 'Fee Number',
     'set_as_primary_tooltip' => 'Set as primary academy',
-
+    'disabled_text' => 'This academy has been disabled.',
 ];

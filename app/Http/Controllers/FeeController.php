@@ -242,6 +242,7 @@ class FeeController extends Controller {
         return response()->json([
             'fees' => $fees,
             'count' => $fees->count(),
+            'free_fees_count' => $fees->where('is_admin_generated', 1)->count(),
         ]);
     }
 
@@ -269,10 +270,66 @@ class FeeController extends Controller {
                 'auto_renew' => 0,
                 'unique_id' => Str::orderedUuid(),
                 'used' => 0,
+                'is_admin_generated' => 1,
             ]);
         }
 
         return back()->with('success', 'Fees created successfully');
+    }
+    
+    public function deleteFreeFeesForAcademy(Request $request) {
+        $authUser = User::find(Auth::user()->id);
+        $authRole = $authUser->getRole();
+
+        if ($authRole != 'admin') {
+            return redirect()->back()->withErrors(['new_fees_error' => 'Unauthorized']);
+        }
+
+        $request->validate([
+            'academy_id' => 'required|exists:academies,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $academy = Academy::find($request->academy_id);
+
+        if (!$academy) {
+            return redirect()->back()->withErrors(['academy' => 'Academy not found']);
+        }
+        $quantity = $request->quantity;
+        if ($quantity <= 0) {
+            return redirect()->back()->withErrors(['quantity' => 'Quantity must be greater than 0']);
+        }
+        // Scrivo la query una volta sola, la uso per contare e poi la clono per recuperare i dati da eliminare.
+        // Clonandola evito di riscriverla e se si deve correggere si fa in un solo punto.
+        $query = Fee::where('academy_id', $academy->id)
+            ->where('end_date', '>', now()->format('Y-m-d'))
+            ->where('used', 0)
+            ->where('is_admin_generated', 1);
+
+        if ($query->count() < $quantity) {
+            return redirect()->back()->withErrors(['quantity' => 'Not enough fees available to delete']);
+        }
+
+        // Log the IDs of the fees that will be deleted
+        $feesToDelete = (clone $query)->limit($quantity)->get();
+
+        Log::info('Deleting admin-generated fees', [
+            'user_id' => $authUser->id,
+            'academy_id' => $academy->id,
+            'quantity' => $quantity,
+            'fee_ids' => $feesToDelete->map(function($fee) {
+                return [
+                    'id' => $fee->id,
+                    'unique_id' => $fee->unique_id,
+                ];
+            })->toArray(),
+        ]);
+
+        // Delete the specified number of fees
+        // $feesToDelete->delete();
+        Fee::whereIn('id', $feesToDelete->pluck('id'))->delete();
+
+        return back()->with('success', 'Fees deleted successfully');
     }
 
     //? Checkout with Stripe.

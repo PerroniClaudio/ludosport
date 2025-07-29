@@ -667,28 +667,44 @@ class UserController extends Controller {
         }
 
         // Risultati eventi 
+        $date = Carbon::now(); 
 
-        $events_user = $user->eventResults()->with('event')->get();
+        $user_event_results = $user->eventResults()
+            ->whereHas('event', function ($q) use ($date) {
+                $q->where('is_approved', 1)
+                    ->where('is_published', 1)
+                    ->where('end_date', '<=', $date->format('Y-m-d'))
+                    ->where('is_disabled', 0)
+                    ->whereHas('type', function ($q) {
+                        $q->whereIn('name', [
+                            'School Tournament',
+                            'Academy Tournament',
+                            'National Tournament'
+                        ]);
+                    });
+            })
+            ->with('event')
+            ->get();
         $events_formatted = [];
         $participated_events = [];
 
-        foreach ($events_user as $event) {
+        foreach ($user_event_results as $event_result) {
 
-            if (in_array($event->event->id, $participated_events)) {
+            if (in_array($event_result->event->id, $participated_events)) {
                 continue;
             }
 
-            $event_date = Carbon::parse($event->event->start_date);
+            $event_date = Carbon::parse($event_result->event->start_date);
 
             $events_formatted[] = [
-                'event' => $event->event->name,
-                'war_points' => $event->total_war_points,
-                'style_points' => $event->total_style_points,
+                'event' => $event_result->event->name,
+                'war_points' => $event_result->total_war_points,
+                'style_points' => $event_result->total_style_points,
                 'date' => $event_date->format('d/m/Y'),
-                'placement' => 32 - $event->war_points + 1,
+                'placement' => $event_result->event->getUserRankPosition($user) ?: 'N/A',
             ];
 
-            $participated_events[] = $event->event->id;
+            $participated_events[] = $event_result->event->id;
         }
 
         $user->events = $events_formatted;

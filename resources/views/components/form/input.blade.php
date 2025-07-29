@@ -43,7 +43,8 @@
                     placeholder="{{ $placeholder }}" @if ($min != null) min="{{ $min }}" @endif
                     @if ($max != null) max="{{ $max }}" @endif
                     @if ($step != null) step="{{ $step }}" @endif
-                    class="{{ $hidden ? 'hidden' : '' }} {{ $disabled ? 'cursor-not-allowed' : '' }} w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
+                    class="{{ $hidden ? 'hidden' : '' }} {{ $disabled ? 'cursor-not-allowed' : '' }} w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm"
+                    {{ $attributes }} />
     
     @if ($text_before && !$hidden)
             </div>

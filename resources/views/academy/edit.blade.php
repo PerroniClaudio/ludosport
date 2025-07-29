@@ -14,6 +14,14 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
 
+            @if ($academy->is_disabled)
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                    <p class="text-background-800 dark:text-background-200 text-xl">
+                        {{ __('academies.disabled_text') }}
+                    </p>
+                </div>
+            @endif
+
             <div class="grid grid-cols-2 gap-4">
 
                 @if ($authRole === 'admin')

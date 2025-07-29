@@ -7,6 +7,7 @@ return [
     'schools' => 'Schools',
     'academies' => 'Academies',
     'courses' => 'Courses',
+    'events' => 'Events',
     'restore_message' => 'Are you sure you want to restore this element?',
     'cancel' => 'Cancel',
 ];

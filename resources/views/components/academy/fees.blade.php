@@ -4,6 +4,7 @@
 
 <div x-data="{
     academy_id: {{ $academy }},
+    freeFeesCount: 0,
     availableFees: 0,
     usersNoFees: 0,
     getAvailableFees() {
@@ -11,6 +12,7 @@
             .then(response => response.json())
             .then(data => {
                 this.availableFees = data.count;
+                this.freeFeesCount = data.free_fees_count;
             })
             .catch(error => console.error('Error:', error));
     },
@@ -32,21 +34,28 @@
         <div class="flex items-center justify-between">
             <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('fees.title') }}
             </h3>
-            <x-primary-button x-on:click.prevent="$dispatch('open-modal', 'new-fees-modal')">
-                <span>
-                    {{ __('academies.academy_create_fees') }}
-                </span>
-            </x-primary-button>
+            <div>
+                <x-primary-button x-on:click.prevent="$dispatch('open-modal', 'delete-fees-modal')" x-bind:disabled="freeFeesCount <= 0">
+                    <span>
+                        {{ __('academies.academy_delete_fees') }}
+                    </span>
+                </x-primary-button>
+                <x-primary-button x-on:click.prevent="$dispatch('open-modal', 'new-fees-modal')">
+                    <span>
+                        {{ __('academies.academy_create_fees') }}
+                    </span>
+                </x-primary-button>
+            </div>
         </div>
         <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
         <div class="grid grid-cols-2 gap-4">
             <div class="bg-white dark:bg-background-900 rounded-lg p-2 flex flex-col">
                 <h2 class="text-xl text-primary-500">{{ __('fees.available_fees') }}</h2>
-                <p class="text-lg" x-text="availableFees"></p>
+                <p class="text-lg text-background-500 dark:text-background-300" x-text="availableFees"></p>
             </div>
             <div class="bg-white dark:bg-background-900 rounded-lg p-2">
                 <h2 class="text-xl text-primary-500">{{ __('fees.users_no_fees') }}</h2>
-                <p class="text-lg" x-text="usersNoFees"></p>
+                <p class="text-lg text-background-500 dark:text-background-300" x-text="usersNoFees"></p>
             </div>
         </div>
     </div>
@@ -55,18 +64,15 @@
         <form method="post" action="{{ route('academies.generate-fees') }}" class="p-6 flex flex-col gap-4"
             x-ref="form">
             @csrf
-
-
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
                     {{ __('academies.academy_create_fees') }}
                 </h2>
                 <div>
                     <x-lucide-x class="w-6 h-6 text-background-500 dark:text-background-300 cursor-pointer"
-                        x-on:click="$dispatch('close-modal', 'new-school-modal')" />
+                        x-on:click="$dispatch('close-modal', 'new-fees-modal')" />
                 </div>
             </div>
-
             @if ($errors->any())
                 <div class="bg-red-100 text-red-800 p-4 rounded-lg">
                     <ul class="list-disc pl-5">
@@ -76,18 +82,53 @@
                     </ul>
                 </div>
             @endif
-
             <input type="hidden" name="academy_id" value="{{ $academy }}">
-
             <x-form.input name="number" label="{{ __('academies.fee_number') }}" type="number" required
                 placeholder="{{ __('academies.fee_number') }}" />
-
             <div class="flex justify-end">
                 <x-primary-button x-on:click.prevent="$refs.form.submit()">
                     <span>{{ __('academies.academy_create_fees') }}</span>
                 </x-primary-button>
             </div>
+        </form>
+    </x-modal>
 
+    <x-modal name="delete-fees-modal" :show="$errors->get('quantity') || $errors->get('delete_fees_error')" focusable>
+        <form method="post" action="{{ route('academies.delete-fees') }}" class="p-6 flex flex-col gap-4" x-ref="deleteForm">
+            @csrf
+            <div class="flex items-center justify-between">
+                <div class='flex items-center gap-2'>
+                    <h2 class="text-lg font-medium text-background-900 dark:text-background-100" x-text="`{{ __('academies.academy_delete_fees_with_count') }}`.replace(':count', freeFeesCount)">
+                    </h2>
+                    <div class='has-tooltip'>
+                        <span
+                            class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-3 translate-y-full -translate-x-full'>
+                            {{ __('academies.removable_fees_info') }}
+                        </span>
+                        <x-lucide-info class="h-4 text-background-400" />
+                    </div>
+                </div>
+                <div>
+                    <x-lucide-x class="w-6 h-6 text-background-500 dark:text-background-300 cursor-pointer"
+                        x-on:click="$dispatch('close-modal', 'delete-fees-modal')" />
+                </div>
+            </div>
+            @if ($errors->any())
+                <div class="bg-red-100 text-red-800 p-4 rounded-lg">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            <input type="hidden" name="academy_id" :value="academy_id">
+            <x-form.input name="quantity" label="{{ __('academies.fee_number') }}" type="number" required min="1" x-bind:max="freeFeesCount" placeholder="{{ __('academies.fee_number') }}" />
+            <div class="flex justify-end">
+                <x-primary-button x-on:click.prevent="$refs.deleteForm.submit()">
+                    <span>{{ __('academies.academy_delete_fees') }}</span>
+                </x-primary-button>
+            </div>
         </form>
     </x-modal>
 </div>
