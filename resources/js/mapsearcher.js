@@ -1,5 +1,68 @@
 export const mapsearcher = (academies) => {
     return {
+        createSchoolMarker: function(result) {
+            this.infoWindowPinned = false;
+            let latLng = typeof result.coordinates === "string"
+                ? JSON.parse(result.coordinates)
+                : result.coordinates;
+            let marker = new google.maps.Marker({
+                position: latLng,
+                map: this.map,
+            });
+            // Crea una InfoWindow con il nome della scuola
+            let address = result.address || "";
+            let city = result.city || "";
+            let state = result.state || "";
+            let zip = result.zip || "";
+            let country = result.country || "";
+            let lat = (latLng && latLng.lat) || "";
+            let lng = (latLng && latLng.lng) || "";
+            let mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${lat},${lng}`)}`;
+            let infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div style='font-size:16px;font-weight:bold;'>
+                        ${result.name || ""}
+                    </div>
+                    <div style='font-size:14px;'>
+                        ${address}<br>
+                        ${city}${city && state ? ', ' : ''}${state} ${zip}<br>
+                        ${country}
+                    </div>
+                    <div class="text-primary-500 font-semibold" style='margin-top:8px;'>
+                        <a href="${mapsUrl}" target="_blank" rel="noopener">Get directions on Google Maps</a>
+                    </div>
+                `
+            });
+            marker.addListener("click", () => {
+                this.zoomToMarker(result.id);
+                infoWindow.open(this.map, marker);
+                this.infoWindowPinned = true;
+                console.log("click ", this.infoWindowPinned ? "true" : "false");
+            });
+            infoWindow.addListener("closeclick", () => {
+                this.infoWindowPinned = false;
+                console.log("closeclick ", this.infoWindowPinned ? "true" : "false");
+            });
+            marker.addListener("mouseover", () => {
+                infoWindow.open(this.map, marker);
+            });
+            marker.addListener("mouseout", () => {
+                console.log("mouseout start ", this.infoWindowPinned ? "true" : "false");
+                if (!this.infoWindowPinned) {
+                    infoWindow.close();
+                    console.log("mouseout in ", this.infoWindowPinned ? "true" : "false");
+                }
+            });
+            this.map.addListener("click", () => {
+                infoWindow.close();
+                this.infoWindowPinned = false;
+            });
+            this.markers.push({
+                id: result.id,
+                marker: marker,
+                infoWindow: infoWindow,
+            });
+        },
         map: null,
         search: "",
         results: academies,
@@ -9,6 +72,8 @@ export const mapsearcher = (academies) => {
         totalPages: 0,
         nationFilter: "",
         markers: [],
+        infoWindowPinned: false,
+
         searchChanged: async function () {
             if (this.search.length === 0) {
                 // Rimuovi tutti i marker dalla mappa
@@ -35,21 +100,7 @@ export const mapsearcher = (academies) => {
             this.markers = [];
 
             this.results.forEach((result) => {
-                let latLng = JSON.parse(result.coordinates);
-
-                let marker = new google.maps.Marker({
-                    position: latLng,
-                    map: this.map,
-                });
-
-                marker.addListener("click", () => {
-                    this.zoomToMarker(result.id);
-                });
-
-                this.markers.push({
-                    id: result.id,
-                    marker: marker,
-                });
+                this.createSchoolMarker(result);
             });
 
             if (this.results[0] && this.results[0].id) {
@@ -102,8 +153,6 @@ export const mapsearcher = (academies) => {
         async init() {
             const { Map } = await google.maps.importLibrary("maps");
 
-            let infoWindowPinned = false;
-
             this.map = new Map(document.getElementById("google-map"), {
                 center: { lat: 45.46404, lng: 9.18938 },
                 zoom: 2,
@@ -115,72 +164,7 @@ export const mapsearcher = (academies) => {
             this.paginateResults();
 
             this.results.forEach((result) => {
-                let marker = new google.maps.Marker({
-                    position: result.coordinates,
-                    map: this.map,
-                });
-
-                // Crea una InfoWindow con il nome della scuola
-                let address = result.address || "";
-                let city = result.city || "";
-                let state = result.state || "";
-                let zip = result.zip || "";
-                let country = result.country || "";
-                let lat = (result.coordinates && result.coordinates.lat) || "";
-                let lng = (result.coordinates && result.coordinates.lng) || "";
-
-                let mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${lat},${lng}`)}`;
-
-                let infoWindow = new google.maps.InfoWindow({
-                    content: `
-                        <div style='font-size:16px;font-weight:bold;'>
-                            ${result.name || ""}
-                        </div>
-                        <div style='font-size:14px;'>
-                            ${address}<br>
-                            ${city}${city && state ? ', ' : ''}${state} ${zip}<br>
-                            ${country}
-                        </div>
-                        <div class="text-primary-500 font-semibold" style='margin-top:8px;'>
-                            <a href="${mapsUrl}" target="_blank" rel="noopener">Get directions on Google Maps</a>
-                        </div>
-                    `
-                });
-
-                marker.addListener("click", () => {
-                    this.zoomToMarker(result.id);
-                    infoWindow.open(this.map, marker);
-                    infoWindowPinned = true;
-                    console.log("click ", infoWindowPinned ? "true" : "false");
-                });
-                infoWindow.addListener("closeclick", () => {
-                    infoWindowPinned = false;
-                    console.log("closeclick ", infoWindowPinned ? "true" : "false");
-                });
-                marker.addListener("mouseover", () => {
-                    infoWindow.open(this.map, marker);
-                });
-                marker.addListener("mouseout", () => {
-                    console.log("mouseout start ", infoWindowPinned ? "true" : "false");
-                    if (!infoWindowPinned) {
-                        infoWindow.close();
-                        console.log("mouseout in ", infoWindowPinned ? "true" : "false");
-                    }
-                });
-
-                // Chiudi la finestra info se clicchi altrove sulla mappa
-                this.map.addListener("click", () => {
-                    // if (infoWindowPinned) {
-                    // }
-                    infoWindow.close();
-                    infoWindowPinned = false;
-                });
-
-                this.markers.push({
-                    id: result.id,
-                    marker: marker,
-                    infoWindow: infoWindow,
-                });
+                this.createSchoolMarker(result);
             });
         },
     };
