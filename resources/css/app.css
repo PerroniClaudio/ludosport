@@ -406,13 +406,14 @@ hr {
     flex: 1 1 100%;
 }
 
+/* Google Maps */
 .gm-ui-hover-effect {
     /* width: 20px !important;
     height: 20px !important; */
     width: fit-content !important;
     height: fit-content !important;
     top: 4px !important;
-    right: -8px !important;
+    right: 4px !important;
 }
 .gm-ui-hover-effect > span {
     font-size: 16px !important;

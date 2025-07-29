@@ -28,7 +28,7 @@ export const mapsearcher = (academies) => {
                         ${city}${city && state ? ', ' : ''}${state} ${zip}<br>
                         ${country}
                     </div>
-                    <div class="text-primary-500 font-semibold" style='margin-top:8px;'>
+                    <div class="text-primary-500 font-semibold border-none focus:outline-none" style='margin-top:8px;'>
                         <a href="${mapsUrl}" target="_blank" rel="noopener">Get directions on Google Maps</a>
                     </div>
                 `
