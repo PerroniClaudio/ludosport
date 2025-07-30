@@ -35,7 +35,7 @@
             <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('fees.title') }}
             </h3>
             <div>
-                <x-primary-button x-on:click.prevent="$dispatch('open-modal', 'delete-fees-modal')" x-bind:disabled="freeFeesCount <= 0">
+                <x-primary-button x-on:click.prevent="$dispatch('open-modal', 'delete-fees-modal')" x-bind:disabled="availableFees <= 0">
                     <span>
                         {{ __('academies.academy_delete_fees') }}
                     </span>
@@ -100,13 +100,6 @@
                 <div class='flex items-center gap-2'>
                     <h2 class="text-lg font-medium text-background-900 dark:text-background-100" x-text="`{{ __('academies.academy_delete_fees_with_count') }}`.replace(':count', freeFeesCount)">
                     </h2>
-                    <div class='has-tooltip'>
-                        <span
-                            class='tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm max-w-[800px] -mt-3 translate-y-full -translate-x-full'>
-                            {{ __('academies.removable_fees_info') }}
-                        </span>
-                        <x-lucide-info class="h-4 text-background-400" />
-                    </div>
                 </div>
                 <div>
                     <x-lucide-x class="w-6 h-6 text-background-500 dark:text-background-300 cursor-pointer"
@@ -123,7 +116,7 @@
                 </div>
             @endif
             <input type="hidden" name="academy_id" :value="academy_id">
-            <x-form.input name="quantity" label="{{ __('academies.fee_number') }}" type="number" required min="1" x-bind:max="freeFeesCount" placeholder="{{ __('academies.fee_number') }}" />
+            <x-form.input name="quantity" label="{{ __('academies.fee_number') }}" type="number" required min="1" x-bind:max="availableFees" placeholder="{{ __('academies.fee_number') }}" />
             <div class="flex justify-end">
                 <x-primary-button x-on:click.prevent="$refs.deleteForm.submit()">
                     <span>{{ __('academies.academy_delete_fees') }}</span>

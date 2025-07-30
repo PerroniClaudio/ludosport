@@ -303,8 +303,7 @@ class FeeController extends Controller {
         // Clonandola evito di riscriverla e se si deve correggere si fa in un solo punto.
         $query = Fee::where('academy_id', $academy->id)
             ->where('end_date', '>', now()->format('Y-m-d'))
-            ->where('used', 0)
-            ->where('is_admin_generated', 1);
+            ->where('used', 0);
 
         if ($query->count() < $quantity) {
             return redirect()->back()->withErrors(['quantity' => 'Not enough fees available to delete']);
@@ -313,14 +312,16 @@ class FeeController extends Controller {
         // Log the IDs of the fees that will be deleted
         $feesToDelete = (clone $query)->limit($quantity)->get();
 
-        Log::info('Deleting admin-generated fees', [
+        Log::info('Deleting fees', [
             'user_id' => $authUser->id,
             'academy_id' => $academy->id,
             'quantity' => $quantity,
-            'fee_ids' => $feesToDelete->map(function($fee) {
+            'deleted_fees' => $feesToDelete->map(function($fee) {
                 return [
                     'id' => $fee->id,
                     'unique_id' => $fee->unique_id,
+                    'is_admin_generated' => $fee->is_admin_generated,
+                    'created_at' => $fee->created_at,
                 ];
             })->toArray(),
         ]);
