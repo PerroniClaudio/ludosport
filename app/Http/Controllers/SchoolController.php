@@ -1249,10 +1249,10 @@ class SchoolController extends Controller {
         $locationLat = $coordinates[0];
         $locationLon = $coordinates[1];
 
-        $schools = Academy::where('is_disabled', '0')->whereNotNull('coordinates')->get();
-        $nearbyAcademies = $this->findNearbySchools($schools, $locationLat, $locationLon, $radius);
+        $schools = School::where('is_disabled', '0')->whereNotNull('coordinates')->get();
+        $nearbySchools = $this->findNearbySchools($schools, $locationLat, $locationLon, $radius);
 
-        return response()->json($nearbyAcademies);
+        return response()->json($nearbySchools);
     }
 
     public function detail(School $school) {

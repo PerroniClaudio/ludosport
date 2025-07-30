@@ -37,20 +37,16 @@ export const mapsearcher = (academies) => {
                 this.zoomToMarker(result.id);
                 infoWindow.open(this.map, marker);
                 this.infoWindowPinned = true;
-                console.log("click ", this.infoWindowPinned ? "true" : "false");
             });
             infoWindow.addListener("closeclick", () => {
                 this.infoWindowPinned = false;
-                console.log("closeclick ", this.infoWindowPinned ? "true" : "false");
             });
             marker.addListener("mouseover", () => {
                 infoWindow.open(this.map, marker);
             });
             marker.addListener("mouseout", () => {
-                console.log("mouseout start ", this.infoWindowPinned ? "true" : "false");
                 if (!this.infoWindowPinned) {
                     infoWindow.close();
-                    console.log("mouseout in ", this.infoWindowPinned ? "true" : "false");
                 }
             });
             this.map.addListener("click", () => {
