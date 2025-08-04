@@ -998,61 +998,21 @@ class EventController extends Controller
     public function eventsList(Request $request)
     {
 
-        /*
-
-        $countries = Nation::all();
-        $continents = [];
-
-        foreach ($countries as $key => $country) {
-
-            $continent = $country['continent'];
-
-            if (!isset($continents[$continent])) {
-                $continents[$continent] = [];
-            }
-
-            $continents[$continent][] = [
-                'value' => $country->id,
-                'label' => $country->name,
-            ];
-        }
-
-        foreach ($continents as $key => $value) {
-            $options = [];
-
-            foreach ($value as $country) {
-                $options[] = [
-                    "value" => $country['value'],
-                    "label" => $country['label']
-                ];
-            }
-
-            $continents[$key] = [
-                "label" => $key,
-                "options" => $options
-            ];
-        }
-
-        $europe = $continents['Europe'];
-        unset($continents['Europe']);
-        $continents = ['Europe' => $europe] + $continents;
-
-        */
-
         $date = Carbon::parse(now());
 
+        // Questa lista viene usata nel sito web per mostrare gli eventi futuri, quindi non deve essere filtrata per tipo di evento.
         $eventsQuery = Event::query()
             ->where('is_approved', 1)
             ->where('is_published', 1)
             ->where('end_date', '>=', $date->format('Y-m-d'))
             ->where('is_disabled', 0)
-            ->whereHas('type', function ($q) {
-                $q->whereIn('name', [
-                    'School Tournament',
-                    'Academy Tournament',
-                    'National Tournament'
-                ]);
-            })
+            // ->whereHas('type', function ($q) {
+            //     $q->whereIn('name', [
+            //         'School Tournament',
+            //         'Academy Tournament',
+            //         'National Tournament'
+            //     ]);
+            // })
             ;
 
         if (isset($request->nation)) {
