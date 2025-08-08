@@ -700,7 +700,7 @@ class SchoolController extends Controller {
         $athletes = $school->athletes->pluck('id')->toArray();
         $personnel = $school->personnel->pluck('id')->toArray();
 
-        $primaryPersonnel = $school->personnel->wherePivot('is_primary', true)->pluck('id')->toArray();
+        $primaryPersonnel = $school->personnel()->wherePivot('is_primary', true)->pluck('users.id')->toArray();
 
         $school->athletes()->detach();
         $school->personnel()->detach();
