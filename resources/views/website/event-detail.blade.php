@@ -3,6 +3,9 @@
         <section class="col-span-12 py-12">
             <div
                 class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-2 sm:p-8 text-background-800 dark:text-background-200">
+                @if ($event->thumbnail)
+                    <img src="/event-picture/{{ $event->id }}" alt="{{ $event->name }}" class="h-[400px] max-w-[600px] object-cover rounded-lg">
+                @endif
                 <h1 class="font-semibold text-3xl  leading-tight">
                     {{ $event->name }}</h1>
                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>

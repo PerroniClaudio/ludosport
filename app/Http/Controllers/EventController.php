@@ -18,6 +18,7 @@ use App\Models\Order;
 use App\Models\WeaponForm;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -1065,8 +1066,72 @@ class EventController extends Controller
         }
 
         $events = $eventsQuery->get();
+        
+        foreach ($events as $event) {
+            if ($event->thumbnail) {
+                /** 
+                 * @disregard Intelephense non rileva il metodo temporaryurl
+                 * 
+                 * @see https://github.com/spatie/laravel-google-cloud-storage
+                 */
+                $event->thumbnail_url = Storage::disk('gcs')->temporaryUrl(
+                    $event->thumbnail,
+                    now()->addMinutes(5)
+                );
+            }
+        }
 
         return response()->json($events);
+    }
+
+    public function eventPicture(Event $event) {
+
+        // $cacheKey = 'eventpic-' . $event->id;
+
+        // $image = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($user) {
+        //     if ($user->profile_picture !== null) {
+        //         /** 
+        //          * @disregard Intelephense non rileva il metodo temporaryurl
+        //          * 
+        //          * @see https://github.com/spatie/laravel-google-cloud-storage
+        //          */
+        //         $url = Storage::disk('gcs')->temporaryUrl(
+        //             $user->profile_picture,
+        //             now()->addMinutes(5)
+        //         );
+        //     } else {
+        //         $url = 'https://ui-avatars.com/api/?name=' . $user->name . '+' . $user->surname . '&size=256';
+        //     }
+
+        //     $response = Http::get($url);
+
+        //     return $response->body();
+        // });
+
+        if ($event->thumbnail !== null) {
+            /** 
+             * @disregard Intelephense non rileva il metodo temporaryurl
+             * 
+             * @see https://github.com/spatie/laravel-google-cloud-storage
+             */
+            $url = Storage::disk('gcs')->temporaryUrl(
+                $event->thumbnail,
+                now()->addMinutes(5)
+            );
+
+            $response = Http::get($url);
+            
+            $image = $response->body();
+        } else {
+            $image = null;
+        }
+
+        $headers = [
+            'Content-Type' => 'image/png',
+            'Content-Length' => strlen($image),
+        ];
+
+        return response($image, 200, $headers);
     }
 
     public function general(Request $request)

@@ -35,41 +35,48 @@
                 @endif
 
                 @foreach ($events as $event)
-                    <div x-data="{
-                        start_date: '{{ $event->start_date }}',
-                        end_date: '{{ $event->end_date }}',
-                    }"
-                        class="bg-white text-background-800 dark:bg-background-800 rounded dark:text-background-300 p-4 flex flex-col justify-between gap-2">
-                        <p class="text-2xl font-semibold group-hover:text-primary-500">
-                            {{ $event->name }}
-                        </p>
-                        <div class="flex items-center gap-1">
-                            <x-lucide-calendar-days class="w-4 h-4 text-primary-500" />
-                            <div class="flex flex-row gap-2">
-                                <p x-text="new Date(start_date).toLocaleDateString('it-IT', {
-                                    hour: 'numeric', 
-                                    minute: 'numeric' 
-                                })"
-                                    class="text-xs"></p>
-                                <span class="text-xs"> - </span>
-                                <p x-text="new Date(end_date).toLocaleDateString('it-IT', {
-                                    hour: 'numeric', 
-                                    minute: 'numeric' 
-                                })"
-                                    class="text-xs"></p>
+                    <div class="bg-white text-background-800 dark:bg-background-800 rounded dark:text-background-300 p-4 flex gap-2 justify-start">
+                        @if ($event->thumbnail)
+                            <img src="/event-picture/{{ $event->id }}" alt="{{ $event->name }}" class="h-[122px] aspect-[3/4] object-cover rounded-lg">
+                        @endif
+                        
+                        <div x-data="{
+                            start_date: '{{ $event->start_date }}',
+                            end_date: '{{ $event->end_date }}',
+                        }"
+                            class="flex flex-col justify-between gap-2">
+                            <p class="text-2xl font-semibold group-hover:text-primary-500">
+                                {{ $event->name }}
+                            </p>
+                            <div class="flex items-center gap-1">
+                                <x-lucide-calendar-days class="w-4 h-4 text-primary-500" />
+                                <div class="flex flex-row gap-2">
+                                    <p x-text="new Date(start_date).toLocaleDateString('it-IT', {
+                                        hour: 'numeric', 
+                                        minute: 'numeric' 
+                                    })"
+                                        class="text-xs"></p>
+                                    <span class="text-xs"> - </span>
+                                    <p x-text="new Date(end_date).toLocaleDateString('it-IT', {
+                                        hour: 'numeric', 
+                                        minute: 'numeric' 
+                                    })"
+                                        class="text-xs"></p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <x-lucide-map-pin class="w-4 h-4 text-primary-500" />
-                            <span
-                                class="text-sm font-semibold group-hover:text-primary-500">{{ $event->full_address }}</span>
+                            <div class="flex items-center gap-1">
+                                <x-lucide-map-pin class="w-4 h-4 text-primary-500" />
+                                <span
+                                    class="text-sm font-semibold group-hover:text-primary-500">{{ $event->full_address }}</span>
+                            </div>
+    
+                            <a href="{{ route('event-detail', $event->slug) }}">
+                                <x-primary-button>
+                                    {{ __('website.events_list_button') }}
+                                </x-primary-button>
+                            </a>
                         </div>
 
-                        <a href="{{ route('event-detail', $event->slug) }}">
-                            <x-primary-button>
-                                {{ __('website.events_list_button') }}
-                            </x-primary-button>
-                        </a>
                     </div>
                 @endforeach
             </div>
