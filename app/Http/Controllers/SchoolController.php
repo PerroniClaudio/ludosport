@@ -559,8 +559,31 @@ class SchoolController extends Controller {
                 // Ottieni l'indirizzo formattato
                 $formattedAddress = $data['result']['address']['formattedAddress'];
 
+                // Controlla la granularità della validazione
+                // Se la granularità è "PREMISE" o "ROOFTOP" e la posizione è presente, accetta l'indirizzo
+                $granularity = $data['result']['verdict']['validationGranularity'] ?? null;
+                $location = $data['result']['geocode']['location'] ?? null;
+                $unconfirmed = $data['result']['address']['unconfirmedComponentTypes'] ?? [];
+
+                $canAccept = false;
+                if (in_array($granularity, ['PREMISE', 'ROOFTOP']) && $location) {
+                    // Se solo country/postal_code/POI sono non confermati, accetta comunque
+                    $allowedUnconfirmed = [
+                        'point_of_interest',
+                        'premise',
+                        'subpremise',
+                        'administrative_area_level_3',
+                        'administrative_area_level_2',
+                        'postal_code',
+                        'country'
+                    ];
+                    if (count(array_diff($unconfirmed, $allowedUnconfirmed)) === 0) {
+                        $canAccept = true;
+                    }
+                }
+
                 // if ($isAddressComplete && !$hasUnconfirmedComponents) {
-                if (!$hasUnconfirmedComponents) {
+                if (!$hasUnconfirmedComponents || $canAccept) {
                     // L'indirizzo è valido e completo
 
                     $address = $request->address . " " . $request->city . " "  . $request->zip;
