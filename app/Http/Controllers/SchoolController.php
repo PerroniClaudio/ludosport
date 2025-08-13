@@ -566,26 +566,14 @@ class SchoolController extends Controller {
                 $unconfirmed = $data['result']['address']['unconfirmedComponentTypes'] ?? [];
 
                 $canAccept = false;
+                $fundamental = ['street_number', 'route', 'locality', 'country', 'postal_code'];
+                $missingFundamental = array_intersect($unconfirmed, $fundamental);
                 if (in_array($granularity, ['PREMISE', 'ROOFTOP']) && $location) {
-                    // Se solo country/postal_code/POI sono non confermati, accetta comunque
-                    $allowedUnconfirmed = [
-                        'point_of_interest',
-                        'premise',
-                        'subpremise',
-                        'administrative_area_level_3',
-                        'administrative_area_level_2',
-                        'postal_code',
-                        'country'
-                    ];
-                    if (count(array_diff($unconfirmed, $allowedUnconfirmed)) === 0) {
-                        $canAccept = true;
-                    }
+                    // Accetta sempre se la posizione è precisa, ma segnala warning se mancano componenti fondamentali
+                    $canAccept = true;
                 }
 
-                // if ($isAddressComplete && !$hasUnconfirmedComponents) {
                 if (!$hasUnconfirmedComponents || $canAccept) {
-                    // L'indirizzo è valido e completo
-
                     $address = $request->address . " " . $request->city . " "  . $request->zip;
                     $location = $this->getLocation($address);
                     $school = School::find($request->school_id);
@@ -600,26 +588,30 @@ class SchoolController extends Controller {
                         'coordinates' => json_encode(['lat' => $location['lat'], 'lng' => $location['lng']]),
                     ]);
 
+                    $warning = null;
+                    if (count($missingFundamental) > 0) {
+                        $unconfirmedComponents = [];
+                        foreach ($missingFundamental as $component) {
+                            $unconfirmedComponents[] = __('school.address_' . $component);
+                        }
+                        $warning = __('school.address_warning') . ': ' . implode(', ', $unconfirmedComponents);
+                    }
+
                     return response()->json([
                         'state' => 1,
-                        'message' => 'The address is valid.',
+                        'message' => __('school.address_valid') . ($warning ? ' ' . $warning : ''),
                         'original' => $data
                     ]);
                 } else {
                     // L'indirizzo potrebbe essere incompleto o ambiguo
-
                     if ($hasUnconfirmedComponents) {
-
                         $unconfirmed = $data['result']['address']['unconfirmedComponentTypes'];
                         $message = 'The given address is not completely correct, correct could be: ' . $formattedAddress;
-
                         $unconfirmedComponents = [];
                         foreach ($unconfirmed as $component) {
                             $unconfirmedComponents[] = __('school.address_' . $component);
                         }
-
                         $unconfirmed = 'The following elements need to be corrected: ' . implode(', ', $unconfirmedComponents);
-
                         return response()->json([
                             'state' => 2,
                             'message' => $message,

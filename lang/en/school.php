@@ -41,7 +41,7 @@ return [
     'address_street_number' => 'Street number',
     'address_postal_code' => 'Postal Code',
     'address_locality' => 'City/Locality',
-    'addrress_country' => 'Country',
+    'address_country' => 'Country',
     'address_point_of_interest' => 'Point of Interest',
     'address_administrative_area_level_3,' => 'Administrative Area Level 3',
     'address_administrative_area_level_2' => 'Administrative Area Level 2',
@@ -59,4 +59,6 @@ return [
     'select_dean' => 'Select a Dean',
     'set_as_primary_tooltip' => 'Set as primary school',
     'disabled_text' => 'This school has been disabled.',
+    'address_warning' => 'Warning: some fundamental elements have not been confirmed by Google. Please verify that the address is correct',
+    'address_valid' => 'The address is valid.',
 ];
