@@ -510,6 +510,8 @@ class SchoolController extends Controller {
     }
 
     public function verifyAddress(Request $request) {
+
+        Log::channel('single')->info('verifyAddress params', $request->all());
         $request->validate([
             'address' => 'required|string',
             'city' => 'required|string',
@@ -537,8 +539,13 @@ class SchoolController extends Controller {
                 'Content-Type' => 'application/json',
             ])->post($url, $data);
 
+            Log::channel('single')->info('verifyAddress Google API response', [
+                'request' => $data,
+                'response' => $response->json(),
+                'status' => $response->status(),
+            ]);
+
             if ($response->successful()) {
-                //return response()->json($response->json());
                 $data = $response->json();
 
                 // Controlla se l'indirizzo è completo
@@ -574,14 +581,41 @@ class SchoolController extends Controller {
                 }
 
                 if (!$hasUnconfirmedComponents || $canAccept) {
+
                     $address = $request->address . " " . $request->city . " "  . $request->zip;
                     $location = $this->getLocation($address);
                     $school = School::find($request->school_id);
+                    Log::channel('single')->info('In the right path');
 
-                    $postalAddress = $data['result']['address']['postalAddress'];
+                    $postalAddress = $data['result']['address']['postalAddress'] ?? [];
+                    // Fallback per la città: 1) addressComponents['locality']->englishName 2) request->city 3) addressComponents['locality']->text 4) postalAddress['locality']
+                    $city = null;
+                    if (isset($data['result']['address']['addressComponents'])) {
+                        foreach ($data['result']['address']['addressComponents'] as $component) {
+                            if (($component['componentType'] ?? null) === 'locality') {
+                                if (!empty($component['componentName']['englishName'])) {
+                                    $city = $component['componentName']['englishName'];
+                                } elseif (!empty($request->city)) {
+                                    $city = $request->city;
+                                } elseif (!empty($component['componentName']['text'])) {
+                                    $city = $component['componentName']['text'];
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    // Se ancora non trovato, fallback su postalAddress['locality']
+                    if (!$city && !empty($postalAddress['locality'])) {
+                        $city = $postalAddress['locality'];
+                    }
+                    // Se ancora non trovato, fallback su request->city
+                    if (!$city) {
+                        $city = $request->city;
+                    }
+
                     $school->update([
                         'address' => $request->address,
-                        'city' => $postalAddress['locality'],
+                        'city' => $city,
                         'state' => $location['state'], // Regione
                         'zip' => $request->zip,
                         'country' => ($location['country'] ? $location['country'] : $nation->name), // Nazione
@@ -637,7 +671,7 @@ class SchoolController extends Controller {
             return response()->json([
                 'state' => 3,
                 'message' => 'The address seems incorrect. Try including street name and house number, the city and the postal code.',
-                // 'message' => $e->getMessage()
+                'error' => $e->getMessage()
             ]);
         }
     }

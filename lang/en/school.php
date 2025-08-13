@@ -45,6 +45,8 @@ return [
     'address_point_of_interest' => 'Point of Interest',
     'address_administrative_area_level_3,' => 'Administrative Area Level 3',
     'address_administrative_area_level_2' => 'Administrative Area Level 2',
+    'address_sublocality_level_2' => 'Sublocality Level 2',
+    'address_sublocality_level_1' => 'Sublocality Level 1',
     'school' => 'School',
     "edit_school" => "Edit School #:id",
     'school_email' => 'School Email',
