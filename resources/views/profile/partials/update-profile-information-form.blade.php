@@ -99,7 +99,7 @@
         </div>
     </form>
 
-    <a href={{ '/website-users/' . $user->battle_name }}>
+    <a href={{ '/website-users/' . rawurlencode($user->battle_name) }}>
         <x-secondary-button>{{ __('website.user_profile_visit') }}</x-secondary-button>
     </a>
 </section>
