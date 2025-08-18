@@ -11,7 +11,7 @@ services:
       - MEILISEARCH_HOST=http://meilisearch:7700
     volumes:
       - ./docker/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
-      - app_logs:/var/www/html/storage/logs
+      - ./docker/logs/laravel:/var/www/html/storage/logs
     networks:
       - app-network
     depends_on:
