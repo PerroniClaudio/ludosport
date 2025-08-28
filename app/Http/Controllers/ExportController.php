@@ -26,10 +26,14 @@ class ExportController extends Controller {
      */
     public function index() {
 
-        return redirect()->route('dashboard')->with('error', 'The function is temporarily disabled');
         //
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
+
+        if($authRole != 'admin') {
+            return redirect()->route('dashboard')->with('error', 'The function is temporarily disabled');
+        }
+
 
         if (!$authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
