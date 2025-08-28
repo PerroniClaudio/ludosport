@@ -26,7 +26,6 @@ class ExportController extends Controller {
      */
     public function index() {
 
-        return redirect()->route('dashboard')->with('error', 'The function is temporarily disabled');
         //
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
