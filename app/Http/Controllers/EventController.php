@@ -1020,7 +1020,7 @@ class EventController extends Controller
             $eventsQuery->where('nation_id', $request->nation);
         }
 
-        $events = $eventsQuery->with('nation')->get();
+        $events = $eventsQuery->with('nation')->orderBy('start_date')->get();
 
         $nations = [];
 
