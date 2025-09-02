@@ -1065,7 +1065,7 @@ class EventController extends Controller
             }
         }
 
-        $events = $eventsQuery->get();
+        $events = $eventsQuery->orderBy('start_date')->get();
         
         foreach ($events as $event) {
             if ($event->thumbnail) {
