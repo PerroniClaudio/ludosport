@@ -116,7 +116,8 @@
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                             </div>
                             <div class="flex-1">
-                                <p x-text="selectedAnnouncement.content"></p>
+                                <div x-html="selectedAnnouncement.content"
+                                    class="prose prose-sm dark:prose-invert max-w-none"></div>
                             </div>
                             <div class="flex justify-end">
                                 <p

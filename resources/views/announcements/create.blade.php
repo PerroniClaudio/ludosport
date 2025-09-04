@@ -34,7 +34,7 @@
                         </div>
                     </div>
 
-                    <x-form.textarea name="content" label="Content" required="{{ true }}"
+                    <x-rich-text-editor name="content" label="Content" required="{{ true }}"
                         value="{{ old('content') }}" placeholder="Write a message..." />
 
                     <div class="flex items-end justify-end gap-4">
