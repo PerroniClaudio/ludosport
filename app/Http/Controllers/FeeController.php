@@ -629,20 +629,18 @@ class FeeController extends Controller {
 
         $price = config('app.stripe.fee_price_numeral');
 
-        foreach ($items as $item) {
+        $item = $items[0];
 
-            $amount += $price;
-
-            $order->items()->create([
-                'product_type' => 'fee',
-                'product_name' => $item->name,
-                'product_code' => 'fee',
-                'quantity' => $item->quantity,
-                'price' => number_format($price * $item->quantity, 2),
-                'vat' => 0,
-                'total' => number_format($price * $item->quantity, 2),
-            ]);
-        }
+        $order->items()->create([
+            'product_type' => 'fee',
+            'product_name' => $item->name,
+            'product_code' => 'fee',
+            'quantity' => $item->quantity,
+            'price' => number_format($price * $item->quantity, 2),
+            'vat' => 0,
+            'total' => number_format($price * $item->quantity, 2),
+        ]);
+        $amount += $price * $item->quantity;
 
         $response = $provider->createOrder([
             'intent' => 'CAPTURE',
@@ -712,19 +710,19 @@ class FeeController extends Controller {
         $items = json_decode($request->items);
         $amount = 0;
         $feePrice = config('app.stripe.fee_price_numeral');
-        foreach ($items as $item) {
-            $amount += $feePrice;
 
-            $order->items()->create([
-                'product_type' => 'fee',
-                'product_name' => $item->name,
-                'product_code' => 'fee',
-                'quantity' => $item->quantity,
-                'price' => number_format($amount, 2),
-                'vat' => 0,
-                'total' => number_format($amount, 2),
-            ]);
-        }
+        $item = $items[0];
+
+        $order->items()->create([
+            'product_type' => 'fee',
+            'product_name' => $item->name,
+            'product_code' => 'fee',
+            'quantity' => $item->quantity,
+            'price' => number_format($amount, 2),
+            'vat' => 0,
+            'total' => number_format($amount, 2),
+        ]);
+        $amount += $feePrice * $item->quantity;
 
         $response = $provider->createOrder([
             'intent' => 'CAPTURE',
