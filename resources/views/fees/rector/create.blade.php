@@ -67,6 +67,7 @@
         },
         calculateTotalPrice() {
             this.totalPrice = this.fees_count * this.fee_price;
+            this.shouldShowPayment = this.totalPrice > 0;
         },
         fetchInvoiceData() {
             const url = `/rector/invoices/user-data/{{ Auth()->user()->id }}`
@@ -313,27 +314,27 @@
                         <p class="text-background-800 dark:text-background-200 text-lg"
                             x-text="'€ ' + totalPrice.toFixed(2)"></p>
 
-                        <div x-show="totalPrice > 0" class="mt-4">
+                        <div x-show="shouldShowPayment" class="mt-4">
                             <div class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer"
                                 @click="startPaypalCheckout">
 
                                 <span>PayPal</span>
                             </div>
                         </div>
-                        <div x-show="totalPrice > 0" class="mt-4">
+                        <div x-show="shouldShowPayment" class="mt-4">
                             <div class="rounded-full bg-white hover:bg-gray-200 text-black font-bold p-1 text-center cursor-pointer"
                                 @click="startStripeCheckout">
 
                                 <span>Stripe</span>
                             </div>
                         </div>
-                        <div x-show="shouldShowPayment" class="mt-4">
+                        {{-- <div x-show="shouldShowPayment" class="mt-4">
                             <div class="rounded-full bg-gray-300 hover:bg-gray-500 text-black font-bold p-1 text-center cursor-pointer"
                                 @click="startWireCheckout">
 
                                 <span>{{ __('website.wire_transfer') }}</span>
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
 
                 </div>

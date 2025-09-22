@@ -958,7 +958,7 @@ class FeeController extends Controller {
 
         foreach ($items as $item) {
 
-            $amount += $price;
+            $amount += $price * $item->quantity;
 
             $order->items()->create([
                 'product_type' => 'fee',
