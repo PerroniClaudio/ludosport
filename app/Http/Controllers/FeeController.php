@@ -382,6 +382,7 @@ class FeeController extends Controller {
 
         $order->update([
             'total' => $total,
+            'payment_method' => 'stripe',
         ]);
 
         return $request->user()->checkout($prices, [
@@ -426,6 +427,7 @@ class FeeController extends Controller {
 
         $order->update([
             'total' => $total,
+            'payment_method' => 'stripe',
         ]);
 
         return $request->user()->checkout($prices, [
