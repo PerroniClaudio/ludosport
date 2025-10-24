@@ -56,28 +56,30 @@
                     athletes_no_fees: {{ collect($athletes_no_fees) }},
                     athletes_add_fees: [],
                     fees_number: {{ $fees_number }},
-                    paginatedAthletes: [],
+                    paginatedAthletes: [],                    
                     currentAthletePage: 1,
                     totalAthletePages: 1,
                     feesCheckData: {},
-                    searchavailableAthletes: function(event) {
-                        const query = event.target.value;
-                        if (query.length < 3) {
-                            this.paginatedAthletes = this.athletes_no_fees || [];
-                            return;
+                    searchTerm: '',
+                    getFilteredAthletes: function() {
+                        if (this.searchTerm.length < 3) {
+                            return this.athletes_no_fees;
                         }
-                
-                        this.paginatedAthletes = this.athletes_no_fees.filter((athlete) => {
-                            return athlete.fullname.toLowerCase().includes(query.toLowerCase());
+                        return this.athletes_no_fees.filter((athlete) => {
+                            return athlete.fullname.toLowerCase().includes(this.searchTerm.toLowerCase());
                         });
+                    },
+                    searchavailableAthletes: function(event) {
+                        this.searchTerm = event.target.value;
+                        this.currentAthletePage = 1; // Reset alla prima pagina
+                        this.paginateAthletes();
                     },
                     goToAthletePage: function(page) {
                         if (page < 1 || page > this.totalAthletePages) {
                             return;
                         }
-                
                         this.currentAthletePage = page;
-                        this.paginatedAthletes = this.athletes_no_fees.slice((page - 1) * 10, page * 10);
+                        this.paginateAthletes();
                     },
                     addAthlete: function(athlete_id) {
                         let athlete = this.athletes_no_fees.find((athlete) => {
@@ -87,7 +89,7 @@
                         this.athletes_no_fees = this.athletes_no_fees.filter((athlete) => {
                             return athlete.id !== athlete_id;
                         });
-                        this.paginatedAthletes = this.athletes_no_fees.slice((this.currentAthletePage - 1) * 10, this.currentAthletePage * 10);
+                        this.paginateAthletes(); // Ricalcola la paginazione
                     },
                     removeAthlete(athlete_id) {
                         let athlete = this.athletes_add_fees.find((athlete) => {
@@ -97,11 +99,20 @@
                         this.athletes_add_fees = this.athletes_add_fees.filter((athlete) => {
                             return athlete.id !== athlete_id;
                         });
-                        this.paginatedAthletes = this.athletes_no_fees.slice((this.currentAthletePage - 1) * 10, this.currentAthletePage * 10);
+                        this.paginateAthletes(); // Ricalcola la paginazione
                     },
                     paginateAthletes: function() {
-                        this.totalAthletePages = Math.ceil(this.athletes_no_fees.length / 10);
-                        this.paginatedAthletes = this.athletes_no_fees.slice(0, 10);
+                        const filteredAthletes = this.getFilteredAthletes();
+                        this.totalAthletePages = Math.ceil(filteredAthletes.length / 10);
+                        
+                        // Assicurati che la pagina corrente sia valida
+                        if (this.currentAthletePage > this.totalAthletePages) {
+                            this.currentAthletePage = Math.max(1, this.totalAthletePages);
+                        }
+                        
+                        const startIndex = (this.currentAthletePage - 1) * 10;
+                        const endIndex = startIndex + 10;
+                        this.paginatedAthletes = filteredAthletes.slice(startIndex, endIndex);
                     },
                     openConfirmModal: function() {
                 
