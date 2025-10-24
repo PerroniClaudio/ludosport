@@ -63,12 +63,12 @@
                     searchavailableAthletes: function(event) {
                         const query = event.target.value;
                         if (query.length < 3) {
-                            this.paginatedAthletes = [];
+                            this.paginatedAthletes = this.athletes_no_fees || [];
                             return;
                         }
                 
                         this.paginatedAthletes = this.athletes_no_fees.filter((athlete) => {
-                            return athlete.name.toLowerCase().includes(query.toLowerCase());
+                            return athlete.fullname.toLowerCase().includes(query.toLowerCase());
                         });
                     },
                     goToAthletePage: function(page) {
@@ -204,7 +204,7 @@
                                     </h4>
                                 </div>
                                 <div>
-                                    <x-text-input type="text" x-on:input="searchavailableAcademies(event);"
+                                    <x-text-input type="text" x-on:input="searchavailableAthletes(event);"
                                         placeholder="Search..."
                                         class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" />
                                 </div>
@@ -287,9 +287,10 @@
                                 </div>
 
                                 <div>
-                                    <x-text-input type="text" x-on:input="searchavailableAcademies(event);"
+                                    <x-text-input type="text" 
+                                        {{-- x-on:input="searchavailableAcademies(event);" --}}
                                         placeholder="Search..."
-                                        class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" />
+                                        class="invisible border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" />
                                 </div>
 
                             </div>

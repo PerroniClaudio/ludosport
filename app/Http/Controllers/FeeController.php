@@ -9,25 +9,26 @@ use App\Models\Order;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Env;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Laravel\Cashier\Cashier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Laravel\Cashier\Cashier;
 use Srmklive\PayPal\Services\PayPal as PaypalClient;
 
-class FeeController extends Controller {
+class FeeController extends Controller
+{
     /**
      * Display a listing of the resource.
      */
-    public function index() {
+    public function index()
+    {
         //
 
         $user = User::find(Auth::user()->id);
         $academy_id = $user->getActiveInstitutionId() ?? null;
 
-        if (!$user->validatePrimaryInstitutionPersonnel()) {
+        if (! $user->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'Main academy not found');
         }
 
@@ -40,7 +41,7 @@ class FeeController extends Controller {
         $athletes_no_fees = Academy::find($academy_id)->athletes()->where('has_paid_fee', 0)->get();
 
         foreach ($athletes_no_fees as $key => $value) {
-            $athletes_no_fees[$key]->fullname = $value->name . ' ' . $value->surname;
+            $athletes_no_fees[$key]->fullname = $value->name.' '.$value->surname;
         }
 
         return view('fees.rector.index', [
@@ -52,13 +53,14 @@ class FeeController extends Controller {
     /**
      * Show the form for creating a new resource.
      */
-    public function create() {
+    public function create()
+    {
         //
 
         $user = User::find(Auth::user()->id);
         $academy = $user->getActiveInstitutionId() ?? null;
 
-        if (!$academy) {
+        if (! $academy) {
             return redirect()->route('dashboard')->with('error', 'Main academy academy not found');
         }
 
@@ -70,13 +72,14 @@ class FeeController extends Controller {
         ]);
     }
 
-    public function renew() {
+    public function renew()
+    {
         //
 
         $user = User::find(Auth::user()->id);
         $academy_id = $user->getActiveInstitutionId() ?? null;
 
-        if (!$academy_id) {
+        if (! $academy_id) {
             return redirect()->route('dashboard')->with('error', 'Main academy academy not found');
         }
 
@@ -99,13 +102,12 @@ class FeeController extends Controller {
                     'id' => $value->id,
                     'name' => $value->name,
                     'surname' => $value->surname,
-                    'fullname' => $value->name . ' ' . $value->surname,
+                    'fullname' => $value->name.' '.$value->surname,
                     'email' => $value->email,
                     'fee_expired_at' => $latest_fee->end_date,
                 ];
             }
         }
-
 
         return view('fees.rector.renew', [
             'users_expired_fees' => $users_expired_fees,
@@ -116,39 +118,45 @@ class FeeController extends Controller {
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         //
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Fee $fee) {
+    public function show(Fee $fee)
+    {
         //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Fee $fee) {
+    public function edit(Fee $fee)
+    {
         //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Fee $fee) {
+    public function update(Request $request, Fee $fee)
+    {
         //
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Fee $fee) {
+    public function destroy(Fee $fee)
+    {
         //
     }
 
-    public function extimateFeeConsumption(Request $request) {
+    public function extimateFeeConsumption(Request $request)
+    {
 
         $user = User::find(Auth::user()->id);
         $academy_id = $user->getActiveInstitutionId() ?? null;
@@ -173,7 +181,8 @@ class FeeController extends Controller {
         ]);
     }
 
-    public function associateFeesToUsers(Request $request) {
+    public function associateFeesToUsers(Request $request)
+    {
 
         $authuser = User::find(Auth::user()->id);
 
@@ -195,7 +204,7 @@ class FeeController extends Controller {
                 $availableFee->update([
                     'user_id' => $user->id,
                     'used' => true,
-                    'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
+                    'end_date' => now()->addYear()->endOfYear()->format('Y').'-08-31',
                 ]);
 
                 $user->update([
@@ -220,7 +229,8 @@ class FeeController extends Controller {
         ]);
     }
 
-    public function academyAvailableFees(Request $request) {
+    public function academyAvailableFees(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
@@ -230,7 +240,7 @@ class FeeController extends Controller {
 
         $academy = Academy::find($request->academy_id);
 
-        if (!$academy) {
+        if (! $academy) {
             return response()->json(['error' => 'Academy not found'], 404);
         }
 
@@ -246,7 +256,8 @@ class FeeController extends Controller {
         ]);
     }
 
-    public function createFreeFeesForAcademy(Request $request) {
+    public function createFreeFeesForAcademy(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
@@ -256,7 +267,7 @@ class FeeController extends Controller {
 
         $academy = Academy::find($request->academy_id);
 
-        if (!$academy) {
+        if (! $academy) {
             return redirect()->back()->withErrors(['academy' => 'Academy not found']);
         }
 
@@ -266,7 +277,7 @@ class FeeController extends Controller {
                 'academy_id' => $academy->id,
                 'type' => 3,
                 'start_date' => now(),
-                'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
+                'end_date' => now()->addYear()->endOfYear()->format('Y').'-08-31',
                 'auto_renew' => 0,
                 'unique_id' => Str::orderedUuid(),
                 'used' => 0,
@@ -276,8 +287,9 @@ class FeeController extends Controller {
 
         return back()->with('success', 'Fees created successfully');
     }
-    
-    public function deleteFreeFeesForAcademy(Request $request) {
+
+    public function deleteFreeFeesForAcademy(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
@@ -292,7 +304,7 @@ class FeeController extends Controller {
 
         $academy = Academy::find($request->academy_id);
 
-        if (!$academy) {
+        if (! $academy) {
             return redirect()->back()->withErrors(['academy' => 'Academy not found']);
         }
         $quantity = $request->quantity;
@@ -316,7 +328,7 @@ class FeeController extends Controller {
             'user_id' => $authUser->id,
             'academy_id' => $academy->id,
             'quantity' => $quantity,
-            'deleted_fees' => $feesToDelete->map(function($fee) {
+            'deleted_fees' => $feesToDelete->map(function ($fee) {
                 return [
                     'id' => $fee->id,
                     'unique_id' => $fee->unique_id,
@@ -333,9 +345,10 @@ class FeeController extends Controller {
         return back()->with('success', 'Fees deleted successfully');
     }
 
-    //? Checkout with Stripe.
+    // ? Checkout with Stripe.
 
-    public function checkoutStripe(Request $request) {
+    public function checkoutStripe(Request $request)
+    {
 
         // Crea ordine
 
@@ -368,12 +381,12 @@ class FeeController extends Controller {
                 'product_name' => $item->name,
                 'product_code' => $product_code,
                 'quantity' => $item->quantity,
-                'price' => $price  / 100,
+                'price' => $price / 100,
                 'vat' => 0,
                 'total' => ($price * $item->quantity) / 100,
             ]);
 
-            $prices["{$price_id}"] =  "{$item->quantity}";
+            $prices["{$price_id}"] = "{$item->quantity}";
         }
 
         // Calcola totale
@@ -382,16 +395,18 @@ class FeeController extends Controller {
 
         $order->update([
             'total' => $total,
+            'payment_method' => 'stripe',
         ]);
 
         return $request->user()->checkout($prices, [
-            'success_url' => route('fees.success') . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('fees.cancel')  . '?session_id={CHECKOUT_SESSION_ID}',
+            'success_url' => route('fees.success').'?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('fees.cancel').'?session_id={CHECKOUT_SESSION_ID}',
             'metadata' => ['order_id' => $order->id],
         ]);
     }
 
-    public function userCheckoutStripe(Request $request) {
+    public function userCheckoutStripe(Request $request)
+    {
 
         $user = User::find(Auth::user()->id);
 
@@ -414,33 +429,33 @@ class FeeController extends Controller {
                 'product_name' => $item->name,
                 'product_code' => $product_code,
                 'quantity' => $item->quantity,
-                'price' => $price  / 100,
+                'price' => $price / 100,
                 'vat' => 0,
                 'total' => ($price * $item->quantity) / 100,
             ]);
 
-            $prices["{$price_id}"] =  "{$item->quantity}";
+            $prices["{$price_id}"] = "{$item->quantity}";
         }
 
         $total = $order->items()->sum('total');
 
         $order->update([
             'total' => $total,
+            'payment_method' => 'stripe',
         ]);
 
         return $request->user()->checkout($prices, [
-            'success_url' => route('shop.fees.success') . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('shop.fees.cancel')  . '?session_id={CHECKOUT_SESSION_ID}',
+            'success_url' => route('shop.fees.success').'?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('shop.fees.cancel').'?session_id={CHECKOUT_SESSION_ID}',
             'metadata' => ['order_id' => $order->id],
         ]);
     }
 
-
     /**
      * Payment success. - Personnel (rector)
      */
-
-    public function success(Request $request) {
+    public function success(Request $request)
+    {
         $sessionId = $request->get('session_id');
 
         if ($sessionId === null) {
@@ -464,8 +479,8 @@ class FeeController extends Controller {
 
             foreach ($order->items as $item) {
                 $primaryAcademy = $user->getActiveInstitution();
-                if (!$primaryAcademy) {
-                    Log::error('Primary academy not found. Check for fees created for this order. - Order ID: ' . $order->id . ' - Item ID: ' . $item->id);
+                if (! $primaryAcademy) {
+                    Log::error('Primary academy not found. Check for fees created for this order. - Order ID: '.$order->id.' - Item ID: '.$item->id);
                 }
 
                 for ($i = 0; $i < $item->quantity; $i++) {
@@ -474,7 +489,7 @@ class FeeController extends Controller {
                         'academy_id' => $order->user->getActiveInstitutionId() ?? 1,
                         'type' => 3,
                         'start_date' => now(),
-                        'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
+                        'end_date' => now()->addYear()->endOfYear()->format('Y').'-08-31',
                         'auto_renew' => 0,
                         'unique_id' => Str::orderedUuid(),
                     ]);
@@ -484,13 +499,13 @@ class FeeController extends Controller {
             event(new \App\Events\BulkFeePaid($order));
         }
 
-
         return view('fees.rector.success', [
             'order' => $order,
         ]);
     }
 
-    public function successUser(Request $request) {
+    public function successUser(Request $request)
+    {
         $sessionId = $request->get('session_id');
 
         if ($sessionId === null) {
@@ -508,11 +523,11 @@ class FeeController extends Controller {
                 'status' => 2,
                 'total' => number_format($session->amount_total / 100, 2),
                 'payment_method' => 'stripe',
-                'result' => json_encode($session)
+                'result' => json_encode($session),
             ]);
             $user = User::find($order->user_id);
 
-            //! Cosa succede se l'utente non è in una accademia?
+            // ! Cosa succede se l'utente non è in una accademia?
 
             $academy = $order->user->primaryAcademyAthlete();
             $academyId = $academy->id ?? 1;
@@ -524,7 +539,7 @@ class FeeController extends Controller {
                     'academy_id' => $academyId,
                     'type' => 3,
                     'start_date' => now(),
-                    'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
+                    'end_date' => now()->addYear()->endOfYear()->format('Y').'-08-31',
                     'auto_renew' => 0,
                     'used' => 1,
                     'unique_id' => Str::orderedUuid(),
@@ -546,8 +561,8 @@ class FeeController extends Controller {
     /**
      * Payment cancel.
      */
-
-    public function cancel(Request $request) {
+    public function cancel(Request $request)
+    {
         $sessionId = $request->get('session_id');
 
         if ($sessionId === null) {
@@ -557,22 +572,49 @@ class FeeController extends Controller {
         $session = Cashier::stripe()->checkout->sessions->retrieve($sessionId);
 
         $orderId = $session['metadata']['order_id'] ?? null;
-
         $order = Order::findOrFail($orderId);
 
         if ($order->status !== 0) {
+            // Ordine già processato
         } else {
-            $order->update(['status' => 4, 'result' => json_encode($session)]);
+            // Estrai informazioni dettagliate sulla cancellazione
+            $cancellationData = [
+                'session_id' => $sessionId,
+                'payment_status' => $session->payment_status ?? 'unknown',
+                'status' => $session->status ?? 'unknown',
+                'cancel_url' => $session->cancel_url ?? null,
+                'customer_details' => $session->customer_details ?? null,
+                'expires_at' => $session->expires_at ?? null,
+                'mode' => $session->mode ?? null,
+                'payment_intent' => $session->payment_intent ?? null,
+                'cancelled_at' => now()->toISOString(),
+                'full_session' => $session->toArray(),
+            ];
+
+            $order->update([
+                'status' => 4,
+                'result' => json_encode($cancellationData),
+            ]);
+
+            // Log della cancellazione per debugging
+            Log::info('Rector payment cancelled', [
+                'order_id' => $order->id,
+                'user_id' => $order->user_id,
+                'session_id' => $sessionId,
+                'payment_status' => $session->payment_status ?? 'unknown',
+                'session_status' => $session->status ?? 'unknown',
+            ]);
         }
-
-
 
         return view('fees.rector.cancel', [
             'order' => $order,
+            'cancellation_reason' => $session->payment_status ?? 'unknown',
+            'session_status' => $session->status ?? 'unknown',
         ]);
     }
 
-    public function cancelUser(Request $request) {
+    public function cancelUser(Request $request)
+    {
         $sessionId = $request->get('session_id');
 
         if ($sessionId === null) {
@@ -582,27 +624,58 @@ class FeeController extends Controller {
         $session = Cashier::stripe()->checkout->sessions->retrieve($sessionId);
 
         $orderId = $session['metadata']['order_id'] ?? null;
-
         $order = Order::findOrFail($orderId);
 
         if ($order->status !== 0) {
+            // Ordine già processato
         } else {
-            $order->update(['status' => 4, 'result' => json_encode($session)]);
+            // Estrai informazioni dettagliate sulla cancellazione
+            $cancellationData = [
+                'session_id' => $sessionId,
+                'payment_status' => $session->payment_status ?? 'unknown',
+                'status' => $session->status ?? 'unknown',
+                'cancel_url' => $session->cancel_url ?? null,
+                'customer_details' => $session->customer_details ?? null,
+                'expires_at' => $session->expires_at ?? null,
+                'mode' => $session->mode ?? null,
+                'payment_intent' => $session->payment_intent ?? null,
+                'cancelled_at' => now()->toISOString(),
+                'full_session' => $session->toArray(),
+            ];
+
+            $order->update([
+                'status' => 4,
+                'result' => json_encode($cancellationData),
+            ]);
+
+            // Log della cancellazione per debugging
+            Log::info('User payment cancelled', [
+                'order_id' => $order->id,
+                'user_id' => $order->user_id,
+                'session_id' => $sessionId,
+                'payment_status' => $session->payment_status ?? 'unknown',
+                'session_status' => $session->status ?? 'unknown',
+            ]);
         }
 
         return view('website.shop.fees-cancel', [
             'order' => $order,
+            'cancellation_reason' => $session->payment_status ?? 'unknown',
+            'session_status' => $session->status ?? 'unknown',
         ]);
     }
 
-    private function retrievePriceByPriceId($priceId) {
+    private function retrievePriceByPriceId($priceId)
+    {
         $price = Cashier::stripe()->prices->retrieve($priceId);
+
         return $price->unit_amount;
     }
 
-    //? Checkout with Paypal.
+    // ? Checkout with Paypal.
 
-    public function checkoutPaypal(Request $request) {
+    public function checkoutPaypal(Request $request)
+    {
         $provider = new PaypalClient;
         $provider->setApiCredentials(config('paypal'));
         $provider->getAccessToken();
@@ -653,9 +726,9 @@ class FeeController extends Controller {
                 ],
             ],
             'application_context' => [
-                'cancel_url' => route('fees.paypal-cancel') . "?order_id={$order->id}",
-                'return_url' => route('fees.paypal-success') . "?order_id={$order->id}",
-                'order_id' => $order->id
+                'cancel_url' => route('fees.paypal-cancel')."?order_id={$order->id}",
+                'return_url' => route('fees.paypal-success')."?order_id={$order->id}",
+                'order_id' => $order->id,
             ],
         ]);
 
@@ -664,7 +737,6 @@ class FeeController extends Controller {
 
             foreach ($response['links'] as $link) {
                 if ($link['rel'] == 'approve') {
-
 
                     $order->update([
                         'status' => 1,
@@ -693,12 +765,13 @@ class FeeController extends Controller {
             return response()->json([
                 'success' => false,
                 'error' => 'Error creating order',
-                'url' => route('fees.paypal-cancel') . "?order_id={$order->id}",
+                'url' => route('fees.paypal-cancel')."?order_id={$order->id}",
             ]);
         }
     }
 
-    public function userCheckoutPaypal(Request $request) {
+    public function userCheckoutPaypal(Request $request)
+    {
 
         $provider = new PaypalClient;
         $provider->setApiCredentials(config('paypal'));
@@ -735,9 +808,9 @@ class FeeController extends Controller {
                 ],
             ],
             'application_context' => [
-                'cancel_url' => route('shop.fees.paypal-cancel') . "?order_id={$order_id}",
-                'return_url' => route('shop.fees.paypal-success') . "?order_id={$order_id}",
-                'order_id' => $order_id
+                'cancel_url' => route('shop.fees.paypal-cancel')."?order_id={$order_id}",
+                'return_url' => route('shop.fees.paypal-success')."?order_id={$order_id}",
+                'order_id' => $order_id,
             ],
         ]);
 
@@ -746,7 +819,6 @@ class FeeController extends Controller {
 
             foreach ($response['links'] as $link) {
                 if ($link['rel'] == 'approve') {
-
 
                     $order->update([
                         'status' => 1,
@@ -780,13 +852,13 @@ class FeeController extends Controller {
         }
     }
 
-    public function successUserPaypal(Request $request) {
+    public function successUserPaypal(Request $request)
+    {
         $provider = new PaypalClient;
         $provider->setApiCredentials(config('paypal'));
         $provider->getAccessToken();
         $result = $provider->capturePaymentOrder($request->token);
         $orderId = $request->order_id;
-
 
         if ($orderId === null) {
             return;
@@ -803,7 +875,7 @@ class FeeController extends Controller {
             ]);
             $user = User::find($order->user_id);
 
-            //! Cosa succede se l'utente non è in una accademia?
+            // ! Cosa succede se l'utente non è in una accademia?
 
             $academy = $order->user->primaryAcademyAthlete();
             $academyId = $academy->id ?? 1;
@@ -815,7 +887,7 @@ class FeeController extends Controller {
                     'academy_id' => $academyId,
                     'type' => 3,
                     'start_date' => now(),
-                    'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
+                    'end_date' => now()->addYear()->endOfYear()->format('Y').'-08-31',
                     'auto_renew' => 1,
                     'used' => 1,
                     'unique_id' => Str::orderedUuid(),
@@ -834,7 +906,8 @@ class FeeController extends Controller {
         ]);
     }
 
-    public function cancelUserPaypal(Request $request) {
+    public function cancelUserPaypal(Request $request)
+    {
         $provider = new PaypalClient;
         $provider->setApiCredentials(config('paypal'));
         $provider->getAccessToken();
@@ -860,7 +933,8 @@ class FeeController extends Controller {
         ]);
     }
 
-    public function successPaypal(Request $request) {
+    public function successPaypal(Request $request)
+    {
         $provider = new PaypalClient;
         $provider->setApiCredentials(config('paypal'));
         $provider->getAccessToken();
@@ -905,7 +979,8 @@ class FeeController extends Controller {
         ]);
     }
 
-    public function cancelPaypal(Request $request) {
+    public function cancelPaypal(Request $request)
+    {
         $provider = new PaypalClient;
         $provider->setApiCredentials(config('paypal'));
         $provider->getAccessToken();
@@ -931,9 +1006,10 @@ class FeeController extends Controller {
         ]);
     }
 
-    //? Wire Transfer.
+    // ? Wire Transfer.
 
-    public function userCheckoutWireTransfer(Request $request) {
+    public function userCheckoutWireTransfer(Request $request)
+    {
 
         // Crea ordine
 
@@ -949,7 +1025,6 @@ class FeeController extends Controller {
             'result' => '{}',
             'invoice_id' => $invoice->id,
         ]);
-
 
         $items = json_decode($request->items);
         $amount = 0;
