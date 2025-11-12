@@ -359,7 +359,13 @@ class AnnouncementController extends Controller {
                     }
                     if (array_intersect($user->roles->where('id', '!=', $athleteRoleId)->pluck('id')->toArray(), $allowed_roles)) {
                         // $allAcademiesPersonnel = $user->academies->pluck('id')->toArray();
-                        $primaryAcademyPersonnel = $user->primaryAcademy() ? $user->getActiveInstitutionId() : null;
+                        // $primaryAcademyPersonnel = $user->primaryAcademy() ? $user->getActiveInstitutionId() : null;
+                        // Alcuni ruoli possono non avere l'active institution settata. quindi se c'è si prende quella, altirmenti la primary academy
+                        $primaryAcademyPersonnel = $user->getActiveInstitution() 
+                            ? $user->getActiveInstitutionId() 
+                            : ($user->primaryAcademy() 
+                                ? $user->primaryAcademy()->id 
+                                : null);
                         if (in_array($primaryAcademyPersonnel, $academies)) {
                             $canSee = true;
                         }
