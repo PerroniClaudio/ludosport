@@ -428,7 +428,9 @@ class FeeController extends Controller
         if($order->items->count() > 0){
             // Se l'ordine ha già degli item, l'ordine si imposta come cancellato e se ne crea uno nuovo, aggiornando anche il dato in sessione
             $order->update(['status' => 4, 'result' => 'User restarted checkout. Another order will be generated.']);
-            $oldOrderInvoiceId = $order->invoice_id;
+            $newOrderInvoice = $order->invoice->replicate();
+            $newOrderInvoice->save();
+            
             $order=Order::create([
                 'user_id' => $user->id,
                 'status' => 0,
@@ -436,7 +438,7 @@ class FeeController extends Controller
                 'payment_method' => 'stripe',
                 'order_number' => Str::orderedUuid(),
                 'result' => '{}',
-                'invoice_id' => $oldOrderInvoiceId,
+                'invoice_id' => $newOrderInvoice->id,
             ]);
             $request->session()->put('order_id', $order->id);
         }

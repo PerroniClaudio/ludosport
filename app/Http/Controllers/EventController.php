@@ -1674,10 +1674,38 @@ class EventController extends Controller
         $order_id = $request->session()->get('order_id');
         $order = Order::findOrFail($order_id);
 
+        if($order->status != 0){
+            $oldOrder = $order;
 
-        $order->update([
-            'payment_method' => 'stripe',
-        ]);
+            $oldOrder->update([
+                'status' => 4,
+                'result' => 'User restarted checkout. Another order will be generated.'
+            ]);
+            $newOrderInvoice = $oldOrder->invoice->replicate();
+            $newOrderInvoice->save();
+
+            $order = Order::create([
+                'user_id' => $user->id,
+                'status' => 0,
+                'total' => $event->price,
+                'payment_method' => 'stripe',
+                'order_number' => Str::orderedUuid(),
+                'result' => '{}',
+                'invoice_id' => $newOrderInvoice->id,
+            ]);
+            $request->session()->put('order_id', $order->id);
+
+            foreach ($oldOrder->items as $item) {
+                $newItem = $item->replicate();
+                $newItem->order_id = $order->id;
+                $newItem->save();
+            }
+            
+        } else {
+            $order->update([
+                'payment_method' => 'stripe',
+            ]);
+        }
 
         return $request->user()->checkoutCharge(($event->price * 100), $event->name, 1, [
             'success_url' => route('shop.event.success') . '?session_id={CHECKOUT_SESSION_ID}',
