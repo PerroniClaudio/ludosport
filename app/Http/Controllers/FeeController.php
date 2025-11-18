@@ -412,6 +412,9 @@ class FeeController extends Controller
 
         $order_id = $request->session()->get('order_id');
         $order = Order::findOrFail($order_id);
+        if(!$order){
+            return redirect()->back()->withErrors(['order_not_found' => 'Order not found']);
+        }
 
         // Aggiungi item all'ordine
 
@@ -421,6 +424,22 @@ class FeeController extends Controller
         $product_code = config('app.stripe.fee_code');
         $price_id = config('app.stripe.fee_price');
         $price = $this->retrievePriceByPriceId($price_id);
+
+        if($order->items->count() > 0){
+            // Se l'ordine ha già degli item, l'ordine si imposta come cancellato e se ne crea uno nuovo, aggiornando anche il dato in sessione
+            $order->update(['status' => 4, 'result' => 'User restarted checkout. Another order will be generated.']);
+            $oldOrderInvoiceId = $order->invoice_id;
+            $order=Order::create([
+                'user_id' => $user->id,
+                'status' => 0,
+                'total' => 0,
+                'payment_method' => 'stripe',
+                'order_number' => Str::orderedUuid(),
+                'result' => '{}',
+                'invoice_id' => $oldOrderInvoiceId,
+            ]);
+            $request->session()->put('order_id', $order->id);
+        }
 
         foreach ($items as $item) {
 

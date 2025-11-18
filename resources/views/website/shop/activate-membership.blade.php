@@ -6,8 +6,8 @@
         <section class="col-span-12 py-12">
             <div x-data="{
                 birthday: '',
-                Fees: 0,
-                FeesPrice: {{$feePrice}},
+                fees: 0,
+                feesPrice: {{$feePrice}},
                 totalPrice: 0,
                 name: 'Name',
                 surname: 'Surname',
@@ -47,7 +47,7 @@
             
                     if (age < 99) {
                         this.fees = 1
-                        this.totalPrice = this.FeesPrice
+                        this.totalPrice = this.feesPrice
             
                         this.shouldShowPayment = true
             
