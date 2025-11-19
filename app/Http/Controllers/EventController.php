@@ -1679,7 +1679,7 @@ class EventController extends Controller
 
             $oldOrder->update([
                 'status' => 4,
-                'result' => 'User restarted checkout. Another order will be generated.'
+                'result' => json_encode(['message' => 'User restarted checkout. Another order will be generated.'])
             ]);
             $newOrderInvoice = $oldOrder->invoice->replicate();
             $newOrderInvoice->save();

@@ -427,7 +427,7 @@ class FeeController extends Controller
 
         if($order->items->count() > 0){
             // Se l'ordine ha già degli item, l'ordine si imposta come cancellato e se ne crea uno nuovo, aggiornando anche il dato in sessione
-            $order->update(['status' => 4, 'result' => 'User restarted checkout. Another order will be generated.']);
+            $order->update(['status' => 4, 'result' => json_encode(['message' => 'User restarted checkout. Another order will be generated.'])]);
             $newOrderInvoice = $order->invoice->replicate();
             $newOrderInvoice->save();
             
