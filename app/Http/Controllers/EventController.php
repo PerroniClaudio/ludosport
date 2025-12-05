@@ -562,8 +562,8 @@ class EventController extends Controller
 
         switch ($authRole) {
             case 'admin':
-                $events = Event::where('start_date', '>=', $request->start)
-                    ->where('end_date', '<=', $request->end)
+                $events = Event::where('start_date', '<=', $request->end)
+                    ->where('end_date', '>=', $request->start)
                     ->where('is_disabled', false)
                     ->with('user')
                     ->get();
@@ -572,8 +572,8 @@ class EventController extends Controller
             case 'manager':
                 $primaryAcademy = $authUser->getActiveInstitution();
                 $events = Event::where('academy_id', ($primaryAcademy ? $primaryAcademy->id : null))
-                    ->where('start_date', '>=', $request->start)
-                    ->where('end_date', '<=', $request->end)
+                    ->where('start_date', '<=', $request->end)
+                    ->where('end_date', '>=', $request->start)
                     ->where('is_disabled', false)
                     ->with('user')
                     ->get();
@@ -581,8 +581,8 @@ class EventController extends Controller
             case 'dean':
                 $primaryAcademy = $authUser->getActiveInstitution()->academy;
                 $events = Event::where('academy_id', ($primaryAcademy ? $primaryAcademy->id : null))
-                    ->where('start_date', '>=', $request->start)
-                    ->where('end_date', '<=', $request->end)
+                    ->where('start_date', '<=', $request->end)
+                    ->where('end_date', '>=', $request->start)
                     ->where('is_disabled', false)
                     ->with('user')
                     ->get();
@@ -590,15 +590,15 @@ class EventController extends Controller
             case 'technician':
                 $events = Event::whereHas('personnel', function ($query) use ($authUser) {
                     $query->where('user_id', $authUser->id);
-                })->where('start_date', '>=', $request->start)
-                    ->where('end_date', '<=', $request->end)
+                })->where('start_date', '<=', $request->end)
+                    ->where('end_date', '>=', $request->start)
                     ->where('is_disabled', false)
                     ->with('user')
                     ->get();
                 break;
             default:
-                $events = Event::where('start_date', '>=', $request->start)
-                    ->where('end_date', '<=', $request->end)
+                $events = Event::where('start_date', '<=', $request->end)
+                    ->where('end_date', '>=', $request->start)
                     ->where('is_disabled', false)
                     ->with('user')
                     ->get();
