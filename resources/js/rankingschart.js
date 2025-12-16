@@ -6,7 +6,11 @@ export const rankingschart = (config = {}) => {
     const distinctYears = Array.isArray(config.yearOptions)
         ? config.yearOptions
         : [];
-    const defaultYear = distinctYears.length > 0 ? distinctYears[0] : null;
+    const baseYears =
+        distinctYears.length > 0 ? distinctYears : [currentSeasonYear];
+    const yearOptions = baseYears.includes(currentSeasonYear)
+        ? baseYears
+        : [currentSeasonYear, ...baseYears];
 
     return {
         events: [],
@@ -16,8 +20,8 @@ export const rankingschart = (config = {}) => {
         nationFilter: "",
         nation: [],
         eventName: "General Rankings",
-        selectedYear: defaultYear ?? currentSeasonYear,
-        yearOptions: distinctYears,
+        selectedYear: currentSeasonYear,
+        yearOptions,
         selectedSeasonDateISO() {
             const effectiveYear = this.selectedYear ?? currentSeasonYear;
             const date = new Date(effectiveYear, 9, 31, 23, 59, 59, 999); // Oct 31 of the selected season year
