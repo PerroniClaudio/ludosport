@@ -21,6 +21,15 @@ export const rankingschart = (config = {}) => {
         eventName: "General Rankings",
         selectedYear: currentSeasonYear,
         yearOptions,
+        isLoading: false,
+        async withLoading(callback) {
+            this.isLoading = true;
+            try {
+                await callback();
+            } finally {
+                this.isLoading = false;
+            }
+        },
         selectedSeasonDateISO() {
             const effectiveYear = this.selectedYear ?? currentSeasonYear;
             const date = new Date(effectiveYear, 9, 31, 23, 59, 59, 999); // Oct 31 of the selected season year
@@ -28,14 +37,16 @@ export const rankingschart = (config = {}) => {
         },
         onYearChange: async function () {
             this.page = 1;
-            if (this.selectedEvent && this.selectedEvent !== 0) {
-                await this.getDataForEvent(this.selectedEvent);
-            } else if (this.nationFilter) {
-                await this.fiterByNation(this.nationFilter);
-            } else {
-                await this.getGeneralRankings();
-            }
-            await this.getEventsList(this.nationFilter || null);
+            await this.withLoading(async () => {
+                if (this.selectedEvent && this.selectedEvent !== 0) {
+                    await this.getDataForEvent(this.selectedEvent);
+                } else if (this.nationFilter) {
+                    await this.fiterByNation(this.nationFilter);
+                } else {
+                    await this.getGeneralRankings();
+                }
+                await this.getEventsList(this.nationFilter || null);
+            });
         },
         getEventsList: async function (nationId = null) {
             const url = `/website-rankings/events/list?date=${this.selectedSeasonDateISO()}${

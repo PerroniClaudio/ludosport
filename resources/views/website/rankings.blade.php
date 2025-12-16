@@ -71,7 +71,17 @@
 
                     <h1 class="font-bold tracking-tighter text-4xl pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300"
                         x-text="eventName"></h1>
-                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg relative">
+                        <div x-show="isLoading" x-transition
+                            class="absolute inset-0 bg-white/70 dark:bg-background-900/70 flex items-center justify-center z-20">
+                            <svg class="animate-spin h-10 w-10 text-primary-500" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                        </div>
                         <div class="p-6 text-background-900 dark:text-background-100">
                             <div
                                 class="overflow-x-auto bg-white dark:bg-background-800 rounded-lg shadow overflow-y-auto relative   w-full">
