@@ -1978,6 +1978,11 @@ class EventController extends Controller
             ->values()
             ->all();
 
+        $currentSeasonYear = Event::calculateEventYear(now());
+        if (!in_array($currentSeasonYear, $years, true)) {
+            array_unshift($years, $currentSeasonYear);
+        }
+
         foreach ($countries as $key => $country) {
 
             if ($country->academies->count() == 0) {

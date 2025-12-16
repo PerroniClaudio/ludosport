@@ -6,11 +6,10 @@ export const rankingschart = (config = {}) => {
     const distinctYears = Array.isArray(config.yearOptions)
         ? config.yearOptions
         : [];
-    const baseYears =
-        distinctYears.length > 0 ? distinctYears : [currentSeasonYear];
-    const yearOptions = baseYears.includes(currentSeasonYear)
-        ? baseYears
-        : [currentSeasonYear, ...baseYears];
+    const mergedYears = distinctYears.includes(currentSeasonYear)
+        ? distinctYears
+        : [currentSeasonYear, ...distinctYears];
+    const yearOptions = [...new Set(mergedYears)];
 
     return {
         events: [],
