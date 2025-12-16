@@ -73,7 +73,7 @@
                         x-text="eventName"></h1>
                     <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg relative">
                         <div x-show="isLoading" x-transition
-                            class="absolute inset-0 bg-white/70 dark:bg-background-900/70 flex items-center justify-center z-20">
+                            class="absolute inset-0 bg-background-900/80 dark:bg-background-900/80 flex items-center justify-center z-20">
                             <svg class="animate-spin h-10 w-10 text-primary-500" xmlns="http://www.w3.org/2000/svg"
                                 fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
