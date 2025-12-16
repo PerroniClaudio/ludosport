@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
@@ -42,13 +43,40 @@ class Event extends Model {
         'block_subscriptions',
         'waiting_list_close_date',
         'internal_shop',
+        'year',
     ];
 
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'waiting_list_close_date' => 'datetime',
+        'year' => 'integer',
     ];
+
+    protected static function booted() {
+        static::creating(function (Event $event) {
+            if (is_null($event->year)) {
+                $event->year = self::calculateEventYear($event->start_date);
+            }
+        });
+
+        static::updating(function (Event $event) {
+            if ($event->isDirty('start_date') && !$event->isDirty('year')) {
+                $event->year = self::calculateEventYear($event->start_date);
+            }
+        });
+    }
+
+    public static function calculateEventYear($date): ?int {
+        if (!$date) {
+            return null;
+        }
+
+        $parsedDate = Carbon::parse($date);
+        $baseYear = (int) $parsedDate->format('Y');
+
+        return $parsedDate->month >= 11 ? $baseYear + 1 : $baseYear;
+    }
 
     public function nation() {
         return $this->belongsTo(Nation::class);

@@ -1,5 +1,12 @@
-export const rankingschart = () => {
+export const rankingschart = (config = {}) => {
     const today = new Date();
+    const computeSeasonYear = (date) =>
+        date.getMonth() >= 10 ? date.getFullYear() + 1 : date.getFullYear();
+    const currentSeasonYear = computeSeasonYear(today);
+    const distinctYears = Array.isArray(config.yearOptions)
+        ? config.yearOptions
+        : [];
+    const defaultYear = distinctYears.length > 0 ? distinctYears[0] : null;
 
     return {
         events: [],
@@ -9,8 +16,26 @@ export const rankingschart = () => {
         nationFilter: "",
         nation: [],
         eventName: "General Rankings",
+        selectedYear: defaultYear ?? currentSeasonYear,
+        yearOptions: distinctYears,
+        selectedSeasonDateISO() {
+            const effectiveYear = this.selectedYear ?? currentSeasonYear;
+            const date = new Date(effectiveYear, 9, 31, 23, 59, 59, 999); // Oct 31 of the selected season year
+            return date.toISOString();
+        },
+        onYearChange: async function () {
+            this.page = 1;
+            if (this.selectedEvent && this.selectedEvent !== 0) {
+                await this.getDataForEvent(this.selectedEvent);
+            } else if (this.nationFilter) {
+                await this.fiterByNation(this.nationFilter);
+            } else {
+                await this.getGeneralRankings();
+            }
+            await this.getEventsList(this.nationFilter || null);
+        },
         getEventsList: async function (nationId = null) {
-            const url = `/website-rankings/events/list?date=${today.toISOString()}${
+            const url = `/website-rankings/events/list?date=${this.selectedSeasonDateISO()}${
                 nationId ? "&nation=" + nationId : ""
             }`;
             const response = await fetch(url);
@@ -23,7 +48,7 @@ export const rankingschart = () => {
         getDataForEvent: async function (id) {
             this.selectedEvent = id;
             this.athletesData = [];
-            const url = `/website-rankings/events/${this.selectedEvent}/rankings`;
+            const url = `/website-rankings/events/${this.selectedEvent}/rankings?date=${this.selectedSeasonDateISO()}`;
             const response = await fetch(url);
 
             if (response.ok) {
@@ -49,12 +74,12 @@ export const rankingschart = () => {
         },
         getGeneralRankings: async function () {
             if (this.nationFilter != "") {
-                this.fiterByNation(this.nationFilter);
+                await this.fiterByNation(this.nationFilter);
             } else {
                 this.selectedEvent = 0;
                 this.athletesData = [];
                 this.eventName = "General Rankings";
-                const url = `/website-rankings/general?date=${today.toISOString()}`;
+                const url = `/website-rankings/general?date=${this.selectedSeasonDateISO()}`;
                 const response = await fetch(url);
 
                 if (response.ok) {
@@ -91,12 +116,12 @@ export const rankingschart = () => {
                 return;
             }
 
-            this.getEventsList(nationId);
+            await this.getEventsList(nationId);
             this.events = this.events.filter((a) => a.nation_id == nationId);
             this.athletesData = [];
 
             const res = await fetch(
-                `/website-rankings/nation/${nationId}/rankings`
+                `/website-rankings/nation/${nationId}/rankings?date=${this.selectedSeasonDateISO()}`
             );
 
             const data = await res.json();

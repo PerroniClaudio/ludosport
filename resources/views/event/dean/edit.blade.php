@@ -80,6 +80,10 @@
                         value="{{ $event->end_date }}" placeholder="{{ fake()->date() }}"
                         disabled="{{ true }}" />
 
+                    <x-form.input name="year" label="Year" type="number" required="{{ false }}"
+                        value="{{ $event->year }}" placeholder="{{ now()->year }}"
+                        disabled="{{ true }}" />
+
                     <x-form.input name="waiting_list_close_date" label="Waiting list closing date" type="datetime-local"
                         required="{{ false }}" value="{{ $event->waiting_list_close_date }}"
                         placeholder="{{ fake()->date() }}" disabled="{{ true }}"

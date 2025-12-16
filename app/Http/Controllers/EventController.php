@@ -164,6 +164,7 @@ class EventController extends Controller
             'name' => $request->name,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
+            'year' => Event::calculateEventYear($request->start_date),
             'description' => '',
             'user_id' => auth()->user()->id,
             'location' => '',
@@ -415,6 +416,7 @@ class EventController extends Controller
                 'start_date' => 'required',
                 'end_date' => 'required',
                 'price' => 'min:0',
+                'year' => 'nullable|integer',
             ]);
 
 
@@ -427,6 +429,7 @@ class EventController extends Controller
             }
 
             $event->name = $request->name;
+            $event->year = $request->filled('year') ? (int) $request->year : Event::calculateEventYear($request->start_date);
 
             // $event->start_date = Carbon::parse($request->start_date, $request->user_timezone)->setTimezone('GMT');
             // $event->end_date = Carbon::parse($request->end_date, $request->user_timezone)->setTimezone('GMT');
@@ -1042,13 +1045,15 @@ class EventController extends Controller
     public function list(Request $request)
     {
 
-        $date = Carbon::parse($request->date);
+        $date = Carbon::parse($request->date ?? now());
+        $seasonYear = Event::calculateEventYear($date);
 
         $eventsQuery = Event::query()
             ->where('is_approved', 1)
             ->where('is_published', 1)
             ->where('end_date', '<=', $date->format('Y-m-d'))
             ->where('is_disabled', 0)
+            ->where('year', $seasonYear)
             ->whereHas('type', function ($q) {
                 $q->whereIn('name', [
                     'School Tournament',
@@ -1137,10 +1142,12 @@ class EventController extends Controller
     public function general(Request $request)
     {
 
-        $date = Carbon::parse($request->date);
+        $date = Carbon::parse($request->date ?? now());
+        $seasonYear = Event::calculateEventYear($date);
 
         $events = Event::where('end_date', '<=', $date->format('Y-m-d'))
             ->where('is_disabled', false)
+            ->where('year', $seasonYear)
             ->whereHas('type', function ($q) {
                 $q->whereIn('name', [
                     'School Tournament',
@@ -1216,14 +1223,16 @@ class EventController extends Controller
 
         // Usa la data fornita, se presente, altrimenti now()
         $date = $request->date ? \Carbon\Carbon::parse($request->date) : now();
+        $seasonYear = Event::calculateEventYear($date);
 
         foreach ($users as $user) {
             $primaryAcademyAthlete = $user->primaryAcademyAthlete();
 
             // Calcola i punti totali filtrando per la data richiesta
             $eventResults = $user->eventResults()
-                ->whereHas('event', function ($query) use ($date) {
+                ->whereHas('event', function ($query) use ($date, $seasonYear) {
                     $query->where('end_date', '<=', $date->format('Y-m-d'))
+                        ->where('year', $seasonYear)
                         ->where('is_disabled', false)
                         ->whereHas('type', function ($q) {
                             $q->whereIn('name', [
@@ -1271,8 +1280,15 @@ class EventController extends Controller
         ]);
     }
 
-    public function eventResult(Event $event)
+    public function eventResult(Request $request, Event $event)
     {
+
+        $date = Carbon::parse($request->date ?? now());
+        $seasonYear = Event::calculateEventYear($date);
+
+        if ($event->year !== $seasonYear) {
+            return response()->json([]);
+        }
 
         $results = [];
 
@@ -1943,6 +1959,24 @@ class EventController extends Controller
 
         $countries = Nation::all();
         $continents = [];
+        $years = Event::query()
+            ->whereNotNull('year')
+            ->where('is_approved', 1)
+            ->where('is_published', 1)
+            ->where('is_disabled', false)
+            ->whereHas('type', function ($q) {
+                $q->whereIn('name', [
+                    'School Tournament',
+                    'Academy Tournament',
+                    'National Tournament'
+                ]);
+            })
+            ->select('year')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year')
+            ->values()
+            ->all();
 
         foreach ($countries as $key => $country) {
 
@@ -1986,6 +2020,7 @@ class EventController extends Controller
 
         return view('website.rankings', [
             'continents' => $continents,
+            'years' => $years,
         ]);
     }
 }

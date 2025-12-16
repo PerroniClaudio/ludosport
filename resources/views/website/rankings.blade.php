@@ -15,7 +15,7 @@
             </p>
 
             <div class="flex flex-col lg:grid lg:grid-cols-12 gap-4 rounded  min-h-[60vh]  mt-8" x-load
-                x-data="rankingschart" x-init="$watch('nationFilter', (value) => fiterByNation(value))">
+                x-data="rankingschart({ yearOptions: @json($years) })" x-init="$watch('nationFilter', (value) => fiterByNation(value))">
                 <div class="flex flex-col gap-2 col-span-3">
                     <!-- Events -->
 
@@ -162,8 +162,8 @@
 
                                             </table>
                                         </div>
-                                        <div class="flex justify-between items-center p-6">
-                                            <div class="flex items-center justify-end w-full">
+                                        <div class="flex justify-between items-center p-6 flex-wrap gap-4">
+                                            <div class="flex items-center justify-end w-full lg:w-auto">
 
                                                 <div class="flex items-center">
                                                     <button type="button" x-on:click="page = 1" class="mr-2"
@@ -194,6 +194,19 @@
                                                             class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                                                     </button>
                                                 </div>
+                                            </div>
+                                            <div class="flex items-center gap-2 ml-auto">
+                                                <label class="text-sm text-background-600 dark:text-background-300"
+                                                    for="ranking-year-selector">
+                                                    Year
+                                                </label>
+                                                <select id="ranking-year-selector" x-model.number="selectedYear"
+                                                    x-on:change="onYearChange()"
+                                                    class="border border-background-100 dark:border-background-700 rounded-lg p-2 text-sm bg-white dark:bg-background-800 text-background-700 dark:text-background-200 w-28 sm:w-32">
+                                                    <template x-for="year in yearOptions" :key="year">
+                                                        <option :value="year" x-text="year"></option>
+                                                    </template>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
