@@ -110,6 +110,46 @@ class User extends Authenticatable implements MustVerifyEmail {
                 $user->unique_code = $unique_code;
             }
         });
+
+        // Invalida cache statistiche atleti quando un utente viene creato o modificato
+        static::created(function ($user) {
+            static::clearAthletesCache();
+        });
+
+        // Invalida cache quando is_disabled viene modificato
+        static::updated(function ($user) {
+            if ($user->isDirty('is_disabled')) {
+                static::clearAthletesCache();
+            }
+        });
+
+        // Invalida cache quando un utente viene eliminato definitivamente
+        static::deleted(function ($user) {
+            static::clearAthletesCache();
+        });
+    }
+
+    /**
+     * Invalida tutte le cache delle statistiche atleti
+     */
+    protected static function clearAthletesCache() {
+        // Cache world
+        \Illuminate\Support\Facades\Cache::forget('athletes-world-data');
+        \Illuminate\Support\Facades\Cache::forget('athletes-world-data-per-year');
+
+        // Cache academy - invalida per tutte le academy
+        $academies = \App\Models\Academy::pluck('id');
+        foreach ($academies as $academyId) {
+            \Illuminate\Support\Facades\Cache::forget("athletes-academy-{$academyId}-data");
+            \Illuminate\Support\Facades\Cache::forget("athletes-academy-{$academyId}-data-per-year");
+        }
+
+        // Cache school - invalida per tutte le school
+        $schools = \App\Models\School::pluck('id');
+        foreach ($schools as $schoolId) {
+            \Illuminate\Support\Facades\Cache::forget("athletes-school-{$schoolId}-data");
+            \Illuminate\Support\Facades\Cache::forget("athletes-school-{$schoolId}-data-per-year");
+        }
     }
 
 
