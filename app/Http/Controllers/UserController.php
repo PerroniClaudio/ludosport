@@ -2033,6 +2033,21 @@ class UserController extends Controller {
         $users_course_not_active = 0;
         $new_users_this_year = 0;
 
+        // Determina l'anno accademico corrente (1 settembre - 31 agosto)
+        $now = now();
+        $currentMonth = $now->month;
+        $currentYear = $now->year;
+        
+        // Se siamo prima del 1 settembre, l'anno accademico è iniziato l'anno scorso
+        if ($currentMonth <= 8) {
+            $academicYearStart = \Carbon\Carbon::create($currentYear - 1, 9, 1, 0, 0, 0);
+            $academicYearEnd = \Carbon\Carbon::create($currentYear, 8, 31, 23, 59, 59);
+        } else {
+            // Se siamo dopo l'1 settembre, l'anno accademico finirà l'anno prossimo
+            $academicYearStart = \Carbon\Carbon::create($currentYear, 9, 1, 0, 0, 0);
+            $academicYearEnd = \Carbon\Carbon::create($currentYear + 1, 8, 31, 23, 59, 59);
+        }
+
         foreach ($athletes as $key => $athlete) {
 
             if ($athlete->has_paid_fee) {
@@ -2047,7 +2062,7 @@ class UserController extends Controller {
                 $users_course_not_active++;
             }
 
-            if ($athlete->created_at->year == now()->year) {
+            if ($athlete->created_at >= $academicYearStart && $athlete->created_at <= $academicYearEnd) {
                 $new_users_this_year++;
             }
         }
@@ -2144,8 +2159,33 @@ class UserController extends Controller {
         $athletes_last_year = 0;
         $athletes_this_year = 0;
 
+        // Determina l'anno accademico corrente (1 settembre - 31 agosto)
+        $now = now();
+        $currentMonth = $now->month;
+        $currentYear = $now->year;
+        
+        // Se siamo prima del 1 settembre, l'anno accademico è iniziato l'anno scorso
+        if ($currentMonth <= 8) {
+            $academicYearStart = \Carbon\Carbon::create($currentYear - 1, 9, 1, 0, 0, 0);
+            $academicYearEnd = \Carbon\Carbon::create($currentYear, 8, 31, 23, 59, 59);
+            // Anno accademico precedente
+            $previousAcademicYearStart = \Carbon\Carbon::create($currentYear - 2, 9, 1, 0, 0, 0);
+            $previousAcademicYearEnd = \Carbon\Carbon::create($currentYear - 1, 8, 31, 23, 59, 59);
+        } else {
+            // Se siamo dopo l'1 settembre, l'anno accademico finirà l'anno prossimo
+            $academicYearStart = \Carbon\Carbon::create($currentYear, 9, 1, 0, 0, 0);
+            $academicYearEnd = \Carbon\Carbon::create($currentYear + 1, 8, 31, 23, 59, 59);
+            // Anno accademico precedente
+            $previousAcademicYearStart = \Carbon\Carbon::create($currentYear - 1, 9, 1, 0, 0, 0);
+            $previousAcademicYearEnd = \Carbon\Carbon::create($currentYear, 8, 31, 23, 59, 59);
+        }
+
         foreach ($athletes as $athlete) {
-            $athlete->created_at->year == now()->year ? $athletes_this_year++ : $athletes_last_year++;
+            if ($athlete->created_at >= $academicYearStart && $athlete->created_at <= $academicYearEnd) {
+                $athletes_this_year++;
+            } else if ($athlete->created_at >= $previousAcademicYearStart && $athlete->created_at <= $previousAcademicYearEnd) {
+                $athletes_last_year++;
+            }
         }
 
         return response()->json([
