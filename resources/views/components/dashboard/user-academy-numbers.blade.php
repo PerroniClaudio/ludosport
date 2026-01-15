@@ -42,23 +42,27 @@
 
         <!-- Utenti attivi ma non associati a un corso -->
 
-        <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg">
-            <a href="{{ route($pathNamePrefix . 'users.filtered-by-active-and-course', ['active' => 'active', 'clans' => 'without']) }}" rel="noopener noreferrer">
+        <a href="{{ route($pathNamePrefix . 'users.filtered-by-active-and-course', ['active' => 'active', 'clans' => 'without']) }}" rel="noopener noreferrer"
+            class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg"    
+        >
+            {{-- <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg"> --}}
                 <h4 class="text-background-800 dark:text-background-200 text-lg">
                     {{ __('dashboard.rector_active_users_no_course') }}</h4>
                 <span class="text-primary-600 dark:text-primary-500 text-3xl" x-text="active_users_no_course"></span>
-            </a>
-        </div>
+            {{-- </div> --}}
+        </a>
 
         <!-- Utenti associati a un corso ma non attivi -->
 
-        <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg">
-            <a href="{{ route($pathNamePrefix . 'users.filtered-by-active-and-course', ['active' => 'inactive', 'clans' => 'with']) }}" rel="noopener noreferrer">
+        <a href="{{ route($pathNamePrefix . 'users.filtered-by-active-and-course', ['active' => 'inactive', 'clans' => 'with']) }}" rel="noopener noreferrer"
+            class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg"    
+        >
+            {{-- <div class="flex flex-col justify-between p-4 bg-background-100 dark:bg-background-700 rounded-lg"> --}}
                 <h4 class="text-background-800 dark:text-background-200 text-lg">
                     {{ __('dashboard.rector_inactive_users') }}</h4>
                 <span class="text-primary-600 dark:text-primary-500 text-3xl" x-text="users_course_not_active"></span>
-            </a>
-        </div>
+            {{-- </div> --}}
+        </a>
 
         <!-- Utenti iscritti quest'anno per la prima volta -->
 
