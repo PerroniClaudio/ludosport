@@ -61,7 +61,7 @@
         </form>
     </div>
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-    <div x-load x-data="editor('{{ $value }}', {{ $authRole === 'admin' || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')) ? 'true' : 'false' }})">
+    <div x-load x-data="editor(@js($value), {{ $authRole === 'admin' || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')) ? 'true' : 'false' }})">
 
         <template x-if="isLoaded()">
             <div class="menu flex items-center justify-between">
