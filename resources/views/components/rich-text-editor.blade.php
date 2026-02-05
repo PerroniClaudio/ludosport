@@ -28,7 +28,7 @@
 
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-    <div x-load x-data="editor('{{ $value }}', {{ $editable ? 'true' : 'false' }})">
+    <div x-load x-data="editor(@js($value), {{ $editable ? 'true' : 'false' }})">
         <template x-if="isLoaded()">
             <div class="menu flex items-center justify-between">
                 <div class="flex items-center gap-1">

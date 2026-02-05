@@ -27,7 +27,7 @@
             <div>
                 <x-input-label for="birthday" :value="__('Birthday')" />
                 <x-text-input id="birthday" class="block mt-1 w-full" type="date" name="birthday" :value="old('birthday')"
-                    required autofocus autocomplete="birthday" />
+                    placeholder="dd/mm/yyyy" required autofocus autocomplete="birthday" />
                 <x-input-error :messages="$errors->get('birthday')" class="mt-2" />
             </div>
 
@@ -111,8 +111,8 @@
                         $subYears[] = ['value' => $year, 'label' => $year];
                     }
                 @endphp
-                <x-form.select name="subscription_year" label="{{ __('First subscription year') }}" :options="$subYears"
-                    :shouldHaveEmptyOption="false" :required="true" :value="date('Y')" />
+                <x-form.select name="subscription_year" label="{{ __('Year you started LudoSport') }}"
+                    :options="$subYears" :shouldHaveEmptyOption="false" :required="true" :value="date('Y')" />
             </div>
 
             <!-- How did you met us -->
