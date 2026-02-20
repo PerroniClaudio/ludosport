@@ -1,13 +1,21 @@
 @props(['value' => '', 'label' => '', 'event' => []])
 @php
     $authRole = auth()->user()->getRole();
-    $formRoute = $authRole === 'admin' ? 'events.save.description' : $authRole . '.events.save.description';
+    $candidateFormRoute = $authRole === 'admin' ? 'events.save.description' : $authRole . '.events.save.description';
+    $hasDescriptionRoute = \Illuminate\Support\Facades\Route::has($candidateFormRoute);
+    $formRoute = $candidateFormRoute;
+    $authUser = auth()->user();
+    $canEditDescription = $authRole === 'admin' ||
+        ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === $authUser->getActiveInstitutionId())) ||
+        $event->user_id === $authUser->id ||
+        $event->personnel()->where('user_id', $authUser->id)->exists();
+    $canEditDescription = $canEditDescription && $hasDescriptionRoute;
 @endphp
 
 
 <script>
     async function saveContent() {
-        @if ($authRole === 'admin' || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')))
+        @if ($canEditDescription)
             const description = document.getElementById('editor-content').value;
             const formDataContent = new FormData();
 
@@ -46,7 +54,7 @@
                 <x-lucide-circle-check class="w-5 h-5 text-primary-500 dark:text-primary-500 cursor-pointer" />
             </div>
         </div>
-        @if ($authRole === 'admin' || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')))
+        @if ($canEditDescription)
             <form method="POST" action={{ route($formRoute, $event->id) }}>
             @else
                 <form>
@@ -61,7 +69,7 @@
         </form>
     </div>
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-    <div x-load x-data="editor(@js($value), {{ $authRole === 'admin' || (!$event->is_approved && ($authRole === 'rector' || $authRole === 'manager')) ? 'true' : 'false' }})">
+    <div x-load x-data="editor(@js($value), {{ $canEditDescription ? 'true' : 'false' }})">
 
         <template x-if="isLoaded()">
             <div class="menu flex items-center justify-between">

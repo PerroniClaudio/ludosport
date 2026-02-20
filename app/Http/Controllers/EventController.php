@@ -296,10 +296,13 @@ class EventController extends Controller
     {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
+        $isEventPersonnel = $event->personnel()->where('user_id', $authUser->id)->exists();
 
-        // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato, l'utente che lo ha creato. 
+        // Può modificarlo solo l'admin, il rettore dell'accademia a cui è collegato,
+        // l'utente che lo ha creato o il personale associato all'evento.
         if (!($authRole === 'admin' ||
             ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === $authUser->getActiveInstitutionId())) ||
+            $isEventPersonnel ||
             $event->user_id === $authUser->id)) {
             return redirect()->route($authRole . '.events.index')->with('error', 'You are not authorized to edit this event');
         }
