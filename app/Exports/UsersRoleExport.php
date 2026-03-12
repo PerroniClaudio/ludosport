@@ -1,6 +1,7 @@
 <?php
 namespace App\Exports;
 
+use App\Models\School;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromArray;
 
@@ -15,8 +16,49 @@ class UsersRoleExport implements FromArray {
     public function array(): array {
 
         $selected_roles = json_decode($this->export->filters)->selected_roles;
+        $requestingUser = User::find($this->export->user_id);
+        $requestingRole = $requestingUser?->getRole();
+
         $users = User::whereHas('roles', function ($query) use ($selected_roles) {
             $query->whereIn('role_id', $selected_roles);
+        })->when(in_array($requestingRole, ['rector', 'manager', 'dean']), function ($query) use ($requestingUser, $requestingRole) {
+            $scopeId = match ($requestingRole) {
+                'rector', 'manager' => $requestingUser?->getActiveInstitutionId(),
+                'dean' => $requestingUser?->getActiveInstitutionId(),
+                default => null,
+            };
+
+            if (!$scopeId) {
+                $query->whereRaw('1 = 0');
+                return;
+            }
+
+            if (in_array($requestingRole, ['rector', 'manager'])) {
+                $query->where(function ($academyQuery) use ($scopeId) {
+                    $academyQuery->whereHas('academies', function ($q) use ($scopeId) {
+                        $q->where('academy_id', $scopeId);
+                    })->orWhereHas('academyAthletes', function ($q) use ($scopeId) {
+                        $q->where('academy_id', $scopeId);
+                    })->orWhereHas('schools', function ($q) use ($scopeId) {
+                        $q->where('academy_id', $scopeId);
+                    })->orWhereHas('schoolAthletes', function ($q) use ($scopeId) {
+                        $q->where('academy_id', $scopeId);
+                    });
+                });
+                return;
+            }
+
+            $query->where(function ($schoolQuery) use ($scopeId) {
+                $schoolQuery->whereHas('schools', function ($q) use ($scopeId) {
+                    $q->where('school_id', $scopeId);
+                })->orWhereHas('schoolAthletes', function ($q) use ($scopeId) {
+                    $q->where('school_id', $scopeId);
+                })->orWhereHas('clansPersonnel', function ($q) use ($scopeId) {
+                    $q->where('school_id', $scopeId);
+                })->orWhereHas('clans', function ($q) use ($scopeId) {
+                    $q->where('school_id', $scopeId);
+                });
+            });
         })->with('roles')->get()->map(function ($user) {
             return [
                 $user->unique_code,

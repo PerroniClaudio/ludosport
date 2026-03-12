@@ -945,7 +945,7 @@ class SchoolController extends Controller {
     }
 
     public function all(Request $request) {
-        $schools = School::where('is_disabled', '0')->with(['academy'])->get();
+        $schools = $this->queryAllowedSchools()->with(['academy'])->get();
         $formatted_schools = [];
 
         foreach ($schools as $key => $school) {
@@ -1013,18 +1013,9 @@ class SchoolController extends Controller {
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if ($authRole === 'rector') {
-            $academy = $authUser->getActiveInstitution();
-            $schools = $academy
-                ? School::query()->when($request->search, function ($q, $search) {
-                    return $q->whereIn('id', School::search($search)->keys());
-                })->where([['is_disabled', '0'], ['academy_id', $academy->id]])->with(['academy'])->get()
-                : collect([]);
-        } else {
-            $schools = School::query()->when($request->search, function ($q, $search) {
-                return $q->whereIn('id', School::search($search)->keys());
-            })->where('is_disabled', '0')->with(['academy'])->get();
-        }
+        $schools = $this->queryAllowedSchools()->when($request->search, function ($q, $search) {
+            return $q->whereIn('id', School::search($search)->keys());
+        })->with(['academy'])->get();
 
         $formatted_schools = [];
 
@@ -1038,6 +1029,31 @@ class SchoolController extends Controller {
 
 
         return response()->json($formatted_schools);
+    }
+
+    private function queryAllowedSchools()
+    {
+        $authUser = auth()->check() ? User::find(auth()->user()->id) : null;
+        $authRole = $authUser?->getRole();
+        $query = School::query()->where('is_disabled', '0');
+
+        if (!$authUser) {
+            return $query;
+        }
+
+        return match ($authRole) {
+            'rector', 'manager' => $query->whereIn('academy_id', $authUser->academies()
+                ->where('is_disabled', '0')
+                ->pluck('academies.id')
+                ->unique()
+                ->toArray()),
+            'dean' => $query->whereIn('id', $authUser->schools()
+                ->where('is_disabled', '0')
+                ->pluck('schools.id')
+                ->unique()
+                ->toArray()),
+            default => $query,
+        };
     }
 
     public function athletesDataForSchool(School $school) {

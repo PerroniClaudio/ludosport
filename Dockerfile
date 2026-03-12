@@ -1,5 +1,5 @@
 # Usa l'immagine ufficiale di PHP 8.3 con FPM
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 # Installa le dipendenze necessarie
 RUN apt-get update && apt-get install -y \
