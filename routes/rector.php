@@ -20,6 +20,8 @@ Route::prefix('rector')->middleware(['auth', 'role.institution.selected', 'role:
   Route::post('/fees/paypal/checkout', [App\Http\Controllers\FeeController::class, 'checkoutPaypal'])->name('fees.checkout-paypal');
   Route::get('/fees/paypal/success', [App\Http\Controllers\FeeController::class, 'successPaypal'])->name('fees.paypal-success');
   Route::get('/fees/paypal/cancel', [App\Http\Controllers\FeeController::class, 'cancelPaypal'])->name('fees.paypal-cancel');
+  Route::get('/fees/wire-transfer', [App\Http\Controllers\FeeController::class, 'checkoutWireTransfer'])->name('fees.wire-transfer');
+  Route::get('/wire-transfer/{order}/success', [App\Http\Controllers\FeeController::class, 'successWireTransfer'])->name('rector.wire-transfer-success');
 
   Route::get('/fees/stripe-checkout', [App\Http\Controllers\FeeController::class, 'checkoutStripe'])->name('fees.checkout');
 

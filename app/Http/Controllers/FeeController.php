@@ -1029,16 +1029,20 @@ class FeeController extends Controller
 
     // ? Wire Transfer.
 
-    public function userCheckoutWireTransfer(Request $request)
+    public function checkoutWireTransfer(Request $request)
     {
-
-        // Crea ordine
-
         $user = User::find(Auth::user()->id);
+        $academyId = $user->getActiveInstitutionId() ?? null;
+
+        if (! $academyId) {
+            return redirect()->route('rector.fees.purchase')->with('error', 'Main academy not found');
+        }
+
         $invoice = $user->invoices()->latest()->first();
 
         $order = Order::create([
             'user_id' => $user->id,
+            'academy_id' => $academyId,
             'status' => 0,
             'total' => 0,
             'payment_method' => 'wire_transfer',
@@ -1049,11 +1053,9 @@ class FeeController extends Controller
 
         $items = json_decode($request->items);
         $amount = 0;
-
         $price = config('app.stripe.fee_price_numeral');
 
         foreach ($items as $item) {
-
             $amount += $price * $item->quantity;
 
             $order->items()->create([
@@ -1071,6 +1073,22 @@ class FeeController extends Controller
             'total' => $amount,
         ]);
 
-        return redirect()->route('shop.wire-transfer-success', $order->id);
+        return redirect()->route('rector.wire-transfer-success', $order->id);
+    }
+
+    public function userCheckoutWireTransfer(Request $request)
+    {
+        if (Auth::user()->hasRole('athlete')) {
+            return redirect()->route('shop-activate-membership')->with('error', 'Wire transfer is not available for athletes.');
+        }
+
+        return redirect()->route('rector.fees.purchase')->with('error', 'Use the bulk fee purchase page to pay by wire transfer.');
+    }
+
+    public function successWireTransfer(Order $order)
+    {
+        return view('website.shop.wire-transfer', [
+            'order' => $order,
+        ]);
     }
 }
