@@ -732,7 +732,7 @@ class ClanController extends Controller {
     public function all(Request $request) {
         //
 
-        $clans = Clan::orderBy('created_at', 'desc')->where('is_disabled', '0')->with(['school'])->get();
+        $clans = $this->queryAllowedClans()->orderBy('created_at', 'desc')->with(['school'])->get();
         $formatted_clans = [];
 
         foreach ($clans as $key => $clan) {
@@ -749,8 +749,8 @@ class ClanController extends Controller {
     public function search(Request $request) {
         //
 
-        $clans = Clan::query()->when($request->search, function ($q, $search) {
-            return $q->whereIn('id', Clan::search($search)->keys())->where('is_disabled', '0');
+        $clans = $this->queryAllowedClans()->when($request->search, function ($q, $search) {
+            return $q->whereIn('id', Clan::search($search)->keys());
         })->with(['school'])->get();
 
         $formatted_clans = [];
@@ -764,6 +764,34 @@ class ClanController extends Controller {
         }
 
         return response()->json($formatted_clans);
+    }
+
+    private function queryAllowedClans()
+    {
+        $authUser = auth()->check() ? User::find(auth()->user()->id) : null;
+        $authRole = $authUser?->getRole();
+        $query = Clan::query()->where('is_disabled', '0');
+
+        if (!$authUser) {
+            return $query;
+        }
+
+        return match ($authRole) {
+            'rector', 'manager' => $query->whereIn('school_id', \App\Models\School::whereIn('academy_id', $authUser->academies()
+                ->where('is_disabled', '0')
+                ->pluck('academies.id')
+                ->unique()
+                ->toArray())
+                ->where('is_disabled', '0')
+                ->pluck('id')
+                ->toArray()),
+            'dean' => $query->whereIn('school_id', $authUser->schools()
+                ->where('is_disabled', '0')
+                ->pluck('schools.id')
+                ->unique()
+                ->toArray()),
+            default => $query,
+        };
     }
 
     public function getBySchool(Request $request) {

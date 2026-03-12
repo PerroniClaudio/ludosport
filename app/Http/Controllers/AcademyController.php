@@ -526,7 +526,7 @@ class AcademyController extends Controller {
     }
 
     public function all(Request $request) {
-        $academies = Academy::where('is_disabled', '0')->with(['nation'])->get();
+        $academies = $this->queryAllowedAcademies()->with(['nation'])->get();
         $formatted_academies = [];
 
         foreach ($academies as $key => $academy) {
@@ -562,9 +562,9 @@ class AcademyController extends Controller {
     }
 
     public function search(Request $request) {
-        $academies = Academy::query()->when($request->search, function ($q, $search) {
+        $academies = $this->queryAllowedAcademies()->when($request->search, function ($q, $search) {
             return $q->whereIn('id', Academy::search($search)->keys());
-        })->where('is_disabled', '0')->with(['nation'])->get();
+        })->with(['nation'])->get();
 
         $formatted_academies = [];
 
@@ -578,6 +578,35 @@ class AcademyController extends Controller {
 
 
         return response()->json($formatted_academies);
+    }
+
+    private function queryAllowedAcademies()
+    {
+        $authUser = Auth::check() ? User::find(Auth::user()->id) : null;
+        $authRole = $authUser?->getRole();
+        $query = Academy::query()->where('is_disabled', '0');
+
+        if (!$authUser) {
+            return $query;
+        }
+
+        switch ($authRole) {
+            case 'rector':
+            case 'manager':
+                return $query->whereIn('id', $authUser->academies()
+                    ->where('is_disabled', '0')
+                    ->pluck('academies.id')
+                    ->unique()
+                    ->toArray());
+            case 'dean':
+                return $query->whereIn('id', $authUser->schools()
+                    ->where('is_disabled', '0')
+                    ->pluck('schools.academy_id')
+                    ->unique()
+                    ->toArray());
+            default:
+                return $query;
+        }
     }
 
     private function getLocation($address) {

@@ -929,7 +929,7 @@ class EventController extends Controller
 
     public function all()
     {
-        $events = Event::where('is_approved', 1)->get();
+        $events = $this->queryAllowedEvents()->where('is_approved', 1)->get();
 
         $formatted_events = [];
 
@@ -941,7 +941,7 @@ class EventController extends Controller
             ];
         }
 
-        return response()->json($events);
+        return response()->json($formatted_events);
     }
 
     public function dashboardEvents()
@@ -982,9 +982,8 @@ class EventController extends Controller
 
     public function search(Request $request)
     {
-
-        $events = Event::query()->when($request->search, function ($q, $search) {
-            return $q->where('id', Event::search($search)->keys());
+        $events = $this->queryAllowedEvents()->when($request->search, function ($q, $search) {
+            return $q->whereIn('id', Event::search($search)->keys());
         })->get();
 
         $formatted_events = [];
@@ -998,6 +997,39 @@ class EventController extends Controller
         }
 
         return response()->json($formatted_events);
+    }
+
+    private function queryAllowedEvents()
+    {
+        $authUser = auth()->check() ? User::find(auth()->user()->id) : null;
+        $authRole = $authUser?->getRole();
+        $query = Event::query();
+
+        if (!$authUser) {
+            return $query;
+        }
+
+        switch ($authRole) {
+            case 'rector':
+            case 'manager':
+                return $query->whereIn('academy_id', $authUser->academies()
+                    ->where('is_disabled', '0')
+                    ->pluck('academies.id')
+                    ->unique()
+                    ->toArray());
+            case 'dean':
+                return $query->whereIn('school_id', $authUser->schools()
+                    ->where('is_disabled', '0')
+                    ->pluck('schools.id')
+                    ->unique()
+                    ->toArray());
+            case 'technician':
+                return $query->whereHas('personnel', function ($personnelQuery) use ($authUser) {
+                    $personnelQuery->where('user_id', $authUser->id);
+                });
+            default:
+                return $query;
+        }
     }
 
     // Sito web 

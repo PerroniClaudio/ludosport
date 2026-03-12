@@ -46,9 +46,9 @@ class Export extends Model {
                 return ['users', 'user_roles', 'users_nation', 'users_academy', 'users_school', 'users_course', 'event_participants', 'instructor_event_results', 'event_war', 'event_style', 'orders'];
             case 'rector':
             case 'manager':
-                return ['users', 'user_roles', 'users_academy', 'users_school', 'users_course', 'event_participants'];
+                return ['user_roles', 'users_academy', 'users_school', 'users_course', 'event_participants'];
             case 'dean':
-                return ['users', 'user_roles', 'users_school', 'users_course', 'event_participants'];
+                return ['user_roles', 'users_school', 'users_course', 'event_participants'];
             case 'technician':
                 return ['event_participants', 'instructor_event_results'];
             default:

@@ -14,6 +14,7 @@ use App\Exports\UsersNationExport;
 use App\Exports\UsersRoleExport;
 use App\Exports\UsersSchoolExport;
 use App\Models\Export;
+use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -29,11 +30,6 @@ class ExportController extends Controller {
         //
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
-
-        if($authRole != 'admin') {
-            return redirect()->route('dashboard')->with('error', 'The function is temporarily disabled');
-        }
-
 
         if (!$authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
@@ -102,7 +98,9 @@ class ExportController extends Controller {
         //  
 
         $export = new Export();
-        $exportTypes = $export->getExportTypes()->toArray();
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        $exportTypes = Export::getAvailableExportsByRole($authRole);
 
         $request->validate([
             'type' => 'required|string|in:' . implode(',', $exportTypes)
@@ -135,21 +133,54 @@ class ExportController extends Controller {
                 ];
                 break;
             case 'users_academy':
+                $academies = collect(json_decode($request->filters, true));
+                $allowedAcademyIds = $this->getControllableAcademyIds($authUser);
+                $selectedAcademies = $academies
+                    ->filter(fn($academy) => in_array($academy['id'] ?? null, $allowedAcademyIds, true))
+                    ->values()
+                    ->all();
+
+                if (count($selectedAcademies) === 0) {
+                    return back()->with('error', 'You are not authorized to export users for the selected academies.');
+                }
+
                 $filters = [
                     "users_type" => $request->users_type,
-                    "academies" => json_decode($request->filters, true),
+                    "academies" => $selectedAcademies,
                 ];
                 break;
             case 'users_school':
+                $schools = collect(json_decode($request->filters, true));
+                $allowedSchoolIds = $this->getControllableSchoolIds($authUser);
+                $selectedSchools = $schools
+                    ->filter(fn($school) => in_array($school['id'] ?? null, $allowedSchoolIds, true))
+                    ->values()
+                    ->all();
+
+                if (count($selectedSchools) === 0) {
+                    return back()->with('error', 'You are not authorized to export users for the selected schools.');
+                }
+
                 $filters = [
                     "users_type" => $request->users_type,
-                    "schools" => json_decode($request->filters, true),
+                    "schools" => $selectedSchools,
                 ];
                 break;
             case 'users_course':
+                $courses = collect(json_decode($request->filters, true));
+                $allowedCourseIds = $this->getControllableCourseIds($authUser);
+                $selectedCourses = $courses
+                    ->filter(fn($course) => in_array($course['id'] ?? null, $allowedCourseIds, true))
+                    ->values()
+                    ->all();
+
+                if (count($selectedCourses) === 0) {
+                    return back()->with('error', 'You are not authorized to export users for the selected courses.');
+                }
+
                 $filters = [
                     "users_type" => $request->users_type,
-                    "courses" => json_decode($request->filters, true),
+                    "courses" => $selectedCourses,
                 ];
                 break;
 
@@ -157,8 +188,19 @@ class ExportController extends Controller {
             case 'instructor_event_results':
             case 'event_war':
             case 'event_style':
+                $events = collect(json_decode($request->filters, true));
+                $allowedEventIds = $this->getControllableEventIds($authUser);
+                $selectedEvents = $events
+                    ->filter(fn($event) => in_array($event['id'] ?? null, $allowedEventIds, true))
+                    ->values()
+                    ->all();
+
+                if (count($selectedEvents) === 0) {
+                    return back()->with('error', 'You are not authorized to export the selected events.');
+                }
+
                 $filters = [
-                    "filters" => json_decode($request->filters, true),
+                    "filters" => $selectedEvents,
                 ];
                 break;
             default:
@@ -175,10 +217,103 @@ class ExportController extends Controller {
 
         $export->save();
 
-        $authRole = User::find(auth()->user()->id)->getRole();
-
         $redirectRoute = $authRole == 'admin' ? 'exports.index' : $authRole . '.exports.index';
         return redirect()->route($redirectRoute);
+    }
+
+    private function getControllableAcademyIds(User $authUser): array
+    {
+        $authRole = $authUser->getRole();
+
+        return match ($authRole) {
+            'admin' => \App\Models\Academy::where('is_disabled', '0')->pluck('id')->toArray(),
+            'rector', 'manager' => $authUser->academies()
+                ->where('is_disabled', '0')
+                ->pluck('academies.id')
+                ->unique()
+                ->values()
+                ->toArray(),
+            'dean' => $authUser->schools()
+                ->where('is_disabled', '0')
+                ->pluck('schools.academy_id')
+                ->unique()
+                ->values()
+                ->toArray(),
+            default => [],
+        };
+    }
+
+    private function getControllableEventIds(User $authUser): array
+    {
+        $authRole = $authUser->getRole();
+
+        return match ($authRole) {
+            'admin' => Event::pluck('id')->toArray(),
+            'technician' => Event::whereHas('personnel', function ($query) use ($authUser) {
+                $query->where('user_id', $authUser->id);
+            })->pluck('id')->toArray(),
+            'rector', 'manager' => Event::whereIn('academy_id', $authUser->academies()
+                ->where('is_disabled', '0')
+                ->pluck('academies.id')
+                ->unique()
+                ->toArray())
+                ->pluck('id')
+                ->toArray(),
+            'dean' => Event::whereIn('school_id', $authUser->schools()
+                ->where('is_disabled', '0')
+                ->pluck('schools.id')
+                ->unique()
+                ->toArray())
+                ->pluck('id')
+                ->toArray(),
+            default => [],
+        };
+    }
+
+    private function getControllableSchoolIds(User $authUser): array
+    {
+        $authRole = $authUser->getRole();
+
+        return match ($authRole) {
+            'admin' => \App\Models\School::where('is_disabled', '0')->pluck('id')->toArray(),
+            'rector', 'manager' => \App\Models\School::whereIn('academy_id', $authUser->academies()
+                ->where('is_disabled', '0')
+                ->pluck('academies.id')
+                ->unique()
+                ->toArray())
+                ->where('is_disabled', '0')
+                ->pluck('id')
+                ->toArray(),
+            'dean' => $authUser->schools()
+                ->where('is_disabled', '0')
+                ->pluck('schools.id')
+                ->unique()
+                ->values()
+                ->toArray(),
+            default => [],
+        };
+    }
+
+    private function getControllableCourseIds(User $authUser): array
+    {
+        $authRole = $authUser->getRole();
+
+        return match ($authRole) {
+            'admin' => \App\Models\Clan::where('is_disabled', '0')->pluck('id')->toArray(),
+            'rector', 'manager' => \App\Models\Clan::whereIn('school_id', $this->getControllableSchoolIds($authUser))
+                ->where('is_disabled', '0')
+                ->pluck('id')
+                ->toArray(),
+            'dean' => \App\Models\Clan::whereIn('school_id', $authUser->schools()
+                ->where('is_disabled', '0')
+                ->pluck('schools.id')
+                ->unique()
+                ->toArray())
+                ->where('is_disabled', '0')
+                ->pluck('id')
+                ->toArray(),
+            default => [],
+        };
     }
 
     /**

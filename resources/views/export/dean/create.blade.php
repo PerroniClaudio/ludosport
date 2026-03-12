@@ -32,10 +32,6 @@
                             <x-exports.dean.user-course />
                         </div>
 
-                        <div x-show="selectedType == 'users_academy'">
-                            <x-exports.dean.user-academy />
-                        </div>
-
                         <div x-show="selectedType == 'users_school'">
                             <x-exports.dean.user-school />
                         </div>
