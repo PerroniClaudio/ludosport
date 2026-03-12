@@ -133,40 +133,27 @@ class OrderController extends Controller {
             return redirect()->route('orders.edit', $order->id)->with('error', 'Order already approved');
         }
 
-        // Definire l'id dell'accademia da attribuire
-
-        // Al momento wire transfer possono usarlo solo gli atleti.
-        // Se dovranno usarlo anche i docenti, bisognerà aggiungere il campo academy_id, perchè il valore non può più essere recuperato con $order->user->primaryAcademy().
+        $isBulkFeeOrder = ! is_null($order->academy_id);
         $athleteAcademy = $order->user->primaryAcademyAthlete();
+        $academyId = $isBulkFeeOrder ? $order->academy_id : ($athleteAcademy ? $athleteAcademy->id : 1);
 
-        $academyId = $athleteAcademy ? $athleteAcademy->id : 1;
+        foreach ($order->items as $item) {
+            if ($item->product_type == 'fee') {
+                if ($isBulkFeeOrder) {
+                    for ($i = 0; $i < $item->quantity; $i++) {
+                        Fee::create([
+                            'user_id' => $order->user_id,
+                            'academy_id' => $academyId,
+                            'type' => 3,
+                            'start_date' => now(),
+                            'end_date' => now()->addYear(),
+                            'auto_renew' => 0,
+                            'unique_id' => Str::orderedUuid(),
+                        ]);
+                    }
 
-        // Capire cosa c'è dentro l'ordine
-
-        if (count($order->items) > 1) {
-
-            // Sono fee multiple. (dal momento che è limitato agli atleti qui non dovrebbe entrarci mai)
-
-            foreach ($order->items as $item) {
-                Fee::create([
-                    'user_id' => $order->user_id,
-                    'academy_id' => $academyId,
-                    'type' => 3,
-                    'start_date' => now(),
-                    'end_date' => now()->addYear(),
-                    'auto_renew' => 0,
-                    'unique_id' => Str::orderedUuid(),
-                ]);
-            }
-
-            event(new \App\Events\BulkFeePaid($order));
-        } else {
-
-            // O è una Fee singola o è un biglietto per un evento
-
-            $item = $order->items()->first();
-
-            if ($item->product_type == 'fee') {;
+                    continue;
+                }
 
                 Fee::create([
                     'user_id' => $order->user_id,
@@ -182,8 +169,6 @@ class OrderController extends Controller {
                 $order->user->update([
                     'has_paid_fee' => 1,
                 ]);
-
-                event(new \App\Events\FeePaid($order));
             } else if ($item->product_type == 'event_participation') {
                 $event = Event::find($item->product_code);
 
@@ -201,6 +186,12 @@ class OrderController extends Controller {
                     ]);
                 }
             }
+        }
+
+        if ($isBulkFeeOrder) {
+            event(new \App\Events\BulkFeePaid($order));
+        } else if ($order->items->contains('product_type', 'fee')) {
+            event(new \App\Events\FeePaid($order));
         }
 
         $order->update([

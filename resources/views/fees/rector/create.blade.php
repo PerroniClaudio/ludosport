@@ -183,7 +183,7 @@
         startWireCheckout() {
             this.saveInvoiceData()
     
-            const url = `/shop/fees/wire-transfer`
+            const url = `/rector/fees/wire-transfer`
             let items = [];
     
             if (this.fees_count > 0) {
@@ -328,13 +328,13 @@
                                 <span>Stripe</span>
                             </div>
                         </div>
-                        {{-- <div x-show="shouldShowPayment" class="mt-4">
+                        <div x-show="shouldShowPayment" class="mt-4">
                             <div class="rounded-full bg-gray-300 hover:bg-gray-500 text-black font-bold p-1 text-center cursor-pointer"
                                 @click="startWireCheckout">
 
                                 <span>{{ __('website.wire_transfer') }}</span>
                             </div>
-                        </div> --}}
+                        </div>
                     </div>
 
                 </div>

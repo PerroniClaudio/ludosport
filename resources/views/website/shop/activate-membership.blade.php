@@ -164,25 +164,6 @@
                             window.location.href = data.url
                         })
                 },
-                startWireCheckout() {
-                    this.saveInvoiceData()
-            
-                    const url = `/shop/fees/wire-transfer`
-                    let items = [];
-            
-                    items.push({
-                        'name': 'fee',
-                        'quantity': this.fees,
-                    })
-                        
-                    const itemsJson = JSON.stringify(items)
-            
-                    const params = new URLSearchParams({
-                        'items': itemsJson
-                    })
-            
-                    window.location.href = `${url}?${params}`
-                },
                 init() {
                     this.fetchInvoiceData()
                     this.$watch('vat', value => {
