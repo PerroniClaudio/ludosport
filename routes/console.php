@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\DailyLogArchiveUploader;
+use Carbon\CarbonImmutable;
 use App\Jobs\CheckPrimaryAcademyJob;
 use App\Jobs\CheckWaitingListJob;
 use App\Models\Academy;
@@ -7,14 +9,47 @@ use App\Models\School;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Symfony\Component\Console\Command\Command;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
+Artisan::command('logs:archive-daily {--date= : The log date to archive (Y-m-d)}', function (DailyLogArchiveUploader $uploader) {
+    $dateOption = $this->option('date');
+
+    try {
+        $date = $dateOption
+            ? CarbonImmutable::createFromFormat('Y-m-d', $dateOption)->startOfDay()
+            : null;
+    } catch (\Throwable) {
+        $this->error('The --date option must be in Y-m-d format.');
+
+        return Command::INVALID;
+    }
+
+    $remotePath = $uploader->archive($date);
+
+    if ($remotePath === null) {
+        $this->info('No daily log file found to archive.');
+
+        return Command::SUCCESS;
+    }
+
+    $this->info("Daily log uploaded to {$remotePath} and truncated locally.");
+
+    return Command::SUCCESS;
+})->purpose('Upload the previous daily Laravel log to Google Cloud Storage and truncate it locally.');
+
 Schedule::job(new CheckWaitingListJob())->daily();
 
 Schedule::job(new CheckPrimaryAcademyJob())->daily();
+
+Schedule::command('logs:archive-daily')
+    ->dailyAt(config('logging.archive.time', '00:10'))
+    ->name('logs:archive-daily')
+    ->onOneServer()
+    ->withoutOverlapping();
 
 Schedule::call(function () {
     $importController = new \App\Http\Controllers\ImportController();
