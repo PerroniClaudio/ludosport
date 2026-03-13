@@ -36,6 +36,12 @@ return [
         'trace' => env('LOG_DEPRECATIONS_TRACE', false),
     ],
 
+    'archive' => [
+        'disk' => env('LOG_ARCHIVE_DISK', 'gcs'),
+        'prefix' => env('LOG_ARCHIVE_PREFIX', 'logs'),
+        'time' => env('LOG_ARCHIVE_TIME', '00:10'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Log Channels
