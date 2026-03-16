@@ -10,6 +10,17 @@ export default {
         "./resources/views/**/*.blade.php",
     ],
 
+    safelist: [
+        // Classi per le dimensioni delle immagini nell'editor eventi
+        'max-w-xs',
+        'max-w-md',
+        'max-w-2xl',
+        'max-w-full',
+        'h-auto',
+        'rounded-lg',
+        'my-4',
+    ],
+
     future: {
         hoverOnlyWhenSupported: true, // Abilita il supporto per dispositivi con hover
     },

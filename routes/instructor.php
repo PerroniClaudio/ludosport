@@ -32,6 +32,8 @@ Route::prefix('instructor')->middleware(['auth', 'role.institution.selected'])->
         Route::post('events/create', [App\Http\Controllers\EventController::class, 'store'])->name('instructor.events.store');
         Route::get('events/{event}', [App\Http\Controllers\EventController::class, 'edit'])->name('instructor.events.edit');
         Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('instructor.events.save.description');
+        Route::post('events/{event}/description/upload-image', [App\Http\Controllers\EventController::class, 'uploadDescriptionImage'])->name('instructor.events.upload.description.image');
+        Route::get('events/{event}/description/image/{filename}', [App\Http\Controllers\EventController::class, 'getDescriptionImage'])->name('instructor.events.description.image');
         Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('instructor.events.save.location');
         Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('instructor.events.update.thumbnail');
         Route::post('events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('instructor.events.update');

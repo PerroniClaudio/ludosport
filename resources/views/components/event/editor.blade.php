@@ -69,7 +69,7 @@
         </form>
     </div>
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-    <div x-load x-data="editor(@js($value), {{ $canEditDescription ? 'true' : 'false' }})">
+    <div x-load x-data="editor(@js($value), {{ $canEditDescription ? 'true' : 'false' }}, {{ $event->id }})">
 
         <template x-if="isLoaded()">
             <div class="menu flex items-center justify-between">
@@ -155,6 +155,26 @@
                         :class="{ 'is-active': isActive('link', updatedAt) }">
                         <x-lucide-link class="w-5 h-5  cursor-pointer" />
                     </button>
+
+                    @if ($canEditDescription)
+                        <!-- Immagine -->
+                        <button class="editor-button" @click="insertImage()"
+                            :class="{ 'is-active': isActive('image', updatedAt) }">
+                            <x-lucide-image class="w-5 h-5  cursor-pointer" />
+                        </button>
+
+                        <!-- Dimensioni immagine (visibile solo quando un'immagine è selezionata) -->
+                        <template x-if="isActive('image', updatedAt)">
+                            <select class="editor-button w-32" @change="setImageSize($event.target.value)"
+                                :value="getImageSize(updatedAt)">
+                                <option value="">{{ __('events.image_size') }}</option>
+                                <option value="small" :selected="getImageSize(updatedAt) === 'small'">{{ __('events.image_small') }}</option>
+                                <option value="medium" :selected="getImageSize(updatedAt) === 'medium'">{{ __('events.image_medium') }}</option>
+                                <option value="large" :selected="getImageSize(updatedAt) === 'large'">{{ __('events.image_large') }}</option>
+                                <option value="full" :selected="getImageSize(updatedAt) === 'full'">{{ __('events.image_full') }}</option>
+                            </select>
+                        </template>
+                    @endif
 
                 </div>
 

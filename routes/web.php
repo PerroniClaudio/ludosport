@@ -235,6 +235,8 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
     Route::post('/events/{event}/results', [App\Http\Controllers\EventController::class, 'addResult'])->name('events.results.store');
 
     Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('events.save.description');
+    Route::post('events/{event}/description/upload-image', [App\Http\Controllers\EventController::class, 'uploadDescriptionImage'])->name('events.upload.description.image');
+    Route::get('events/{event}/description/image/{filename}', [App\Http\Controllers\EventController::class, 'getDescriptionImage'])->name('events.description.image');
     Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('events.save.location');
     Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('events.update.thumbnail');
 

@@ -4,6 +4,7 @@ import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
+import Image from "@tiptap/extension-image";
 
 String.prototype.deentitize = function () {
     var ret = this.replace(/&amp;/g, "&");
@@ -16,7 +17,7 @@ String.prototype.deentitize = function () {
     return ret;
 };
 
-export const editor = (content, isEditable = true) => {
+export const editor = (content, isEditable = true, eventId = null) => {
     let editor; // Alpine's reactive engine automatically wraps component properties in proxy objects. Attempting to use a proxied editor instance to apply a transaction will cause a "Range Error: Applying a mismatched transaction", so be sure to unwrap it using Alpine.raw(), or simply avoid storing your editor as a component property, as shown in this example.
 
     return {
@@ -41,6 +42,25 @@ export const editor = (content, isEditable = true) => {
                     }),
                     TextAlign.configure({
                         types: ["heading", "paragraph"],
+                    }),
+                    Image.extend({
+                        addAttributes() {
+                            return {
+                                ...this.parent?.(),
+                                class: {
+                                    default: 'max-w-full h-auto rounded-lg my-4',
+                                    parseHTML: element => element.getAttribute('class'),
+                                    renderHTML: attributes => {
+                                        return {
+                                            class: attributes.class || 'max-w-full h-auto rounded-lg my-4'
+                                        }
+                                    },
+                                },
+                            }
+                        },
+                    }).configure({
+                        inline: true,
+                        allowBase64: false,
                     }),
                 ],
                 content: content.deentitize(),
@@ -131,6 +151,46 @@ export const editor = (content, isEditable = true) => {
                 .setLink({ href: url })
                 .run();
         },
+        setImageSize(size) {
+            const sizeClasses = {
+                'small': 'max-w-xs',      // 320px
+                'medium': 'max-w-md',     // 448px
+                'large': 'max-w-2xl',     // 672px
+                'full': 'max-w-full'      // 100%
+            };
+
+            if (!sizeClasses[size]) return;
+
+            // Aggiorna gli attributi dell'immagine selezionata
+            editor.chain().focus().updateAttributes('image', {
+                class: `${sizeClasses[size]} h-auto rounded-lg my-4`
+            }).run();
+
+            // Salva automaticamente la descrizione
+            if (typeof saveContent === 'function') {
+                saveContent();
+            }
+        },
+        getImageSize(updatedAt) {
+            if (this.updatedAt !== updatedAt) {
+                return '';
+            }
+
+            if (!editor.isActive('image')) {
+                return '';
+            }
+
+            const attrs = editor.getAttributes('image');
+            const imgClass = attrs.class || '';
+
+            // Cerca quale classe di dimensione è presente
+            if (imgClass.includes('max-w-xs')) return 'small';
+            if (imgClass.includes('max-w-md')) return 'medium';
+            if (imgClass.includes('max-w-2xl')) return 'large';
+            if (imgClass.includes('max-w-full')) return 'full';
+
+            return 'full'; // default
+        },
         undo() {
             editor.chain().focus().undo().run();
         },
@@ -173,6 +233,91 @@ export const editor = (content, isEditable = true) => {
             if (editor.isActive({ textAlign: "justify" })) {
                 return "justify";
             }
+        },
+        async uploadImage(file) {
+            if (!eventId || !isEditable) {
+                console.error('Cannot upload image: eventId not provided or editor not editable');
+                return null;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                // Determina il ruolo dall'URL corrente
+                const currentPath = window.location.pathname;
+                let routePrefix = '';
+                
+                if (currentPath.includes('/rector/')) {
+                    routePrefix = '/rector';
+                } else if (currentPath.includes('/manager/')) {
+                    routePrefix = '/manager';
+                } else if (currentPath.includes('/instructor/')) {
+                    routePrefix = '/instructor';
+                }
+
+                const uploadUrl = `${routePrefix}/events/${eventId}/description/upload-image`;
+
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Salva il path invece dell'URL temporaneo
+                    return data.path;
+                } else {
+                    console.error('Upload failed:', data.error);
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                return null;
+            }
+        },
+        async insertImage() {
+            if (!isEditable) return;
+
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Mostra feedback all'utente
+                const originalContent = editor.getHTML();
+                editor.commands.insertContent('<p>Uploading image...</p>');
+
+                const imagePath = await this.uploadImage(file);
+                
+                if (imagePath) {
+                    // Rimuovi il messaggio di caricamento
+                    editor.commands.setContent(originalContent);
+                    // Inserisci l'immagine con il path e classe di default (full width)
+                    editor.chain().focus().setImage({ 
+                        src: imagePath,
+                        class: 'max-w-full h-auto rounded-lg my-4'
+                    }).run();
+                    
+                    // Salva automaticamente la descrizione
+                    if (typeof saveContent === 'function') {
+                        await saveContent();
+                    }
+                } else {
+                    // Ripristina il contenuto originale in caso di errore
+                    editor.commands.setContent(originalContent);
+                    alert('Error uploading image. Please try again.');
+                }
+            };
+
+            input.click();
         },
     };
 };
