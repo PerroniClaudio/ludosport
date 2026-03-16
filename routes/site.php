@@ -120,6 +120,7 @@ Route::middleware('throttle:rate_limit,1')->get('/website-users/search', [App\Ht
 Route::get('/profile-picture/{user}', [App\Http\Controllers\UserController::class, 'propic'])->name('profile-picture');
 Route::get('/website-users/{user:battle_name}', [App\Http\Controllers\UserController::class, 'show'])->name('website-users-show');
 Route::get('/event-picture/{event}', [App\Http\Controllers\EventController::class, 'eventPicture'])->name('event-picture');
+Route::get('/events/{event}/description/image/{filename}', [App\Http\Controllers\EventController::class, 'getDescriptionImage'])->name('site.events.description.image');
 
 /** Statiche */
 

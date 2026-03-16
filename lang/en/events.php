@@ -98,4 +98,9 @@ return [
     'thumbnail_info' => 'The picture must be less than 8MB',
     'error_thumbnail_size' => 'The picture must be less than 8MB',
     'disabled_text' => 'This event has been disabled.',
+    'image_size' => 'Image Size',
+    'image_small' => 'Small',
+    'image_medium' => 'Medium',
+    'image_large' => 'Large',
+    'image_full' => 'Full Width',
 ];

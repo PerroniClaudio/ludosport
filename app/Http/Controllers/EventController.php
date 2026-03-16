@@ -229,6 +229,9 @@ class EventController extends Controller
             );
         }
 
+        // Rigenera URL temporanei per le immagini nella descrizione
+        $event->description = $this->regenerateDescriptionImageUrls($event->description);
+
         // Ordina i risultati per punti totali (war_points + style_points) in ordine decrescente, poi per nome e cognome dell'utente
         $rankingResults = $event->results()
             ->with('user')
@@ -556,6 +559,84 @@ class EventController extends Controller
         } else {
             return redirect()->route($redirectRoute, $id)->with('error', 'Error uploading thumbnail!');
         }
+    }
+
+    public function uploadDescriptionImage(Request $request, Event $event)
+    {
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        $isEventPersonnel = $event->personnel()->where('user_id', $authUser->id)->exists();
+
+        // Riusa la logica di permessi di saveDescription
+        if (!($authRole === 'admin' ||
+            ($authRole === 'rector' && isset($event->academy_id) && ($event->academy_id === $authUser->getActiveInstitutionId())) ||
+            $isEventPersonnel ||
+            $event->user_id === $authUser->id)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,jpg,png,webp,avif|max:200', // 200KB, solo jpeg, jpg, png, webp, avif
+        ]);
+
+        $file = $request->file('image');
+        $fileName = time() . '_' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $path = "events/{$event->id}/description/{$fileName}";
+
+        $storeFile = $file->storeAs("events/{$event->id}/description/", $fileName, "gcs");
+
+        if (!$storeFile) {
+            return response()->json(['error' => 'Error uploading image'], 500);
+        }
+
+        // Genera l'URL dell'endpoint pubblico per servire l'immagine
+        // Usa sempre la route pubblica del sito così funziona per tutti i ruoli
+        $imageUrl = route('site.events.description.image', [
+            'event' => $event->id,
+            'filename' => $fileName
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'url' => $imageUrl,
+            'path' => $imageUrl, // Il frontend si aspetta 'path' per il src dell'immagine
+            'filename' => $fileName,
+        ]);
+    }
+
+    private function regenerateDescriptionImageUrls(string $description): string
+    {
+        if (empty($description)) {
+            return $description;
+        }
+
+        // Trova tutti i path GCS nelle immagini (cerca sia con src="path" che src=\"path\" o src già con URL)
+        preg_match_all('/src=["\\\\]*"(events\/(\d+)\/description\/([^"\\\\]+))["\\\\]*"/', $description, $matches);
+
+        if (empty($matches[1])) {
+            return $description;
+        }
+
+        foreach ($matches[1] as $key => $path) {
+            // Rimuovi eventuali caratteri di escape
+            $cleanPath = str_replace('\\', '', $path);
+            $eventId = $matches[2][$key];
+            $filename = $matches[3][$key];
+            
+            if (Storage::disk('gcs')->exists($cleanPath)) {
+                // Genera l'URL dell'endpoint pubblico usando la route del sito
+                $imageUrl = route('site.events.description.image', [
+                    'event' => $eventId,
+                    'filename' => $filename
+                ]);
+                
+                // Sostituisci tutte le occorrenze del path (con o senza escape) con l'URL dell'endpoint
+                $description = str_replace($path, $imageUrl, $description);
+                $description = str_replace($cleanPath, $imageUrl, $description);
+            }
+        }
+
+        return $description;
     }
 
     public function calendar(Request $request)
@@ -1174,6 +1255,46 @@ class EventController extends Controller
         return response($image, 200, $headers);
     }
 
+    public function getDescriptionImage(Event $event, string $filename)
+    {
+        $path = "events/{$event->id}/description/{$filename}";
+
+        if (!Storage::disk('gcs')->exists($path)) {
+            abort(404);
+        }
+
+        /** 
+         * @disregard Intelephense non rileva il metodo temporaryurl
+         * 
+         * @see https://github.com/spatie/laravel-google-cloud-storage
+         */
+        $url = Storage::disk('gcs')->temporaryUrl(
+            $path,
+            now()->addMinutes(5)
+        );
+
+        $response = Http::get($url);
+        $image = $response->body();
+
+        // Estrai il tipo di file dall'estensione
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $contentType = match($extension) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            default => 'image/jpeg',
+        };
+
+        $headers = [
+            'Content-Type' => $contentType,
+            'Content-Length' => strlen($image),
+            'Cache-Control' => 'public, max-age=300', // 5 minuti di cache
+        ];
+
+        return response($image, 200, $headers);
+    }
+
     public function general(Request $request)
     {
 
@@ -1409,6 +1530,8 @@ class EventController extends Controller
             $canpurchase = false;
         }
 
+        // Rigenera URL temporanei per le immagini nella descrizione
+        $event->description = $this->regenerateDescriptionImageUrls($event->description);
 
 
 

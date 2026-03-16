@@ -161,6 +161,8 @@ Route::prefix('rector')->middleware(['auth', 'role.institution.selected', 'role:
     Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])->name('rector.events.store');
     Route::post('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('rector.events.update');
     Route::post('events/{event}/description', [App\Http\Controllers\EventController::class, 'saveDescription'])->name('rector.events.save.description');
+    Route::post('events/{event}/description/upload-image', [App\Http\Controllers\EventController::class, 'uploadDescriptionImage'])->name('rector.events.upload.description.image');
+    Route::get('events/{event}/description/image/{filename}', [App\Http\Controllers\EventController::class, 'getDescriptionImage'])->name('rector.events.description.image');
     Route::post('events/{event}/location', [App\Http\Controllers\EventController::class, 'saveLocation'])->name('rector.events.save.location');
     Route::put('events/{event}/thumbnail', [App\Http\Controllers\EventController::class, 'updateThumbnail'])->name('rector.events.update.thumbnail');
     Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('rector.events.participants');
