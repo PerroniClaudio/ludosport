@@ -320,6 +320,12 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
 
     Route::post('/announcements', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('announcements.store');
     Route::post('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'update'])->name('announcements.update');
+    Route::post('/announcements/{announcement}/content/upload-image', [App\Http\Controllers\AnnouncementController::class, 'uploadContentImage'])->name('announcements.upload.content.image');
+});
+
+// Route pubblica per servire le immagini degli annunci
+Route::group(['middleware' => ['auth', 'role.institution.selected']], function () {
+    Route::get('/announcements/{announcement}/content/image/{filename}', [App\Http\Controllers\AnnouncementController::class, 'getContentImage'])->name('announcements.content.image');
 });
 
 /** Ruoli */

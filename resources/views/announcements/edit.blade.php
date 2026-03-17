@@ -46,7 +46,7 @@
                     </div>
 
                     <x-rich-text-editor name="content" label="Content" required="{{ true }}" :value="$announcement->content"
-                        placeholder="Write a message..." />
+                        placeholder="Write a message..." :announcementId="$announcement->id" />
 
                     <div class="flex items-end justify-end gap-4">
                         <x-primary-button>
