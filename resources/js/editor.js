@@ -48,11 +48,11 @@ export const editor = (content, isEditable = true, eventId = null) => {
                             return {
                                 ...this.parent?.(),
                                 class: {
-                                    default: 'max-w-full h-auto rounded-lg my-4',
+                                    default: 'w-full max-w-full h-auto rounded-lg my-4',
                                     parseHTML: element => element.getAttribute('class'),
                                     renderHTML: attributes => {
                                         return {
-                                            class: attributes.class || 'max-w-full h-auto rounded-lg my-4'
+                                            class: attributes.class || 'w-full max-w-full h-auto rounded-lg my-4'
                                         }
                                     },
                                 },
@@ -152,11 +152,17 @@ export const editor = (content, isEditable = true, eventId = null) => {
                 .run();
         },
         setImageSize(size) {
+            // const sizeClasses = {
+            //     'small': 'max-w-xs',      // 320px
+            //     'medium': 'max-w-md',     // 448px
+            //     'large': 'max-w-2xl',     // 672px
+            //     'full': 'max-w-full'      // 100%
+            // };
             const sizeClasses = {
-                'small': 'max-w-xs',      // 320px
-                'medium': 'max-w-md',     // 448px
-                'large': 'max-w-2xl',     // 672px
-                'full': 'max-w-full'      // 100%
+                'small': 'w-full max-w-xs',      // 100% width fino a 320px
+                'medium': 'w-full max-w-md',     // 100% width fino a 448px
+                'large': 'w-full max-w-2xl',     // 100% width fino a 672px
+                'full': 'w-full max-w-full'      // 100% width sempre
             };
 
             if (!sizeClasses[size]) return;
