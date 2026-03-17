@@ -30,4 +30,12 @@ return [
     'free' => 'Free',
     '' => '',
     'admin' => 'Admin',
+    'filters' => 'Filters',
+    'filter' => 'Filter',
+    'reset_filters' => 'Reset Filters',
+    'min_price' => 'Minimum Price',
+    'max_price' => 'Maximum Price',
+    'min_date' => 'Minimum Date',
+    'max_date' => 'Maximum Date',
+    'payment_status' => 'Payment Status',
 ];
