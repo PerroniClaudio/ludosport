@@ -31,6 +31,7 @@ return [
     'minor_documents' => 'Minor registration documents',
     'minor_documents_description' => 'Upload the required documents if you already have them available. This step is optional, buit they will be required to complete the registration process.',
     'minor_documents_help' => 'Accepted file size up to 10MB.',
+    'minor_documents_too_large' => 'The selected file exceeds the 10MB limit. Choose a smaller file before uploading.',
     'select_file' => 'Select file',
     'choose_option' => 'Choose',
     'registering' => 'Registering...',

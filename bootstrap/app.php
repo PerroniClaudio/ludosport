@@ -2,9 +2,12 @@
 
 use App\Http\Middleware\SearchThrottleMiddleware;
 use App\Http\Middleware\UserRoleMiddleware;
+use Illuminate\Http\Exceptions\PostTooLargeException;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,5 +25,23 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (PostTooLargeException $exception, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'The uploaded file is too large.',
+                ], Response::HTTP_REQUEST_ENTITY_TOO_LARGE);
+            }
+
+            $field = $request->routeIs('register', 'users.update-minor-documents')
+                ? 'minor_documents'
+                : 'file';
+
+            $message = $field === 'minor_documents'
+                ? __('auth.minor_documents_too_large')
+                : 'The uploaded file is too large.';
+
+            return back()
+                ->withInput($request->except(['password', 'password_confirmation']))
+                ->withErrors([$field => $message]);
+        });
     })->create();

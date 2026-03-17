@@ -263,8 +263,30 @@
             </div>
 
             <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" class="mt-8"
-                x-data="{ isSubmitting: false, showPassword: false, showPasswordConfirmation: false }"
-                @submit="isSubmitting = true">
+                x-data="{
+                    isSubmitting: false,
+                    showPassword: false,
+                    showPasswordConfirmation: false,
+                    minorDocumentsError: '',
+                    validateMinorDocuments(event) {
+                        const file = event.target.files?.[0];
+                        const maxSize = 10 * 1024 * 1024;
+
+                        if (!file) {
+                            this.minorDocumentsError = '';
+                            return;
+                        }
+
+                        if (file.size > maxSize) {
+                            this.minorDocumentsError = '{{ __('auth.minor_documents_too_large') }}';
+                            event.target.value = '';
+                            return;
+                        }
+
+                        this.minorDocumentsError = '';
+                    }
+                }"
+                @submit="if (minorDocumentsError) { return false; } isSubmitting = true">
                 @csrf
                 <input type="hidden" name="registration_type" value="minor">
 
@@ -410,10 +432,13 @@
                             {{ __('auth.minor_documents_description') }}
                         </p>
                         <input id="minor_documents" name="minor_documents" type="file"
+                            @change="validateMinorDocuments($event)"
                             class="mt-3 block w-full rounded-lg border border-background-200 bg-white px-4 py-3 text-sm text-background-700 shadow-sm file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100 dark:border-background-700 dark:bg-background-900 dark:text-background-200 dark:file:bg-primary-950/50 dark:file:text-primary-300" />
                         <p class="mt-2 text-xs text-background-500 dark:text-background-400">
                             {{ __('auth.minor_documents_help') }}
                         </p>
+                        <p x-show="minorDocumentsError" x-text="minorDocumentsError"
+                            class="mt-2 text-sm text-red-600 dark:text-red-400"></p>
                         <x-input-error :messages="$errors->get('minor_documents')" class="mt-2" />
                     </div>
                 </div>
