@@ -14,10 +14,36 @@ class OrderController extends Controller {
     /**
      * Display a listing of the resource.
      */
-    public function index() {
+    public function index(Request $request) {
         //
+        $query = Order::query()->orderBy('created_at', 'desc');
 
-        $orders = Order::orderBy('created_at', 'desc')->get();
+        // Filtro prezzo minimo
+        if ($request->filled('min_price')) {
+            $query->where('total', '>=', $request->input('min_price'));
+        }
+
+        // Filtro prezzo massimo
+        if ($request->filled('max_price')) {
+            $query->where('total', '<=', $request->input('max_price'));
+        }
+
+        // Filtro data minima
+        if ($request->filled('min_date')) {
+            $query->whereDate('created_at', '>=', $request->input('min_date'));
+        }
+
+        // Filtro data massima
+        if ($request->filled('max_date')) {
+            $query->whereDate('created_at', '<=', $request->input('max_date'));
+        }
+
+        // Filtro stati
+        if ($request->filled('status')) {
+            $query->whereIn('status', $request->input('status'));
+        }
+
+        $orders = $query->get();
 
         foreach ($orders as $key => $order) {
             $orders[$key]->status = __('orders.status' . $order->status);
