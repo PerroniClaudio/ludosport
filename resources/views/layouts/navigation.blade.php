@@ -15,17 +15,17 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-2 lg:space-x-4 xl:space-x-8 lg:-my-px lg:ms-10 lg:flex">
+                    @php
+                        $authRole = Auth::user()->getRole();
+                    @endphp
+                    @php
+                        $isMinorPendingApproval = Auth::user()->isMinorPendingApproval();
+                    @endphp
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('dashboard.title') }}
                     </x-nav-link>
 
-                    @if (Auth::user()->getRole() !== 'admin')
-                        @foreach (Auth::user()->routes() as $route)
-                            <x-nav-link :href="route($route->name)" :active="request()->routeIs($route->active)">
-                                {{ __('navigation.' . $route->label) }}
-                            </x-nav-link>
-                        @endforeach
-                    @else
+                    @if ($authRole === 'admin')
                         @php
                             $navLang = 'users';
                             if (request()->routeIs('users.*')) {
@@ -95,11 +95,32 @@
                                     href="{{ route('deleted-elements.index') }}">{{ __('navigation.deleted_elements') }}</a>
                             </x-slot>
                         </x-nav-link-parent>
+                    @elseif (!$isMinorPendingApproval)
+                        @foreach (Auth::user()->routes() as $route)
+                            @if ($authRole === 'rector' && $route->label === 'users')
+                                <x-nav-link-parent :href="'#'" :active="request()->routeIs('rector.users.*')">
+                                    <x-slot name="name">{{ __('navigation.users') }}</x-slot>
+                                    <x-slot name="children">
+                                        <a href="{{ route('rector.users.index') }}">{{ __('navigation.users_list') }}</a>
+                                        <span class="separator"></span>
+                                        <a href="{{ route('rector.users.approve.index') }}">
+                                            {{ __('navigation.approve_users') }}
+                                        </a>
+                                    </x-slot>
+                                </x-nav-link-parent>
+                            @else
+                                <x-nav-link :href="route($route->name)" :active="request()->routeIs($route->active)">
+                                    {{ __('navigation.' . $route->label) }}
+                                </x-nav-link>
+                            @endif
+                        @endforeach
                     @endif
 
-                    <x-nav-link :href="route('homepage')">
-                        {{ __('navigation.website') }}
-                    </x-nav-link>
+                    @if (!$isMinorPendingApproval)
+                        <x-nav-link :href="route('homepage')">
+                            {{ __('navigation.website') }}
+                        </x-nav-link>
+                    @endif
 
                 </div>
             </div>
@@ -124,19 +145,21 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
+                        @if (!$isMinorPendingApproval)
+                            <x-dropdown-link :href="route('profile.edit')">
+                                {{ __('Profile') }}
+                            </x-dropdown-link>
 
-                        @if (count(Auth::user()->allowedRoles()) > 1)
-                            <x-dropdown-link :href="route('role-selector')">
-                                {{ __('users.select_role') }}
-                            </x-dropdown-link>
-                        @endif
-                        @if (count(Auth::user()->allowedInstitutions()) > 1)
-                            <x-dropdown-link :href="route('institution-selector')">
-                                {{ __('users.select_institution') }}
-                            </x-dropdown-link>
+                            @if (count(Auth::user()->allowedRoles()) > 1)
+                                <x-dropdown-link :href="route('role-selector')">
+                                    {{ __('users.select_role') }}
+                                </x-dropdown-link>
+                            @endif
+                            @if (count(Auth::user()->allowedInstitutions()) > 1)
+                                <x-dropdown-link :href="route('institution-selector')">
+                                    {{ __('users.select_institution') }}
+                                </x-dropdown-link>
+                            @endif
                         @endif
 
                         <!-- Authentication -->
@@ -175,13 +198,7 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('dashboard.title') }}
             </x-responsive-nav-link>
-            @if (Auth::user()->getRole() !== 'admin')
-                @foreach (Auth::user()->routes() as $route)
-                    <x-responsive-nav-link :href="route($route->name)" :active="request()->routeIs($route->active)">
-                        {{ __('navigation.' . $route->label) }}
-                    </x-responsive-nav-link>
-                @endforeach
-            @else
+            @if ($authRole === 'admin')
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                     {{ __('navigation.users') }}
                 </x-responsive-nav-link>
@@ -221,10 +238,34 @@
                 <x-responsive-nav-link :href="route('deleted-elements.index')" :active="request()->routeIs('deleted-elements.*')">
                     {{ __('navigation.deleted_elements') }}
                 </x-responsive-nav-link>
+            @elseif (!$isMinorPendingApproval)
+                @foreach (Auth::user()->routes() as $route)
+                    @if ($authRole === 'rector' && $route->label === 'users')
+                        <x-responsive-nav-link-parent :active="request()->routeIs('rector.users.*')">
+                            <x-slot name="name">{{ __('navigation.users') }}</x-slot>
+                            <x-slot name="children">
+                                <a href="{{ route('rector.users.index') }}"
+                                    class="block pl-6 pr-4 py-2 text-base font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-background-300 dark:hover:text-background-100 dark:hover:bg-background-700">
+                                    {{ __('navigation.users_list') }}
+                                </a>
+                                <a href="{{ route('rector.users.approve.index') }}"
+                                    class="block pl-6 pr-4 py-2 text-base font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-background-300 dark:hover:text-background-100 dark:hover:bg-background-700">
+                                    {{ __('navigation.approve_users') }}
+                                </a>
+                            </x-slot>
+                        </x-responsive-nav-link-parent>
+                    @else
+                        <x-responsive-nav-link :href="route($route->name)" :active="request()->routeIs($route->active)">
+                            {{ __('navigation.' . $route->label) }}
+                        </x-responsive-nav-link>
+                    @endif
+                @endforeach
             @endif
-            <x-responsive-nav-link :href="route('homepage')" :active="request()->routeIs('homepage')">
-                {{ __('navigation.website') }}
-            </x-responsive-nav-link>
+            @if (!$isMinorPendingApproval)
+                <x-responsive-nav-link :href="route('homepage')" :active="request()->routeIs('homepage')">
+                    {{ __('navigation.website') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
@@ -237,14 +278,16 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                @if (count(Auth::user()->allowedRoles()) > 1)
-                    <x-responsive-nav-link :href="route('role-selector')">
-                        {{ __('users.select_role') }}
+                @if (!$isMinorPendingApproval)
+                    <x-responsive-nav-link :href="route('profile.edit')">
+                        {{ __('Profile') }}
                     </x-responsive-nav-link>
+
+                    @if (count(Auth::user()->allowedRoles()) > 1)
+                        <x-responsive-nav-link :href="route('role-selector')">
+                            {{ __('users.select_role') }}
+                        </x-responsive-nav-link>
+                    @endif
                 @endif
 
                 <!-- Authentication -->

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\CreatedUserEmail;
+use App\Mail\MinorApprovalDeniedMail;
 use App\Models\Academy;
 use App\Models\Announcement;
 use App\Models\Clan;
@@ -1512,7 +1513,7 @@ class UserController extends Controller {
         }
 
         $request->validate([
-            'minor_documents' => ['required', 'file', 'max:10240'],
+            'minor_documents' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
         $file = $request->file('minor_documents');
@@ -1530,6 +1531,158 @@ class UserController extends Controller {
         $authUser->save();
 
         return redirect()->route('dashboard')->with('success', 'Approval documents uploaded successfully.');
+    }
+
+    public function approveMinorUsersIndex(Request $request) {
+        $authUser = User::find(Auth::id());
+
+        if ($authUser->getRole() !== 'rector') {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page!');
+        }
+
+        $academyId = $authUser->getActiveInstitutionId();
+        if (!$academyId) {
+            return redirect()->route('dashboard')->with('error', 'You don\'t have an academy assigned!');
+        }
+
+        $users = User::query()
+            ->where('is_disabled', false)
+            ->where('is_user_minor', true)
+            ->where('has_admin_approved_minor', false)
+            ->whereHas('academyAthletes', function ($query) use ($academyId) {
+                $query->where('academy_id', $academyId);
+            })
+            ->with(['academyAthletes.nation', 'schoolAthletes'])
+            ->orderBy('surname')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($user) {
+                $user->academy = $user->primaryAcademyAthlete();
+                $user->school = $user->primarySchoolAthlete();
+
+                return $user;
+            });
+
+        return view('users.rector.approve-users', [
+            'users' => $users,
+        ]);
+    }
+
+    public function uploadMinorApprovalDocumentAsRector(User $user, Request $request) {
+        $authUser = User::find(Auth::id());
+
+        if ($authUser->getRole() !== 'rector') {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to perform this action!');
+        }
+
+        $academyId = $authUser->getActiveInstitutionId();
+        if (!$academyId || !$user->academyAthletes()->where('academy_id', $academyId)->exists()) {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to upload a document for this user!');
+        }
+
+        if (!$user->is_user_minor) {
+            return redirect()->route('rector.users.approve.index')->with('error', 'This upload is only available for minor users.');
+        }
+
+        $request->validate([
+            'minor_documents' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
+
+        $file = $request->file('minor_documents');
+        $fileExtension = $file->getClientOriginalExtension();
+        $fileName = time() . '_minor_documents.' . $fileExtension;
+        $path = "/users/{$user->id}/approval_documents/{$fileName}";
+        $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
+
+        if (!$storedFile) {
+            return redirect()->route('rector.users.approve.index')->with('error', 'Error uploading approval documents.');
+        }
+
+        $user->uploaded_documents_path = $path;
+        $user->has_user_uploaded_documents = true;
+        $user->has_admin_approved_minor = true;
+        $user->save();
+
+        return redirect()->route('rector.users.approve.index')->with('success', 'Approval documents uploaded and user approved successfully.');
+    }
+
+    public function viewMinorApprovalDocument(User $user, Request $request) {
+        $authUser = User::find(Auth::id());
+
+        if ($authUser->getRole() !== 'rector') {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page!');
+        }
+
+        $academyId = $authUser->getActiveInstitutionId();
+        if (!$academyId || !$user->academyAthletes()->where('academy_id', $academyId)->exists()) {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to access this document!');
+        }
+
+        if (!$user->uploaded_documents_path || !Storage::disk('gcs')->exists($user->uploaded_documents_path)) {
+            return redirect()->route('rector.users.approve.index')->with('error', 'Approval document not found.');
+        }
+
+        $url = Storage::disk('gcs')->temporaryUrl(
+            $user->uploaded_documents_path,
+            now()->addMinutes(5),
+            [
+                'ResponseContentType' => 'application/pdf',
+                'ResponseContentDisposition' => 'inline; filename="approval-document-' . $user->id . '.pdf"',
+            ]
+        );
+
+        return redirect()->away($url);
+    }
+
+    public function approveMinorUser(User $user, Request $request) {
+        $authUser = User::find(Auth::id());
+
+        if ($authUser->getRole() !== 'rector') {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to perform this action!');
+        }
+
+        $academyId = $authUser->getActiveInstitutionId();
+        if (!$academyId || !$user->academyAthletes()->where('academy_id', $academyId)->exists()) {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to approve this user!');
+        }
+
+        if (!$user->is_user_minor || !$user->has_user_uploaded_documents) {
+            return redirect()->route('rector.users.approve.index')->with('error', 'This user is not ready for approval.');
+        }
+
+        $user->has_admin_approved_minor = true;
+        $user->save();
+
+        return redirect()->route('rector.users.approve.index')->with('success', 'User approved successfully.');
+    }
+
+    public function denyMinorUser(User $user, Request $request) {
+        $authUser = User::find(Auth::id());
+
+        if ($authUser->getRole() !== 'rector') {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to perform this action!');
+        }
+
+        $academyId = $authUser->getActiveInstitutionId();
+        if (!$academyId || !$user->academyAthletes()->where('academy_id', $academyId)->exists()) {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to deny this user!');
+        }
+
+        if (!$user->is_user_minor || !$user->has_user_uploaded_documents) {
+            return redirect()->route('rector.users.approve.index')->with('error', 'This user is not ready for review.');
+        }
+
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $user->has_admin_approved_minor = false;
+        $user->has_user_uploaded_documents = false;
+        $user->save();
+
+        Mail::to($user->email)->send(new MinorApprovalDeniedMail($user, $validated['reason']));
+
+        return redirect()->route('rector.users.approve.index')->with('success', 'User denied successfully. The user has been notified by email.');
     }
 
     public function dashboard(Request $request) {
@@ -1978,26 +2131,26 @@ class UserController extends Controller {
 
             $primaryAcademies = $authUser->academies->where('pivot.is_primary', 1);
             if ($primaryAcademies->count() > 1) {
-                return redirect()->intended(route('institution-selector', absolute: false));
+                return redirect()->route('institution-selector');
             } else {
                 $primaryAcademy = $primaryAcademies->first();
                 if ($primaryAcademy) {
                     session(['institution' => $primaryAcademy]);
                 } else {
-                    return redirect()->intended(route('institution-selector', absolute: false));
+                    return redirect()->route('institution-selector');
                 }
             }
         } else if ($authUser->getRole() === 'dean') {
 
             $primarySchools = $authUser->schools->where('pivot.is_primary', 1);
             if ($primarySchools->count() > 1) {
-                return redirect()->intended(route('institution-selector', absolute: false));
+                return redirect()->route('institution-selector');
             } else {
                 $primarySchool = $primarySchools->first();
                 if ($primarySchool) {
                         session(['institution' => $primarySchool]);
                 } else {
-                    return redirect()->intended(route('institution-selector', absolute: false));
+                    return redirect()->route('institution-selector');
                 }
             }
         }

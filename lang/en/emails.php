@@ -84,4 +84,11 @@ return [
     'created_user_email_introduction' => 'Your account has been created successfully! You can now set up your password to proceed further.',
     'created_user_setup_password' => 'Set up your password',
 
+    /** Minor approval denial */
+    'minor_approval_denied_title' => 'Hello :name,',
+    'minor_approval_denied_introduction' => 'Your minor registration documents could not be approved. Please review the reason below and upload a new document from your dashboard.',
+    'minor_approval_denied_upload_again' => 'After uploading a new PDF, your request will be sent again for review.',
+    'minor_approval_denied_button' => 'Open dashboard',
+    'minor_approval_denied_regards' => 'Regards,',
+
 ];

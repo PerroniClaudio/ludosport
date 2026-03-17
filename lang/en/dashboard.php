@@ -48,6 +48,7 @@ return [
     'athlete_upcoming_events' => 'Upcoming events',
     'athlete_minor_documents_required_title' => 'Minor approval documents required',
     'athlete_minor_documents_required_text' => 'As a minor user, you must upload the required approval documents to complete your registration.',
+    'athlete_minor_documents_denied_text' => 'Your previously uploaded documents were rejected. Check your email for the reason, then upload a new PDF from here.',
     'athlete_minor_documents_upload_button' => 'Upload documents',
     'athletes_nations_title' => 'Athletes by nations',
     'nations_with_athletes_char' => 'Nations with most athletes',

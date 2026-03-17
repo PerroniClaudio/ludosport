@@ -49,7 +49,7 @@ class RegisteredUserController extends Controller {
             'subscription_year' => ['required', 'int', 'min:' . 2006, 'max:' . (date('Y'))],
             'gender' => ['required', 'string', 'in:male,female,other,notsay'],
             'battle_name' => ['nullable', 'string', 'max:255'],
-            'minor_documents' => ['nullable', 'file', 'max:10240'],
+            'minor_documents' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
         $nation = Nation::where('name', $request->nationality)->first();

@@ -512,47 +512,156 @@ class DatabaseSeeder extends Seeder {
             ]);
         }
 
-        $filePath = database_path('data/academies.json');
+        $academies = [
+            [
+                'name' => 'LudoSport Alpha',
+                'slug' => 'ludosport-alpha',
+                'nation_id' => 2,
+                'created_at' => '2025-03-06 12:47:15',
+                'updated_at' => '2025-07-02 08:46:58',
+                'is_disabled' => 0,
+                'address' => null,
+                'city' => null,
+                'state' => null,
+                'zip' => null,
+                'country' => null,
+                'coordinates' => null,
+                'picture' => '/academies/99/1741261752_logo.png',
+                'email' => 'alpha@ludosport.net',
+            ],
+            [
+                'name' => 'LudoSport Porta dei Laghi',
+                'slug' => 'ludosport-porta-dei-laghi',
+                'nation_id' => 2,
+                'created_at' => '2025-03-25 12:52:15',
+                'updated_at' => '2025-07-04 07:34:39',
+                'is_disabled' => 0,
+                'address' => null,
+                'city' => null,
+                'state' => null,
+                'zip' => null,
+                'country' => null,
+                'coordinates' => null,
+                'picture' => '/academies/100/1742907171_logo.png',
+                'email' => 'portadeilaghi@ludosport.net',
+            ],
+            [
+                'name' => 'LudoSport Porta dei Mari',
+                'slug' => 'ludosport-porta-dei-mari',
+                'nation_id' => 2,
+                'created_at' => '2025-03-25 12:53:50',
+                'updated_at' => '2025-09-17 08:55:46',
+                'is_disabled' => 0,
+                'address' => null,
+                'city' => null,
+                'state' => null,
+                'zip' => null,
+                'country' => null,
+                'coordinates' => null,
+                'picture' => '/academies/101/1742907363_logo.png',
+                'email' => 'portadeimari@ludosport.net',
+            ],
+            [
+                'name' => 'LudoSport Aemilia',
+                'slug' => 'ludosport-aemilia',
+                'nation_id' => 2,
+                'created_at' => '2025-06-18 12:34:31',
+                'updated_at' => '2025-07-04 07:34:47',
+                'is_disabled' => 0,
+                'address' => null,
+                'city' => null,
+                'state' => null,
+                'zip' => null,
+                'country' => null,
+                'coordinates' => null,
+                'picture' => '/academies/102/1750250588_logo.png',
+                'email' => 'aemilia@ludosport.net',
+            ],
+            [
+                'name' => 'LudoSport Cassia',
+                'slug' => 'ludosport-cassia',
+                'nation_id' => 2,
+                'created_at' => '2025-06-18 12:44:01',
+                'updated_at' => '2025-07-04 07:34:25',
+                'is_disabled' => 0,
+                'address' => null,
+                'city' => null,
+                'state' => null,
+                'zip' => null,
+                'country' => null,
+                'coordinates' => null,
+                'picture' => '/academies/103/1750250699_logo.png',
+                'email' => 'cassia@ludosport.net',
+            ],
+            [
+                'name' => 'LudoSport Neapolis',
+                'slug' => 'ludosport-neapolis',
+                'nation_id' => 2,
+                'created_at' => '2025-06-18 12:45:28',
+                'updated_at' => '2025-07-04 07:34:20',
+                'is_disabled' => 0,
+                'address' => null,
+                'city' => null,
+                'state' => null,
+                'zip' => null,
+                'country' => null,
+                'coordinates' => null,
+                'picture' => '/academies/104/1750250943_logo.png',
+                'email' => 'neapolis@ludosport.net',
+            ],
+            [
+                'name' => 'LudoSport Roma',
+                'slug' => 'ludosport-roma',
+                'nation_id' => 2,
+                'created_at' => '2025-06-18 12:49:24',
+                'updated_at' => '2025-07-02 08:50:28',
+                'is_disabled' => 0,
+                'address' => null,
+                'city' => null,
+                'state' => null,
+                'zip' => null,
+                'country' => null,
+                'coordinates' => null,
+                'picture' => '/academies/105/1750251104_logo.png',
+                'email' => 'roma@ludosport.net',
+            ],
+            [
+                'name' => 'LudoSport Adriatica',
+                'slug' => 'ludosport-adriatica',
+                'nation_id' => 2,
+                'created_at' => '2025-06-18 12:52:12',
+                'updated_at' => '2025-07-02 10:12:37',
+                'is_disabled' => 0,
+                'address' => null,
+                'city' => null,
+                'state' => null,
+                'zip' => null,
+                'country' => null,
+                'coordinates' => null,
+                'picture' => '/academies/106/1750251163_logo.png',
+                'email' => 'adriatica@ludosport.net',
+            ],
+        ];
 
-        if (!File::exists($filePath)) {
-            Log::error("File not found: $filePath");
-            return;
-        }
-
-        // Leggi il contenuto del file JSON
-        $academiesJson = File::get(database_path('data/academies.json'));
-
-        // Decodifica il JSON in un array associativo
-        $academies = json_decode($academiesJson, true);
-
-        // Inserisci i dati nel database
         foreach ($academies as $academy) {
-
-            $slug = Str::slug($academy['name']);
-
-            $address = $academy['address'] . " " . $academy['city'] . " "  . $academy['zip'];
-            $location = $this->getLocation($address);
-
-            $nation = \App\Models\Nation::where('name', $academy['country'])->first();
-            if (!$nation && ($location != null)) {
-                $nation = \App\Models\Nation::where('name', $location['country'])->first();
-            }
-
-            $coordinates = $location ? json_encode(['lat' => $location['lat'], 'lng' => $location['lng']]) : null;
-
-            if (!Academy::where('slug', $slug)->exists()) {
-                Academy::create([
+            Academy::updateOrCreate(
+                ['slug' => $academy['slug']],
+                [
                     'name' => $academy['name'],
-                    'nation_id' => $nation->id ?? 1,
-                    'slug' => $slug,
-                    'address' => $academy['address'] ?? null,
-                    'city' => $academy['city'] ?? null,
-                    'state' => $academy['state'] ?? null, //provincia
-                    'zip' => $academy['zip'] ?? null,
-                    'country' => $academy['country'] ?? null,
-                    'coordinates' => $coordinates
-                ]);
-            }
+                    'nation_id' => $academy['nation_id'],
+                    'address' => $academy['address'],
+                    'city' => $academy['city'],
+                    'state' => $academy['state'],
+                    'zip' => $academy['zip'],
+                    'country' => $academy['country'],
+                    'coordinates' => $academy['coordinates'],
+                    'picture' => $academy['picture'],
+                    'email' => $academy['email'],
+                    'is_disabled' => $academy['is_disabled'],
+                    'created_at' => $academy['created_at'],
+                    'updated_at' => $academy['updated_at'],
+                ]
+            );
         }
     }
 

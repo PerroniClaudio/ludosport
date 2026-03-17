@@ -28,7 +28,7 @@ class EnsureRoleAndInstitutionSelectedMiddleware
                 $role = $roles->first()->label;
                 session(['role' => $role]);
             } else {
-                return redirect()->intended(route('role-selector', absolute: false));
+                return redirect()->route('role-selector');
             }
         }
 
@@ -41,14 +41,14 @@ class EnsureRoleAndInstitutionSelectedMiddleware
                     if ($primaryAcademies->count() === 1) {
                         session(['institution' => $primaryAcademies->first()]);
                     } else {
-                        return redirect()->intended(route('institution-selector', absolute: false));
+                        return redirect()->route('institution-selector');
                     }
                 } elseif ($role === 'dean') {
                     $primarySchools = $authUser->schools->where('pivot.is_primary', 1);
                     if ($primarySchools->count() === 1) {
                         session(['institution' => $primarySchools->first()]);
                     } else {
-                        return redirect()->intended(route('institution-selector', absolute: false));
+                        return redirect()->route('institution-selector');
                     }
                 }
             }

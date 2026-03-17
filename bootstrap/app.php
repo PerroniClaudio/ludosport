@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\SearchThrottleMiddleware;
+use App\Http\Middleware\EnsureMinorUserIsApproved;
 use App\Http\Middleware\UserRoleMiddleware;
 use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Http\Request;
@@ -21,7 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => UserRoleMiddleware::class,
             'throttle' => SearchThrottleMiddleware::class,
-            'role.institution.selected' => \App\Http\Middleware\EnsureRoleAndInstitutionSelectedMiddleware::class
+            'role.institution.selected' => \App\Http\Middleware\EnsureRoleAndInstitutionSelectedMiddleware::class,
+            'minor.approved' => EnsureMinorUserIsApproved::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
