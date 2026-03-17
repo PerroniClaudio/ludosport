@@ -62,6 +62,8 @@ class RegisteredUserController extends Controller {
             'surname' => $request->surname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'academy_id' => $request->academy_id,
+            'school_id' => $request->school_id,
             'nation_id' => $nation->id,
             'battle_name' => $battle_name ?? ($request->name . $request->surname . rand(10, 99)),
             'how_found_us' => $request->how_found_us,
