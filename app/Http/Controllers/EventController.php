@@ -229,9 +229,6 @@ class EventController extends Controller
             );
         }
 
-        // Rigenera URL temporanei per le immagini nella descrizione
-        $event->description = $this->regenerateDescriptionImageUrls($event->description);
-
         // Ordina i risultati per punti totali (war_points + style_points) in ordine decrescente, poi per nome e cognome dell'utente
         $rankingResults = $event->results()
             ->with('user')
@@ -602,41 +599,6 @@ class EventController extends Controller
             'path' => $imageUrl, // Il frontend si aspetta 'path' per il src dell'immagine
             'filename' => $fileName,
         ]);
-    }
-
-    private function regenerateDescriptionImageUrls(string $description): string
-    {
-        if (empty($description)) {
-            return $description;
-        }
-
-        // Trova tutti i path GCS nelle immagini (cerca sia con src="path" che src=\"path\" o src già con URL)
-        preg_match_all('/src=["\\\\]*"(events\/(\d+)\/description\/([^"\\\\]+))["\\\\]*"/', $description, $matches);
-
-        if (empty($matches[1])) {
-            return $description;
-        }
-
-        foreach ($matches[1] as $key => $path) {
-            // Rimuovi eventuali caratteri di escape
-            $cleanPath = str_replace('\\', '', $path);
-            $eventId = $matches[2][$key];
-            $filename = $matches[3][$key];
-            
-            if (Storage::disk('gcs')->exists($cleanPath)) {
-                // Genera l'URL dell'endpoint pubblico usando la route del sito
-                $imageUrl = route('site.events.description.image', [
-                    'event' => $eventId,
-                    'filename' => $filename
-                ]);
-                
-                // Sostituisci tutte le occorrenze del path (con o senza escape) con l'URL dell'endpoint
-                $description = str_replace($path, $imageUrl, $description);
-                $description = str_replace($cleanPath, $imageUrl, $description);
-            }
-        }
-
-        return $description;
     }
 
     public function calendar(Request $request)
@@ -1529,11 +1491,6 @@ class EventController extends Controller
         } else {
             $canpurchase = false;
         }
-
-        // Rigenera URL temporanei per le immagini nella descrizione
-        $event->description = $this->regenerateDescriptionImageUrls($event->description);
-
-
 
         return view('website.event-detail', [
             'event' => $event,
