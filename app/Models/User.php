@@ -42,7 +42,11 @@ class User extends Authenticatable implements MustVerifyEmail {
         'bio',
         'how_found_us',
         'rank_id',
-        'gender'
+        'gender',
+        'is_user_minor',
+        'has_user_uploaded_documents',
+        'has_admin_approved_minor',
+        'uploaded_documents_path',
     ];
 
     public function toSearchableArray() {
@@ -76,6 +80,9 @@ class User extends Authenticatable implements MustVerifyEmail {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_user_minor' => 'boolean',
+            'has_user_uploaded_documents' => 'boolean',
+            'has_admin_approved_minor' => 'boolean',
         ];
     }
 

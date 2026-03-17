@@ -30,7 +30,11 @@ class RegisteredUserController extends Controller {
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse {
+        $isUserMinor = $request->input('registration_type') === 'minor';
+        $adultCutoffDate = date('Y-m-d', strtotime('-18 years'));
+
         $request->validate([
+            'registration_type' => ['required', 'string', 'in:adult,minor'],
             'name' => ['required', 'string', 'max:255'],
             'surname' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
@@ -39,15 +43,19 @@ class RegisteredUserController extends Controller {
             'academy_id' => ['required', 'int', 'exists:' . Academy::class . ',id'],
             'school_id' => ['nullable', 'int', 'exists:' . School::class . ',id'],
             'how_found_us' => ['required', 'string', 'max:255'],
-            'birthday' => ['required', 'date', 'before:' . date('Y-m-d', strtotime('-10 years'))],
+            'birthday' => $isUserMinor
+                ? ['required', 'date', 'before:today', 'after:' . $adultCutoffDate]
+                : ['required', 'date', 'before_or_equal:' . $adultCutoffDate],
             'subscription_year' => ['required', 'int', 'min:' . 2006, 'max:' . (date('Y'))],
             'gender' => ['required', 'string', 'in:male,female,other,notsay'],
             'battle_name' => ['nullable', 'string', 'max:255'],
+            'minor_documents' => ['nullable', 'file', 'max:10240'],
         ]);
 
         $nation = Nation::where('name', $request->nationality)->first();
         $academy = Academy::find($request->academy_id);
         $battle_name = preg_replace('/[^A-Za-z0-9 ]/', '', $request->battle_name);
+        $hasUploadedDocuments = false;
 
         $user = User::create([
             'name' => $request->name,
@@ -59,8 +67,25 @@ class RegisteredUserController extends Controller {
             'how_found_us' => $request->how_found_us,
             'subscription_year' => $request->subscription_year ?? date('Y'),
             'birthday' => $request->birthday,
-            'gender' => $request->gender
+            'gender' => $request->gender,
+            'is_user_minor' => $isUserMinor,
+            'has_user_uploaded_documents' => false,
         ]);
+
+        if ($isUserMinor && $request->hasFile('minor_documents')) {
+            $file = $request->file('minor_documents');
+            $fileExtension = $file->getClientOriginalExtension();
+            $fileName = time() . '_minor_documents.' . $fileExtension;
+            $filePath = "/users/{$user->id}/approval_documents/{$fileName}";
+
+            $stored = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
+
+            if ($stored) {
+                $user->uploaded_documents_path = $filePath;
+                $user->has_user_uploaded_documents = true;
+                $user->save();
+            }
+        }
 
         $user->academyAthletes()->syncWithoutDetaching($academy->id);
         $user->setPrimaryAcademyAthlete($academy->id);

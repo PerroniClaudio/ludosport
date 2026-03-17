@@ -1500,6 +1500,38 @@ class UserController extends Controller {
         }
     }
 
+    public function uploadMinorApprovalDocuments($id, Request $request) {
+        $authUser = $request->user();
+
+        if ((int) $authUser->id !== (int) $id) {
+            return redirect()->route('dashboard')->with('error', 'Not authorized.');
+        }
+
+        if (!$authUser->is_user_minor) {
+            return redirect()->route('dashboard')->with('error', 'This upload is only available for minor users.');
+        }
+
+        $request->validate([
+            'minor_documents' => ['required', 'file', 'max:10240'],
+        ]);
+
+        $file = $request->file('minor_documents');
+        $fileExtension = $file->getClientOriginalExtension();
+        $fileName = time() . '_minor_documents.' . $fileExtension;
+        $path = "/users/{$authUser->id}/approval_documents/{$fileName}";
+        $storedFile = $file->storeAs("/users/{$authUser->id}/approval_documents/", $fileName, 'gcs');
+
+        if (!$storedFile) {
+            return redirect()->route('dashboard')->with('error', 'Error uploading approval documents.');
+        }
+
+        $authUser->uploaded_documents_path = $path;
+        $authUser->has_user_uploaded_documents = true;
+        $authUser->save();
+
+        return redirect()->route('dashboard')->with('success', 'Approval documents uploaded successfully.');
+    }
+
     public function dashboard(Request $request) {
         $user = Auth::user()->id;
         $user = User::find($user);
