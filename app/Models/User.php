@@ -60,6 +60,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         ];
     }
 
+    public function isMinorPendingApproval(): bool {
+        return $this->is_user_minor && !$this->has_admin_approved_minor;
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.

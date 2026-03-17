@@ -37,7 +37,7 @@ class AuthenticatedSessionController extends Controller {
         $roles = $user->roles()->get();
 
         if ($roles->count() > 1) {
-            return redirect()->intended(route('role-selector', absolute: false));
+            return redirect()->route('role-selector');
         } else {
 
             // Stesso codice anche in userController setUserRoleForSession
@@ -45,26 +45,26 @@ class AuthenticatedSessionController extends Controller {
 
                 $primaryAcademies = $user->academies->where('pivot.is_primary', 1);
                 if ($primaryAcademies->count() > 1) {
-                    return redirect()->intended(route('institution-selector', absolute: false));
+                    return redirect()->route('institution-selector');
                 } else {
                     $primaryAcademy = $primaryAcademies->first();
                     if ($primaryAcademy) {
                          session(['institution' => $primaryAcademy]);
                     } else {
-                        return redirect()->intended(route('institution-selector', absolute: false));
+                        return redirect()->route('institution-selector');
                     }
                 }
             } else if ($user->getRole() === 'dean') {
 
                 $primarySchools = $user->schools->where('pivot.is_primary', 1);
                 if ($primarySchools->count() > 1) {
-                    return redirect()->intended(route('institution-selector', absolute: false));
+                    return redirect()->route('institution-selector');
                 } else {
                     $primarySchool = $primarySchools->first();
                     if ($primarySchool) {
                          session(['institution' => $primarySchool]);
                     } else {
-                        return redirect()->intended(route('institution-selector', absolute: false));
+                        return redirect()->route('institution-selector');
                     }
                 }
             }

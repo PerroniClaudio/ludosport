@@ -35,7 +35,7 @@ Route::middleware('guest')->group(function () {
                 ->name('password.store');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'minor.approved'])->group(function () {
 // Qui non so se usare il middleware 'role.institution.selected' o meno. per ora non lo uso per evitare di rompere qualche route in cui non dovrebbe esserci
 // Route::middleware(['auth', 'role.institution.selected'])->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)

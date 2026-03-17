@@ -3,9 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'role.institution.selected', 'verified'])->name('dashboard');
-Route::get('/role-select', [App\Http\Controllers\UserController::class, 'roleSelector'])->middleware(['auth', 'verified'])->name('role-selector');
-Route::get('/institution-select', [App\Http\Controllers\UserController::class, 'institutionSelector'])->middleware(['auth', 'verified'])->name('institution-selector');
+Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'minor.approved', 'role.institution.selected', 'verified'])->name('dashboard');
+Route::get('/role-select', [App\Http\Controllers\UserController::class, 'roleSelector'])->middleware(['auth', 'minor.approved', 'verified'])->name('role-selector');
+Route::get('/institution-select', [App\Http\Controllers\UserController::class, 'institutionSelector'])->middleware(['auth', 'minor.approved', 'verified'])->name('institution-selector');
 
 /** Assets */
 
@@ -25,12 +25,12 @@ Route::get('/logoex', [App\Http\Controllers\AssetController::class, 'logoex'])->
 Route::get('/user/{user}/profile-picture', [App\Http\Controllers\UserController::class, 'propic'])->name('user.profile-picture-show');
 
 // Queste due route non devono avere il middleware role.institution.selected, perchè si usano per impostare ruolo e istituzione e devno essere accessibili anche se non sono stati selezionati
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'minor.approved'])->group(function () {
     Route::post('/profile/role', [App\Http\Controllers\UserController::class, 'setUserRoleForSession'])->name('profile.role.update');
     Route::post('/profile/institution', [App\Http\Controllers\UserController::class, 'setUserInstitutionForSession'])->name('profile.institution.update');
 });
 
-Route::middleware(['auth', 'role.institution.selected'])->group(function () {
+Route::middleware(['auth', 'minor.approved', 'role.institution.selected'])->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -44,14 +44,14 @@ Route::middleware(['auth', 'role.institution.selected'])->group(function () {
 
 /** Eliminati */
 
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/deleted-elements', [App\Http\Controllers\DeletedElementController::class, 'index'])->name('deleted-elements.index');
     Route::post('/deleted-elements', [App\Http\Controllers\DeletedElementController::class, 'restore'])->name('deleted-elements.restore');
 });
 
 /** Users */
 
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('users.index');
     Route::get('/filtered-by-dashboard', [App\Http\Controllers\PaginatedUserController::class, 'usersFilteredByActiveAndCoursePagination'])->name('users.filtered-by-active-and-course');
     Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('users.filter');
@@ -92,7 +92,7 @@ Route::post('/users/{user}/languages', [App\Http\Controllers\UserController::cla
 
 /** Nazioni */
 
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/nations', [App\Http\Controllers\NationController::class, 'index'])->name('nations.index');
     Route::get('/nations/all', [App\Http\Controllers\NationController::class, 'all'])->name('nations.all');
     Route::get('/nations/{nation}', [App\Http\Controllers\NationController::class, 'edit'])->name('nations.edit');
@@ -109,7 +109,7 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
 
 /** Accademie */
 
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/academies', [App\Http\Controllers\AcademyController::class, 'index'])->name('academies.index');
     Route::get('/academies/create', [App\Http\Controllers\AcademyController::class, 'create'])->name('academies.create');
     Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('academies.all');
@@ -173,13 +173,13 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
     Route::get('/schools/{school}/users-search', [App\Http\Controllers\SchoolController::class, 'searchUsers'])->name('schools.users-search');
 });
 
-Route::group(['middleware' => ['auth', 'role.institution.selected']], function () {
+Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected']], function () {
     Route::get('/verify-address', [App\Http\Controllers\SchoolController::class, 'verifyAddress'])->name('schools.verify-address');
 });
 
 /** Clan */
 
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/courses', [App\Http\Controllers\ClanController::class, 'index'])->name('clans.index');
     Route::get('/courses/create', [App\Http\Controllers\ClanController::class, 'create'])->name('clans.create');
 
