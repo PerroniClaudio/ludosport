@@ -9,6 +9,9 @@ use App\Models\Nation;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AnnouncementController extends Controller {
     /**
@@ -429,5 +432,85 @@ class AnnouncementController extends Controller {
         return response()->json([
             'success' => true
         ]);
+    }
+
+    public function uploadContentImage(Request $request, Announcement $announcement)
+    {
+        $authUser = User::find(auth()->user()->id);
+
+        // Solo admin può caricare immagini negli annunci
+        if ($authUser->getRole() !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,jpg,png,webp,avif|max:200', // 200KB
+        ]);
+
+        $file = $request->file('image');
+        $fileName = time() . '_' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $path = "announcements/{$announcement->id}/content/{$fileName}";
+
+        $storeFile = $file->storeAs("announcements/{$announcement->id}/content/", $fileName, "gcs");
+
+        if (!$storeFile) {
+            return response()->json(['error' => 'Error uploading image'], 500);
+        }
+
+        // Genera l'URL dell'endpoint pubblico per servire l'immagine
+        $imageUrl = route('announcements.content.image', [
+            'announcement' => $announcement->id,
+            'filename' => $fileName
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'url' => $imageUrl,
+            'path' => $imageUrl, // Il frontend si aspetta 'path' per il src dell'immagine
+            'filename' => $fileName,
+        ]);
+    }
+
+    // Per ora basta essere loggati per vedere le immagini degli annunci, 
+    // Sembra eccessivo, ma se vogliono si può aggiungere un controllo più granulare (es. solo chi può vedere l'annuncio può vedere le immagini)
+    public function getContentImage(Announcement $announcement, string $filename)
+    {
+        $path = "announcements/{$announcement->id}/content/{$filename}";
+
+        if (!Storage::disk('gcs')->exists($path)) {
+            abort(404);
+        }
+
+        /** 
+         * @disregard Intelephense non rileva il metodo temporaryurl
+         * 
+         * @see https://github.com/spatie/laravel-google-cloud-storage
+         */
+        $url = Storage::disk('gcs')->temporaryUrl(
+            $path,
+            now()->addMinutes(5)
+        );
+
+        $response = Http::get($url);
+        $image = $response->body();
+
+        // Estrai il tipo di file dall'estensione
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $contentType = match($extension) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'avif' => 'image/avif',
+            default => 'image/jpeg',
+        };
+
+        $headers = [
+            'Content-Type' => $contentType,
+            'Content-Length' => strlen($image),
+            'Cache-Control' => 'public, max-age=300', // 5 minuti di cache
+        ];
+
+        return response($image, 200, $headers);
     }
 }

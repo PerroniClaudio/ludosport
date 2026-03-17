@@ -17,7 +17,7 @@ String.prototype.deentitize = function () {
     return ret;
 };
 
-export const editor = (content, isEditable = true, eventId = null) => {
+export const editor = (content, isEditable = true, entityId = null, entityType = 'event') => {
     let editor; // Alpine's reactive engine automatically wraps component properties in proxy objects. Attempting to use a proxied editor instance to apply a transaction will cause a "Range Error: Applying a mismatched transaction", so be sure to unwrap it using Alpine.raw(), or simply avoid storing your editor as a component property, as shown in this example.
 
     return {
@@ -241,8 +241,8 @@ export const editor = (content, isEditable = true, eventId = null) => {
             }
         },
         async uploadImage(file) {
-            if (!eventId || !isEditable) {
-                console.error('Cannot upload image: eventId not provided or editor not editable');
+            if (!entityId || !isEditable) {
+                console.error('Cannot upload image: entityId not provided or editor not editable');
                 return null;
             }
 
@@ -250,19 +250,26 @@ export const editor = (content, isEditable = true, eventId = null) => {
             formData.append('image', file);
 
             try {
-                // Determina il ruolo dall'URL corrente
-                const currentPath = window.location.pathname;
-                let routePrefix = '';
+                let uploadUrl;
                 
-                if (currentPath.includes('/rector/')) {
-                    routePrefix = '/rector';
-                } else if (currentPath.includes('/manager/')) {
-                    routePrefix = '/manager';
-                } else if (currentPath.includes('/instructor/')) {
-                    routePrefix = '/instructor';
-                }
+                if (entityType === 'announcement') {
+                    // Per gli annunci, la route è sempre senza prefisso di ruolo
+                    uploadUrl = `/announcements/${entityId}/content/upload-image`;
+                } else {
+                    // Per gli eventi, determina il ruolo dall'URL corrente
+                    const currentPath = window.location.pathname;
+                    let routePrefix = '';
+                    
+                    if (currentPath.includes('/rector/')) {
+                        routePrefix = '/rector';
+                    } else if (currentPath.includes('/manager/')) {
+                        routePrefix = '/manager';
+                    } else if (currentPath.includes('/instructor/')) {
+                        routePrefix = '/instructor';
+                    }
 
-                const uploadUrl = `${routePrefix}/events/${eventId}/description/upload-image`;
+                    uploadUrl = `${routePrefix}/events/${entityId}/description/upload-image`;
+                }
 
                 const response = await fetch(uploadUrl, {
                     method: 'POST',
@@ -275,7 +282,6 @@ export const editor = (content, isEditable = true, eventId = null) => {
                 const data = await response.json();
 
                 if (data.success) {
-                    // Salva il path invece dell'URL temporaneo
                     return data.path;
                 } else {
                     console.error('Upload failed:', data.error);
@@ -309,7 +315,7 @@ export const editor = (content, isEditable = true, eventId = null) => {
                     // Inserisci l'immagine con il path e classe di default (full width)
                     editor.chain().focus().setImage({ 
                         src: imagePath,
-                        class: 'max-w-full h-auto rounded-lg my-4'
+                        class: 'w-full max-w-full h-auto rounded-lg my-4'
                     }).run();
                     
                     // Salva automaticamente la descrizione

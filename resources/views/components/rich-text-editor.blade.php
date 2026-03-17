@@ -6,6 +6,7 @@
     'placeholder' => '',
     'description' => '',
     'editable' => true,
+    'announcementId' => null,
 ])
 
 <div>
@@ -28,7 +29,7 @@
 
     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-    <div x-load x-data="editor(@js($value), {{ $editable ? 'true' : 'false' }})">
+    <div x-load x-data="editor(@js($value), {{ $editable ? 'true' : 'false' }}, {{ $announcementId ? $announcementId : 'null' }}, 'announcement')">
         <template x-if="isLoaded()">
             <div class="menu flex items-center justify-between">
                 <div class="flex items-center gap-1">
@@ -57,56 +58,76 @@
                     </select>
 
                     <!-- Stili scrittura -->
-                    <button class="editor-button" @click="toggleBold()"
+                    <button type="button" class="editor-button" @click="toggleBold()"
                         :class="{ 'is-active': isActive('bold', updatedAt) }">
                         <x-lucide-bold class="w-5 h-5 cursor-pointer" />
                     </button>
-                    <button class="editor-button" @click="toggleItalic()"
+                    <button type="button" class="editor-button" @click="toggleItalic()"
                         :class="{ 'is-active': isActive('italic', updatedAt) }">
                         <x-lucide-italic class="w-5 h-5 cursor-pointer" />
                     </button>
-                    <button class="editor-button" @click="toggleStrike()"
+                    <button type="button" class="editor-button" @click="toggleStrike()"
                         :class="{ 'is-active': isActive('strike', updatedAt) }">
                         <x-lucide-strikethrough class="w-5 h-5 cursor-pointer" />
                     </button>
 
                     <!-- Liste -->
-                    <button class="editor-button" @click="toggleBulletList()"
+                    <button type="button" class="editor-button" @click="toggleBulletList()"
                         :class="{ 'is-active': isActive('bulletList', updatedAt) }">
                         <x-lucide-list class="w-5 h-5 cursor-pointer" />
                     </button>
-                    <button class="editor-button" @click="toggleOrderedList()"
+                    <button type="button" class="editor-button" @click="toggleOrderedList()"
                         :class="{ 'is-active': isActive('orderedList', updatedAt) }">
                         <x-lucide-list-ordered class="w-5 h-5 cursor-pointer" />
                     </button>
 
                     <!-- Citazioni -->
-                    <button class="editor-button" @click="toggleBlockquote()"
+                    <button type="button" class="editor-button" @click="toggleBlockquote()"
                         :class="{ 'is-active': isActive('blockquote', updatedAt) }">
                         <x-lucide-quote class="w-5 h-5 cursor-pointer" />
                     </button>
 
                     <!-- Linea orizzontale -->
-                    <button class="editor-button" @click="toggleHorizontalRule()"
+                    <button type="button" class="editor-button" @click="toggleHorizontalRule()"
                         :class="{ 'is-active': isActive('horizontalRule', updatedAt) }">
                         <x-lucide-minus class="w-5 h-5 cursor-pointer" />
                     </button>
 
                     <!-- Link -->
-                    <button class="editor-button" @click="toggleLink()"
+                    <button type="button" class="editor-button" @click="toggleLink()"
                         :class="{ 'is-active': isActive('link', updatedAt) }">
                         <x-lucide-link class="w-5 h-5 cursor-pointer" />
                     </button>
+
+                    @if ($editable && $announcementId)
+                        <!-- Immagine -->
+                        <button type="button" class="editor-button" @click="insertImage()"
+                            :class="{ 'is-active': isActive('image', updatedAt) }">
+                            <x-lucide-image class="w-5 h-5 cursor-pointer" />
+                        </button>
+
+                        <!-- Dimensioni immagine (visibile solo quando un'immagine è selezionata) -->
+                        <template x-if="isActive('image', updatedAt)">
+                            <select class="editor-button w-32" @change="setImageSize($event.target.value)"
+                                :value="getImageSize(updatedAt)">
+                                <option value="">{{ __('events.image_size') }}</option>
+                                <option value="small" :selected="getImageSize(updatedAt) === 'small'">{{ __('events.image_small') }}</option>
+                                <option value="medium" :selected="getImageSize(updatedAt) === 'medium'">{{ __('events.image_medium') }}</option>
+                                <option value="large" :selected="getImageSize(updatedAt) === 'large'">{{ __('events.image_large') }}</option>
+                                <option value="full" :selected="getImageSize(updatedAt) === 'full'">{{ __('events.image_full') }}</option>
+                            </select>
+                        </template>
+                    @endif
                 </div>
 
                 <!-- Avanti e indietro -->
                 <div>
-                    <button class="editor-button" @click="undo()"
+                    <button type="button" class="editor-button" @click="undo()"
                         :class="{ 'is-active': isActive('undo', updatedAt) }">
                         <x-lucide-undo class="w-5 h-5 cursor-pointer" />
                     </button>
 
-                    <button class="editor-button" @click="redo()"
+                    <button type="button" class="editor-button" @click="redo()"
                         :class="{ 'is-active': isActive('redo', updatedAt) }">
                         <x-lucide-redo class="w-5 h-5 cursor-pointer" />
                     </button>
