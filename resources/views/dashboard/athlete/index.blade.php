@@ -7,6 +7,71 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-4">
+            @if (auth()->user()->is_user_minor && !auth()->user()->has_user_uploaded_documents)
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-background-900 dark:text-background-100">
+                        <div class="flex items-start gap-3 text-red-500">
+                            <x-lucide-circle-alert class="h-6 w-6 mt-0.5 shrink-0" />
+                            <div>
+                                <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                    {{ __('dashboard.athlete_minor_documents_required_title') }}
+                                </h3>
+                                <p class="mt-2 text-sm text-background-700 dark:text-background-300">
+                                    {{ __('dashboard.athlete_minor_documents_required_text') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <form method="POST" action="{{ route('users.update-minor-documents', auth()->id()) }}"
+                            enctype="multipart/form-data" class="mt-6 lg:w-2/3"
+                            x-data="{
+                                isSubmitting: false,
+                                minorDocumentsError: '',
+                                validateMinorDocuments(event) {
+                                    const file = event.target.files?.[0];
+                                    const maxSize = 10 * 1024 * 1024;
+
+                                    if (!file) {
+                                        this.minorDocumentsError = '';
+                                        return;
+                                    }
+
+                                    if (file.size > maxSize) {
+                                        this.minorDocumentsError = '{{ __('auth.minor_documents_too_large') }}';
+                                        event.target.value = '';
+                                        return;
+                                    }
+
+                                    this.minorDocumentsError = '';
+                                }
+                            }"
+                            @submit="if (minorDocumentsError) { return false; } isSubmitting = true">
+                            @csrf
+                            @method('PUT')
+
+                            <x-input-label for="dashboard_minor_documents" :value="__('auth.minor_documents')" />
+                            <input id="dashboard_minor_documents" name="minor_documents" type="file"
+                                @change="validateMinorDocuments($event)"
+                                class="mt-3 block w-full rounded-lg border border-background-200 bg-white px-4 py-3 text-sm text-background-700 shadow-sm file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100 dark:border-background-700 dark:bg-background-900 dark:text-background-200 dark:file:bg-primary-950/50 dark:file:text-primary-300" />
+                            <p class="mt-2 text-xs text-background-500 dark:text-background-400">
+                                {{ __('auth.minor_documents_help') }}
+                            </p>
+                            <p x-show="minorDocumentsError" x-text="minorDocumentsError"
+                                class="mt-2 text-sm text-red-600 dark:text-red-400"></p>
+                            <x-input-error :messages="$errors->get('minor_documents')" class="mt-2" />
+
+                            <div class="mt-4 flex justify-end">
+                                <x-primary-button x-bind:disabled="isSubmitting" x-bind:aria-busy="isSubmitting">
+                                    <span x-show="!isSubmitting" x-cloak>
+                                        {{ __('dashboard.athlete_minor_documents_upload_button') }}
+                                    </span>
+                                    <span x-show="isSubmitting" x-cloak>{{ __('auth.registering') }}</span>
+                                </x-primary-button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            @endif
 
             @if (auth()->user()->has_paid_fee)
                 @if (auth()->user()->isFeeExpiring())

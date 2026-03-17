@@ -25,7 +25,7 @@
 
 <body class="font-sans text-background-900 antialiased">
     <div
-        class="min-h-screen flex flex-col sm:justify-center items-center py-6 bg-background-100 dark:bg-background-900">
+        class="min-h-screen flex flex-col sm:justify-center items-center py-6 bg-background-100 dark:bg-background-900 p-2">
         <div>
             <a href="/">
                 <x-application-logo class="w-20 h-20 fill-current text-background-500" />
