@@ -434,8 +434,8 @@ class EventController extends Controller
             $event->name = $request->name;
             $event->year = $request->filled('year') ? (int) $request->year : Event::calculateEventYear($request->start_date);
 
-            // $event->start_date = Carbon::parse($request->start_date, $request->user_timezone)->setTimezone('GMT');
-            // $event->end_date = Carbon::parse($request->end_date, $request->user_timezone)->setTimezone('GMT');
+            $event->start_date = $request->start_date;
+            $event->end_date = $request->end_date;
 
             if (isset($request->weapon_form_id) && $request->weapon_form_id != 0) {
                 $event->weapon_form_id = $request->weapon_form_id;
