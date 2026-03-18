@@ -1367,7 +1367,9 @@ class SchoolController extends Controller {
         return response()->json($nearbySchools);
     }
 
-    public function detail(School $school) {
+    public function detail(Request $request, School $school) {
+
+        $viewer = $request->user();
 
         $dean = $school->dean() ? $school->dean()->name . " " . $school->dean()->surname : "";
 
@@ -1376,6 +1378,14 @@ class SchoolController extends Controller {
         $rectors = $academy->personnel()->whereHas('roles', function ($query) {
             $query->where('name', 'rector');
         })->get();
+
+        $school->setRelation('athletes', $school->athletes->map(function ($athlete) use ($viewer) {
+            if (!$athlete->canViewerSeeMinorBattleName($viewer)) {
+                $athlete->battle_name = '';
+            }
+
+            return $athlete;
+        }));
 
         return view('website.school-profile', [
             'school' => $school,

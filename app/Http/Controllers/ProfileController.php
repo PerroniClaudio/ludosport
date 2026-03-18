@@ -19,6 +19,7 @@ class ProfileController extends Controller {
         return view('profile.edit', [
             'languages' => Language::all(),
             'user' => $request->user(),
+            'minorPrivacy' => $request->attributes->get('minor_privacy', []),
         ]);
     }
 

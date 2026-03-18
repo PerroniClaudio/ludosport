@@ -654,7 +654,10 @@ class UserController extends Controller {
         ]);
     }
 
-    public function show(User $user) {
+    public function show(Request $request, User $user) {
+
+        $viewer = $request->user();
+        $minorPrivacy = $request->attributes->get('minor_privacy', []);
 
         $roles = Role::all();
         $user->roles = $user->roles->pluck('label')->toArray();
@@ -710,18 +713,35 @@ class UserController extends Controller {
 
         $user->events = $events_formatted;
 
+        if (!($minorPrivacy['can_view_bio'] ?? true)) {
+            $user->bio = '';
+        }
+
+        if (!($minorPrivacy['can_view_social'] ?? true)) {
+            $user->instagram = '';
+            $user->telegram = '';
+        }
+
+        if (!($minorPrivacy['can_view_battle_name'] ?? true)) {
+            $user->battle_name = '';
+        }
+
         return view('website.user-show', [
             'user' => $user,
             'roles' => $roles,
+            'minorPrivacy' => $minorPrivacy,
+            'viewer' => $viewer,
         ]);
     }
 
-    public function propic(User $user) {
+    public function propic(Request $request, User $user) {
+
+        $minorPrivacy = $request->attributes->get('minor_privacy', []);
 
         $cacheKey = 'propic-' . $user->id;
 
-        $image = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($user) {
-            if ($user->profile_picture !== null) {
+        $image = Cache::remember($cacheKey . '-' . (($minorPrivacy['can_view_avatar'] ?? true) ? 'visible' : 'hidden'), now()->addMinutes(5), function () use ($user, $minorPrivacy) {
+            if (($minorPrivacy['can_view_avatar'] ?? true) && $user->profile_picture !== null) {
                 /** 
                  * @disregard Intelephense non rileva il metodo temporaryurl
                  * 
@@ -1227,6 +1247,25 @@ class UserController extends Controller {
             ->where('is_disabled', false)
             ->with(['roles', 'academies', 'academyAthletes', 'nation'])
             ->get();
+
+        $viewer = $request->user();
+        $users = $users->map(function (User $user) use ($viewer) {
+            if (!$user->canViewerSeeMinorBattleName($viewer)) {
+                $user->battle_name = null;
+            }
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'surname' => $user->surname,
+                'battle_name' => $user->battle_name,
+                'nation' => $user->nation ? [
+                    'id' => $user->nation->id,
+                    'name' => $user->nation->name,
+                ] : null,
+                'profile_url' => $user->battle_name ? route('website-users-show', $user->battle_name) : null,
+            ];
+        })->values();
 
         return response()->json($users);
     }

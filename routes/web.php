@@ -22,7 +22,7 @@ Route::get('/weapon/{weapon}/image', [App\Http\Controllers\AssetController::clas
 Route::get('/weapon-form/{weapon:id}/image', [App\Http\Controllers\AssetController::class, 'weaponFormImage'])->name('weapon-form-image');
 Route::get('/favicon', [App\Http\Controllers\AssetController::class, 'favicon'])->name('favicon');
 Route::get('/logoex', [App\Http\Controllers\AssetController::class, 'logoex'])->name('logoex');
-Route::get('/user/{user}/profile-picture', [App\Http\Controllers\UserController::class, 'propic'])->name('user.profile-picture-show');
+Route::get('/user/{user}/profile-picture', [App\Http\Controllers\UserController::class, 'propic'])->middleware('minor.privacy')->name('user.profile-picture-show');
 
 // Queste due route non devono avere il middleware role.institution.selected, perchè si usano per impostare ruolo e istituzione e devno essere accessibili anche se non sono stati selezionati
 Route::middleware(['auth', 'minor.approved'])->group(function () {
@@ -32,8 +32,8 @@ Route::middleware(['auth', 'minor.approved'])->group(function () {
 
 Route::middleware(['auth', 'minor.approved', 'role.institution.selected'])->group(function () {
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile', [ProfileController::class, 'edit'])->middleware('minor.privacy')->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->middleware('minor.privacy')->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::put('/profile/{user}/picture', [App\Http\Controllers\UserController::class, 'userUploadPicture'])->name('users.update-pfp');
     Route::put('/profile/{user}/approval-documents', [App\Http\Controllers\UserController::class, 'uploadMinorApprovalDocuments'])->name('users.update-minor-documents');

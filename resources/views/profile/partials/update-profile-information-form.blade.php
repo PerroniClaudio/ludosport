@@ -64,12 +64,13 @@
             @endif
         </div>
 
+        @if ($minorPrivacy['can_edit_restricted_profile_fields'] ?? true)
+            <x-form.input name="instagram" label="{{ __('users.instagram_field') }}" type="text" required="{{ false }}"
+                :value="$user->instagram" placeholder="{{ fake()->username() }}" />
 
-        <x-form.input name="instagram" label="{{ __('users.instagram_field') }}" type="text" required="{{ false }}"
-            :value="$user->instagram" placeholder="{{ fake()->username() }}" />
-
-        <x-form.input name="telegram" label="{{ __('users.telegram_field') }}" type="text" required="{{ false }}"
-            :value="$user->telegram" placeholder="@username" />
+            <x-form.input name="telegram" label="{{ __('users.telegram_field') }}" type="text" required="{{ false }}"
+                :value="$user->telegram" placeholder="@username" />
+        @endif
 
 
         @if ($user->primaryAcademyAthlete())
@@ -86,7 +87,13 @@
             </div>
         @endif
 
-        <x-form.textarea name="bio" label="Bio" required="{{ false }}" :value="$user->bio" />
+        @if ($minorPrivacy['can_edit_restricted_profile_fields'] ?? true)
+            <x-form.textarea name="bio" label="Bio" required="{{ false }}" :value="$user->bio" />
+        @else
+            <p class="text-sm text-background-600 dark:text-background-400">
+                I campi bio e social non sono disponibili per gli utenti minorenni.
+            </p>
+        @endif
 
 
         <div class="flex items-center gap-4">

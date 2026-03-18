@@ -64,6 +64,34 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->is_user_minor && !$this->has_admin_approved_minor;
     }
 
+    public function viewerHasMinorPrivacyOverride(?self $viewer): bool
+    {
+        if (!$viewer) {
+            return false;
+        }
+
+        if ($viewer->id === $this->id) {
+            return true;
+        }
+
+        return $viewer->hasAnyRole(['admin', 'rector', 'manager']);
+    }
+
+    public function canViewerSeeMinorSensitiveFields(?self $viewer): bool
+    {
+        return !$this->is_user_minor || $this->viewerHasMinorPrivacyOverride($viewer);
+    }
+
+    public function canViewerSeeMinorBattleName(?self $viewer): bool
+    {
+        return !$this->is_user_minor || $viewer !== null;
+    }
+
+    public function canViewerSeeMinorInstitutions(?self $viewer): bool
+    {
+        return !$this->is_user_minor || $viewer !== null;
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.
