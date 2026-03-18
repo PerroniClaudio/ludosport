@@ -39,6 +39,7 @@ Route::prefix('rector')->middleware(['auth', 'minor.approved', 'role.institution
     Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('rector.users.index');
     Route::get('/users/approve', [App\Http\Controllers\UserController::class, 'approveMinorUsersIndex'])->name('rector.users.approve.index');
     Route::get('/users/{user}/approval-document', [App\Http\Controllers\UserController::class, 'viewMinorApprovalDocument'])->name('rector.users.approval-document');
+    Route::put('/users/{user}/approval-document', [App\Http\Controllers\UserController::class, 'uploadMinorApprovalDocumentForEditAsRector'])->name('rector.users.approval-document.store');
     Route::put('/users/{user}/approval-document-upload', [App\Http\Controllers\UserController::class, 'uploadMinorApprovalDocumentAsRector'])->name('rector.users.approval-document-upload');
     Route::put('/users/{user}/approve-minor', [App\Http\Controllers\UserController::class, 'approveMinorUser'])->name('rector.users.approve-minor');
     Route::put('/users/{user}/deny-minor', [App\Http\Controllers\UserController::class, 'denyMinorUser'])->name('rector.users.deny-minor');

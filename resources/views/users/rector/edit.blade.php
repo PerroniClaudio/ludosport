@@ -9,6 +9,7 @@
     $editable_roles = auth()->user()->getEditableRoles()->pluck('label');
     // L'atleta dovrebbe avere una sola accademia associata, ma le recupero comunque tutte per sicurezza
 $canEdit = in_array($authUser->getActiveInstitutionId(), $user->academyAthletes->pluck('id')->toArray());
+$canManageMinorDocuments = $authRole === 'rector' && $user->is_user_minor && $canEdit;
 // Dal momento che non può accedere alla pagina se l'utente non è associato alla sua accademia e che è del personale può comunque modificare il ruolo, $canEditRoles può essere sempre vero.
     $canEditRoles = true;
 @endphp
@@ -83,6 +84,12 @@ $canEdit = in_array($authUser->getActiveInstitutionId(), $user->academyAthletes-
                                 </div>
                             @endif
                         </div>
+                        @if ($user->is_user_minor)
+                            <div
+                                class="mt-1 text-sm text-background-600 dark:text-background-200 flex flex-row items-center gap-2">
+                                <x-lucide-baby class="w-6 h-6 text-amber-500" />
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -138,6 +145,50 @@ $canEdit = in_array($authUser->getActiveInstitutionId(), $user->academyAthletes-
                                 </div>
                             </div>
 
+                            @if ($canManageMinorDocuments)
+                                <div class="mt-4 border-t border-background-100 dark:border-background-700 pt-4">
+                                    <div class="flex flex-col gap-3">
+                                        <div>
+                                            <x-input-label :value="__('users.minor_approval_documents')" />
+                                            <p class="text-sm text-background-600 dark:text-background-300">
+                                                {{ __('users.minor_approval_documents_help') }}
+                                            </p>
+                                        </div>
+
+                                        <div class="flex items-center gap-2 text-sm">
+                                            @if ($user->has_user_uploaded_documents)
+                                                <x-lucide-check-circle class="w-5 h-5 text-green-500" />
+                                                <span class="text-green-600 dark:text-green-400">
+                                                    {{ __('users.document_uploaded') }}
+                                                </span>
+                                            @else
+                                                <x-lucide-x-circle class="w-5 h-5 text-amber-500" />
+                                                <span class="text-amber-600 dark:text-amber-400">
+                                                    {{ __('users.document_missing') }}
+                                                </span>
+                                            @endif
+                                        </div>
+
+                                        <div class="flex flex-wrap gap-2">
+                                            @if ($user->has_user_uploaded_documents)
+                                                <x-primary-link-button-small href="{{ route('rector.users.approval-document', $user->id) }}"
+                                                    target="_blank" rel="noopener noreferrer">
+                                                    {{ __('users.view_document') }}
+                                                </x-primary-link-button-small>
+                                            @endif
+
+                                            <x-primary-button-small type="button"
+                                                x-data=""
+                                                x-on:click.prevent="$dispatch('open-modal', 'upload-minor-document-{{ $user->id }}')">
+                                                {{ $user->has_user_uploaded_documents ? __('users.replace') . ' ' . __('users.document') : __('users.upload_document') }}
+                                            </x-primary-button-small>
+                                        </div>
+
+                                        <x-input-error :messages="$errors->get('minor_documents')" />
+                                    </div>
+                                </div>
+                            @endif
+
                         </div>
                     </div>
 
@@ -154,6 +205,51 @@ $canEdit = in_array($authUser->getActiveInstitutionId(), $user->academyAthletes-
                     <x-user.roles :user="$user" :roles="$user->roles" :availableRoles="$roles" />
                 </div>
             </div>
+
+            @if ($canManageMinorDocuments)
+                <x-modal name="upload-minor-document-{{ $user->id }}" :show="false" focusable>
+                    <form method="POST"
+                        action="{{ route('rector.users.approval-document.store', $user->id) }}"
+                        enctype="multipart/form-data"
+                        class="p-6">
+                        @csrf
+                        @method('PUT')
+
+                        <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
+                            {{ $user->has_user_uploaded_documents ? __('users.replace') . ' ' . __('users.document') : __('users.upload_document') }}
+                        </h2>
+
+                        <p class="mt-1 text-sm text-background-600 dark:text-background-300">
+                            {{ __('users.minor_approval_documents_help') }}
+                        </p>
+
+                        <div class="mt-6">
+                            <label for="minor_documents_{{ $user->id }}"
+                                class="mb-2 block text-sm font-medium text-background-700 dark:text-background-300">
+                                {{ __('users.document') }}
+                            </label>
+                            <input id="minor_documents_{{ $user->id }}"
+                                name="minor_documents"
+                                type="file"
+                                accept="application/pdf"
+                                required
+                                class="block w-full text-sm text-background-700 file:mr-4 file:rounded-md file:border-0 file:bg-primary-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-background-700 dark:text-background-200 dark:file:bg-primary-400 dark:file:text-background-900 dark:hover:file:bg-primary-600" />
+                            <x-input-error :messages="$errors->get('minor_documents')" class="mt-2" />
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-3">
+                            <x-secondary-button type="button"
+                                x-on:click="$dispatch('close-modal', 'upload-minor-document-{{ $user->id }}')">
+                                {{ __('users.cancel') }}
+                            </x-secondary-button>
+
+                            <x-primary-button>
+                                {{ $user->has_user_uploaded_documents ? __('users.replace') . ' ' . __('users.document') : __('users.upload_document') }}
+                            </x-primary-button>
+                        </div>
+                    </form>
+                </x-modal>
+            @endif
 
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
