@@ -184,6 +184,8 @@ return [
     'upload_document_and_approve' => 'Upload Document and Approve',
     'upload_document_and_approve_help' => 'Upload the minor approval document to approve this registration immediately.',
     'view_document' => 'View Document',
+    'minor_approval_documents' => 'Minor Approval Documents',
+    'minor_approval_documents_help' => 'Assigned rectors can upload or download the PDF required for minor approval.',
     'approve_registration' => 'Approve Registration',
     'deny_registration' => 'Deny Registration',
     'deny_reason' => 'Reason for denial',

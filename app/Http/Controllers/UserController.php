@@ -1570,18 +1570,19 @@ class UserController extends Controller {
 
     public function uploadMinorApprovalDocumentAsRector(User $user, Request $request) {
         $authUser = User::find(Auth::id());
+        $redirect = back();
 
         if ($authUser->getRole() !== 'rector') {
-            return redirect()->route('dashboard')->with('error', 'You are not authorized to perform this action!');
+            return $redirect->with('error', 'You are not authorized to perform this action!');
         }
 
         $academyId = $authUser->getActiveInstitutionId();
         if (!$academyId || !$user->academyAthletes()->where('academy_id', $academyId)->exists()) {
-            return redirect()->route('dashboard')->with('error', 'You are not authorized to upload a document for this user!');
+            return $redirect->with('error', 'You are not authorized to upload a document for this user!');
         }
 
         if (!$user->is_user_minor) {
-            return redirect()->route('rector.users.approve.index')->with('error', 'This upload is only available for minor users.');
+            return $redirect->with('error', 'This upload is only available for minor users.');
         }
 
         $request->validate([
@@ -1595,7 +1596,7 @@ class UserController extends Controller {
         $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
 
         if (!$storedFile) {
-            return redirect()->route('rector.users.approve.index')->with('error', 'Error uploading approval documents.');
+            return $redirect->with('error', 'Error uploading approval documents.');
         }
 
         $user->uploaded_documents_path = $path;
@@ -1603,7 +1604,45 @@ class UserController extends Controller {
         $user->has_admin_approved_minor = true;
         $user->save();
 
-        return redirect()->route('rector.users.approve.index')->with('success', 'Approval documents uploaded and user approved successfully.');
+        return $redirect->with('success', 'Approval documents uploaded and user approved successfully.');
+    }
+
+    public function uploadMinorApprovalDocumentForEditAsRector(User $user, Request $request) {
+        $authUser = User::find(Auth::id());
+        $redirect = back();
+
+        if ($authUser->getRole() !== 'rector') {
+            return $redirect->with('error', 'You are not authorized to perform this action!');
+        }
+
+        $academyId = $authUser->getActiveInstitutionId();
+        if (!$academyId || !$user->academyAthletes()->where('academy_id', $academyId)->exists()) {
+            return $redirect->with('error', 'You are not authorized to upload a document for this user!');
+        }
+
+        if (!$user->is_user_minor) {
+            return $redirect->with('error', 'This upload is only available for minor users.');
+        }
+
+        $request->validate([
+            'minor_documents' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
+
+        $file = $request->file('minor_documents');
+        $fileExtension = $file->getClientOriginalExtension();
+        $fileName = time() . '_minor_documents.' . $fileExtension;
+        $path = "/users/{$user->id}/approval_documents/{$fileName}";
+        $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
+
+        if (!$storedFile) {
+            return $redirect->with('error', 'Error uploading approval documents.');
+        }
+
+        $user->uploaded_documents_path = $path;
+        $user->has_user_uploaded_documents = true;
+        $user->save();
+
+        return $redirect->with('success', 'Approval document uploaded successfully.');
     }
 
     public function viewMinorApprovalDocument(User $user, Request $request) {
