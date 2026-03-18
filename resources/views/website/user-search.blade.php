@@ -29,8 +29,12 @@
             
                     }
                 },
-                userDetail(slug) {
-                    window.location.href = '/website-users/' + slug;
+                userDetail(url) {
+                    if (!url) {
+                        return;
+                    }
+
+                    window.location.href = url;
                 }
             }">
                 <div class="flex items-center gap-2">
@@ -45,16 +49,19 @@
 
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 py-8 text-background-900 dark:text-background-100">
                     <template x-for="user in users" :key="user.id">
-                        <div class="bg-white dark:bg-transparent flex gap-4 mb-4  border dark:border-background-700 rounded p-4 hover:border-primary-500 cursor-pointer"
-                            @click="userDetail(user.battle_name)">
+                        <div class="bg-white dark:bg-transparent flex gap-4 mb-4 border dark:border-background-700 rounded p-4"
+                            :class="user.profile_url ? 'hover:border-primary-500 cursor-pointer' : ''"
+                            @click="userDetail(user.profile_url)">
                             <div class="rounded-full h-12 w-12">
                                 <img x-bind:src="'{{ env('APP_URL') }}/profile-picture/' + user.id" alt="avatar"
                                     class="rounded-full h-12 w-12 object-cover object-center" />
                             </div>
                             <div>
                                 <div class="text-md text-primary-500" x-text="user.name + ' ' + user.surname"></div>
-                                <div class="text-xs text-background-500 dark:text-background-400"
-                                    x-text="'@'+user.battle_name"></div>
+                                <template x-if="user.battle_name">
+                                    <div class="text-xs text-background-500 dark:text-background-400"
+                                        x-text="'@' + user.battle_name"></div>
+                                </template>
 
                                 <div class="flex items-center gap-2">
                                     <x-lucide-flag class="h-4 w-4 text-background-500 dark:text-background-400" />

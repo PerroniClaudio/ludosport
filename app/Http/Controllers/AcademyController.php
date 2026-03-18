@@ -1009,7 +1009,9 @@ class AcademyController extends Controller {
         return $authorized;
     }
 
-    public function detail(Academy $academy) {
+    public function detail(Request $request, Academy $academy) {
+
+        $viewer = $request->user();
 
         $rector = "";
         $associated_personnel = $academy->personnel;
@@ -1018,7 +1020,19 @@ class AcademyController extends Controller {
             $associated_personnel[$key]->role = implode(', ', $person->roles->pluck('name')->map(function ($role) {
                 return __('users.' . $role);
             })->toArray());
+
+            if (!$person->canViewerSeeMinorBattleName($viewer)) {
+                $associated_personnel[$key]->battle_name = '';
+            }
         }
+
+        $academy->setRelation('athletes', $academy->athletes->map(function ($athlete) use ($viewer) {
+            if (!$athlete->canViewerSeeMinorBattleName($viewer)) {
+                $athlete->battle_name = '';
+            }
+
+            return $athlete;
+        }));
 
         $rectors = $academy->personnel()->whereHas('roles', function ($query) {
             $query->where('name', 'rector');

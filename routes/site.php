@@ -26,8 +26,8 @@ Route::get('/athlete-profile/{id}', function () {
 /** Academy Map */
 
 Route::get('/schools-map', [App\Http\Controllers\SchoolController::class, 'schoolsMap'])->name('schools-map');
-Route::get('/school-profile/{school:slug}', [App\Http\Controllers\SchoolController::class, 'detail'])->name('school-profile');
-Route::get('/academy-profile/{academy:slug}', [App\Http\Controllers\AcademyController::class, 'detail'])->name('academy-profile');
+Route::get('/school-profile/{school:slug}', [App\Http\Controllers\SchoolController::class, 'detail'])->middleware('minor.privacy')->name('school-profile');
+Route::get('/academy-profile/{academy:slug}', [App\Http\Controllers\AcademyController::class, 'detail'])->middleware('minor.privacy')->name('academy-profile');
 Route::get('/academy-image/{academy}', [App\Http\Controllers\AcademyController::class, 'academyImage'])->name('academy-image');
 Route::middleware('throttle:rate_limit,1')->get('/schools-search', [App\Http\Controllers\SchoolController::class, 'searchSchools'])->name('schools-search');
 Route::get('/academy/{academy}/schools', [App\Http\Controllers\AcademyController::class, 'schools'])->name('academies.schools.index');
@@ -116,9 +116,9 @@ Route::prefix('/registration')->group(function () {
 });
 
 
-Route::middleware('throttle:rate_limit,1')->get('/website-users/search', [App\Http\Controllers\UserController::class, 'searchJson'])->name('website-users-search');
-Route::get('/profile-picture/{user}', [App\Http\Controllers\UserController::class, 'propic'])->name('profile-picture');
-Route::get('/website-users/{user:battle_name}', [App\Http\Controllers\UserController::class, 'show'])->name('website-users-show');
+Route::middleware(['throttle:rate_limit,1', 'minor.privacy'])->get('/website-users/search', [App\Http\Controllers\UserController::class, 'searchJson'])->name('website-users-search');
+Route::get('/profile-picture/{user}', [App\Http\Controllers\UserController::class, 'propic'])->middleware('minor.privacy')->name('profile-picture');
+Route::get('/website-users/{user:battle_name}', [App\Http\Controllers\UserController::class, 'show'])->middleware('minor.privacy')->name('website-users-show');
 Route::get('/event-picture/{event}', [App\Http\Controllers\EventController::class, 'eventPicture'])->name('event-picture');
 Route::get('/events/{event}/description/image/{filename}', [App\Http\Controllers\EventController::class, 'getDescriptionImage'])->name('site.events.description.image');
 
