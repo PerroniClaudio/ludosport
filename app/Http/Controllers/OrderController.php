@@ -7,6 +7,7 @@ use App\Models\Fee;
 use App\Models\Invoice;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Cashier\Cashier;
 use Illuminate\Support\Str;
 
@@ -221,7 +222,8 @@ class OrderController extends Controller {
         }
 
         $order->update([
-            'status' => 2
+            'status' => 2,
+            'approved_by' => Auth::id(),
         ]);
 
         return redirect()->route('orders.edit', $order->id)->with('success', 'Order approved successfully');
