@@ -2,6 +2,7 @@
 
 use App\Support\DailyLogArchiveUploader;
 use Carbon\CarbonImmutable;
+use App\Jobs\CheckUsersComingOfAgeJob;
 use App\Jobs\CheckPrimaryAcademyJob;
 use App\Jobs\CheckWaitingListJob;
 use App\Models\Academy;
@@ -44,6 +45,8 @@ Artisan::command('logs:archive-daily {--date= : The log date to archive (Y-m-d)}
 Schedule::job(new CheckWaitingListJob())->daily();
 
 Schedule::job(new CheckPrimaryAcademyJob())->daily();
+
+Schedule::job(new CheckUsersComingOfAgeJob())->daily();
 
 Schedule::command('logs:archive-daily')
     ->dailyAt(config('logging.archive.time', '00:10'))

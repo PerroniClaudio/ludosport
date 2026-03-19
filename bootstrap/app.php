@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\SearchThrottleMiddleware;
 use App\Http\Middleware\EnsureMinorUserIsApproved;
+use App\Http\Middleware\EnsureMinorSwitchIsCompleted;
 use App\Http\Middleware\HandleMinorUserPrivacy;
 use App\Http\Middleware\UserRoleMiddleware;
 use Illuminate\Http\Exceptions\PostTooLargeException;
@@ -26,6 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role.institution.selected' => \App\Http\Middleware\EnsureRoleAndInstitutionSelectedMiddleware::class,
             'minor.approved' => EnsureMinorUserIsApproved::class,
             'minor.privacy' => HandleMinorUserPrivacy::class,
+        ]);
+        $middleware->web(append: [
+            EnsureMinorSwitchIsCompleted::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
