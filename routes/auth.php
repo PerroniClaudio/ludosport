@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\MinorSwitchController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -38,6 +39,12 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'minor.approved'])->group(function () {
 // Qui non so se usare il middleware 'role.institution.selected' o meno. per ora non lo uso per evitare di rompere qualche route in cui non dovrebbe esserci
 // Route::middleware(['auth', 'role.institution.selected'])->group(function () {
+    Route::get('minor-switch-email', [MinorSwitchController::class, 'edit'])
+                ->name('minor-switch.edit');
+
+    Route::put('minor-switch-email', [MinorSwitchController::class, 'update'])
+                ->name('minor-switch.update');
+
     Route::get('verify-email', EmailVerificationPromptController::class)
                 ->name('verification.notice');
 

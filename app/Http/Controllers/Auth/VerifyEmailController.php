@@ -21,6 +21,14 @@ class VerifyEmailController extends Controller
         }
 
         if ($request->user()->markEmailAsVerified()) {
+            if ($request->user()->has_to_switch_from_minor) {
+                $request->user()->forceFill([
+                    'is_user_minor' => false,
+                    'has_to_switch_from_minor' => false,
+                    'has_admin_approved_minor' => false,
+                ])->save();
+            }
+
             event(new Verified($request->user()));
         }
 
