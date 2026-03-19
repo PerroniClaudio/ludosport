@@ -2,20 +2,21 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Cashier\Billable;
-use Laravel\Sanctum\HasApiTokens;
-use Laravel\Scout\Searchable;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Laravel\Cashier\Billable;
+use Laravel\Sanctum\HasApiTokens;
+use Laravel\Scout\Searchable;
 
-class User extends Authenticatable implements MustVerifyEmail {
-    use HasFactory, Notifiable, HasApiTokens, Searchable, Billable;
+class User extends Authenticatable implements MustVerifyEmail
+{
+    use Billable, HasApiTokens, HasFactory, Notifiable, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -47,9 +48,11 @@ class User extends Authenticatable implements MustVerifyEmail {
         'has_user_uploaded_documents',
         'has_admin_approved_minor',
         'uploaded_documents_path',
+        'privacy_policy_accepted_at',
     ];
 
-    public function toSearchableArray() {
+    public function toSearchableArray()
+    {
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -60,13 +63,14 @@ class User extends Authenticatable implements MustVerifyEmail {
         ];
     }
 
-    public function isMinorPendingApproval(): bool {
-        return $this->is_user_minor && !$this->has_admin_approved_minor;
+    public function isMinorPendingApproval(): bool
+    {
+        return $this->is_user_minor && ! $this->has_admin_approved_minor;
     }
 
     public function viewerHasMinorPrivacyOverride(?self $viewer): bool
     {
-        if (!$viewer) {
+        if (! $viewer) {
             return false;
         }
 
@@ -79,19 +83,43 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function canViewerSeeMinorSensitiveFields(?self $viewer): bool
     {
-        return !$this->is_user_minor || $this->viewerHasMinorPrivacyOverride($viewer);
+        return ! $this->is_user_minor || $this->viewerHasMinorPrivacyOverride($viewer);
     }
 
     public function canViewerSeeMinorBattleName(?self $viewer): bool
     {
-        return !$this->is_user_minor || $viewer !== null;
+        return ! $this->is_user_minor || $viewer !== null;
     }
 
     public function canViewerSeeMinorInstitutions(?self $viewer): bool
     {
-        return !$this->is_user_minor || $viewer !== null;
+        return ! $this->is_user_minor || $viewer !== null;
     }
 
+    /**
+     * Controlla se l'utente ha accettato l'ultima privacy policy
+     */
+    public function hasAcceptedLatestPrivacyPolicy(): bool
+    {
+        if (! $this->privacy_policy_accepted_at) {
+            return false;
+        }
+
+        $policy = PrivacyPolicy::find(1);
+        if (! $policy) {
+            return false;
+        }
+
+        return ! $policy->isNewerThan($this->privacy_policy_accepted_at);
+    }
+
+    /**
+     * Registra l'accettazione della privacy policy da parte dell'utente
+     */
+    public function acceptPrivacyPolicy(): void
+    {
+        $this->update(['privacy_policy_accepted_at' => now()]);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -108,7 +136,8 @@ class User extends Authenticatable implements MustVerifyEmail {
      *
      * @return array<string, string>
      */
-    protected function casts(): array {
+    protected function casts(): array
+    {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
@@ -118,7 +147,8 @@ class User extends Authenticatable implements MustVerifyEmail {
         ];
     }
 
-    protected static function boot() {
+    protected static function boot()
+    {
         parent::boot();
 
         static::creating(function ($user) {
@@ -128,7 +158,7 @@ class User extends Authenticatable implements MustVerifyEmail {
             }
 
             // Se l'utente non ha inserito il battle name o se è già esistente viene generato in automatico
-            if (!$user->battle_name || User::where('battle_name', $user->battle_name)->exists()) {
+            if (! $user->battle_name || User::where('battle_name', $user->battle_name)->exists()) {
                 $user->battle_name = $user->generateBattleName();
             }
 
@@ -138,12 +168,12 @@ class User extends Authenticatable implements MustVerifyEmail {
 
             if (
                 is_null($user->unique_code) ||
-                $user->unique_code == "" ||
+                $user->unique_code == '' ||
                 User::where('unique_code', $user->unique_code)->count() > 0
             ) {
                 $code_valid = false;
-                while (!$code_valid) {
-                    $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
+                while (! $code_valid) {
+                    $unique_code = Str::random(4).'-'.Str::random(4).'-'.Str::random(4).'-'.Str::random(4);
                     $code_valid = User::where('unique_code', $unique_code)->count() == 0;
                 }
                 $user->unique_code = $unique_code;
@@ -171,7 +201,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     /**
      * Invalida tutte le cache delle statistiche atleti
      */
-    protected static function clearAthletesCache() {
+    protected static function clearAthletesCache()
+    {
         // Cache world
         \Illuminate\Support\Facades\Cache::forget('athletes-world-data');
         \Illuminate\Support\Facades\Cache::forget('athletes-world-data-per-year');
@@ -191,23 +222,26 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
     }
 
-
-    public function nation() {
+    public function nation()
+    {
         return $this->belongsTo(Nation::class);
     }
 
     // Restutuisce le accademie in cui fa parte del personale
-    public function academies() {
+    public function academies()
+    {
         return $this->belongsToMany(Academy::class, 'academies_personnel', 'user_id', 'academy_id')->withPivot('is_primary');
     }
 
     // Restituisce l'accademia principale (per il personale)
-    public function primaryAcademy() {
+    public function primaryAcademy()
+    {
         return $this->academies()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
     }
 
     // Imposta accademia primaria (per il personale) non più usato.
-    public function setPrimaryAcademy($academyId) {
+    public function setPrimaryAcademy($academyId)
+    {
         // Rimuove l'attuale accademia principale del personale e imposta la nuova
         if ($this->primaryAcademy()) {
             $this->academies()->updateExistingPivot($this->primaryAcademy()->id, ['is_primary' => false]);
@@ -216,12 +250,14 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Restituisce le accademie in cui fa parte degli atleti
-    public function academyAthletes() {
+    public function academyAthletes()
+    {
         return $this->belongsToMany(Academy::class, 'academies_athletes', 'user_id', 'academy_id')->withPivot('is_primary');
     }
 
     // Restituisce l'accademia principale (per gli atleti)
-    public function primaryAcademyAthlete() {
+    public function primaryAcademyAthlete()
+    {
 
         $academy = $this->academyAthletes()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
 
@@ -234,7 +270,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Imposta accademia primaria (per gli atleti)
-    public function setPrimaryAcademyAthlete($academyId) {
+    public function setPrimaryAcademyAthlete($academyId)
+    {
         // Rimuove l'attuale accademia principale dell'atleta e imposta la nuova
         if ($this->primaryAcademyAthlete()) {
             $this->academyAthletes()->updateExistingPivot($this->primaryAcademyAthlete()->id, ['is_primary' => false]);
@@ -243,17 +280,20 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Restituisce le scuole in cui fa parte del personale
-    public function schools() {
+    public function schools()
+    {
         return $this->belongsToMany(School::class, 'schools_personnel', 'user_id', 'school_id')->withPivot('is_primary');
     }
 
     // Restituisce la scuola principale (per il personale)
-    public function primarySchool() {
+    public function primarySchool()
+    {
         return $this->schools()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
     }
 
     // Imposta scuola primaria (per il personale)
-    public function setPrimarySchool($schoolId) {
+    public function setPrimarySchool($schoolId)
+    {
         // Rimuove l'attuale scuola principale del personale e imposta la nuova
         if ($this->primarySchool()) {
             $this->schools()->updateExistingPivot($this->primarySchool()->id, ['is_primary' => false]);
@@ -262,17 +302,20 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Restituisce le scuole in cui fa parte degli atleti
-    public function schoolAthletes() {
+    public function schoolAthletes()
+    {
         return $this->belongsToMany(School::class, 'schools_athletes', 'user_id', 'school_id')->withPivot('is_primary');
     }
 
     // Restituisce la scuola principale (per gli atleti)
-    public function primarySchoolAthlete() {
+    public function primarySchoolAthlete()
+    {
         return $this->schoolAthletes()->where('is_disabled', false)->wherePivot('is_primary', true)->first();
     }
 
     // Imposta scuola primaria (per gli atleti)
-    public function setPrimarySchoolAthlete($schoolId) {
+    public function setPrimarySchoolAthlete($schoolId)
+    {
         // Rimuove l'attuale scuola principale dell'atleta e imposta la nuova
         if ($this->primarySchoolAthlete()) {
             $this->schoolAthletes()->updateExistingPivot($this->primarySchoolAthlete()->id, ['is_primary' => false]);
@@ -280,54 +323,66 @@ class User extends Authenticatable implements MustVerifyEmail {
         $this->schoolAthletes()->updateExistingPivot($schoolId, ['is_primary' => true]);
     }
 
-    public function clans() {
+    public function clans()
+    {
         return $this->belongsToMany(Clan::class, 'clans_users', 'user_id', 'clan_id');
     }
 
-    public function clansPersonnel() {
+    public function clansPersonnel()
+    {
         return $this->belongsToMany(Clan::class, 'clans_personnel', 'user_id', 'clan_id');
     }
 
-    public function roles() {
+    public function roles()
+    {
         return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
 
-    public function seenAnnouncements() {
+    public function seenAnnouncements()
+    {
         return $this->belongsToMany(Announcement::class, 'announcement_users', 'user_id', 'announcement_id');
     }
 
-    public function fees() {
+    public function fees()
+    {
         return $this->hasMany(Fee::class);
     }
 
-    public function imports() {
+    public function imports()
+    {
         return $this->hasMany(Import::class);
     }
 
-    public function exports() {
+    public function exports()
+    {
         return $this->hasMany(Export::class);
     }
 
     // Eventi creati dall'utente
-    public function events() {
+    public function events()
+    {
         return $this->hasMany(Event::class);
     }
 
     // Eventi in cui l'utente è stato inserito come personale
-    public function eventsPersonnel() {
+    public function eventsPersonnel()
+    {
         return $this->belongsToMany(Event::class, 'events_personnel', 'user_id', 'event_id');
     }
 
     // Eventi a cui l'utente partecipa da atleta
-    public function eventResults() {
+    public function eventResults()
+    {
         return $this->hasMany(EventResult::class);
     }
 
-    public function customRoles() {
+    public function customRoles()
+    {
         return $this->belongsToMany(CustomRole::class, 'custom_roles_users', 'user_id', 'custom_role_id');
     }
 
-    public function weaponForms() {
+    public function weaponForms()
+    {
         return $this->belongsToMany(WeaponForm::class, 'weapon_forms_users', 'user_id', 'weapon_form_id')
             // ->withPivot('created_at as awarded_at');
             ->withPivot('awarded_at as awarded_at');
@@ -335,47 +390,52 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     // Solo le richieste approvate. Le altre le vedono gli admin partendo da weaponForms
     // Weapon forms personnel è per gli istruttori
-    public function weaponFormsPersonnel() {
+    public function weaponFormsPersonnel()
+    {
         return $this->belongsToMany(WeaponForm::class, 'weapon_forms_personnel', 'user_id', 'weapon_form_id')
             // ->withPivot('created_at as awarded_at');
             ->withPivot('awarded_at as awarded_at');
     }
 
     // Weapon forms technicians è per i tecnici
-    public function weaponFormsTechnician() {
+    public function weaponFormsTechnician()
+    {
         return $this->belongsToMany(WeaponForm::class, 'weapon_forms_technicians', 'user_id', 'weapon_form_id')
             // ->withPivot('created_at as awarded_at');
             ->withPivot('awarded_at as awarded_at');
     }
 
-    public function languages() {
+    public function languages()
+    {
         return $this->belongsToMany(Language::class, 'users_languages', 'user_id', 'language_id');
     }
 
-    public function rank() {
+    public function rank()
+    {
         return $this->belongsTo(Rank::class);
     }
 
-    public function invoices() {
+    public function invoices()
+    {
         return $this->hasMany(\App\Models\Invoice::class);
     }
 
-    public function routes() {
+    public function routes()
+    {
 
         $role = $this->getRole();
-
 
         switch ($role) {
             case 'admin':
                 return collect([
-                    (object)[
+                    (object) [
                         'label' => 'any',
                         'name' => 'admin.any.index',
-                    ]
+                    ],
                 ]);
             case 'athlete':
                 return collect([
-                    (object)[
+                    (object) [
                         'label' => 'announcements',
                         'active' => 'announcements.*',
                         'name' => 'athlete.announcements.index',
@@ -383,47 +443,47 @@ class User extends Authenticatable implements MustVerifyEmail {
                 ]);
             case 'rector':
                 return collect([
-                    (object)[
+                    (object) [
                         'label' => 'announcements',
                         'active' => 'announcements.*',
                         'name' => 'rector.announcements.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'accademia',
                         'active' => 'academies.*',
                         'name' => 'rector.academies.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'scuole',
                         'active' => 'schools.*',
                         'name' => 'rector.schools.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'clan',
                         'active' => 'clans.*',
                         'name' => 'rector.clans.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'users',
                         'active' => 'users.*',
                         'name' => 'rector.users.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'eventi',
                         'active' => 'events.*',
                         'name' => 'rector.events.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'fees',
                         'active' => 'fees.*',
                         'name' => 'rector.fees.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'imports',
                         'active' => 'imports.*',
                         'name' => 'rector.imports.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'exports',
                         'active' => 'exports.*',
                         'name' => 'rector.exports.index',
@@ -432,37 +492,37 @@ class User extends Authenticatable implements MustVerifyEmail {
                 ]);
             case 'dean':
                 return collect([
-                    (object)[
+                    (object) [
                         'label' => 'announcements',
                         'active' => 'announcements.*',
                         'name' => 'dean.announcements.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'scuola',
                         'active' => 'schools.*',
                         'name' => 'dean.school.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'clan',
                         'active' => 'clans.*',
                         'name' => 'dean.clans.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'users',
                         'active' => 'users.*',
                         'name' => 'dean.users.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'eventi',
                         'active' => 'events.*',
                         'name' => 'dean.events.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'imports',
                         'active' => 'imports.*',
                         'name' => 'dean.imports.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'exports',
                         'active' => 'exports.*',
                         'name' => 'dean.exports.index',
@@ -470,47 +530,47 @@ class User extends Authenticatable implements MustVerifyEmail {
                 ]);
             case 'manager':
                 return collect([
-                    (object)[
+                    (object) [
                         'label' => 'announcements',
                         'active' => 'announcements.*',
                         'name' => 'manager.announcements.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'accademia',
                         'active' => 'academy.*',
                         'name' => 'manager.academy.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'scuole',
                         'active' => 'schools.*',
                         'name' => 'manager.schools.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'clan',
                         'active' => 'clans.*',
                         'name' => 'manager.clans.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'users',
                         'active' => 'users.*',
                         'name' => 'manager.users.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'eventi',
                         'active' => 'events.*',
                         'name' => 'manager.events.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'fees',
                         'active' => 'fees.*',
                         'name' => 'manager.fees.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'imports',
                         'active' => 'imports.*',
                         'name' => 'manager.imports.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'exports',
                         'active' => 'exports.*',
                         'name' => 'manager.exports.index',
@@ -518,27 +578,27 @@ class User extends Authenticatable implements MustVerifyEmail {
                 ]);
             case 'technician':
                 return collect([
-                    (object)[
+                    (object) [
                         'label' => 'announcements',
                         'active' => 'announcements.*',
                         'name' => 'technician.announcements.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'users',
                         'active' => 'users.*',
                         'name' => 'technician.users.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'eventi',
                         'active' => 'events.*',
                         'name' => 'technician.events.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'imports',
                         'active' => 'imports.*',
                         'name' => 'technician.imports.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'exports',
                         'active' => 'exports.*',
                         'name' => 'technician.exports.index',
@@ -551,17 +611,17 @@ class User extends Authenticatable implements MustVerifyEmail {
                 ]);
             case 'instructor':
                 return collect([
-                    (object)[
+                    (object) [
                         'label' => 'users',
                         'active' => 'users.*',
                         'name' => 'instructor.users.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'clan',
                         'active' => 'clans.*',
                         'name' => 'instructor.clans.index',
                     ],
-                    (object)[
+                    (object) [
                         'label' => 'announcements',
                         'active' => 'announcements.*',
                         'name' => 'instructor.announcements.index',
@@ -572,13 +632,15 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
     }
 
-    public function allowedRoles(): array {
+    public function allowedRoles(): array
+    {
         return $this->roles()->get()->map(function ($role) {
             return $role->name;
         })->toArray();
     }
 
-    public function allowedInstitutions() {
+    public function allowedInstitutions()
+    {
         $authRole = $this->getRole();
 
         switch ($authRole) {
@@ -595,30 +657,38 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
     }
 
-    public function allowedRoleIds(): array {
+    public function allowedRoleIds(): array
+    {
         return $this->roles()->get()->map(function ($role) {
             return $role->id;
         })->toArray();
     }
 
-    public function hasRole(string $role): bool {
+    public function hasRole(string $role): bool
+    {
         $selectedRole = Role::where('name', $role)->first();
-        if (!$selectedRole) {
+        if (! $selectedRole) {
             return false;
         }
         $user = $selectedRole->users()->where('user_id', $this->id)->get();
+
         return $user->count() > 0;
     }
 
-    public function getRole() {
+    public function getRole()
+    {
         return session('role', $this->roles()->first()->name);
     }
-    public function getActiveRoleId() {
+
+    public function getActiveRoleId()
+    {
         $active_role = Role::where('name', $this->getRole())->first();
+
         return $active_role->id;
     }
 
-    public function hasAnyRole($roles) {
+    public function hasAnyRole($roles)
+    {
         if (is_string($roles)) {
             return $this->roles->contains('name', $roles);
         }
@@ -632,7 +702,8 @@ class User extends Authenticatable implements MustVerifyEmail {
         return false;
     }
 
-    public function canModifyRole($roleLabel) {
+    public function canModifyRole($roleLabel)
+    {
         $requestingUserRole = $this->getRole();
 
         switch ($requestingUserRole) {
@@ -640,14 +711,14 @@ class User extends Authenticatable implements MustVerifyEmail {
                 return true;
                 break;
             case 'rector':
-                return !in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician']);
+                return ! in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician']);
                 break;
-            // Il manager ha diverse autorizzazioni simili al rettore ma non questa.
+                // Il manager ha diverse autorizzazioni simili al rettore ma non questa.
             case 'manager':
-                return !in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician', 'manager', 'dean']);
+                return ! in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician', 'manager', 'dean']);
                 break;
             case 'dean':
-                return !in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician', 'manager', 'dean']);
+                return ! in_array($roleLabel, ['admin', 'rector', 'instructor', 'technician', 'manager', 'dean']);
                 break;
             default:
                 return false;
@@ -655,7 +726,8 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
     }
 
-    public function getEditableRoles() {
+    public function getEditableRoles()
+    {
         $authRole = $this->getRole();
         switch ($authRole) {
             case 'admin':
@@ -664,7 +736,7 @@ class User extends Authenticatable implements MustVerifyEmail {
             case 'rector':
                 return Role::all()->whereNotIn('name', ['admin', 'rector', 'instructor', 'technician']);
                 break;
-            // Il manager ha diverse autorizzazioni simili al rettore ma non questa.
+                // Il manager ha diverse autorizzazioni simili al rettore ma non questa.
             case 'manager':
                 return Role::all()->whereNotIn('name', ['admin', 'rector', 'instructor', 'technician', 'manager', 'dean']);
                 break;
@@ -676,9 +748,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
     }
 
-    public function isFeeExpiring() {
+    public function isFeeExpiring()
+    {
         $fee = $this->fees()->orderBy('created_at', 'desc')->first();
-        if (!$fee) {
+        if (! $fee) {
             return false;
         }
         $now = now();
@@ -687,10 +760,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $now->diffInDays($expirationDate) < 30;
     }
 
-
     // Rimuove tutte le associazioni dell'atleta con tutte le accademie (escluso quella indicata) e le rispettive scuole e corsi
-    public function removeAcademiesAthleteAssociations($academyExeption = null, $importingUserId = null, $executedByJobName = false) {
-        $madeBy = $executedByJobName ? ('job - ' . $executedByJobName) : ($importingUserId ? $importingUserId : (auth()->check() ? auth()->user()->id : null));
+    public function removeAcademiesAthleteAssociations($academyExeption = null, $importingUserId = null, $executedByJobName = false)
+    {
+        $madeBy = $executedByJobName ? ('job - '.$executedByJobName) : ($importingUserId ? $importingUserId : (auth()->check() ? auth()->user()->id : null));
         // Chi usa la funzione ha già il controllo sull'autorizzazione
         // $authRole = $authUser->getRole();
 
@@ -722,7 +795,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Rimuove l'associazione del personnel con l'accademia indicata e le rispettive scuole e corsi associati
-    public function removeAcademyPersonnelAssociations($academyToRemove = null) {
+    public function removeAcademyPersonnelAssociations($academyToRemove = null)
+    {
         if ($academyToRemove == null) {
             return;
         }
@@ -739,7 +813,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         $removedSchools = $this->schools()->where('academy_id', $academyToRemove->id)->get();
         foreach ($removedSchools as $school) {
             $this->schools()->detach($school->id);
-        } 
+        }
         $removedSchoolsIds = $removedSchools->pluck('id')->toArray();
 
         $removedAcademies = $this->academies()->where('academy_id', $academyToRemove->id)->get();
@@ -758,7 +832,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Rimuove tutte le associazioni del personnel con la scuola indicata e i rispettivi corsi
-    public function removeSchoolPersonnelAssociations($schoolToRemove = null) {
+    public function removeSchoolPersonnelAssociations($schoolToRemove = null)
+    {
         if ($schoolToRemove == null) {
             return;
         }
@@ -785,7 +860,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Rimuove l'associazione dell'atleta con la scuola indicata e i rispettivi corsi
-    public function removeSchoolAthleteAssociations($schoolToRemove = null) {
+    public function removeSchoolAthleteAssociations($schoolToRemove = null)
+    {
         $authUser = User::find(auth()->user()->id);
         // Chi usa la funzione ha già il controllo sull'autorizzazione
         // $authRole = $authUser->getRole();
@@ -808,7 +884,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Rimuove tutte le associazioni del personnel con la scuola indicata e i rispettivi corsi
-    public function removeClanPersonnelAssociations($clanToRemove = null) {
+    public function removeClanPersonnelAssociations($clanToRemove = null)
+    {
         if ($clanToRemove == null) {
             return;
         }
@@ -831,7 +908,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Rimuove l'associazione dell'atleta con la scuola indicata e i rispettivi corsi
-    public function removeClanAthleteAssociations($clanToRemove = null) {
+    public function removeClanAthleteAssociations($clanToRemove = null)
+    {
         if ($clanToRemove == null) {
             return;
         }
@@ -854,41 +932,45 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     // Usatp negli import per capire l'autorizzazione per associazioni di atleti ad accademie, scuole e corsi. la parte di istruttore e tecnico non mi interessa per ora
-    public function getHighestRole() {
+    public function getHighestRole()
+    {
         $highestRole = null;
         if ($this->hasRole('admin')) {
             $highestRole = 'admin';
         }
-        if (!$highestRole && $this->hasRole('rector')) {
+        if (! $highestRole && $this->hasRole('rector')) {
             $highestRole = 'rector';
         }
-        if (!$highestRole && $this->hasRole('manager')) {
+        if (! $highestRole && $this->hasRole('manager')) {
             $highestRole = 'manager';
         }
-        if (!$highestRole && $this->hasRole('dean')) {
+        if (! $highestRole && $this->hasRole('dean')) {
             $highestRole = 'dean';
         }
-        if (!$highestRole && $this->hasRole('instructor')) {
+        if (! $highestRole && $this->hasRole('instructor')) {
             $highestRole = 'instructor';
         }
-        if (!$highestRole && $this->hasRole('technician')) {
+        if (! $highestRole && $this->hasRole('technician')) {
             $highestRole = 'technician';
         }
+
         return $highestRole;
     }
 
-    public function generateBattleName() {
+    public function generateBattleName()
+    {
         $number = 10;
-        $tempBattleName = $this->name . $this->surname . $number;
+        $tempBattleName = $this->name.$this->surname.$number;
         while (User::where('battle_name', $tempBattleName)->count() > 0) {
             $number++;
-            $tempBattleName = $this->name . $this->surname . $number;
+            $tempBattleName = $this->name.$this->surname.$number;
         }
+
         return $tempBattleName;
     }
 
-
-    public function validatePrimaryInstitutionPersonnel() {
+    public function validatePrimaryInstitutionPersonnel()
+    {
         $user = User::find(Auth::user()->id);
         $role = $user->getRole();
         $primary = null;
@@ -898,32 +980,37 @@ class User extends Authenticatable implements MustVerifyEmail {
                 break;
             case 'rector':
                 $primary = $user->academies()->wherePivot('is_primary', true)->count() > 0;
-                if (!$primary) {
+                if (! $primary) {
                     return false;
                 }
                 // Check if user has at least one primary academy that is not academy ID 1
                 $validPrimary = $user->academies()->wherePivot('is_primary', true)->where('academy_id', '!=', 1)->count() > 0;
+
                 return $validPrimary;
                 break;
             case 'dean':
                 $primary = $user->schools()->wherePivot('is_primary', true)->count() > 0;
+
                 return $primary;
                 break;
             case 'manager':
                 $primary = $user->academies()->wherePivot('is_primary', true)->count() > 0;
+
                 return $primary;
                 break;
             case 'instructor':
                 $primary = $user->clansPersonnel()->count() > 0;
+
                 return $primary;
                 break;
             case 'technician':
                 $primary = $user->academies()->wherePivot('is_primary', true)->count() > 0;
-                if (!$primary) {
+                if (! $primary) {
                     return false;
                 }
                 // Check if user has at least one primary academy that is not academy ID 1
                 $validPrimary = $user->academies()->wherePivot('is_primary', true)->where('academy_id', '!=', 1)->count() > 0;
+
                 return $validPrimary;
                 break;
             default:
@@ -932,21 +1019,25 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
     }
 
-    public function getActiveInstitutionId() {
+    public function getActiveInstitutionId()
+    {
         $institution = session('institution');
+
         return $institution ? $institution->id : null;
     }
 
-    public function getActiveInstitution() {
+    public function getActiveInstitution()
+    {
         return session('institution');
     }
 
-    public function getActivePrimaryAcademy() {
+    public function getActivePrimaryAcademy()
+    {
         $active_academy_id = session('institution')->id ?: null;
 
         if ($active_academy_id) {
             $academy = Academy::find($active_academy_id);
-            if ($academy && !$academy->is_disabled) {
+            if ($academy && ! $academy->is_disabled) {
                 return $academy;
             }
         } else {
