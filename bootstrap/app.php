@@ -37,6 +37,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'logout',
         ]);
+        $middleware->web(append: [
+            EnsureMinorSwitchIsCompleted::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (PostTooLargeException $exception, Request $request) {

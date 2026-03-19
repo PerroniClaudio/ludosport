@@ -64,9 +64,8 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function isMinorPendingApproval(): bool
-    {
-        return $this->is_user_minor && ! $this->has_admin_approved_minor && ! $this->has_to_switch_from_minor;
+    public function isMinorPendingApproval(): bool {
+        return $this->is_user_minor && !$this->has_admin_approved_minor && !$this->has_to_switch_from_minor;
     }
 
     public function isMinorPrivacyRestricted(): bool
@@ -89,17 +88,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function canViewerSeeMinorSensitiveFields(?self $viewer): bool
     {
-        return ! $this->isMinorPrivacyRestricted() || $this->viewerHasMinorPrivacyOverride($viewer);
+        return !$this->isMinorPrivacyRestricted() || $this->viewerHasMinorPrivacyOverride($viewer);
     }
 
     public function canViewerSeeMinorBattleName(?self $viewer): bool
     {
-        return ! $this->isMinorPrivacyRestricted() || $viewer !== null;
+        return !$this->isMinorPrivacyRestricted() || $viewer !== null;
     }
 
     public function canViewerSeeMinorInstitutions(?self $viewer): bool
     {
-        return ! $this->isMinorPrivacyRestricted() || $viewer !== null;
+        return !$this->isMinorPrivacyRestricted() || $viewer !== null;
     }
 
     /**
