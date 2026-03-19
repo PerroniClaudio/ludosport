@@ -34,6 +34,11 @@ class AuthenticatedSessionController extends Controller {
 
         $user = auth()->user();
         $user = User::find($user->id);
+
+        if ($user->has_to_switch_from_minor) {
+            return redirect()->route('minor-switch.edit');
+        }
+
         $roles = $user->roles()->get();
 
         if ($roles->count() > 1) {

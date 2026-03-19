@@ -1,11 +1,21 @@
 <x-guest-layout>
     <div class="mb-4 text-sm text-background-600 dark:text-background-400">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
+        @if (auth()->user()?->has_to_switch_from_minor)
+            {{ __('Before continuing, confirm the email address linked to your adult account by clicking the link we just emailed to you. If you did not receive it, we can send another one.') }}
+        @else
+            {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
+        @endif
     </div>
 
     @if (session('status') == 'verification-link-sent')
         <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
             {{ __('A new verification link has been sent to the email address you provided during registration.') }}
+        </div>
+    @endif
+
+    @if (session('status') == 'adult-verification-link-sent')
+        <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
+            {{ __('A verification link has been sent to the email address you selected for your adult account.') }}
         </div>
     @endif
 

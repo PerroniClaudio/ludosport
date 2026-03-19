@@ -47,6 +47,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_user_minor',
         'has_user_uploaded_documents',
         'has_admin_approved_minor',
+        'has_to_switch_from_minor',
         'uploaded_documents_path',
         'privacy_policy_accepted_at',
     ];
@@ -63,9 +64,13 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function isMinorPendingApproval(): bool
+    public function isMinorPendingApproval(): bool {
+        return $this->is_user_minor && !$this->has_admin_approved_minor && !$this->has_to_switch_from_minor;
+    }
+
+    public function isMinorPrivacyRestricted(): bool
     {
-        return $this->is_user_minor && ! $this->has_admin_approved_minor;
+        return $this->is_user_minor || $this->has_to_switch_from_minor;
     }
 
     public function viewerHasMinorPrivacyOverride(?self $viewer): bool
@@ -83,17 +88,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function canViewerSeeMinorSensitiveFields(?self $viewer): bool
     {
-        return ! $this->is_user_minor || $this->viewerHasMinorPrivacyOverride($viewer);
+        return !$this->isMinorPrivacyRestricted() || $this->viewerHasMinorPrivacyOverride($viewer);
     }
 
     public function canViewerSeeMinorBattleName(?self $viewer): bool
     {
-        return ! $this->is_user_minor || $viewer !== null;
+        return !$this->isMinorPrivacyRestricted() || $viewer !== null;
     }
 
     public function canViewerSeeMinorInstitutions(?self $viewer): bool
     {
-        return ! $this->is_user_minor || $viewer !== null;
+        return !$this->isMinorPrivacyRestricted() || $viewer !== null;
     }
 
     /**
@@ -144,6 +149,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_user_minor' => 'boolean',
             'has_user_uploaded_documents' => 'boolean',
             'has_admin_approved_minor' => 'boolean',
+            'has_to_switch_from_minor' => 'boolean',
         ];
     }
 

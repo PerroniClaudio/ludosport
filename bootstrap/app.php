@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureMinorUserIsApproved;
 use App\Http\Middleware\EnsurePrivacyPolicyAccepted;
+use App\Http\Middleware\EnsureMinorSwitchIsCompleted;
 use App\Http\Middleware\HandleMinorUserPrivacy;
 use App\Http\Middleware\SearchThrottleMiddleware;
 use App\Http\Middleware\UserRoleMiddleware;
@@ -28,6 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'minor.approved' => EnsureMinorUserIsApproved::class,
             'minor.privacy' => HandleMinorUserPrivacy::class,
             'privacy.policy' => EnsurePrivacyPolicyAccepted::class,
+        ]);
+        $middleware->web(append: [
+            EnsureMinorSwitchIsCompleted::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
