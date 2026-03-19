@@ -3,12 +3,11 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'minor.approved', 'role.institution.selected', 'verified'])->name('dashboard');
-Route::get('/role-select', [App\Http\Controllers\UserController::class, 'roleSelector'])->middleware(['auth', 'minor.approved', 'verified'])->name('role-selector');
-Route::get('/institution-select', [App\Http\Controllers\UserController::class, 'institutionSelector'])->middleware(['auth', 'minor.approved', 'verified'])->name('institution-selector');
+Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected', 'verified'])->name('dashboard');
+Route::get('/role-select', [App\Http\Controllers\UserController::class, 'roleSelector'])->middleware(['auth', 'privacy.policy', 'minor.approved', 'verified'])->name('role-selector');
+Route::get('/institution-select', [App\Http\Controllers\UserController::class, 'institutionSelector'])->middleware(['auth', 'privacy.policy', 'minor.approved', 'verified'])->name('institution-selector');
 
 /** Assets */
-
 Route::get('/logo', [App\Http\Controllers\AssetController::class, 'logo'])->name('logo');
 Route::get('/logo-saber', [App\Http\Controllers\AssetController::class, 'logoSaber'])->name('logo-saber');
 Route::get('/logo-saber-k', [App\Http\Controllers\AssetController::class, 'logoSaberK'])->name('logo-saber-k');
@@ -25,12 +24,12 @@ Route::get('/logoex', [App\Http\Controllers\AssetController::class, 'logoex'])->
 Route::get('/user/{user}/profile-picture', [App\Http\Controllers\UserController::class, 'propic'])->middleware('minor.privacy')->name('user.profile-picture-show');
 
 // Queste due route non devono avere il middleware role.institution.selected, perchè si usano per impostare ruolo e istituzione e devno essere accessibili anche se non sono stati selezionati
-Route::middleware(['auth', 'minor.approved'])->group(function () {
+Route::middleware(['auth', 'privacy.policy', 'minor.approved'])->group(function () {
     Route::post('/profile/role', [App\Http\Controllers\UserController::class, 'setUserRoleForSession'])->name('profile.role.update');
     Route::post('/profile/institution', [App\Http\Controllers\UserController::class, 'setUserInstitutionForSession'])->name('profile.institution.update');
 });
 
-Route::middleware(['auth', 'minor.approved', 'role.institution.selected'])->group(function () {
+Route::middleware(['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected'])->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'edit'])->middleware('minor.privacy')->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->middleware('minor.privacy')->name('profile.update');
@@ -43,15 +42,13 @@ Route::middleware(['auth', 'minor.approved', 'role.institution.selected'])->grou
 });
 
 /** Eliminati */
-
-Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/deleted-elements', [App\Http\Controllers\DeletedElementController::class, 'index'])->name('deleted-elements.index');
     Route::post('/deleted-elements', [App\Http\Controllers\DeletedElementController::class, 'restore'])->name('deleted-elements.restore');
 });
 
 /** Users */
-
-Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('users.index');
     Route::get('/filtered-by-dashboard', [App\Http\Controllers\PaginatedUserController::class, 'usersFilteredByActiveAndCoursePagination'])->name('users.filtered-by-active-and-course');
     Route::get('/users/filter', [App\Http\Controllers\UserController::class, 'filter'])->name('users.filter');
@@ -91,8 +88,7 @@ Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selec
 Route::post('/users/{user}/languages', [App\Http\Controllers\UserController::class, 'languages'])->name('users.languages.store');
 
 /** Nazioni */
-
-Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/nations', [App\Http\Controllers\NationController::class, 'index'])->name('nations.index');
     Route::get('/nations/all', [App\Http\Controllers\NationController::class, 'all'])->name('nations.all');
     Route::get('/nations/{nation}', [App\Http\Controllers\NationController::class, 'edit'])->name('nations.edit');
@@ -108,8 +104,7 @@ Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selec
 });
 
 /** Accademie */
-
-Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/academies', [App\Http\Controllers\AcademyController::class, 'index'])->name('academies.index');
     Route::get('/academies/create', [App\Http\Controllers\AcademyController::class, 'create'])->name('academies.create');
     Route::get('/academies/all', [App\Http\Controllers\AcademyController::class, 'all'])->name('academies.all');
@@ -141,8 +136,7 @@ Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selec
 });
 
 /** Scuole */
-
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/schools', [App\Http\Controllers\SchoolController::class, 'index'])->name('schools.index');
     Route::get('/schools/create', [App\Http\Controllers\SchoolController::class, 'create'])->name('schools.create');
     Route::get('/schools/all', [App\Http\Controllers\SchoolController::class, 'all'])->name('schools.all');
@@ -158,7 +152,6 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
     Route::post('/schools', [App\Http\Controllers\SchoolController::class, 'store'])->name('schools.store');
     Route::post('/schools/{school}', [App\Http\Controllers\SchoolController::class, 'update'])->name('schools.update');
 
-
     Route::post('/schools/{school}/users/create', [App\Http\Controllers\UserController::class, 'storeForSchool'])->name('schools.users.create');
     Route::post('/schools/{school}/clan/create', [App\Http\Controllers\ClanController::class, 'storeForSchool'])->name('schools.clan.create');
 
@@ -173,13 +166,12 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
     Route::get('/schools/{school}/users-search', [App\Http\Controllers\SchoolController::class, 'searchUsers'])->name('schools.users-search');
 });
 
-Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected']], function () {
     Route::get('/verify-address', [App\Http\Controllers\SchoolController::class, 'verifyAddress'])->name('schools.verify-address');
 });
 
 /** Clan */
-
-Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/courses', [App\Http\Controllers\ClanController::class, 'index'])->name('clans.index');
     Route::get('/courses/create', [App\Http\Controllers\ClanController::class, 'create'])->name('clans.create');
 
@@ -200,18 +192,16 @@ Route::group(['middleware' => ['auth', 'minor.approved', 'role.institution.selec
 });
 
 /** Eventi */
-
-
 Route::get('/events/location', [App\Http\Controllers\EventController::class, 'getLocationData'])->name('events.location');
 Route::get('/events/coordinates', [App\Http\Controllers\EventController::class, 'coordinates'])->name('events.coordinates');
 
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');
     Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])->name('events.calendar');
     Route::get('/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('events.create');
     Route::delete('/events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])->name('events.disable');
 
-    //Tipi 
+    // Tipi
 
     Route::get('/event-types', [App\Http\Controllers\EventTypeController::class, 'index'])->name('events.list_types');
     Route::post('/event-types/create', [App\Http\Controllers\EventTypeController::class, 'store'])->name('events.new_type');
@@ -254,13 +244,11 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
 });
 
 /** Imports */
-
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selected', 'role:admin']], function () {
 
     Route::get('/imports', [App\Http\Controllers\ImportController::class, 'index'])->name('imports.index');
     Route::get('/imports/create', [App\Http\Controllers\ImportController::class, 'create'])->name('imports.create');
     Route::delete('/imports/{import}', [App\Http\Controllers\ImportController::class, 'destroy'])->name('imports.disable');
-
 
     Route::post('/imports', [App\Http\Controllers\ImportController::class, 'store'])->name('imports.store');
     Route::post('/imports/{import}', [App\Http\Controllers\ImportController::class, 'update'])->name('imports.update');
@@ -270,8 +258,7 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
 });
 
 /** Exports */
-
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('exports.index');
     Route::get('/exports/create', [App\Http\Controllers\ExportController::class, 'create'])->name('exports.create');
     Route::get('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('exports.download');
@@ -282,17 +269,14 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
     // Route::post('/exports/{export}/download', [App\Http\Controllers\ExportController::class, 'download'])->name('exports.download');
 });
 
-
 /** Rankings and Charts */
-
-Route::group(['middleware' => ['auth', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role:admin']], function () {
     Route::get('/rankings', [App\Http\Controllers\ChartController::class, 'index'])->name('rankings.index');
     Route::get('/rankings/create', [App\Http\Controllers\ChartController::class, 'updatedChart'])->name('rankings.create');
 });
 
 /** Ranks requests */
-
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin,rector,dean']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selected', 'role:admin,rector,dean']], function () {
     Route::get('/rank-requests', [App\Http\Controllers\RankController::class, 'requests'])->name('rank-requests.index');
     Route::get('/rank-requests/approve-all', [App\Http\Controllers\RankController::class, 'acceptAllRequests'])->name('rank-requests.approve-all');
 
@@ -302,18 +286,15 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin,
     Route::get('/pending-rank-requests', [App\Http\Controllers\RankController::class, 'countPendingRequests'])->name('pending-rank-requests.index');
 });
 
-
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:instructor,rector,dean,manager,technician']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selected', 'role:instructor,rector,dean,manager,technician']], function () {
     Route::get('/rank-request', [App\Http\Controllers\RankController::class, 'rankRequestForm'])->name('users.rank.request');
     Route::get('/rank-request-user/{user}', [App\Http\Controllers\RankController::class, 'rankRequestFormUser'])->name('users.rank.request.specific');
     Route::post('/rank-request', [App\Http\Controllers\RankController::class, 'newRequest'])->name('users.rank.request.create');
     Route::get('/users-select', [App\Http\Controllers\UserController::class, 'searchJson'])->name('users-select');
 });
 
-
 /** Annunci */
-
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/announcements', [App\Http\Controllers\AnnouncementController::class, 'index'])->name('announcements.index');
     Route::get('/announcements/create', [App\Http\Controllers\AnnouncementController::class, 'create'])->name('announcements.create');
     Route::get('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'edit'])->name('announcements.edit');
@@ -325,13 +306,12 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
 });
 
 // Route pubblica per servire le immagini degli annunci
-Route::group(['middleware' => ['auth', 'role.institution.selected']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selected']], function () {
     Route::get('/announcements/{announcement}/content/image/{filename}', [App\Http\Controllers\AnnouncementController::class, 'getContentImage'])->name('announcements.content.image');
 });
 
 /** Ruoli */
-
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/custom-roles', [App\Http\Controllers\RoleController::class, 'index'])->name('roles.index');
     Route::get('/custom-roles/search', [App\Http\Controllers\RoleController::class, 'search'])->name('roles.search');
     Route::post('/custom-roles/assign', [App\Http\Controllers\RoleController::class, 'assign'])->name('roles.assign');
@@ -339,8 +319,7 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
 });
 
 /** Ordini */
-
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selected', 'role:admin']], function () {
     Route::post('/orders-invoice/{order}', [App\Http\Controllers\OrderController::class, 'invoice'])->name('orders.update.invoice');
 
     Route::get('/orders', [App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
@@ -351,8 +330,7 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
 });
 
 /** Forme armi */
-
-Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin']], function () {
+Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/weapon-forms', [App\Http\Controllers\WeaponFormController::class, 'index'])->name('weapon-forms.index');
     Route::get('/weapon-forms/create', [App\Http\Controllers\WeaponFormController::class, 'create'])->name('weapon-forms.create');
     Route::get('/weapon-forms/{weaponForm}', [App\Http\Controllers\WeaponFormController::class, 'edit'])->name('weapon-forms.edit');
@@ -365,26 +343,43 @@ Route::group(['middleware' => ['auth', 'role.institution.selected', 'role:admin'
     Route::put('/weapon-forms/{weaponForm}/image', [App\Http\Controllers\AcademyController::class, 'image'])->name('weapon-forms.image.update');
 });
 
-
-
 /** Script */
 
-require __DIR__ . '/auth.php';
-require __DIR__ . '/technician.php';
-require __DIR__ . '/athlete.php';
-require __DIR__ . '/site.php';
-require __DIR__ . '/dean.php';
-require __DIR__ . '/manager.php';
-require __DIR__ . '/rector.php';
-require __DIR__ . '/instructor.php';
-require __DIR__ . '/script.php';
+require __DIR__.'/auth.php';
+require __DIR__.'/technician.php';
+require __DIR__.'/athlete.php';
+require __DIR__.'/site.php';
+require __DIR__.'/dean.php';
+require __DIR__.'/manager.php';
+require __DIR__.'/rector.php';
+require __DIR__.'/instructor.php';
+require __DIR__.'/script.php';
+
+/** Privacy Policy */
+Route::get('privacy-policy', [App\Http\Controllers\PrivacyPolicyController::class, 'show'])
+    ->name('privacy-policy.show');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('privacy-policy', [App\Http\Controllers\PrivacyPolicyController::class, 'accept'])
+        ->name('privacy-policy.accept');
+
+    Route::post('privacy-policy-decline', [App\Http\Controllers\PrivacyPolicyController::class, 'decline'])
+        ->name('privacy-policy.decline');
+});
+
+Route::middleware(['auth', 'role:admin,rector'])->group(function () {
+    Route::get('admin/privacy-policy/edit', [App\Http\Controllers\PrivacyPolicyController::class, 'edit'])
+        ->name('privacy-policy.edit');
+
+    Route::post('admin/privacy-policy', [App\Http\Controllers\PrivacyPolicyController::class, 'update'])
+        ->name('privacy-policy.update');
+});
 
 Route::group([], function () {
     Route::get('/healthcheck', function () {
         return 'healthcheck';
     })->name('healthcheck');
 });
-
 
 Route::group([], function () {
     Route::get('/test', function () {

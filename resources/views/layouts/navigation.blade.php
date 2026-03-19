@@ -84,7 +84,8 @@
                         </x-nav-link>
                         <x-nav-link-parent :href="'#'" :active="request()->routeIs('imports.*') ||
                             request()->routeIs('exports.*') ||
-                            request()->routeIs('deleted-elements.*')">
+                            request()->routeIs('deleted-elements.*') ||
+                            request()->routeIs('privacy-policy.*')">
                             <x-slot name="name">{{ __('navigation.operations') }}</x-slot>
                             <x-slot name="children">
                                 <a href="{{ route('imports.index') }}">{{ __('navigation.imports') }}</a>
@@ -93,6 +94,8 @@
                                 <span class="separator"></span>
                                 <a
                                     href="{{ route('deleted-elements.index') }}">{{ __('navigation.deleted_elements') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('privacy-policy.edit') }}">{{ __('navigation.privacy_policy') }}</a>
                             </x-slot>
                         </x-nav-link-parent>
                     @elseif (!$isMinorPendingApproval)

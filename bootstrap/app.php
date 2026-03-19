@@ -1,22 +1,23 @@
 <?php
 
-use App\Http\Middleware\SearchThrottleMiddleware;
 use App\Http\Middleware\EnsureMinorUserIsApproved;
+use App\Http\Middleware\EnsurePrivacyPolicyAccepted;
 use App\Http\Middleware\HandleMinorUserPrivacy;
+use App\Http\Middleware\SearchThrottleMiddleware;
 use App\Http\Middleware\UserRoleMiddleware;
-use Illuminate\Http\Exceptions\PostTooLargeException;
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\PostTooLargeException;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
-        api: __DIR__ . '/../routes/api.php',
+        api: __DIR__.'/../routes/api.php',
     )
     ->withMiddleware(function (Middleware $middleware) {
         //
@@ -26,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role.institution.selected' => \App\Http\Middleware\EnsureRoleAndInstitutionSelectedMiddleware::class,
             'minor.approved' => EnsureMinorUserIsApproved::class,
             'minor.privacy' => HandleMinorUserPrivacy::class,
+            'privacy.policy' => EnsurePrivacyPolicyAccepted::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
