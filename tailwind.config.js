@@ -19,6 +19,7 @@ export default {
         'h-auto',
         'rounded-lg',
         'my-4',
+        'min-h-[15rem]',
     ],
 
     future: {
