@@ -1,40 +1,107 @@
 <x-website-layout>
 
-    <script>
-        (g => {
-            var h, a, k, p = "The Google Maps JavaScript API",
-                c = "google",
-                l = "importLibrary",
-                q = "__ib__",
-                m = document,
-                b = window;
-            b = b[c] || (b[c] = {});
-            var d = b.maps || (b.maps = {}),
-                r = new Set,
-                e = new URLSearchParams,
-                u = () => h || (h = new Promise(async (f, n) => {
-                    await (a = m.createElement("script"));
-                    e.set("libraries", [...r] + "");
-                    for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
-                    e.set("callback", c + ".maps." + q);
-                    a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
-                    d[q] = f;
-                    a.onerror = () => h = n(Error(p + " could not load."));
-                    a.nonce = m.querySelector("script[nonce]")?.nonce || "";
-                    m.head.append(a)
-                }));
-            d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() =>
-                d[l](f, ...n))
-        })
-        ({
-            key: "{{ config('app.google.maps_key') }}",
-            v: "weekly",
-
-        });
-    </script>
-
     <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
-        <section class="col-span-12 py-12">
+        <section class="col-span-12 py-12" x-data="{
+            googleMapsReady: false,
+            googleMapsAccepted: false,
+            googleMapsLoading: false,
+            
+            init() {
+                this.checkAndLoadGoogleMaps();
+                
+                // Polling per controllare se Google Maps è caricato
+                const interval = setInterval(() => {
+                    if (window.google && window.google.maps) {
+                        console.log('[schools-map] Google Maps is ready!');
+                        this.googleMapsReady = true;
+                        clearInterval(interval);
+                    }
+                }, 100);
+                
+                // Ascolta i cambiamenti di localStorage
+                window.addEventListener('storage', (e) => {
+                    if (e.key === 'policyChoices') {
+                        console.log('[schools-map] Preferences updated from another tab/window');
+                        this.checkAndLoadGoogleMaps();
+                    }
+                });
+                
+                // Ascolta l'evento custom dal banner
+                window.addEventListener('policyChoicesUpdated', (e) => {
+                    console.log('[schools-map] Preferences updated from banner:', e.detail.choices);
+                    this.checkAndLoadGoogleMaps();
+                });
+            },
+            
+            checkAndLoadGoogleMaps() {
+                const policyChoices = JSON.parse(localStorage.getItem('policyChoices') || '{}');
+                const isAccepted = policyChoices.cookie_policy?.categories?.google_api === true;
+                this.googleMapsAccepted = isAccepted;
+                
+                console.log('[schools-map] Google APIs accepted:', isAccepted);
+                
+                if (isAccepted && !window.google && !this.googleMapsLoading) {
+                    this.loadGoogleMaps();
+                } else if (isAccepted && window.google && window.google.maps) {
+                    this.googleMapsReady = true;
+                } else {
+                    // API non accettate: resetta lo stato della mappa
+                    this.googleMapsReady = false;
+                    console.log('[schools-map] Google Maps disabled');
+                }
+            },
+            
+            loadGoogleMaps() {
+                if (this.googleMapsLoading) {
+                    console.log('[schools-map] Google Maps already loading...');
+                    return;
+                }
+                
+                // Controlla se Google Maps è già disponibile
+                if (window.google && window.google.maps) {
+                    console.log('[schools-map] Google Maps already available');
+                    this.googleMapsReady = true;
+                    return;
+                }
+                
+                // Controlla se lo script Google Maps è già stato aggiunto al DOM
+                if (document.getElementById('google-maps-script')) {
+                    console.log('[schools-map] Google Maps script already in DOM');
+                    return;
+                }
+                
+                // Controlla se c'è già uno script con lo stesso src
+                const scripts = document.getElementsByTagName('script');
+                for (let script of scripts) {
+                    if (script.src && script.src.includes('maps.googleapis.com/maps/api/js')) {
+                        console.log('[schools-map] Google Maps script already present in page');
+                        return;
+                    }
+                }
+                
+                this.googleMapsLoading = true;
+                console.log('[schools-map] Loading Google Maps...');
+                const script = document.createElement('script');
+                script.id = 'google-maps-script';
+                script.src = 'https://maps.googleapis.com/maps/api/js?key={{ config('app.google.maps_key') }}&v=weekly';
+                script.async = true;
+                script.defer = false;
+                
+                script.onload = () => {
+                    console.log('[schools-map] Google Maps script loaded');
+                    setTimeout(() => {
+                        this.googleMapsReady = true;
+                    }, 100);
+                };
+                
+                script.onerror = () => {
+                    console.error('[schools-map] Failed to load Google Maps');
+                    this.googleMapsLoading = false;
+                };
+                
+                document.head.appendChild(script);
+            }
+        }" x-init="init()">>
             <h1
                 class="text-6xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300">
                 {{ __('website.schools_map') }}
@@ -43,13 +110,39 @@
             <p class="text-background-800 dark:text-background-200 text-justify">{{ __('website.schools_map_text') }}
             </p>
 
-            <div class="flex flex-col gap-4 rounded  min-h-[60vh]  mt-8" x-load x-data="mapsearcher({{ $schools_json }})"
-                x-init="$watch('nationFilter', (value) => fiterByNation(value))">
-                <div>
-                    <div id="google-map" class="h-[600px] w-full"></div>
+            <!-- Mappa Container: solo visibile se Google APIs accettate -->
+            <template x-if="googleMapsReady">
+                <div class="h-[600px] w-full mt-8 rounded overflow-hidden" x-load 
+                    x-data="mapsearcher({{ $schools_json }})"
+                    x-init="setTimeout(() => init(), 100); $watch('nationFilter', (value) => fiterByNation(value))">
+                    <div id="google-map" class="h-full w-full"></div>
                 </div>
-                <div class="flex flex-col gap-2">
+            </template>
 
+            <!-- Messaggio giallo se Google APIs non accettate -->
+            <template x-if="!googleMapsAccepted">
+                <div
+                    class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/50 p-6 rounded-lg flex flex-col gap-4 items-start h-fit mt-8">
+                    <div>
+                        <h3 class="text-base font-semibold text-yellow-800 dark:text-yellow-100 mb-2">
+                            {{ __('website.cookies_google_apis_required') ?? 'Google APIs Required' }}
+                        </h3>
+                        <p class="text-yellow-700 dark:text-yellow-200 text-sm">
+                            {{ __('website.cookies_google_apis_message') ?? 'To view the schools, you need to enable Google APIs in your cookie preferences.' }}
+                        </p>
+                    </div>
+                    <button @click="typeof window.openCookiePreferences === 'function' && window.openCookiePreferences()"
+                        class="px-4 py-2 bg-primary-600 text-white text-sm font-semibold rounded hover:bg-primary-700 transition">
+                        {{ __('website.cookies_manage_preferences') ?? 'Manage Preferences' }}
+                    </button>
+                </div>
+            </template>
+
+            <!-- Lista delle scuole (sempre visibile) -->
+            <div class="flex flex-col gap-4 rounded mt-8" x-load x-data="mapsearcher({{ $schools_json }})"
+                x-init="paginateResults(); $watch('nationFilter', (value) => fiterByNation(value))">
+                
+                <div class="flex flex-col gap-2">
                     <div class="w-full p-2">
                         <x-form.select name="country" label="{{ __('website.schools_map_nations') }}"
                             x-model="nationFilter" shouldHaveEmptyOption="true" :options="$nations" />
@@ -83,14 +176,15 @@
                         </template>
 
                         <div class="flex justify-center gap-2">
-                            <button x-show="currentPage > 1" @click="prevPage"
-                                class="flex-1 bg-primary-500 text-white rounded p-2">Previous</button>
-                            <button x-show="currentPage < totalPages" @click="nextPage"
-                                class="flex-1 bg-primary-500 text-white rounded p-2">Next</button>
+                            <button @click="prevPage" :disabled="currentPage === 1"
+                                :class="currentPage === 1 ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-primary-500 text-white hover:bg-primary-600'"
+                                class="flex-1 rounded p-2 transition">Previous</button>
+                            <button @click="nextPage" :disabled="currentPage >= totalPages"
+                                :class="currentPage >= totalPages ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-primary-500 text-white hover:bg-primary-600'"
+                                class="flex-1 rounded p-2 transition">Next</button>
                         </div>
                     </div>
                 </div>
-
             </div>
 
         </section>

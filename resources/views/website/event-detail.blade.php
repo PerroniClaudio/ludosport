@@ -109,8 +109,63 @@
                         @endauth
 
                     </div>
-                    <div x-load x-data="googlemap('{{ $event->location }}')" x-ref="eventGoogleMapContainer">
-                        <x-maps-google id="eventGoogleMap" style="height: 400px"></x-maps-google>
+                    
+                    <!-- Google Maps Section -->
+                    <div x-data="{
+                        googleMapsReady: false,
+                        googleMapsAccepted: false,
+                        
+                        init() {
+                            this.checkGoogleMapsAccepted();
+                            
+                            // Ascolta i cambiamenti di localStorage
+                            window.addEventListener('storage', (e) => {
+                                if (e.key === 'policyChoices') {
+                                    console.log('[event-detail] Preferences updated from another tab/window');
+                                    this.checkGoogleMapsAccepted();
+                                }
+                            });
+                            
+                            // Ascolta l'evento custom dal banner
+                            window.addEventListener('policyChoicesUpdated', (e) => {
+                                console.log('[event-detail] Preferences updated from banner:', e.detail.choices);
+                                this.checkGoogleMapsAccepted();
+                            });
+                        },
+                        
+                        checkGoogleMapsAccepted() {
+                            const policyChoices = JSON.parse(localStorage.getItem('policyChoices') || '{}');
+                            const isAccepted = policyChoices.cookie_policy?.categories?.google_api === true;
+                            this.googleMapsAccepted = isAccepted;
+                            this.googleMapsReady = isAccepted;
+                            
+                            console.log('[event-detail] Google APIs accepted:', isAccepted);
+                        }
+                    }" x-init="init()">
+                        <!-- Map visible only if Google APIs loaded -->
+                        <template x-if="googleMapsReady">
+                            <div x-load x-data="googlemap('{{ $event->location }}')" x-ref="eventGoogleMapContainer">
+                                <x-maps-google id="eventGoogleMap" style="height: 400px"></x-maps-google>
+                            </div>
+                        </template>
+                        
+                        <!-- Message and button if Google APIs not accepted -->
+                        <template x-if="!googleMapsAccepted">
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/50 p-6 rounded-lg flex flex-col gap-4 items-start h-fit">
+                                <div>
+                                    <h3 class="text-base font-semibold text-yellow-800 dark:text-yellow-100 mb-2">
+                                        {{ __('website.cookies_google_apis_required') ?? 'Google APIs Required' }}
+                                    </h3>
+                                    <p class="text-yellow-700 dark:text-yellow-200 text-sm">
+                                        {{ __('website.cookies_google_apis_message') ?? 'To view the event location on the map, you need to enable Google APIs in your cookie preferences.' }}
+                                    </p>
+                                </div>
+                                <button @click="typeof window.openCookiePreferences === 'function' && window.openCookiePreferences()"
+                                    class="px-4 py-2 bg-primary-600 text-white text-sm font-semibold rounded hover:bg-primary-700 transition">
+                                    {{ __('website.cookies_manage_preferences') ?? 'Manage Preferences' }}
+                                </button>
+                            </div>
+                        </template>
                     </div>
                 </section>
             </div>

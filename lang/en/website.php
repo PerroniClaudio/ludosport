@@ -124,7 +124,7 @@ return [
     'transfer_amount' => 'Transfer Amount',
     'wire_transfer_additional_info' => 'Order ID must be indicated in transfer notes. Orders will be processed only once the funds have been received.',
     'thank_you' => 'Thank you for your purchase!',
-    'cookies_banner_title' => 'Cookie preferences',
+    'cookies_banner_title' => 'Manage preferences',
     'cookies_banner_text' => 'We use functional cookies and similar technologies for security and a better user experience. By continuing to visit this site you agree to our use of cookies. Technical cookies are necessary for the website to function and cannot be disabled. You can manage your preferences for other types of cookies and other technologies below.',
     'cookies_banner_accept' => 'Accept',
     'cookies_banner_decline' => 'Decline',
@@ -133,6 +133,9 @@ return [
     'cookies_reject_all' => 'Reject All',
     'cookies_confirm_choices' => 'Confirm Choices',
     'cookies_accept_all' => 'Accept All',
+    'cookies_google_apis_required' => 'Google APIs Required',
+    'cookies_google_apis_message' => 'To view the map, you need to enable Google APIs in your cookie preferences.',
+    'cookies_manage_preferences' => 'Manage Preferences',
     'cookie_policy_title' => 'Cookie Policy',
     'privacy_policy_title' => 'Privacy Policy',
 ];

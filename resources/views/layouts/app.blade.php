@@ -41,8 +41,8 @@
 
     <x-flash />
     
-    {{-- Cookie Policy e Privacy Policy banner (nell'admin non serve) --}}
-    {{-- <x-policy-banner /> --}}
+    <!-- Cookie Policy Banner -->
+    <x-policy-banner />
 
 </body>
 

@@ -2,16 +2,17 @@
     showBanner: false,
     policyUpdatedAt: null,
     selectedCategoryDescription: 'technical',
+    hadSavedPreferences: false,
     
     cookieCategories: {
         technical: {
             label: 'Technical',
-            description: 'Technical cookies are essential for the website to function properly. They enable basic functionalities such as page navigation and access to secure areas.',
+            description: 'Technical cookies are essential for the website to function properly. They enable basic functionalities such as fonts, page navigation and access to secure areas.',
             required: true
         },
         google_api: {
             label: 'Google APIs',
-            description: 'Google APIs allow enhanced functionality and analytics integration. These cookies help us understand how users interact with our platform.',
+            description: 'Google APIs are used to enhance website functionality (show maps).',
             required: false
         }
     },
@@ -19,6 +20,23 @@
     cookieChoices: {
         technical: true,
         google_api: false
+    },
+
+    loadSavedPreferences() {
+        // Carica le preferenze salvate da localStorage
+        try {
+            const policyChoices = JSON.parse(localStorage.getItem('policyChoices') || '{}');
+            if (policyChoices.cookie_policy && policyChoices.cookie_policy.categories) {
+                this.cookieChoices = { ...policyChoices.cookie_policy.categories };
+                this.hadSavedPreferences = true;
+                console.log('[policy-banner] Loaded saved preferences:', this.cookieChoices);
+            } else {
+                this.hadSavedPreferences = false;
+            }
+        } catch (error) {
+            console.error('[policy-banner] Error loading preferences:', error);
+            this.hadSavedPreferences = false;
+        }
     },
 
     async init() {
@@ -44,6 +62,46 @@
             // Se errore nella fetch, non mostra banner (fail-open)
             this.showBanner = false;
         }
+        
+        // Esponi funzione globale per aprire il banner da altri componenti
+        window.openCookiePreferences = () => {
+            console.log('[policy-banner] Opening banner via external call');
+            window.dispatchEvent(new CustomEvent('openCookieBanner'));
+        };
+        
+        // Ascolta l'evento per aprire il banner
+        const self = this;
+        window.addEventListener('openCookieBanner', () => {
+            console.log('[policy-banner] openCookieBanner event received');
+            self.showBanner = true;
+            self.loadSavedPreferences();
+        });
+        
+        // Ascolta i cambiamenti di localStorage per reagire alle preferenze aggiornate
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'policyChoices') {
+                console.log('[policy-banner] Preferences updated from another tab/window');
+            }
+        });
+    },
+
+    initializeBanner() {
+        // Carica le preferenze salvate quando il banner si apre
+        if (this.showBanner) {
+            this.loadSavedPreferences();
+        }
+    },
+
+    closeBanner() {
+        // Se non c'erano preferenze salvate prima, rifiuta tutto (primo accesso)
+        // Se c'erano preferenze, ricaricarle e chiudi (annulla modifiche)
+        if (!this.hadSavedPreferences) {
+            this.rejectAll();
+        } else {
+            this.loadSavedPreferences();
+            this.showBanner = false;
+            console.log('[policy-banner] Closed banner, preferences unchanged');
+        }
     },
 
     confirmChoices() {
@@ -58,6 +116,11 @@
         localStorage.setItem('policyChoices', JSON.stringify(choices));
         this.showBanner = false;
         console.log('[policy-banner] Policy confirmed with choices:', this.cookieChoices);
+        
+        // Trigger custom event per notificare gli altri componenti
+        window.dispatchEvent(new CustomEvent('policyChoicesUpdated', { 
+            detail: { choices: this.cookieChoices } 
+        }));
     },
 
     rejectAll() {
@@ -77,6 +140,11 @@
         localStorage.setItem('policyChoices', JSON.stringify(choices));
         this.showBanner = false;
         console.log('[policy-banner] All non-required cookies rejected:', rejectedChoices);
+        
+        // Trigger custom event per notificare gli altri componenti
+        window.dispatchEvent(new CustomEvent('policyChoicesUpdated', { 
+            detail: { choices: rejectedChoices } 
+        }));
     },
 
     acceptAll() {
@@ -96,6 +164,11 @@
         localStorage.setItem('policyChoices', JSON.stringify(choices));
         this.showBanner = false;
         console.log('[policy-banner] All cookies accepted:', acceptedChoices);
+        
+        // Trigger custom event per notificare gli altri componenti
+        window.dispatchEvent(new CustomEvent('policyChoicesUpdated', { 
+            detail: { choices: acceptedChoices } 
+        }));
     }
 }">
   <template x-if="showBanner">
@@ -103,7 +176,7 @@
       <div id="policy-overlay" class="fixed top-0 left-0 w-screen h-screen bg-black z-30 opacity-50"></div>
       <div id="policy-wrap" class="flex justify-center items-end fixed top-0 left-0 w-screen h-screen pb-24 z-50 ">
         <div id="policy-container" class="relative p-8 bg-white dark:bg-background-800 dark:text-background-50 rounded opacity-100 flex flex-col gap-4 w-10/12 md:w-3/5 xl:w-1/2 ">
-          <button @click="rejectAll()" class="absolute top-4 right-4 text-background-400 hover:text-background-600 dark:hover:text-background-300 transition">
+          <button @click="closeBanner()" class="absolute top-4 right-4 text-background-400 hover:text-background-600 dark:hover:text-background-300 transition">
             <x-lucide-x class="w-5 h-5" />
           </button>
 

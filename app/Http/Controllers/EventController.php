@@ -514,9 +514,13 @@ class EventController extends Controller
         $response = file_get_contents($url);
         $json = json_decode($response, true);
 
+        $result = $json['results'][0];
+        
         return [
-            'lat' => $json['results'][0]['geometry']['location']['lat'],
-            'lng' => $json['results'][0]['geometry']['location']['lng'],
+            'lat' => $result['geometry']['location']['lat'],
+            'lng' => $result['geometry']['location']['lng'],
+            'formatted_address' => $result['formatted_address'] ?? '',
+            'address_components' => $result['address_components'] ?? [],
         ];
     }
 
