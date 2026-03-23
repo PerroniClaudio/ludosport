@@ -250,6 +250,12 @@
                 <x-responsive-nav-link :href="route('deleted-elements.index')" :active="request()->routeIs('deleted-elements.*')">
                     {{ __('navigation.deleted_elements') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('privacy-policy.edit')" :active="request()->routeIs('privacy-policy.*')">
+                    {{ __('navigation.privacy_policy') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('cookie-policy.edit')" :active="request()->routeIs('cookie-policy.*')">
+                    {{ __('navigation.cookie_policy') }}
+                </x-responsive-nav-link>
             @elseif (!$isMinorPendingApproval)
                 @foreach (Auth::user()->routes() as $route)
                     @if ($authRole === 'rector' && $route->label === 'users')
@@ -301,6 +307,10 @@
                         </x-responsive-nav-link>
                     @endif
                 @endif
+                
+                <x-responsive-nav-link :href="'#'" onclick="typeof window.openCookiePreferences === 'function' && window.openCookiePreferences()">
+                    {{ __('website.cookies_manage_preferences') ?? 'Policy Preferences' }}
+                </x-responsive-nav-link>
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">

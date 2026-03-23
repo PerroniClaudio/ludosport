@@ -96,6 +96,10 @@
                                     {{ __('users.select_role') }}
                                 </x-dropdown-link>
                             @endif
+                            
+                            <x-dropdown-link :href="'#'" onclick="typeof window.openCookiePreferences === 'function' && window.openCookiePreferences()">
+                                {{ __('website.cookies_manage_preferences') ?? 'Policy Preferences' }}
+                            </x-dropdown-link>
 
                             <!-- Authentication -->
                             <form method="POST" action="{{ route('logout') }}">
@@ -113,6 +117,10 @@
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('register')">
                                 {{ __('Register') }}
+                            </x-dropdown-link>
+                            
+                            <x-dropdown-link :href="'#'" onclick="typeof window.openCookiePreferences === 'function' && window.openCookiePreferences()">
+                                {{ __('website.cookies_manage_preferences') ?? 'Policy Preferences' }}
                             </x-dropdown-link>
                         @endif
 
@@ -188,6 +196,10 @@
                             {{ __('users.select_role') }}
                         </x-responsive-nav-link>
                     @endif
+                    
+                    <x-responsive-nav-link :href="'#'" onclick="typeof window.openCookiePreferences === 'function' && window.openCookiePreferences()">
+                        {{ __('website.cookies_manage_preferences') ?? 'Policy Preferences' }}
+                    </x-responsive-nav-link>
 
                     <!-- Authentication -->
                     <form method="POST" action="{{ route('logout') }}">
@@ -215,6 +227,10 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('register')">
                         {{ __('Register') }}
+                    </x-responsive-nav-link>
+                    
+                    <x-responsive-nav-link :href="'#'" onclick="typeof window.openCookiePreferences === 'function' && window.openCookiePreferences()">
+                        {{ __('website.cookies_manage_preferences') ?? 'Policy Preferences' }}
                     </x-responsive-nav-link>
                 </div>
             </div>
