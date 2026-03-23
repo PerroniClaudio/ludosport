@@ -1,48 +1,179 @@
 <div x-data="{
-    defaultPolicyChoices: {
-        'functional': true,
+    showBanner: false,
+    policyUpdatedAt: null,
+    selectedCategoryDescription: 'technical',
+    
+    cookieCategories: {
+        technical: {
+            label: 'Technical',
+            description: 'Technical cookies are essential for the website to function properly. They enable basic functionalities such as page navigation and access to secure areas.',
+            required: true
+        },
+        google_api: {
+            label: 'Google APIs',
+            description: 'Google APIs allow enhanced functionality and analytics integration. These cookies help us understand how users interact with our platform.',
+            required: false
+        }
     },
-    policyChoices: null,
-    isPolicyChoicesSet: false,
 
-    setPolicyChoices: function () {
-        localStorage.setItem('policyChoices', JSON.stringify(this.defaultPolicyChoices));
-        this.isPolicyChoicesSet = true;
-        console.log('Setting policy choices');
-        console.log(this.isPolicyChoicesSet);
+    cookieChoices: {
+        technical: true,
+        google_api: false
     },
-    init() {
-        this.policyChoices = localStorage.getItem('policyChoices');
-        this.isPolicyChoicesSet = !!this.policyChoices;
-        console.log('Policy banner initialized');
-        console.log(this.isPolicyChoicesSet);
+
+    async init() {
+        try {
+            const response = await fetch('{{ route("cookie-policy.info") }}');
+            const data = await response.json();
+            
+            console.log('[policy-banner] Server data:', data);
+            
+            if (data.exists && data.updated_at) {
+                // Controlla se la policy è stata accettata e se è ancora valida
+                const isAccepted = window.CookiePolicyManager.isPolicyAccepted('cookie_policy', data.updated_at);
+                console.log('[policy-banner] Is accepted:', isAccepted);
+                
+                this.showBanner = !isAccepted;
+                this.policyUpdatedAt = data.updated_at;
+            } else {
+                // Se nessuna policy nel server, non mostrare banner
+                this.showBanner = false;
+            }
+        } catch (error) {
+            console.error('[policy-banner] Error fetching policy info:', error);
+            // Se errore nella fetch, non mostra banner (fail-open)
+            this.showBanner = false;
+        }
+    },
+
+    confirmChoices() {
+        // Salva le scelte attuali (come selezionate dall'utente)
+        window.CookiePolicyManager.acceptPolicy('cookie_policy');
+        const choices = JSON.parse(localStorage.getItem('policyChoices') || '{}');
+        choices.cookie_policy = {
+            accepted_at: new Date().toISOString(),
+            accepted: true,
+            categories: this.cookieChoices
+        };
+        localStorage.setItem('policyChoices', JSON.stringify(choices));
+        this.showBanner = false;
+        console.log('[policy-banner] Policy confirmed with choices:', this.cookieChoices);
+    },
+
+    rejectAll() {
+        // Rifiuta tutto tranne i cookie tecnici (obbligatori)
+        window.CookiePolicyManager.acceptPolicy('cookie_policy');
+        const choices = JSON.parse(localStorage.getItem('policyChoices') || '{}');
+        const rejectedChoices = {};
+        Object.keys(this.cookieCategories).forEach(key => {
+            rejectedChoices[key] = this.cookieCategories[key].required;
+        });
+        
+        choices.cookie_policy = {
+            accepted_at: new Date().toISOString(),
+            accepted: true,
+            categories: rejectedChoices
+        };
+        localStorage.setItem('policyChoices', JSON.stringify(choices));
+        this.showBanner = false;
+        console.log('[policy-banner] All non-required cookies rejected:', rejectedChoices);
+    },
+
+    acceptAll() {
+        // Accetta tutto senza considerare le scelte attuali
+        window.CookiePolicyManager.acceptPolicy('cookie_policy');
+        const choices = JSON.parse(localStorage.getItem('policyChoices') || '{}');
+        const acceptedChoices = {};
+        Object.keys(this.cookieCategories).forEach(key => {
+            acceptedChoices[key] = true;
+        });
+        
+        choices.cookie_policy = {
+            accepted_at: new Date().toISOString(),
+            accepted: true,
+            categories: acceptedChoices
+        };
+        localStorage.setItem('policyChoices', JSON.stringify(choices));
+        this.showBanner = false;
+        console.log('[policy-banner] All cookies accepted:', acceptedChoices);
     }
 }">
-  <template x-if="!isPolicyChoicesSet">
+  <template x-if="showBanner">
     <div>
       <div id="policy-overlay" class="fixed top-0 left-0 w-screen h-screen bg-black z-30 opacity-50"></div>
       <div id="policy-wrap" class="flex justify-center items-end fixed top-0 left-0 w-screen h-screen pb-24 z-50 ">
-        <div id="policy-container" class="relative p-8 bg-white dark:bg-background-800 dark:text-background-50 rounded opacity-100 flex flex-col gap-2 w-10/12 md:w-3/5 xl:w-1/2 ">
-          <h2 class="text-xl font-semibold">
-            {{ __('website.cookies_banner_title') }}
-          </h2>
-          <p>{{__('website.cookies_banner_text')}}</p>
-          
-          {{-- <div class="text-xs md:text-sm">
-            <a href="http://" target="_blank" rel="noopener noreferrer" class="font-semibold text-primary-400 hover:text-primary-600">Cookie Policy</a> <span class="font-light">|</span>
-            <a href="http://" target="_blank" rel="noopener noreferrer" class="font-semibold text-primary-400 hover:text-primary-600">Privacy Policy</a> 
-          </div> --}}
+        <div id="policy-container" class="relative p-8 bg-white dark:bg-background-800 dark:text-background-50 rounded opacity-100 flex flex-col gap-4 w-10/12 md:w-3/5 xl:w-1/2 ">
+          <button @click="rejectAll()" class="absolute top-4 right-4 text-background-400 hover:text-background-600 dark:hover:text-background-300 transition">
+            <x-lucide-x class="w-5 h-5" />
+          </button>
 
-          <div class="flex justify-center">
-            <x-primary-button @click="setPolicyChoices">
-              {{-- Questo se ci saranno scelte diventerà il submit con le impostazioni dell'utente --}}
-              {{ __('website.cookies_banner_accept') }}
+          <div>
+            <h2 class="text-xl font-semibold">
+              {{ __('website.cookies_banner_title') }}
+            </h2>
+            <p class="text-sm mt-2">{{ __('website.cookies_banner_text') }}</p>
+          </div>
+
+          <a href="{{ route('cookie-policy.show') }}" class="text-sm  text-primary-400 hover:text-primary-600">
+            {{ __('website.cookies_policy_link') ?? 'Read Cookie Policy' }}
+          </a>
+
+          <!-- Cookie Categories Checkboxes -->
+          <div class="flex flex-wrap gap-2 border-t border-background-200 dark:border-background-700 pt-4">
+            <template x-for="(category, key) in cookieCategories" :key="key">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  x-model="cookieChoices[key]"
+                  :disabled="category.required"
+                  class="w-4 h-4 rounded"
+                />
+                <span class="text-sm font-medium" :class="category.required && 'opacity-50'">
+                  <span x-text="category.label"></span>
+                  <template x-if="category.required">
+                    <span class="text-xs text-background-500 dark:text-background-400">({{ __('website.cookies_required') ?? 'Required' }})</span>
+                  </template>
+                </span>
+              </label>
+            </template>
+          </div>
+
+          <!-- Cookie Categories Description -->
+          <div class="bg-background-700 dark:bg-background-700/50 p-4 rounded">
+            <!-- Description Tabs -->
+            <div class="flex gap-2 mb-3 overflow-x-auto pb-2">
+              <template x-for="(category, key) in cookieCategories" :key="key">
+                <button 
+                  @click="selectedCategoryDescription = key"
+                  :class="selectedCategoryDescription === key ? 'bg-primary-600 text-white' : 'bg-background-200 dark:bg-background-600 text-background-700 dark:text-background-300'"
+                  class="px-3 py-1 text-sm font-medium rounded whitespace-nowrap transition"
+                >
+                  <span x-text="category.label"></span>
+                </button>
+              </template>
+            </div>
+            
+            <!-- Description Content -->
+            <p class="text-sm ">
+              <template x-for="(category, key) in cookieCategories" :key="key">
+                <template x-if="selectedCategoryDescription === key">
+                  <span x-text="category.description"></span>
+                </template>
+              </template>
+            </p>
+          </div>
+
+          <div class="flex gap-3 justify-center flex-wrap">
+            <x-secondary-button @click="rejectAll()" class="px-4 py-2 text-sm text-background-700 dark:text-background-300 hover:bg-background-100 dark:hover:bg-background-700 rounded transition">
+              {{ __('website.cookies_reject_all') ?? 'Reject All' }}
+            </x-secondary-button>
+            <x-primary-button @click="confirmChoices">
+              {{ __('website.cookies_confirm_choices') ?? 'Confirm Choices' }}
+            </x-primary-button>
+            <x-primary-button @click="acceptAll" class="bg-green-600 hover:bg-green-700">
+              {{ __('website.cookies_accept_all') ?? 'Accept All' }}
             </x-primary-button>
           </div>
-          <button @click="setPolicyChoices"> 
-            {{-- Questo se ci saranno scelte diventerà il submit con le impostazioni di default --}}
-            <x-lucide-x class="w-4 h-4 absolute top-2 right-2" />
-          </button>
         </div>
       </div>
     </div>
