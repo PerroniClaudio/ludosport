@@ -4,12 +4,12 @@
     "name": "auto"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CgRysBoz.css",
+    "file": "assets/app-46NBtXbf.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-BCDzR82V.js",
+    "file": "assets/app-BpmjQlOE.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -38,7 +38,7 @@
     "isDynamicEntry": true
   },
   "resources/js/editor.js": {
-    "file": "assets/editor-B5Us_rTZ.js",
+    "file": "assets/editor-CmpbMrfy.js",
     "name": "editor",
     "src": "resources/js/editor.js",
     "isDynamicEntry": true

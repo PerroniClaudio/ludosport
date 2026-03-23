@@ -375,6 +375,28 @@ Route::middleware(['auth', 'role:admin,rector'])->group(function () {
         ->name('privacy-policy.update');
 });
 
+Route::get('cookie-policy', [App\Http\Controllers\CookiePolicyController::class, 'show'])
+    ->name('cookie-policy.show');
+
+Route::get('api/cookie-policy/info', [App\Http\Controllers\CookiePolicyController::class, 'getInfo'])
+    ->name('cookie-policy.info');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('cookie-policy', [App\Http\Controllers\CookiePolicyController::class, 'accept'])
+        ->name('cookie-policy.accept');
+
+    Route::post('cookie-policy-decline', [App\Http\Controllers\CookiePolicyController::class, 'decline'])
+        ->name('cookie-policy.decline');
+});
+
+Route::middleware(['auth', 'role:admin,rector'])->group(function () {
+    Route::get('admin/cookie-policy/edit', [App\Http\Controllers\CookiePolicyController::class, 'edit'])
+        ->name('cookie-policy.edit');
+
+    Route::post('admin/cookie-policy', [App\Http\Controllers\CookiePolicyController::class, 'update'])
+        ->name('cookie-policy.update');
+});
+
 Route::group([], function () {
     Route::get('/healthcheck', function () {
         return 'healthcheck';
