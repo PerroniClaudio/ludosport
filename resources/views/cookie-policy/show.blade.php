@@ -121,6 +121,9 @@
 
         <!-- Footer -->
         <x-footer />
+        
+        <!-- Cookie Policy Banner -->
+        <x-policy-banner />
     </div>
 </body>
 </html>

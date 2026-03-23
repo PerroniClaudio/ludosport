@@ -192,9 +192,9 @@
           </a>
 
           <!-- Cookie Categories Checkboxes -->
-          <div class="flex flex-wrap gap-2 border-t border-background-200 dark:border-background-700 pt-4">
+          <div class="flex flex-wrap gap-3 border-t border-background-200 dark:border-background-700 pt-4">
             <template x-for="(category, key) in cookieCategories" :key="key">
-              <label class="flex items-center gap-3 cursor-pointer">
+              <label class="flex items-center gap-1 cursor-pointer">
                 <input 
                   type="checkbox" 
                   x-model="cookieChoices[key]"
