@@ -15,6 +15,11 @@ class CookiePolicyController extends Controller
      */
     public function edit(): View
     {
+        // Verifica che l'utente sia admin
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Unauthorized action.');
+        }
+        
         $policy = CookiePolicy::getOrCreate();
 
         return view('admin.cookie-policy.edit', [
@@ -27,6 +32,11 @@ class CookiePolicyController extends Controller
      */
     public function update(UpdateCookiePolicyRequest $request): RedirectResponse
     {
+        // Verifica che l'utente sia admin
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Unauthorized action.');
+        }
+        
         $policy = CookiePolicy::find(1) ?? CookiePolicy::getOrCreate();
 
         // Sanitizza l'HTML permettendo tag e attributi safe compatibili con TipTap

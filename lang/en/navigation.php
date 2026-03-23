@@ -39,6 +39,7 @@ return [
     'rank_requests' => 'Rank Requests',
     'deleted_elements' => 'Deleted Elements',
     'privacy_policy' => 'Privacy Policy',
+    'cookie_policy' => 'Cookie Policy',
     'users_list' => 'Users List',
     'approve_users' => 'Approve Users',
     'marker_directions' => 'Get directions on Google Maps',

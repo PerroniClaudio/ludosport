@@ -367,7 +367,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('privacy-policy.decline');
 });
 
-Route::middleware(['auth', 'role:admin,rector'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('admin/privacy-policy/edit', [App\Http\Controllers\PrivacyPolicyController::class, 'edit'])
         ->name('privacy-policy.edit');
 
@@ -389,7 +389,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('cookie-policy.decline');
 });
 
-Route::middleware(['auth', 'role:admin,rector'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('admin/cookie-policy/edit', [App\Http\Controllers\CookiePolicyController::class, 'edit'])
         ->name('cookie-policy.edit');
 
