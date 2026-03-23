@@ -297,13 +297,13 @@ export const googlemap = (location) => {
                         postal_code: newPostalCode,
                         country: newCountry
                     };
-                    this.searchMessage = 'Address corrected: ' + differences.join('; ');
+                    this.searchMessage = 'Address corrected: ' + differences.join('; ') + '. Remember to save.';
                     
                     console.log('[googlemap] Fields updated with corrected data:', significantDifferences);
                 } else {
                     // Feedback di successo
                     this.searchStatus = 'success';
-                    this.searchMessage = 'Address correctly identified';
+                    this.searchMessage = 'Address correctly identified. Remember to save.';
                 }
                 
                 // Se la mappa esiste e Google APIs è accettato, aggiorna la visualizzazione
