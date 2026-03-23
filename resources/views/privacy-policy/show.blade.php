@@ -76,7 +76,7 @@
                                         {{ __('Profile') }}
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                        {{ __('auth.logout') }}
+                                        {{ __('Log Out') }}
                                     </x-dropdown-link>
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                         @csrf

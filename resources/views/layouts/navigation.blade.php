@@ -165,6 +165,12 @@
                             @endif
                         @endif
 
+                        <div>
+                            <x-dropdown-link :href="'#'" onclick="typeof window.openCookiePreferences === 'function' && window.openCookiePreferences()">
+                                {{ __('website.cookies_manage_preferences') ?? 'Policy Preferences' }}
+                            </x-dropdown-link>
+                        </div>
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf

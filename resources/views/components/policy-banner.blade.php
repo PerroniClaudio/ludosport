@@ -211,9 +211,9 @@
             </template>
           </div>
 
-          <!-- Cookie Categories Description -->
+          {{-- Cookie Categories Description
           <div class="bg-background-700 dark:bg-background-700/50 p-4 rounded">
-            <!-- Description Tabs -->
+            Description Tabs
             <div class="flex gap-2 mb-3 overflow-x-auto pb-2">
               <template x-for="(category, key) in cookieCategories" :key="key">
                 <button 
@@ -226,7 +226,7 @@
               </template>
             </div>
             
-            <!-- Description Content -->
+            Description Content
             <p class="text-sm ">
               <template x-for="(category, key) in cookieCategories" :key="key">
                 <template x-if="selectedCategoryDescription === key">
@@ -234,7 +234,7 @@
                 </template>
               </template>
             </p>
-          </div>
+          </div> --}}
 
           <div class="flex gap-3 justify-center flex-wrap">
             <x-secondary-button @click="rejectAll()" class="px-4 py-2 text-sm text-background-700 dark:text-background-300 hover:bg-background-100 dark:hover:bg-background-700 rounded transition">

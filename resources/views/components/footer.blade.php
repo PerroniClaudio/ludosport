@@ -36,7 +36,7 @@
             </p>
             <a class="text-background-800 hover:text-primary" href="/privacy-policy">Privacy policy</a>
             <a class="text-background-800 hover:text-primary" href="/cookie-policy">Cookie policy</a>
-            <x-primary-button size="xs" onclick="typeof window.openCookiePreferences === 'function' && window.openCookiePreferences()" class="text-xl">
+            <x-primary-button size="xs" onclick="typeof window.openCookiePreferences === 'function' && window.openCookiePreferences()" class="text-xl mt-2">
                 {{ __('website.cookies_manage_preferences') ?? 'Policy Preferences' }}
             </x-primary-button>
 
