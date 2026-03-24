@@ -76,6 +76,18 @@
             this.googleMapsReady = isAccepted;
             
             console.log('[event-map] Google APIs accepted:', isAccepted);
+            
+            // Se Google Maps è stato appena abilitato, reinizializza il component
+            if (isAccepted) {
+                this.reinitializeGoogleMaps();
+            }
+        },
+        
+        reinitializeGoogleMaps() {
+            console.log('[event-map] Reinitializing Google Maps...');
+            // Dispatch un evento custom che Alpine ascolterà
+            const event = new CustomEvent('googleMapsEnabled', { detail: { timestamp: Date.now() } });
+            window.dispatchEvent(event);
         }
     }" x-init="init()">
     <div class="flex items-center gap-1">

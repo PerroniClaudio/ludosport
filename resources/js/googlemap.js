@@ -64,54 +64,88 @@ export const googlemap = (location) => {
                 // Altrimenti, aspetta che Google Maps diventi disponibile
                 this.waitForGoogleMaps();
             }
+            
+            // Ascolta l'evento di abilitazione Google Maps
+            window.addEventListener('googleMapsEnabled', (e) => {
+                console.log('[googlemap] Google Maps enabled event received');
+                if (typeof google !== "undefined" && google.maps) {
+                    // Ricrea la mappa e ricarica i dati
+                    this.reinitializeMap();
+                }
+            });
+        },
+        
+        reinitializeMap() {
+            // Distruggi la mappa precedente se esiste
+            if (this.marker !== null) {
+                this.marker.setMap(null);
+                this.marker = null;
+            }
+            if (this.map) {
+                this.map = null;
+            }
+            
+            // Ricarica i dati dell'indirizzo
+            this.loadLocationData();
+            
+            // Ricrea la mappa
+            setTimeout(() => {
+                this.initializeMap();
+            }, 100);
         },
         
         loadLocationData() {
             const location = this.location;
             fetchLocation(location).then(async (data) => {
-                data.address_components.forEach((element) => {
-                    if (element.types.includes("route")) {
-                        this.address = element.long_name + ", " + this.address;
-                    }
-
-                    if (element.types.includes("street_number")) {
-                        this.address += element.long_name;
-                    }
-
-                    if (this.address === "") {
-                        if (element.types.includes("sublocality_level_2")) {
-                            this.address = element.long_name;
+                // Se i campi sono già pieni, non sovrascrivere (è una reinit)
+                const isReinit = this.address || this.city || this.postal_code || this.country;
+                
+                if (!isReinit) {
+                    // Prima volta: popola i campi
+                    data.address_components.forEach((element) => {
+                        if (element.types.includes("route")) {
+                            this.address = element.long_name + ", " + this.address;
                         }
-                    }
 
-                    if (element.types.includes("locality")) {
-                        this.city = element.long_name;
-                    }
+                        if (element.types.includes("street_number")) {
+                            this.address += element.long_name;
+                        }
 
-                    if (this.city === "") {
-                        if (element.types.includes("postal_town")) {
+                        if (this.address === "") {
+                            if (element.types.includes("sublocality_level_2")) {
+                                this.address = element.long_name;
+                            }
+                        }
+
+                        if (element.types.includes("locality")) {
                             this.city = element.long_name;
                         }
-                    }
 
-                    if (this.city === "") {
-                        if (
-                            element.types.includes(
-                                "administrative_area_level_2"
-                            )
-                        ) {
-                            this.city = element.long_name;
+                        if (this.city === "") {
+                            if (element.types.includes("postal_town")) {
+                                this.city = element.long_name;
+                            }
                         }
-                    }
 
-                    if (element.types.includes("country")) {
-                        this.country = element.long_name;
-                    }
+                        if (this.city === "") {
+                            if (
+                                element.types.includes(
+                                    "administrative_area_level_2"
+                                )
+                            ) {
+                                this.city = element.long_name;
+                            }
+                        }
 
-                    if (element.types.includes("postal_code")) {
-                        this.postal_code = element.long_name;
-                    }
-                });
+                        if (element.types.includes("country")) {
+                            this.country = element.long_name;
+                        }
+
+                        if (element.types.includes("postal_code")) {
+                            this.postal_code = element.long_name;
+                        }
+                    });
+                }
                 
                 // Se la mappa è già inizializzata, aggiorna la visualizzazione
                 if (this.map) {
