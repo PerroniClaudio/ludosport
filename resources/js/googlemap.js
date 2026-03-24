@@ -306,23 +306,35 @@ export const googlemap = (location) => {
                     this.searchMessage = 'Address correctly identified. Remember to save.';
                 }
                 
-                // Se la mappa esiste e Google APIs è accettato, aggiorna la visualizzazione
+                // Rimuovi SEMPRE il marker precedente
+                if (this.marker !== null) {
+                    this.marker.setMap(null);
+                    this.marker = null;
+                }
+                
+                // Distruggi la mappa completamente per ricreaerla pulita
                 if (this.map) {
-                    this.map.setCenter({ lat: data.lat, lng: data.lng });
-                    this.map.setZoom(15);
-
-                    // Rimuovi il marker precedente
-                    if (this.marker !== null) {
-                        this.marker.setMap(null);
-                    }
-
+                    this.map = null;
+                }
+                
+                // Se Google APIs è accettato, ricrea la mappa da zero con le nuove coordinate
+                if (typeof google !== "undefined" && google.maps && document.getElementById("eventGoogleMap")) {
+                    this.map = new google.maps.Map(
+                        document.getElementById("eventGoogleMap"),
+                        {
+                            center: { lat: data.lat, lng: data.lng },
+                            zoom: 15,
+                            height: "400px",
+                        }
+                    );
+                    
                     // Aggiungi il nuovo marker
                     this.marker = new google.maps.Marker({
                         position: { lat: data.lat, lng: data.lng },
                         map: this.map,
                     });
                     
-                    console.log('[googlemap] Map updated with new coordinates:', data);
+                    console.log('[googlemap] Map recreated with new coordinates:', data);
                 } else {
                     console.log('[googlemap] Map not initialized (Google APIs not accepted), but coordinates updated:', data);
                 }
