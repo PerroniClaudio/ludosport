@@ -42,7 +42,7 @@
 
                                 <span
                                     class="text-sm text-background-500 dark:text-background-400 hover:text-primary-500">
-                                    {{ $academy->mainRector->name }} {{ $academy->mainRector->surname }}
+                                    {{ $academy->mainRector?->name }} {{ $academy->mainRector?->surname }}
                                 </span>
 
 

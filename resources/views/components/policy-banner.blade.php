@@ -44,35 +44,34 @@
             const response = await fetch('{{ route("cookie-policy.info") }}');
             const data = await response.json();
             
-            console.log('[policy-banner] Server data:', data);
-            
             if (data.exists && data.updated_at) {
-                // Controlla se la policy è stata accettata e se è ancora valida
-                const isAccepted = window.CookiePolicyManager.isPolicyAccepted('cookie_policy', data.updated_at);
-                console.log('[policy-banner] Is accepted:', isAccepted);
-                
-                this.showBanner = !isAccepted;
-                this.policyUpdatedAt = data.updated_at;
+                // Controlla che CookiePolicyManager sia disponibile
+                if (!window.CookiePolicyManager) {
+                    this.showBanner = true;
+                    this.policyUpdatedAt = data.updated_at;
+                } else {
+                    // Controlla se la policy è stata accettata e se è ancora valida
+                    const isAccepted = window.CookiePolicyManager.isPolicyAccepted('cookie_policy', data.updated_at);
+                    this.showBanner = !isAccepted;
+                    this.policyUpdatedAt = data.updated_at;
+                }
             } else {
                 // Se nessuna policy nel server, non mostrare banner
                 this.showBanner = false;
             }
         } catch (error) {
             console.error('[policy-banner] Error fetching policy info:', error);
-            // Se errore nella fetch, non mostra banner (fail-open)
             this.showBanner = false;
         }
         
         // Esponi funzione globale per aprire il banner da altri componenti
         window.openCookiePreferences = () => {
-            console.log('[policy-banner] Opening banner via external call');
             window.dispatchEvent(new CustomEvent('openCookieBanner'));
         };
         
         // Ascolta l'evento per aprire il banner
         const self = this;
         window.addEventListener('openCookieBanner', () => {
-            console.log('[policy-banner] openCookieBanner event received');
             self.showBanner = true;
             self.loadSavedPreferences();
         });
@@ -80,7 +79,7 @@
         // Ascolta i cambiamenti di localStorage per reagire alle preferenze aggiornate
         window.addEventListener('storage', (e) => {
             if (e.key === 'policyChoices') {
-                console.log('[policy-banner] Preferences updated from another tab/window');
+                // Aggiorna le preferenze se cambiano da un'altra tab
             }
         });
     },
@@ -170,7 +169,7 @@
             detail: { choices: acceptedChoices } 
         }));
     }
-}">
+}" x-init="init()">
   <template x-if="showBanner">
     <div>
       <div id="policy-overlay" class="fixed top-0 left-0 w-screen h-screen bg-black z-30 opacity-50"></div>
