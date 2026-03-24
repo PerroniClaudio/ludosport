@@ -60,9 +60,9 @@ class PrivacyPolicyController extends Controller
     {
         $policy = PrivacyPolicy::find(1);
 
-        // Verifico se l'utente è loggato e se deve ancora accettare la policy
+        // Se non esiste policy, non richiedere approvazione
         $requiresAcceptance = false;
-        if (Auth::check()) {
+        if ($policy && Auth::check()) {
             $user = User::find(Auth::id());
             $requiresAcceptance = ! $user->hasAcceptedLatestPrivacyPolicy();
         }

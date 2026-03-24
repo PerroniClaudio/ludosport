@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\PrivacyPolicy;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,12 @@ class EnsurePrivacyPolicyAccepted
         ];
 
         if ($request->routeIs($allowedRoutes)) {
+            return $next($request);
+        }
+
+        // Se la privacy policy non esiste, salta il controllo
+        $policy = PrivacyPolicy::find(1);
+        if (! $policy) {
             return $next($request);
         }
 
