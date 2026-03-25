@@ -35,7 +35,19 @@ class ExportController extends Controller {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
         }
 
-        $exports = Export::whereIn('type', Export::getAvailableExportsByRole($authRole))->with('user')->orderBy('created_at', 'desc')->get();
+        // Admin vede tutti gli export, altri solo i propri
+        if ($authRole === 'admin') {
+            $exports = Export::whereIn('type', Export::getAvailableExportsByRole($authRole))
+                ->with('user')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            $exports = Export::whereIn('type', Export::getAvailableExportsByRole($authRole))
+                ->where('user_id', $authUser->id)
+                ->with('user')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
 
         $addToRoute = $authRole == 'admin' ? '' : $authRole . '.';
 
@@ -453,11 +465,13 @@ class ExportController extends Controller {
     }
 
     public function download(Export $export) {
-        /** 
-         * @disregard Intelephense non rileva il metodo temporaryurl
-         * 
-         * @see https://github.com/spatie/laravel-google-cloud-storage
-         */
+        // Solo admin o autore può scaricare
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        if ($authRole !== 'admin' && $export->user_id !== $authUser->id) {
+            abort(403, 'Non sei autorizzato a scaricare questo export.');
+        }
+
         $file = Storage::disk('gcs')->temporaryUrl(
             $export->file,
             now()->addMinutes(5)

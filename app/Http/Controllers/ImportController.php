@@ -33,7 +33,19 @@ class ImportController extends Controller {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
         }
 
-        $imports = Import::whereIn('type', Import::getAvailableImportsByRole($authRole))->with('user')->orderBy('created_at', 'desc')->get();
+        // Admin vede tutti gli import, altri solo i propri
+        if ($authRole === 'admin') {
+            $imports = Import::whereIn('type', Import::getAvailableImportsByRole($authRole))
+                ->with('user')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            $imports = Import::whereIn('type', Import::getAvailableImportsByRole($authRole))
+                ->where('user_id', $authUser->id)
+                ->with('user')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
 
         foreach ($imports as $key => $import) {
             $imports[$key]->type = __('imports.' . $import->type);
@@ -327,6 +339,13 @@ class ImportController extends Controller {
          * @see https://github.com/spatie/laravel-google-cloud-storage
          */
 
+
+        // Solo admin o autore può scaricare
+        $authUser = User::find(auth()->user()->id);
+        $authRole = $authUser->getRole();
+        if ($authRole !== 'admin' && $import->user_id !== $authUser->id) {
+            abort(403, 'Non sei autorizzato a scaricare questo import.');
+        }
 
         $url = Storage::disk('gcs')->temporaryUrl(
             $import->file,
