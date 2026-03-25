@@ -43,8 +43,8 @@
         try {
             const response = await fetch('{{ route("cookie-policy.info") }}');
             const data = await response.json();
-            
-            if (data.exists && data.updated_at) {
+            {{-- Modificato in modo che il banner si veda anche se non c'è la policy nel server, ma venga visualizzato solo se non si è fatta ancora la scelta. --}}
+            {{-- if (data.exists && data.updated_at) { --}}
                 // Controlla che CookiePolicyManager sia disponibile
                 if (!window.CookiePolicyManager) {
                     this.showBanner = true;
@@ -55,10 +55,10 @@
                     this.showBanner = !isAccepted;
                     this.policyUpdatedAt = data.updated_at;
                 }
-            } else {
+            {{-- } else {
                 // Se nessuna policy nel server, non mostrare banner
                 this.showBanner = false;
-            }
+            } --}}
         } catch (error) {
             console.error('[policy-banner] Error fetching policy info:', error);
             this.showBanner = false;

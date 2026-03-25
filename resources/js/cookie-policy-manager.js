@@ -51,11 +51,10 @@ class CookiePolicyManager {
      * Controlla se la policy è stata accettata e se è ancora valida
      * 
      * Logica:
-     * 1. Se non esiste localStorage o accepted è false → NOT ACCEPTED
-     * 2. Se esiste localStorage ma NON ha accepted_at → NOT ACCEPTED (retrocompatibilità)
-     * 3. Se esiste localStorage e ha accepted_at, confronta con server:
-     *    - Se accepted_at > updated_at (utente ha accettato dopo l'ultimo update) → ACCEPTED
-     *    - Se accepted_at <= updated_at (server aggiornato dopo accettazione) → NOT ACCEPTED
+     * 1. Se non esiste nessun record o non è marcata come accettata, ritorna false
+     * 2. Se manca la data di aggiornamento dal server, consideriamo la scelta valida (non possiamo invalidarla senza info)
+     * 3. Se manca la data di accettazione, consideriamo la scelta non valida (perchè sul server c'è una data di aggiornamento, quindi possiamo confrontare)
+     * 4. Controlla se la data di accettazione è precedente alla data di aggiornamento della policy sul server
      */
     static isPolicyAccepted(policyType, serverUpdatedAt) {
         const choices = this.getStoredChoices();
@@ -73,32 +72,29 @@ class CookiePolicyManager {
             return false;
         }
 
-        // Step 2: Se manca la data di accettazione, considera non valida (retrocompatibilità)
+        // Step 2: Se manca la data di aggiornamento dal server, consideriamo la scelta valida (non possiamo invalidarla senza info)
+        const updatedDate = serverUpdatedAt ? new Date(serverUpdatedAt) : null;
+        if(!updatedDate || isNaN(updatedDate.getTime())) {
+            console.log(`[isPolicyAccepted] Invalid or missing serverUpdatedAt`);
+            return true; // Se non abbiamo una data di aggiornamento dal server, assumiamo che la scelta sia valida (non possiamo invalidarla senza info)
+        }
+
+        // Step 3: Se manca la data di accettazione, consideriamo la scelta non valida (perchè sul server c'è una data di aggiornamento, quindi possiamo confrontare)
         if (!choice.accepted_at) {
             console.log(`[isPolicyAccepted] Missing accepted_at, considering invalid`);
             return false;
         }
 
-        // Step 3: Se non c'è una data di aggiornamento dal server, non possiamo verificare
-        if (!serverUpdatedAt) {
-            console.log(`[isPolicyAccepted] No serverUpdatedAt provided`);
-            return false;
-        }
-
-        // Confronta le date
-        const acceptedDate = new Date(choice.accepted_at);
-        const updatedDate = new Date(serverUpdatedAt);
-        
-        // Controlla se le date sono valide
-        if (isNaN(acceptedDate.getTime()) || isNaN(updatedDate.getTime())) {
-            console.log(`[isPolicyAccepted] Invalid dates`);
+        // Step 4: Controlla se la data di accettazione è valida
+        const acceptedDate = choice?.accepted_at ? new Date(choice.accepted_at) : null;
+        if (!acceptedDate || isNaN(acceptedDate.getTime())) {
+            console.log(`[isPolicyAccepted] Invalid accepted_at date, considering invalid`);
             return false;
         }
         
-        // La policy è valida solo se l'utente ha accettato DOPO l'ultimo aggiornamento del server
-        // accettato_at > updated_at = ACCETTATO
+        // Step 4: Controlla se la data di accettazione è precedente alla data di aggiornamento della policy sul server
         const isValid = acceptedDate > updatedDate;
-        console.log(`[isPolicyAccepted] Date comparison: acceptedDate(${acceptedDate.toISOString()}) > updatedDate(${updatedDate.toISOString()}) = ${isValid}`);
+        console.log(`[isPolicyAccepted] Date comparison: acceptedDate(${acceptedDate && acceptedDate?.toISOString()}) > updatedDate(${updatedDate && updatedDate?.toISOString()}) = ${isValid}`);
         
         return isValid;
     }
