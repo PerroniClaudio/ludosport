@@ -196,4 +196,16 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        // Ricarica la pagina quando si torna indietro dal browser (bfcache)
+        // Perchè se l'admin approva un wire transfer deve vedere il dato aggiornato quando torna alla lista degli ordini
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+    </script>
+    @endpush
 </x-app-layout>
