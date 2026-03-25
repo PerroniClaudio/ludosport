@@ -8,16 +8,26 @@ use App\Models\Invoice;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Cashier\Cashier;
 use Illuminate\Support\Str;
 
-class OrderController extends Controller {
+class OrderController extends Controller
+{
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request) {
-        //
-        $query = Order::query()->orderBy('created_at', 'desc');
+    public function index(Request $request)
+    {
+        return view('orders.index', [
+            'orders' => [],
+        ]);
+    }
+
+    /**
+     * Get filtered orders as JSON.
+     */
+    public function getOrders(Request $request)
+    {
+        $query = Order::query()->with('user');
 
         // Filtro prezzo minimo
         if ($request->filled('min_price')) {
@@ -44,73 +54,84 @@ class OrderController extends Controller {
             $query->whereIn('status', $request->input('status'));
         }
 
-        $orders = $query->get();
+        $orders = $query->get()->map(function ($order) {
+            return [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'status' => __('orders.status'.$order->status),
+                'payment_method' => __('orders.'.$order->payment_method),
+                'total' => $order->total,
+                'total_formatted' => '€ '.number_format($order->total, 2),
+                'user_fullname' => $order->user->name.' '.$order->user->surname,
+                'created_at' => $order->created_at->toISOString(),
+                'created_at_formatted' => $order->created_at->format('d/m/Y H:i'),
+            ];
+        });
 
-        foreach ($orders as $key => $order) {
-            $orders[$key]->status = __('orders.status' . $order->status);
-            $orders[$key]->payment_method = __('orders.' . $order->payment_method);
-            $orders[$key]->total = '€ ' . number_format($order->total, 2);
-            $orders[$key]->user_fullname = $order->user->name . ' ' . $order->user->surname;
-        }
-
-        return view('orders.index', [
-            'orders' => $orders
+        return response()->json([
+            'data' => $orders,
         ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create() {
+    public function create()
+    {
         //
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         //
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id) {
+    public function show(string $id)
+    {
         //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Order $order) {
+    public function edit(Order $order)
+    {
         //
 
-        $order->status_label = __('orders.status' . $order->status);
-        $order->payment_method_label = __('orders.' . $order->payment_method);
-        $order->total = '€ ' . number_format($order->total, 2);
+        $order->status_label = __('orders.status'.$order->status);
+        $order->payment_method_label = __('orders.'.$order->payment_method);
+        $order->total = '€ '.number_format($order->total, 2);
 
         $order->invoice->address = json_decode($order->invoice->address);
 
         foreach ($order->items as $key => $item) {
-            $order->items[$key]->total = '€ ' . number_format($item->total, 2);
-            $order->items[$key]->product_name = $item->product_type ==  'event_participation'
-                ? __('events.event_participation') . ' - ' . $item->product_name
-                : __('orders.' . $item->product_name);
+            $order->items[$key]->total = '€ '.number_format($item->total, 2);
+            $order->items[$key]->product_name = $item->product_type == 'event_participation'
+                ? __('events.event_participation').' - '.$item->product_name
+                : __('orders.'.$item->product_name);
         }
 
         return view('orders.edit', [
-            'order' => $order
+            'order' => $order,
         ]);
     }
 
-    public function result(Order $order) {
+    public function result(Order $order)
+    {
 
         $payment_result = json_decode($order->result);
 
         return response()->json($payment_result);
     }
 
-    public function invoice(Order $order, Request $request) {
+    public function invoice(Order $order, Request $request)
+    {
         //
 
         $address = json_encode([
@@ -126,7 +147,7 @@ class OrderController extends Controller {
         $invoice->name = $request->name;
         $invoice->surname = $request->surname;
         $invoice->vat = $request->vat;
-        $invoice->business_name	= $request->business_name;
+        $invoice->business_name = $request->business_name;
         $invoice->sdi = $request->sdi;
 
         $invoice->save();
@@ -137,24 +158,28 @@ class OrderController extends Controller {
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id) {
+    public function update(Request $request, string $id)
+    {
         //
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id) {
+    public function destroy(string $id)
+    {
         //
     }
 
-    public function successUserWireTransfer(Order $order) {
+    public function successUserWireTransfer(Order $order)
+    {
         return view('website.shop.wire-transfer', [
-            'order' => $order
+            'order' => $order,
         ]);
     }
 
-    public function approveWireTransfer(Order $order) {
+    public function approveWireTransfer(Order $order)
+    {
 
         if ($order->status !== 0) {
             return redirect()->route('orders.edit', $order->id)->with('error', 'Order already approved');
@@ -187,7 +212,7 @@ class OrderController extends Controller {
                     'academy_id' => $academyId,
                     'type' => 3,
                     'start_date' => now(),
-                    'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
+                    'end_date' => now()->addYear()->endOfYear()->format('Y').'-08-31',
                     'auto_renew' => 1,
                     'used' => 1,
                     'unique_id' => Str::orderedUuid(),
@@ -196,7 +221,7 @@ class OrderController extends Controller {
                 $order->user->update([
                     'has_paid_fee' => 1,
                 ]);
-            } else if ($item->product_type == 'event_participation') {
+            } elseif ($item->product_type == 'event_participation') {
                 $event = Event::find($item->product_code);
 
                 if ($event->resultType() === 'enabling') {
@@ -204,7 +229,7 @@ class OrderController extends Controller {
                         'user_id' => $order->user_id,
                         'weapon_form_id' => $event->weapon_form_id,
                     ]);
-                } else if ($event->resultType() === 'ranking') {
+                } elseif ($event->resultType() === 'ranking') {
                     $event->results()->create([
                         'user_id' => $order->user_id,
                         'war_points' => 0,
@@ -217,7 +242,7 @@ class OrderController extends Controller {
 
         if ($isBulkFeeOrder) {
             event(new \App\Events\BulkFeePaid($order));
-        } else if ($order->items->contains('product_type', 'fee')) {
+        } elseif ($order->items->contains('product_type', 'fee')) {
             event(new \App\Events\FeePaid($order));
         }
 
@@ -227,6 +252,6 @@ class OrderController extends Controller {
         ]);
 
         return redirect()->route('orders.edit', $order->id)->with('success', 'Order approved successfully');
-        
+
     }
 }

@@ -323,6 +323,7 @@ Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selec
     Route::post('/orders-invoice/{order}', [App\Http\Controllers\OrderController::class, 'invoice'])->name('orders.update.invoice');
 
     Route::get('/orders', [App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders-data', [App\Http\Controllers\OrderController::class, 'getOrders'])->name('orders.data');
     Route::get('/orders/{order}', [App\Http\Controllers\OrderController::class, 'edit'])->name('orders.edit');
     Route::get('/orders/{order}/transaction-result', [App\Http\Controllers\OrderController::class, 'result'])->name('orders.transaction-result');
 
