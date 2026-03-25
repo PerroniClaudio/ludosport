@@ -29,7 +29,7 @@
             if (policyChoices.cookie_policy && policyChoices.cookie_policy.categories) {
                 this.cookieChoices = { ...policyChoices.cookie_policy.categories };
                 this.hadSavedPreferences = true;
-                console.log('[policy-banner] Loaded saved preferences:', this.cookieChoices);
+                {{-- console.log('[policy-banner] Loaded saved preferences:', this.cookieChoices); --}}
             } else {
                 this.hadSavedPreferences = false;
             }
@@ -43,22 +43,16 @@
         try {
             const response = await fetch('{{ route("cookie-policy.info") }}');
             const data = await response.json();
-            {{-- Modificato in modo che il banner si veda anche se non c'è la policy nel server, ma venga visualizzato solo se non si è fatta ancora la scelta. --}}
-            {{-- if (data.exists && data.updated_at) { --}}
-                // Controlla che CookiePolicyManager sia disponibile
-                if (!window.CookiePolicyManager) {
-                    this.showBanner = true;
-                    this.policyUpdatedAt = data.updated_at;
-                } else {
-                    // Controlla se la policy è stata accettata e se è ancora valida
-                    const isAccepted = window.CookiePolicyManager.isPolicyAccepted('cookie_policy', data.updated_at);
-                    this.showBanner = !isAccepted;
-                    this.policyUpdatedAt = data.updated_at;
-                }
-            {{-- } else {
-                // Se nessuna policy nel server, non mostrare banner
-                this.showBanner = false;
-            } --}}
+            // Controlla che CookiePolicyManager sia disponibile
+            if (!window.CookiePolicyManager) {
+                this.showBanner = true;
+                this.policyUpdatedAt = data.updated_at;
+            } else {
+                // Controlla se la policy è stata accettata e se è ancora valida
+                const isAccepted = window.CookiePolicyManager.isPolicyAccepted('cookie_policy', data.updated_at);
+                this.showBanner = !isAccepted;
+                this.policyUpdatedAt = data.updated_at;
+            }
         } catch (error) {
             console.error('[policy-banner] Error fetching policy info:', error);
             this.showBanner = false;
@@ -99,7 +93,7 @@
         } else {
             this.loadSavedPreferences();
             this.showBanner = false;
-            console.log('[policy-banner] Closed banner, preferences unchanged');
+            {{-- console.log('[policy-banner] Closed banner, preferences unchanged'); --}}
         }
     },
 
@@ -114,7 +108,7 @@
         };
         localStorage.setItem('policyChoices', JSON.stringify(choices));
         this.showBanner = false;
-        console.log('[policy-banner] Policy confirmed with choices:', this.cookieChoices);
+        {{-- console.log('[policy-banner] Policy confirmed with choices:', this.cookieChoices); --}}
         
         // Trigger custom event per notificare gli altri componenti
         window.dispatchEvent(new CustomEvent('policyChoicesUpdated', { 
@@ -138,7 +132,7 @@
         };
         localStorage.setItem('policyChoices', JSON.stringify(choices));
         this.showBanner = false;
-        console.log('[policy-banner] All non-required cookies rejected:', rejectedChoices);
+        {{-- console.log('[policy-banner] All non-required cookies rejected:', rejectedChoices); --}}
         
         // Trigger custom event per notificare gli altri componenti
         window.dispatchEvent(new CustomEvent('policyChoicesUpdated', { 
@@ -162,7 +156,7 @@
         };
         localStorage.setItem('policyChoices', JSON.stringify(choices));
         this.showBanner = false;
-        console.log('[policy-banner] All cookies accepted:', acceptedChoices);
+        {{-- console.log('[policy-banner] All cookies accepted:', acceptedChoices); --}}
         
         // Trigger custom event per notificare gli altri componenti
         window.dispatchEvent(new CustomEvent('policyChoicesUpdated', { 
