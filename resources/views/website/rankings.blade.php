@@ -9,11 +9,6 @@
             <p class="text-background-800 dark:text-background-200 text-justify">{{ __('website.rankings_text') }}
             </p>
 
-            <p class="text-background-800 dark:text-background-200 text-justify">You can distinguish between <span
-                    class="text-primary-500 mr-1">Arena Points</span> and
-                <span class="text-secondary-500 ml-1">Style Points</span> with their colour.
-            </p>
-
             <div class="flex flex-col lg:grid lg:grid-cols-12 gap-4 rounded  min-h-[60vh]  mt-8" x-load
                 x-data="rankingschart({ yearOptions: @json($years) })" x-init="$watch('nationFilter', (value) => fiterByNation(value))">
                 <div class="flex flex-col gap-2 col-span-3">
