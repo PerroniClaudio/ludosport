@@ -80,8 +80,21 @@ class AuthenticatedSessionController extends Controller {
 
     /**
      * Destroy an authenticated session.
+     * Questa route è stata lasciata fuori dal controllo CSRF globale 
+     * per reindirizzare gli utenti non autenticati alla home al posto di fargli vedere la pagina di errore 419. 
+     * Il controllo CSRF viene fatto manualmente nel controller, verificando se l'utente è autenticato o meno.
      */
     public function destroy(Request $request): RedirectResponse {
+        // Se non autenticato, redirect senza verificare CSRF
+        if(!Auth::check()) {
+            return redirect('/');
+        }
+
+        // Se autenticato, verifica CSRF manualmente
+        if ($request->session()->token() !== $request->input('_token')) {
+            abort(419, 'CSRF token mismatch');
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

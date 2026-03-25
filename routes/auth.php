@@ -67,6 +67,7 @@ Route::middleware(['auth', 'minor.approved'])->group(function () {
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-                ->name('logout');
 });
+
+// Route di logout (CSRF verificato manualmente nel controller)
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');

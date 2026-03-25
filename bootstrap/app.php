@@ -35,6 +35,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             EnsureMinorSwitchIsCompleted::class,
         ]);
+        // Escludi logout dal CSRF - verrà verificato manualmente nel controller
+        $middleware->validateCsrfTokens(except: [
+            'logout',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (PostTooLargeException $exception, Request $request) {
