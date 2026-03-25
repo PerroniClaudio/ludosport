@@ -176,6 +176,16 @@ export const rankingschart = (config = {}) => {
                 columnClasses: "",
             },
             {
+                name: "Arena Points",
+                field: "war_points",
+                columnClasses: "",
+            },
+            {
+                name: "Style Points",
+                field: "style_points",
+                columnClasses: "",
+            },
+            {
                 name: "Academy",
                 field: "academy",
                 columnClasses: "",
@@ -188,16 +198,6 @@ export const rankingschart = (config = {}) => {
             {
                 name: "Nation",
                 field: "nation",
-                columnClasses: "",
-            },
-            {
-                name: "Arena Points",
-                field: "war_points",
-                columnClasses: "",
-            },
-            {
-                name: "Style Points",
-                field: "style_points",
                 columnClasses: "",
             },
         ],

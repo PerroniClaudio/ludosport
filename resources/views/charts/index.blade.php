@@ -25,6 +25,18 @@
                             'rowClasses' => '',
                         ],
                         [
+                            'name' => 'Arena points',
+                            'field' => 'total_war_points',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
+                            'name' => 'Style points',
+                            'field' => 'total_style_points',
+                            'columnClasses' => '',
+                            'rowClasses' => '',
+                        ],
+                        [
                             'name' => 'Academy',
                             'field' => 'user_academy',
                             'columnClasses' => '',
@@ -39,18 +51,6 @@
                         [
                             'name' => 'Nation',
                             'field' => 'nation',
-                            'columnClasses' => '',
-                            'rowClasses' => '',
-                        ],
-                        [
-                            'name' => 'Arena points',
-                            'field' => 'total_war_points',
-                            'columnClasses' => '',
-                            'rowClasses' => '',
-                        ],
-                        [
-                            'name' => 'Style points',
-                            'field' => 'total_style_points',
                             'columnClasses' => '',
                             'rowClasses' => '',
                         ],
