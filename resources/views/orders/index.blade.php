@@ -13,11 +13,18 @@
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg" 
                  x-data="{
                     loading: false,
-                    allOrders: [],
-                    filteredOrders: [],
+                    orders: [],
+                    pagination: {
+                        current_page: 1,
+                        last_page: 1,
+                        per_page: 25,
+                        total: 0,
+                        from: 0,
+                        to: 0
+                    },
                     sorting: {
-                        sort_by: null,
-                        sort_direction: null
+                        sort_by: 'created_at',
+                        sort_direction: 'desc'
                     },
                     filters: {
                         min_price: '',
@@ -27,8 +34,6 @@
                         status: [],
                         search: ''
                     },
-                    page: 1,
-                    pageLength: 10,
                     toggleStatus(statusValue) {
                         const index = this.filters.status.indexOf(statusValue);
                         if (index > -1) {
@@ -42,8 +47,8 @@
                             if (this.sorting.sort_direction === 'asc') {
                                 this.sorting.sort_direction = 'desc';
                             } else if (this.sorting.sort_direction === 'desc') {
-                                this.sorting.sort_by = null;
-                                this.sorting.sort_direction = null;
+                                this.sorting.sort_by = 'created_at';
+                                this.sorting.sort_direction = 'desc';
                             } else {
                                 this.sorting.sort_direction = 'asc';
                             }
@@ -51,68 +56,41 @@
                             this.sorting.sort_by = field;
                             this.sorting.sort_direction = 'asc';
                         }
-                        this.applySortAndSearch();
+                        this.loadOrders();
                     },
-                   applySortAndSearch() {
-                        let result = [...this.allOrders];
-                        
-                        // Ricerca
-                        if (this.filters.search) {
-                            const search = this.filters.search.toLowerCase();
-                            result = result.filter(order => {
-                                return Object.values(order).some(value => {
-                                    return String(value).toLowerCase().includes(search);
-                                });
-                            });
-                        }
-                        
-                        // Ordinamento
-                        if (this.sorting.sort_by && this.sorting.sort_direction) {
-                            result.sort((a, b) => {
-                                let aValue = a[this.sorting.sort_by];
-                                let bValue = b[this.sorting.sort_by];
-                                
-                                // Gestione numeri
-                                if (this.sorting.sort_by === 'total' || this.sorting.sort_by === 'id') {
-                                    aValue = parseFloat(aValue);
-                                    bValue = parseFloat(bValue);
-                                    return this.sorting.sort_direction === 'asc' ? aValue - bValue : bValue - aValue;
-                                }
-                                
-                                // Gestione date
-                                if (this.sorting.sort_by === 'created_at') {
-                                    aValue = new Date(aValue);
-                                    bValue = new Date(bValue);
-                                    return this.sorting.sort_direction === 'asc' ? aValue - bValue : bValue - aValue;
-                                }
-                                
-                                // Gestione stringhe (case-insensitive)
-                                aValue = String(aValue).toLowerCase();
-                                bValue = String(bValue).toLowerCase();
-                                return this.sorting.sort_direction === 'asc' 
-                                    ? aValue.localeCompare(bValue)
-                                    : bValue.localeCompare(aValue);
-                            });
-                        }
-                        
-                        this.filteredOrders = result;
-                        this.page = 1;
-                    },
-                    async loadOrders() {
+                    async loadOrders(page = 1) {
                         this.loading = true;
                         try {
                             const params = new URLSearchParams();
+                            params.append('page', page);
+                            params.append('per_page', this.pagination.per_page);
+                            
+                            // Filtri
                             if (this.filters.min_price) params.append('min_price', this.filters.min_price);
                             if (this.filters.max_price) params.append('max_price', this.filters.max_price);
                             if (this.filters.min_date) params.append('min_date', this.filters.min_date);
                             if (this.filters.max_date) params.append('max_date', this.filters.max_date);
                             this.filters.status.forEach(status => params.append('status[]', status));
                             
+                            // Ricerca
+                            if (this.filters.search) params.append('search', this.filters.search);
+                            
+                            // Sorting
+                            if (this.sorting.sort_by) params.append('sort_by', this.sorting.sort_by);
+                            if (this.sorting.sort_direction) params.append('sort_direction', this.sorting.sort_direction);
+                            
                             const response = await fetch('{{ route('orders.data') }}?' + params.toString());
                             const result = await response.json();
                             
-                            this.allOrders = result.data;
-                            this.applySortAndSearch();
+                            this.orders = result.data;
+                            this.pagination = {
+                                current_page: result.current_page,
+                                last_page: result.last_page,
+                                per_page: result.per_page,
+                                total: result.total,
+                                from: result.from,
+                                to: result.to
+                            };
                         } catch (error) {
                             console.error('Error loading orders:', error);
                         } finally {
@@ -120,7 +98,7 @@
                         }
                     },
                     applyFilters() {
-                        this.loadOrders();
+                        this.loadOrders(1);
                     },
                     resetFilters() {
                         this.filters = {
@@ -131,19 +109,15 @@
                             status: [],
                             search: ''
                         };
+                        this.sorting = {
+                            sort_by: 'created_at',
+                            sort_direction: 'desc'
+                        };
                         this.loadOrders(1);
                     },
-                    totalPages() {
-                        return Math.ceil(this.filteredOrders.length / this.pageLength);
-                    },
-                    paginatedOrders() {
-                        const start = (this.page - 1) * this.pageLength;
-                        const end = start + this.pageLength;
-                        return this.filteredOrders.slice(start, end);
-                    },
                     goToPage(page) {
-                        if (page >= 1 && page <= this.totalPages()) {
-                            this.page = page;
+                        if (page >= 1 && page <= this.pagination.last_page) {
+                            this.loadOrders(page);
                         }
                     }
                  }"
@@ -163,7 +137,6 @@
                                     <input 
                                         type="number" 
                                         x-model="filters.min_price"
-                                        @change="applyFilters()"
                                         step="0.01"
                                         min="0"
                                         class="w-24 text-xs py-0.5 px-1.5 rounded border-background-300 dark:border-background-600 dark:bg-background-700 dark:text-background-100"
@@ -173,7 +146,6 @@
                                     <input 
                                         type="number" 
                                         x-model="filters.max_price"
-                                        @change="applyFilters()"
                                         step="0.01"
                                         min="0"
                                         class="w-24 text-xs py-0.5 px-1.5 rounded border-background-300 dark:border-background-600 dark:bg-background-700 dark:text-background-100"
@@ -191,14 +163,12 @@
                                     <input 
                                         type="date" 
                                         x-model="filters.min_date"
-                                        @change="applyFilters()"
                                         class="w-32 text-xs py-0.5 px-1.5 rounded border-background-300 dark:border-background-600 dark:bg-background-700 dark:text-background-100"
                                     >
                                     <span class="text-xs text-background-400">-</span>
                                     <input 
                                         type="date" 
                                         x-model="filters.max_date"
-                                        @change="applyFilters()"
                                         class="w-32 text-xs py-0.5 px-1.5 rounded border-background-300 dark:border-background-600 dark:bg-background-700 dark:text-background-100"
                                     >
                                 </div>
@@ -215,7 +185,7 @@
                                             <input 
                                                 type="checkbox" 
                                                 value="{{ $status }}"
-                                                @change="toggleStatus({{ $status }}); applyFilters()"
+                                                @change="toggleStatus({{ $status }})"
                                                 class="w-3 h-3 rounded border-background-300 dark:border-background-600 dark:bg-background-700 text-primary-600 focus:ring-primary-500"
                                             >
                                             <span class="text-xs">{{ __('orders.status' . $status) }}</span>
@@ -224,12 +194,19 @@
                                 </div>
                             </div>
                             
-                            <!-- Reset -->
-                            <div class="flex-shrink-0 self-end">
+                            <!-- Buttons -->
+                            <div class="flex-shrink-0 self-end flex gap-2">
+                                <button 
+                                    @click="applyFilters()"
+                                    type="button"
+                                    class="inline-block px-3 py-1 text-xs bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white rounded font-medium transition-colors"
+                                >
+                                    {{ __('orders.apply_filters') }}
+                                </button>
                                 <button 
                                     @click="resetFilters()"
                                     type="button"
-                                    class="inline-block px-2 py-0.5 text-xs bg-background-200 hover:bg-background-300 dark:bg-background-700 dark:hover:bg-background-600 text-background-900 dark:text-background-100 rounded font-medium transition-colors"
+                                    class="inline-block px-3 py-1 text-xs bg-background-200 hover:bg-background-300 dark:bg-background-700 dark:hover:bg-background-600 text-background-900 dark:text-background-100 rounded font-medium transition-colors"
                                 >
                                     {{ __('orders.reset_filters') }}
                                 </button>
@@ -250,7 +227,7 @@
                                 <x-text-input 
                                     type="text" 
                                     x-model="filters.search"
-                                    @input.debounce.500ms="applySortAndSearch()"
+                                    @input.debounce.500ms="loadOrders(1)"
                                     placeholder="Search..."
                                     class="border border-background-100 dark:border-background-700 text-background-500 dark:text-background-300 rounded-lg p-2" 
                                 />
@@ -360,7 +337,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-background-900 divide-y divide-background-200 dark:divide-background-700">
-                                    <template x-for="order in paginatedOrders()" :key="order.id">
+                                    <template x-for="order in orders" :key="order.id">
                                         <tr class="hover:bg-background-50 dark:hover:bg-background-800">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-background-900 dark:text-background-100" x-text="order.id"></td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-background-900 dark:text-background-100" x-text="order.order_number"></td>
@@ -378,7 +355,7 @@
                                             </td>
                                         </tr>
                                     </template>
-                                    <template x-if="filteredOrders.length === 0">
+                                    <template x-if="orders.length === 0">
                                         <tr>
                                             <td colspan="8" class="px-6 py-8 text-center text-background-500 dark:text-background-400">
                                                 Nessun ordine trovato
@@ -394,34 +371,34 @@
                             <div class="flex-1 flex justify-between sm:hidden">
                                 <button
                                     @click="goToPage(1)"
-                                    :disabled="page === 1"
+                                    :disabled="pagination.current_page === 1"
                                     class="mr-2"
-                                    :class="{ 'opacity-50 cursor-not-allowed': page === 1 }"
+                                    :class="{ 'opacity-50 cursor-not-allowed': pagination.current_page === 1 }"
                                 >
                                     <x-lucide-chevron-first class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                                 </button>
                                 <button
-                                    @click="goToPage(page - 1)"
-                                    :disabled="page === 1"
+                                    @click="goToPage(pagination.current_page - 1)"
+                                    :disabled="pagination.current_page === 1"
                                     class="mr-2"
-                                    :class="{ 'opacity-50 cursor-not-allowed': page === 1 }"
+                                    :class="{ 'opacity-50 cursor-not-allowed': pagination.current_page === 1 }"
                                 >
                                     <x-lucide-chevron-left class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                                 </button>
-                                <span class="text-sm text-background-500 dark:text-background-300">Pagina <span x-text="page"></span> di <span x-text="totalPages()"></span></span>
+                                <span class="text-sm text-background-500 dark:text-background-300">Pagina <span x-text="pagination.current_page"></span> di <span x-text="pagination.last_page"></span></span>
                                 <button
-                                    @click="goToPage(page + 1)"
-                                    :disabled="page === totalPages()"
+                                    @click="goToPage(pagination.current_page + 1)"
+                                    :disabled="pagination.current_page === pagination.last_page"
                                     class="ml-2"
-                                    :class="{ 'opacity-50 cursor-not-allowed': page === totalPages() }"
+                                    :class="{ 'opacity-50 cursor-not-allowed': pagination.current_page === pagination.last_page }"
                                 >
                                     <x-lucide-chevron-right class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                                 </button>
                                 <button
-                                    @click="goToPage(totalPages())"
-                                    :disabled="page === totalPages()"
+                                    @click="goToPage(pagination.last_page)"
+                                    :disabled="pagination.current_page === pagination.last_page"
                                     class="ml-2"
-                                    :class="{ 'opacity-50 cursor-not-allowed': page === totalPages() }"
+                                    :class="{ 'opacity-50 cursor-not-allowed': pagination.current_page === pagination.last_page }"
                                 >
                                     <x-lucide-chevron-last class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                                 </button>
@@ -430,45 +407,45 @@
                                 <div>
                                     <p class="text-sm text-background-700 dark:text-background-300">
                                         Mostrando
-                                        <span class="font-medium" x-text="((page - 1) * pageLength) + 1"></span>
+                                        <span class="font-medium" x-text="pagination.from || 0"></span>
                                         -
-                                        <span class="font-medium" x-text="Math.min(page * pageLength, filteredOrders.length)"></span>
+                                        <span class="font-medium" x-text="pagination.to || 0"></span>
                                         di
-                                        <span class="font-medium" x-text="filteredOrders.length"></span>
+                                        <span class="font-medium" x-text="pagination.total"></span>
                                         risultati
                                     </p>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <button
                                         @click="goToPage(1)"
-                                        :disabled="page === 1"
+                                        :disabled="pagination.current_page === 1"
                                         class=""
-                                        :class="{ 'opacity-50 cursor-not-allowed': page === 1 }"
+                                        :class="{ 'opacity-50 cursor-not-allowed': pagination.current_page === 1 }"
                                     >
                                         <x-lucide-chevron-first class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                                     </button>
                                     <button
-                                        @click="goToPage(page - 1)"
-                                        :disabled="page === 1"
+                                        @click="goToPage(pagination.current_page - 1)"
+                                        :disabled="pagination.current_page === 1"
                                         class=""
-                                        :class="{ 'opacity-50 cursor-not-allowed': page === 1 }"
+                                        :class="{ 'opacity-50 cursor-not-allowed': pagination.current_page === 1 }"
                                     >
                                         <x-lucide-chevron-left class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                                     </button>
-                                    <span class="text-sm text-background-500 dark:text-background-300">Pagina <span x-text="page"></span> di <span x-text="totalPages()"></span></span>
+                                    <span class="text-sm text-background-500 dark:text-background-300">Pagina <span x-text="pagination.current_page"></span> di <span x-text="pagination.last_page"></span></span>
                                     <button
-                                        @click="goToPage(page + 1)"
-                                        :disabled="page === totalPages()"
+                                        @click="goToPage(pagination.current_page + 1)"
+                                        :disabled="pagination.current_page === pagination.last_page"
                                         class=""
-                                        :class="{ 'opacity-50 cursor-not-allowed': page === totalPages() }"
+                                        :class="{ 'opacity-50 cursor-not-allowed': pagination.current_page === pagination.last_page }"
                                     >
                                         <x-lucide-chevron-right class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                                     </button>
                                     <button
-                                        @click="goToPage(totalPages())"
-                                        :disabled="page === totalPages()"
+                                        @click="goToPage(pagination.last_page)"
+                                        :disabled="pagination.current_page === pagination.last_page"
                                         class=""
-                                        :class="{ 'opacity-50 cursor-not-allowed': page === totalPages() }"
+                                        :class="{ 'opacity-50 cursor-not-allowed': pagination.current_page === pagination.last_page }"
                                     >
                                         <x-lucide-chevron-last class="w-4 h-4 text-primary-500 dark:text-primary-400" />
                                     </button>

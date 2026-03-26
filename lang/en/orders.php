@@ -32,6 +32,7 @@ return [
     'admin' => 'Admin',
     'filters' => 'Filters',
     'filter' => 'Filter',
+    'apply_filters' => 'Apply Filters',
     'reset_filters' => 'Reset Filters',
     'min_price' => 'Minimum Price',
     'max_price' => 'Maximum Price',

@@ -54,7 +54,50 @@ class OrderController extends Controller
             $query->whereIn('status', $request->input('status'));
         }
 
-        $orders = $query->get()->map(function ($order) {
+        // Ricerca globale
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'LIKE', "%{$search}%")
+                    ->orWhere('total', 'LIKE', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('surname', 'LIKE', "%{$search}%");
+                    });
+            });
+        }
+
+        // Sorting
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        // Mapping dei campi per il sorting
+        $sortableFields = [
+            'id' => 'id',
+            'order_number' => 'order_number',
+            'total' => 'total',
+            'status' => 'status',
+            'payment_method' => 'payment_method',
+            'created_at' => 'created_at',
+        ];
+
+        // Se il sort è su user_fullname, usiamo il campo name nella relation
+        if ($sortBy === 'user_fullname') {
+            $query->join('users', 'orders.user_id', '=', 'users.id')
+                ->select('orders.*')
+                ->orderBy('users.name', $sortDirection)
+                ->orderBy('users.surname', $sortDirection);
+        } elseif (isset($sortableFields[$sortBy])) {
+            $query->orderBy($sortableFields[$sortBy], $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        // Paginazione
+        $perPage = $request->input('per_page', 25);
+        $paginated = $query->paginate($perPage);
+
+        $orders = $paginated->getCollection()->map(function ($order) {
             return [
                 'id' => $order->id,
                 'order_number' => $order->order_number,
@@ -70,6 +113,12 @@ class OrderController extends Controller
 
         return response()->json([
             'data' => $orders,
+            'current_page' => $paginated->currentPage(),
+            'last_page' => $paginated->lastPage(),
+            'per_page' => $paginated->perPage(),
+            'total' => $paginated->total(),
+            'from' => $paginated->firstItem(),
+            'to' => $paginated->lastItem(),
         ]);
     }
 
