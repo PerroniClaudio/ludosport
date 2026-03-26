@@ -20,7 +20,7 @@ class Clan extends Model {
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'school' => $this->school->name,
+            'school' => $this->school?->name ?? '',
             'slug' => $this->slug
         ];
     }

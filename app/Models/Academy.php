@@ -28,7 +28,7 @@ class Academy extends Model {
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'school' => $this->nation->name,
+            'nation' => $this->nation?->name ?? '',
             'slug' => $this->slug
         ];
     }
