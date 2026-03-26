@@ -231,6 +231,25 @@
 
                 </div>
 
+                <!-- Privacy Policy Consent -->
+                <div class="mt-6">
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="privacy_policy_adult" name="privacy_policy_consent" type="checkbox" required
+                                class="h-4 w-4 rounded border-background-300 text-primary-600 focus:ring-primary-500 dark:border-background-600 dark:bg-background-800 dark:ring-offset-background-800" />
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="privacy_policy_adult" class="text-background-600 dark:text-background-300">
+                                {{ __('auth.privacy_policy_consent_text') }}
+                                <a href="{{ route('privacy-policy.show') }}" target="_blank" class="text-primary-600 hover:text-primary-500 underline">
+                                    {{ __('auth.privacy_policy') }}
+                                </a>
+                            </label>
+                        </div>
+                    </div>
+                    <x-input-error :messages="$errors->get('privacy_policy_consent')" class="mt-2" />
+                </div>
+
                 <div class="flex items-center justify-end mt-4">
                     <a class="underline text-sm text-background-600 dark:text-background-400 hover:text-background-900 dark:hover:text-background-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-background-800"
                         href="{{ route('login') }}">
@@ -441,6 +460,25 @@
                             class="mt-2 text-sm text-red-600 dark:text-red-400"></p>
                         <x-input-error :messages="$errors->get('minor_documents')" class="mt-2" />
                     </div>
+                </div>
+
+                <!-- Privacy Policy Consent -->
+                <div class="mt-6">
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="privacy_policy_minor" name="privacy_policy_consent" type="checkbox" required
+                                class="h-4 w-4 rounded border-background-300 text-primary-600 focus:ring-primary-500 dark:border-background-600 dark:bg-background-800 dark:ring-offset-background-800" />
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="privacy_policy_minor" class="text-background-600 dark:text-background-300">
+                                {{ __('auth.privacy_policy_consent_text') }}
+                                <a href="{{ route('privacy-policy.show') }}" target="_blank" class="text-primary-600 hover:text-primary-500 underline">
+                                    {{ __('auth.privacy_policy') }}
+                                </a>
+                            </label>
+                        </div>
+                    </div>
+                    <x-input-error :messages="$errors->get('privacy_policy_consent')" class="mt-2" />
                 </div>
 
                 <div class="flex items-center justify-end mt-4">

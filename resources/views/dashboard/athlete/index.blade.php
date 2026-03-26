@@ -76,6 +76,24 @@
                 </div>
             @endif
 
+            @if (auth()->user()->is_user_minor && auth()->user()->has_user_uploaded_documents && !auth()->user()->has_admin_approved_minor)
+                <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-background-900 dark:text-background-100">
+                        <div class="flex items-start gap-3">
+                            <x-lucide-clock class="h-6 w-6 mt-0.5 shrink-0 text-yellow-500" />
+                            <div>
+                                <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                    {{ __('dashboard.athlete_minor_documents_pending_title') }}
+                                </h3>
+                                <p class="mt-2 text-sm text-background-700 dark:text-background-300">
+                                    {{ __('dashboard.athlete_minor_documents_pending_text') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             @unless ($isMinorPendingApproval)
                 @if (auth()->user()->has_paid_fee)
                     @if (auth()->user()->isFeeExpiring())

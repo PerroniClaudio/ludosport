@@ -50,6 +50,8 @@ return [
     'athlete_minor_documents_required_text' => 'As a minor user, you must upload the required approval documents to complete your registration.',
     'athlete_minor_documents_denied_text' => 'Your previously uploaded documents were rejected. Check your email for the reason, then upload a new PDF from here.',
     'athlete_minor_documents_upload_button' => 'Upload documents',
+    'athlete_minor_documents_pending_title' => 'Account pending approval',
+    'athlete_minor_documents_pending_text' => 'Your account will be activated after the review of the submitted documents.',
     'athletes_nations_title' => 'Athletes by nations',
     'nations_with_athletes_char' => 'Nations with most athletes',
     'athletes_academies_title' => 'Athletes by academies, :nation',

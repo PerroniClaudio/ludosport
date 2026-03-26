@@ -35,5 +35,7 @@ return [
     'select_file' => 'Select file',
     'choose_option' => 'Choose',
     'registering' => 'Registering...',
+    'privacy_policy' => 'Privacy Policy',
+    'privacy_policy_consent_text' => 'I have read and accept the',
 
 ];
