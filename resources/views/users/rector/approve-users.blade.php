@@ -50,15 +50,15 @@
                                                     @if ($user->has_user_uploaded_documents)
                                                         <x-primary-link-button-small href="{{ route('rector.users.approval-document', $user->id) }}"
                                                             target="_blank" rel="noopener noreferrer">
-                                                            {{ __('users.upload_document') }}
+                                                            {{ __('users.view_document') }}
                                                         </x-primary-link-button-small>
-                                                    @else
-                                                        <x-primary-button-small type="button"
-                                                            x-data=""
-                                                            x-on:click.prevent="$dispatch('open-modal', 'upload-minor-document-{{ $user->id }}')">
-                                                            {{ __('users.upload_document') }}
-                                                        </x-primary-button-small>
                                                     @endif
+
+                                                    <x-primary-button-small type="button"
+                                                        x-data=""
+                                                        x-on:click.prevent="$dispatch('open-modal', 'upload-minor-document-{{ $user->id }}')">
+                                                        {{ $user->has_user_uploaded_documents ? __('users.replace') . ' ' . __('users.document') : __('users.upload_document') }}
+                                                    </x-primary-button-small>
 
                                                     <form method="POST"
                                                         action="{{ route('rector.users.approve-minor', $user->id) }}">
