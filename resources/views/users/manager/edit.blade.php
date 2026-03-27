@@ -137,6 +137,13 @@ $canEdit = in_array($authUser->getActiveInstitutionId(), $user->academyAthletes-
                                     {{ $user->instagram ?? '' }}
                                 </div>
                             </div>
+                            <div>
+                                <x-input-label for="" value="Telegram" />
+                                <div
+                                    class="w-full min-h-10 cursor-not-allowed px-3 py-2 border border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
+                                    {{ $user->telegram ?? '' }}
+                                </div>
+                            </div>
 
                         </div>
                     </div>
