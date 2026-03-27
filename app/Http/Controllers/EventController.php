@@ -1289,14 +1289,15 @@ class EventController extends Controller
                 if (!isset($results[$value->user_id])) {
 
                     $primaryAcademyAthlete = $value->user->primaryAcademyAthlete();
+                    $isMinor = $value->user->is_user_minor;
 
                     $results[$value->user_id] = [
                         'user_id' => $value->user_id,
                         'user_name' => $value->user->name . ' ' . $value->user->surname,
                         'user_battle_name' => $value->user->battle_name ?? '',
-                        'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
-                        'user_school' => $value->user->primarySchoolAthlete()->name ?? '',
-                        'school_slug' => $value->user->primarySchoolAthlete()->slug ?? '',
+                        'user_academy' => $isMinor ? '' : ($primaryAcademyAthlete ? $primaryAcademyAthlete->name : ''),
+                        'user_school' => $isMinor ? '' : ($value->user->primarySchoolAthlete()->name ?? ''),
+                        'school_slug' => $isMinor ? '' : ($value->user->primarySchoolAthlete()->slug ?? ''),
                         'nation' => $primaryAcademyAthlete ? $primaryAcademyAthlete->nation->name : $value->user->nation->name,
                         'total_war_points' => 0,
                         'total_style_points' => 0,
@@ -1349,6 +1350,7 @@ class EventController extends Controller
 
         foreach ($users as $user) {
             $primaryAcademyAthlete = $user->primaryAcademyAthlete();
+            $isMinor = $user->is_user_minor;
 
             // Calcola i punti totali filtrando per la data richiesta
             $eventResults = $user->eventResults()
@@ -1372,9 +1374,9 @@ class EventController extends Controller
                 'user_id' => $user->id,
                 'user_name' => $user->name . ' ' . $user->surname,
                 'user_battle_name' => $user->battle_name ?? '',
-                'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
-                'user_school' => $user->primarySchoolAthlete()->name ?? '',
-                'school_slug' => $user->primarySchoolAthlete()->slug ?? '',
+                'user_academy' => $isMinor ? '' : ($primaryAcademyAthlete ? $primaryAcademyAthlete->name : ''),
+                'user_school' => $isMinor ? '' : ($user->primarySchoolAthlete()->name ?? ''),
+                'school_slug' => $isMinor ? '' : ($user->primarySchoolAthlete()->slug ?? ''),
                 'nation' => $primaryAcademyAthlete ? $primaryAcademyAthlete->nation->name : $user->nation->name,
                 'total_war_points' => $total_war_points,
                 'total_style_points' => $total_style_points,
@@ -1419,15 +1421,16 @@ class EventController extends Controller
         foreach ($event_results as $key => $value) {
 
             $primaryAcademyAthlete = $value->user->primaryAcademyAthlete();
+            $isMinor = $value->user->is_user_minor;
 
             if (!isset($results[$value->user_id])) {
                 $results[$value->user_id] = [
                     'user_id' => $value->user_id,
                     'user_name' => $value->user->name . ' ' . $value->user->surname,
                     'user_battle_name' => $value->user->battle_name ?? '',
-                    'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
-                    'user_school' => $value->user->primarySchoolAthlete()->name ?? '',
-                    'school_slug' => $value->user->primarySchoolAthlete()->slug ?? '',
+                    'user_academy' => $isMinor ? '' : ($primaryAcademyAthlete ? $primaryAcademyAthlete->name : ''),
+                    'user_school' => $isMinor ? '' : ($value->user->primarySchoolAthlete()->name ?? ''),
+                    'school_slug' => $isMinor ? '' : ($value->user->primarySchoolAthlete()->slug ?? ''),
                     'nation' => $primaryAcademyAthlete ? $primaryAcademyAthlete->nation->name : $value->user->nation->name,
                     'total_war_points' => 0,
                     'total_style_points' => 0,
