@@ -427,6 +427,34 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(\App\Models\Invoice::class);
     }
 
+    public function minorDocumentHistories()
+    {
+        return $this->hasMany(UserDocumentHistory::class)->orderByDesc('archived_at');
+    }
+
+    public function archiveCurrentMinorApprovalDocument(): void
+    {
+        if (! $this->uploaded_documents_path) {
+            return;
+        }
+
+        $this->minorDocumentHistories()->create([
+            'document_path' => $this->uploaded_documents_path,
+            'was_admin_approved' => (bool) $this->has_admin_approved_minor,
+            'archived_at' => now(),
+        ]);
+    }
+
+    public function replaceMinorApprovalDocument(string $path): void
+    {
+        if ($this->uploaded_documents_path && $this->uploaded_documents_path !== $path) {
+            $this->archiveCurrentMinorApprovalDocument();
+        }
+
+        $this->uploaded_documents_path = $path;
+        $this->has_user_uploaded_documents = true;
+    }
+
     public function routes()
     {
 

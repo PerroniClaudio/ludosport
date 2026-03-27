@@ -88,8 +88,7 @@ class RegisteredUserController extends Controller
             $stored = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
 
             if ($stored) {
-                $user->uploaded_documents_path = $filePath;
-                $user->has_user_uploaded_documents = true;
+                $user->replaceMinorApprovalDocument($filePath);
                 $user->save();
             }
         }

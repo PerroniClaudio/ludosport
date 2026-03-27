@@ -16,6 +16,7 @@ use App\Models\Rank;
 use App\Models\Role;
 use App\Models\School;
 use App\Models\User;
+use App\Models\UserDocumentHistory;
 use App\Models\WeaponForm;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -631,6 +632,7 @@ class UserController extends Controller {
 
         $allLanguages = Language::all();
         $allWeaponForms = WeaponForm::all();
+        $user->load('minorDocumentHistories');
 
         // Per select-institutions
         $allAcademies = Academy::all();
@@ -1565,8 +1567,7 @@ class UserController extends Controller {
             return redirect()->route('dashboard')->with('error', 'Error uploading approval documents.');
         }
 
-        $authUser->uploaded_documents_path = $path;
-        $authUser->has_user_uploaded_documents = true;
+        $authUser->replaceMinorApprovalDocument($path);
         $authUser->save();
 
         return redirect()->route('dashboard')->with('success', 'Approval documents uploaded successfully.');
@@ -1638,8 +1639,7 @@ class UserController extends Controller {
             return $redirect->with('error', 'Error uploading approval documents.');
         }
 
-        $user->uploaded_documents_path = $path;
-        $user->has_user_uploaded_documents = true;
+        $user->replaceMinorApprovalDocument($path);
         $user->has_admin_approved_minor = true;
         $user->save();
 
@@ -1677,8 +1677,7 @@ class UserController extends Controller {
             return $redirect->with('error', 'Error uploading approval documents.');
         }
 
-        $user->uploaded_documents_path = $path;
-        $user->has_user_uploaded_documents = true;
+        $user->replaceMinorApprovalDocument($path);
         $user->save();
 
         return $redirect->with('success', 'Approval document uploaded successfully.');
@@ -1687,17 +1686,12 @@ class UserController extends Controller {
     public function viewMinorApprovalDocument(User $user, Request $request) {
         $authUser = User::find(Auth::id());
 
-        if ($authUser->getRole() !== 'rector') {
-            return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page!');
-        }
-
-        $academyId = $authUser->getActiveInstitutionId();
-        if (!$academyId || !$user->academyAthletes()->where('academy_id', $academyId)->exists()) {
+        if (! $this->canAccessMinorDocument($authUser, $user)) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this document!');
         }
 
         if (!$user->uploaded_documents_path || !Storage::disk('gcs')->exists($user->uploaded_documents_path)) {
-            return redirect()->route('rector.users.approve.index')->with('error', 'Approval document not found.');
+            return back()->with('error', 'Approval document not found.');
         }
 
         $url = Storage::disk('gcs')->temporaryUrl(
@@ -1706,6 +1700,30 @@ class UserController extends Controller {
             [
                 'ResponseContentType' => 'application/pdf',
                 'ResponseContentDisposition' => 'inline; filename="approval-document-' . $user->id . '.pdf"',
+            ]
+        );
+
+        return redirect()->away($url);
+    }
+
+    public function downloadMinorApprovalDocumentHistory(User $user, UserDocumentHistory $history, Request $request)
+    {
+        $authUser = User::find(Auth::id());
+
+        if (! $this->canAccessMinorDocument($authUser, $user) || $history->user_id !== $user->id) {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to access this document!');
+        }
+
+        if (! Storage::disk('gcs')->exists($history->document_path)) {
+            return back()->with('error', 'Approval document not found.');
+        }
+
+        $url = Storage::disk('gcs')->temporaryUrl(
+            $history->document_path,
+            now()->addMinutes(5),
+            [
+                'ResponseContentType' => 'application/pdf',
+                'ResponseContentDisposition' => 'attachment; filename="approval-document-history-' . $user->id . '-' . $history->id . '.pdf"',
             ]
         );
 
@@ -2960,5 +2978,27 @@ class UserController extends Controller {
         return response()->json([
             'success' => true,
         ]);
+    }
+
+    private function canAccessMinorDocument(?User $authUser, User $targetUser): bool
+    {
+        if (! $authUser) {
+            return false;
+        }
+
+        $authRole = $authUser->getRole();
+
+        if ($authRole === 'admin') {
+            return true;
+        }
+
+        if ($authRole !== 'rector') {
+            return false;
+        }
+
+        $academyId = $authUser->getActiveInstitutionId();
+
+        return (bool) $academyId
+            && $targetUser->academyAthletes()->where('academy_id', $academyId)->exists();
     }
 }

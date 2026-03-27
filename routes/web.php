@@ -56,6 +56,8 @@ Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role
     Route::get('/users/search', [App\Http\Controllers\UserController::class, 'search'])->name('users.search');
     Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('users.create');
     Route::get('/users/{user}', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
+    Route::get('/users/{user}/approval-document', [App\Http\Controllers\UserController::class, 'viewMinorApprovalDocument'])->name('users.approval-document');
+    Route::get('/users/{user}/document-history/{history}', [App\Http\Controllers\UserController::class, 'downloadMinorApprovalDocumentHistory'])->name('users.document-history.download');
 
     Route::post('/users/associate-school', [App\Http\Controllers\UserController::class, 'associateSchool'])->name('users.associate-school');
     Route::post('/users/associate-academy', [App\Http\Controllers\UserController::class, 'associateAcademy'])->name('users.associate-academy');

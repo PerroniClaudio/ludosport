@@ -1,6 +1,7 @@
 @php
     $authUser = auth()->user();
     $authRole = $authUser->getRole();
+    $canSeeMinorDocuments = $user->is_user_minor || $user->uploaded_documents_path || $user->minorDocumentHistories->isNotEmpty();
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -183,6 +184,15 @@
                                     {{ $user->telegram ?? '' }}
                                 </div>
                             </div>
+
+                            @if ($canSeeMinorDocuments)
+                                @include('users.partials.minor-document-section', [
+                                    'user' => $user,
+                                    'currentDocumentRoute' => 'users.approval-document',
+                                    'historyDocumentRoute' => 'users.document-history.download',
+                                    'canUpload' => false,
+                                ])
+                            @endif
 
 
                         </div>
