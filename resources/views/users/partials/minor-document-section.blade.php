@@ -63,7 +63,7 @@
                     </p>
                 </div>
                 <span class="text-sm text-background-500 dark:text-background-400">
-                    {{ $user->minorDocumentHistories->count() }}
+                    {{ $user->minorDocumentHistories->count() > 0 ? $user->minorDocumentHistories->count() : '' }}
                 </span>
             </div>
 
