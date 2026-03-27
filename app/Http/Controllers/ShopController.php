@@ -21,6 +21,9 @@ class ShopController extends Controller {
         if ($user->has_paid_fee === 1) {
             return redirect()->route('shop')->with('error', __('website.already_paid'));
         }
+        if ($user->isMinorPendingApproval()) {
+            return redirect()->route('shop')->with('error', __('website.minor_pending_approval'));
+        }
 
         $invoice = $user->invoices->first();
 

@@ -1470,9 +1470,12 @@ class EventController extends Controller
         $isWaitingPayment = false;
         $onlyWaitingList = $event->isWaitingList();
         $isWaitngListClosed = $event->waiting_list_close_date && ($event->waiting_list_close_date < now());
-
+        
         if (Auth::check()) {
             $user = User::find(Auth::user()->id);
+
+            $isMinorPendingApproval = $user->isMinorPendingApproval() ? true : false;
+
             if ($user->has_paid_fee) {
                 // Controlla il tipo di evento
                 $isInWaitingList = EventWaitingList::where('event_id', $event->id)->where('user_id', $user->id)->exists();
@@ -1485,7 +1488,7 @@ class EventController extends Controller
                 }
 
                 // Shop interno, attesa pagamento, iscrizioni sbloccate, non partecipa, non in waiting list (se in attesa di pagamento può), se waiting list deve essere prima della data di chiusura della waiting list
-                $canpurchase = $event->internal_shop && (
+                $canpurchase = $event->internal_shop && !$isMinorPendingApproval && (
                     $isWaitingPayment || (
                         !$event->block_subscriptions && !$isParticipating && !$isInWaitingList
                         && !($onlyWaitingList && $isWaitngListClosed)
@@ -1506,6 +1509,7 @@ class EventController extends Controller
             'block_subscriptions' => $event->block_subscriptions,
             'is_waiting_payment' => $isWaitingPayment,
             'academy_email' => $event->academy->email ?? null,
+            'is_minor_pending' => $isMinorPendingApproval,
         ]);
     }
 

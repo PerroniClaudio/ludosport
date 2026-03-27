@@ -104,6 +104,8 @@
                                 <p>{{ __('website.events_subscriptions_blocked') }}</p>
                             @elseif ($waiting_list_closed)
                                 <p>{{ __('website.event_waiting_list_closed_text') }}</p>
+                            @elseif ($isMinorPendingApproval)
+                                <p>{{ __('website.minor_pending_approval') }}</p>
                             @endif
 
                         @endauth

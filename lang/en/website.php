@@ -138,4 +138,5 @@ return [
     'cookies_manage_preferences' => 'Manage Preferences',
     'cookie_policy_title' => 'Cookie Policy',
     'privacy_policy_title' => 'Privacy Policy',
+    'minor_pending_approval' => 'Your account is waiting for minor approval.',
 ];
