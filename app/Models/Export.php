@@ -22,6 +22,7 @@ class Export extends Model {
         'user_roles',
         'users_nation',
         'users_academy',
+        'schools',
         'users_school',
         'users_course',
         'event_participants',
@@ -43,8 +44,9 @@ class Export extends Model {
     public static function getAvailableExportsByRole($role) {
         switch ($role) {
             case 'admin':
-                return ['users', 'user_roles', 'users_nation', 'users_academy', 'users_school', 'users_course', 'event_participants', 'instructor_event_results', 'event_war', 'event_style', 'orders'];
+                return ['users', 'user_roles', 'users_nation', 'users_academy', 'schools', 'users_school', 'users_course', 'event_participants', 'instructor_event_results', 'event_war', 'event_style', 'orders'];
             case 'rector':
+                return ['user_roles', 'users_academy', 'schools', 'users_school', 'users_course', 'event_participants'];
             case 'manager':
                 return ['user_roles', 'users_academy', 'users_school', 'users_course', 'event_participants'];
             case 'dean':

@@ -101,6 +101,47 @@
                                 <a href="{{ route('cookie-policy.edit') }}">{{ __('navigation.cookie_policy') }}</a>
                             </x-slot>
                         </x-nav-link-parent>
+                    @elseif ($authRole === 'rector' && !$isMinorPendingApproval)
+                        <x-nav-link :href="route('rector.announcements.index')" :active="request()->routeIs('rector.announcements.*')">
+                            {{ __('navigation.announcements') }}
+                        </x-nav-link>
+                        <x-nav-link-parent :href="'#'" :active="request()->routeIs('rector.academies.*') ||
+                            request()->routeIs('rector.schools.*') ||
+                            request()->routeIs('rector.clans.*')">
+                            <x-slot name="name">{{ __('navigation.structure') }}</x-slot>
+                            <x-slot name="children">
+                                <a href="{{ route('rector.academies.index') }}">{{ __('navigation.accademia') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('rector.schools.index') }}">{{ __('navigation.scuole') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('rector.clans.index') }}">{{ __('navigation.clan') }}</a>
+                            </x-slot>
+                        </x-nav-link-parent>
+                        <x-nav-link-parent :href="'#'" :active="request()->routeIs('rector.users.*')">
+                            <x-slot name="name">{{ __('navigation.users') }}</x-slot>
+                            <x-slot name="children">
+                                <a href="{{ route('rector.users.index') }}">{{ __('navigation.users_list') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('rector.users.approve.index') }}">
+                                    {{ __('navigation.approve_users') }}
+                                </a>
+                            </x-slot>
+                        </x-nav-link-parent>
+                        <x-nav-link-parent :href="'#'" :active="request()->routeIs('rector.events.*') ||
+                            request()->routeIs('rector.fees.*') ||
+                            request()->routeIs('rector.imports.*') ||
+                            request()->routeIs('rector.exports.*')">
+                            <x-slot name="name">{{ __('navigation.management') }}</x-slot>
+                            <x-slot name="children">
+                                <a href="{{ route('rector.events.index') }}">{{ __('navigation.eventi') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('rector.fees.index') }}">{{ __('navigation.fees') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('rector.imports.index') }}">{{ __('navigation.imports') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('rector.exports.index') }}">{{ __('navigation.exports') }}</a>
+                            </x-slot>
+                        </x-nav-link-parent>
                     @elseif (!$isMinorPendingApproval)
                         @foreach (Auth::user()->routes() as $route)
                             @if ($authRole === 'rector' && $route->label === 'users')
@@ -254,6 +295,66 @@
                 <x-responsive-nav-link :href="route('cookie-policy.edit')" :active="request()->routeIs('cookie-policy.*')">
                     {{ __('navigation.cookie_policy') }}
                 </x-responsive-nav-link>
+            @elseif ($authRole === 'rector' && !$isMinorPendingApproval)
+                <x-responsive-nav-link :href="route('rector.announcements.index')" :active="request()->routeIs('rector.announcements.*')">
+                    {{ __('navigation.announcements') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link-parent :active="request()->routeIs('rector.academies.*') ||
+                    request()->routeIs('rector.schools.*') ||
+                    request()->routeIs('rector.clans.*')">
+                    <x-slot name="name">{{ __('navigation.structure') }}</x-slot>
+                    <x-slot name="children">
+                        <a href="{{ route('rector.academies.index') }}"
+                            class="block pl-6 pr-4 py-2 text-base font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-background-300 dark:hover:text-background-100 dark:hover:bg-background-700">
+                            {{ __('navigation.accademia') }}
+                        </a>
+                        <a href="{{ route('rector.schools.index') }}"
+                            class="block pl-6 pr-4 py-2 text-base font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-background-300 dark:hover:text-background-100 dark:hover:bg-background-700">
+                            {{ __('navigation.scuole') }}
+                        </a>
+                        <a href="{{ route('rector.clans.index') }}"
+                            class="block pl-6 pr-4 py-2 text-base font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-background-300 dark:hover:text-background-100 dark:hover:bg-background-700">
+                            {{ __('navigation.clan') }}
+                        </a>
+                    </x-slot>
+                </x-responsive-nav-link-parent>
+                <x-responsive-nav-link-parent :active="request()->routeIs('rector.users.*')">
+                    <x-slot name="name">{{ __('navigation.users') }}</x-slot>
+                    <x-slot name="children">
+                        <a href="{{ route('rector.users.index') }}"
+                            class="block pl-6 pr-4 py-2 text-base font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-background-300 dark:hover:text-background-100 dark:hover:bg-background-700">
+                            {{ __('navigation.users_list') }}
+                        </a>
+                        <a href="{{ route('rector.users.approve.index') }}"
+                            class="block pl-6 pr-4 py-2 text-base font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-background-300 dark:hover:text-background-100 dark:hover:bg-background-700">
+                            {{ __('navigation.approve_users') }}
+                        </a>
+                    </x-slot>
+                </x-responsive-nav-link-parent>
+                <x-responsive-nav-link-parent :active="request()->routeIs('rector.events.*') ||
+                    request()->routeIs('rector.fees.*') ||
+                    request()->routeIs('rector.imports.*') ||
+                    request()->routeIs('rector.exports.*')">
+                    <x-slot name="name">{{ __('navigation.management') }}</x-slot>
+                    <x-slot name="children">
+                        <a href="{{ route('rector.events.index') }}"
+                            class="block pl-6 pr-4 py-2 text-base font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-background-300 dark:hover:text-background-100 dark:hover:bg-background-700">
+                            {{ __('navigation.eventi') }}
+                        </a>
+                        <a href="{{ route('rector.fees.index') }}"
+                            class="block pl-6 pr-4 py-2 text-base font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-background-300 dark:hover:text-background-100 dark:hover:bg-background-700">
+                            {{ __('navigation.fees') }}
+                        </a>
+                        <a href="{{ route('rector.imports.index') }}"
+                            class="block pl-6 pr-4 py-2 text-base font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-background-300 dark:hover:text-background-100 dark:hover:bg-background-700">
+                            {{ __('navigation.imports') }}
+                        </a>
+                        <a href="{{ route('rector.exports.index') }}"
+                            class="block pl-6 pr-4 py-2 text-base font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-background-300 dark:hover:text-background-100 dark:hover:bg-background-700">
+                            {{ __('navigation.exports') }}
+                        </a>
+                    </x-slot>
+                </x-responsive-nav-link-parent>
             @elseif (!$isMinorPendingApproval)
                 @foreach (Auth::user()->routes() as $route)
                     @if ($authRole === 'rector' && $route->label === 'users')

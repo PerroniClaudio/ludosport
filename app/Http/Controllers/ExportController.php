@@ -7,6 +7,7 @@ use App\Exports\EventsParticipantsExport;
 use App\Exports\EventsStyleExport;
 use App\Exports\EventsWarExport;
 use App\Exports\OrdersExport;
+use App\Exports\SchoolsExport;
 use App\Exports\UsersAcademyExport;
 use App\Exports\UsersCourseExport;
 use App\Exports\UsersExport;
@@ -159,6 +160,35 @@ class ExportController extends Controller {
                 $filters = [
                     "users_type" => $request->users_type,
                     "academies" => $selectedAcademies,
+                ];
+                break;
+            case 'schools':
+                $allowedAcademyIds = $this->getControllableAcademyIds($authUser);
+
+                if ($authRole === 'admin') {
+                    $academies = collect(json_decode($request->filters, true));
+                    $selectedAcademies = $academies
+                        ->filter(fn($academy) => in_array($academy['id'] ?? null, $allowedAcademyIds, true))
+                        ->values()
+                        ->all();
+
+                    if (count($selectedAcademies) === 0) {
+                        return back()->with('error', 'You are not authorized to export schools for the selected academies.');
+                    }
+                } else {
+                    $activeInstitutionId = $authUser->getActiveInstitutionId();
+
+                    if (!$activeInstitutionId || !in_array($activeInstitutionId, $allowedAcademyIds, true)) {
+                        return back()->with('error', 'You are not authorized to export schools for the selected academy.');
+                    }
+
+                    $selectedAcademies = [[
+                        'id' => $activeInstitutionId,
+                    ]];
+                }
+
+                $filters = [
+                    'academies' => $selectedAcademies,
                 ];
                 break;
             case 'users_school':
@@ -409,6 +439,13 @@ class ExportController extends Controller {
                         $log[] = "['Exporting users academy']";
                         $file_path = 'exports/' . $export->id . '/users_academy.xlsx';
                         Excel::store(new UsersAcademyExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        break;
+                    case 'schools':
+                        $log[] = "['Exporting schools']";
+                        $file_path = 'exports/' . $export->id . '/schools.xlsx';
+                        Excel::store(new SchoolsExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
                         $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
                         break;

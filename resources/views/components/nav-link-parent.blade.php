@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    <div class="children bg-background-100 dark:bg-background-700 rounded-md border border-background-300 dark:border-background-700"
+    <div class="children bg-background-100 dark:bg-background-700 rounded-md border border-background-300 dark:border-background-800 shadow-xl"
         x-show="open" x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100"
         x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100"

@@ -31,6 +31,8 @@ return [
     'login' => 'Login',
     'register' => 'Register',
     'operations' => 'Operations',
+    'structure' => 'Structure',
+    'management' => 'Management',
     'announcements' => 'Announcements',
     'ordini' => 'Orders',
     'weapon_forms' => 'Weapon Forms',

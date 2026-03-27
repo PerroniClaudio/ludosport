@@ -36,6 +36,10 @@
                             <x-exports.rector.user-academy />
                         </div>
 
+                        <div x-show="selectedType == 'schools'">
+                            <x-exports.rector.schools />
+                        </div>
+
                         <div x-show="selectedType == 'users_school'">
                             <x-exports.rector.user-school />
                         </div>
