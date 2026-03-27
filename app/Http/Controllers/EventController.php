@@ -1263,7 +1263,7 @@ class EventController extends Controller
 
     public function general(Request $request)
     {
-
+        $isAuthenticated = auth()->check();
         $date = Carbon::parse($request->date ?? now());
         $seasonYear = Event::calculateEventYear($date);
 
@@ -1295,9 +1295,9 @@ class EventController extends Controller
                         'user_id' => $value->user_id,
                         'user_name' => $value->user->name . ' ' . $value->user->surname,
                         'user_battle_name' => $value->user->battle_name ?? '',
-                        'user_academy' => $isMinor ? '' : ($primaryAcademyAthlete ? $primaryAcademyAthlete->name : ''),
-                        'user_school' => $isMinor ? '' : ($value->user->primarySchoolAthlete()->name ?? ''),
-                        'school_slug' => $isMinor ? '' : ($value->user->primarySchoolAthlete()->slug ?? ''),
+                        'user_academy' => $isMinor && !$isAuthenticated ? '' : ($primaryAcademyAthlete ? $primaryAcademyAthlete->name : ''),
+                        'user_school' => $isMinor && !$isAuthenticated ? '' : ($value->user->primarySchoolAthlete()->name ?? ''),
+                        'school_slug' => $isMinor && !$isAuthenticated ? '' : ($value->user->primarySchoolAthlete()->slug ?? ''),
                         'nation' => $primaryAcademyAthlete ? $primaryAcademyAthlete->nation->name : $value->user->nation->name,
                         'total_war_points' => 0,
                         'total_style_points' => 0,
@@ -1329,7 +1329,7 @@ class EventController extends Controller
 
     public function nation(Request $request)
     {
-
+        $isAuthenticated = auth()->check();
         $nation_id = $request['nation_id'];
         $results = [];
 
@@ -1374,9 +1374,9 @@ class EventController extends Controller
                 'user_id' => $user->id,
                 'user_name' => $user->name . ' ' . $user->surname,
                 'user_battle_name' => $user->battle_name ?? '',
-                'user_academy' => $isMinor ? '' : ($primaryAcademyAthlete ? $primaryAcademyAthlete->name : ''),
-                'user_school' => $isMinor ? '' : ($user->primarySchoolAthlete()->name ?? ''),
-                'school_slug' => $isMinor ? '' : ($user->primarySchoolAthlete()->slug ?? ''),
+                'user_academy' => $isMinor && !$isAuthenticated ? '' : ($primaryAcademyAthlete ? $primaryAcademyAthlete->name : ''),
+                'user_school' => $isMinor && !$isAuthenticated ? '' : ($user->primarySchoolAthlete()->name ?? ''),
+                'school_slug' => $isMinor && !$isAuthenticated ? '' : ($user->primarySchoolAthlete()->slug ?? ''),
                 'nation' => $primaryAcademyAthlete ? $primaryAcademyAthlete->nation->name : $user->nation->name,
                 'total_war_points' => $total_war_points,
                 'total_style_points' => $total_style_points,
@@ -1406,7 +1406,7 @@ class EventController extends Controller
 
     public function eventResult(Request $request, Event $event)
     {
-
+        $isAuthenticated = auth()->check();
         $date = Carbon::parse($request->date ?? now());
         $seasonYear = Event::calculateEventYear($date);
 
@@ -1428,9 +1428,9 @@ class EventController extends Controller
                     'user_id' => $value->user_id,
                     'user_name' => $value->user->name . ' ' . $value->user->surname,
                     'user_battle_name' => $value->user->battle_name ?? '',
-                    'user_academy' => $isMinor ? '' : ($primaryAcademyAthlete ? $primaryAcademyAthlete->name : ''),
-                    'user_school' => $isMinor ? '' : ($value->user->primarySchoolAthlete()->name ?? ''),
-                    'school_slug' => $isMinor ? '' : ($value->user->primarySchoolAthlete()->slug ?? ''),
+                    'user_academy' => $isMinor && !$isAuthenticated ? '' : ($primaryAcademyAthlete ? $primaryAcademyAthlete->name : ''),
+                    'user_school' => $isMinor && !$isAuthenticated ? '' : ($value->user->primarySchoolAthlete()->name ?? ''),
+                    'school_slug' => $isMinor && !$isAuthenticated ? '' : ($value->user->primarySchoolAthlete()->slug ?? ''),
                     'nation' => $primaryAcademyAthlete ? $primaryAcademyAthlete->nation->name : $value->user->nation->name,
                     'total_war_points' => 0,
                     'total_style_points' => 0,
