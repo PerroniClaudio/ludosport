@@ -228,9 +228,26 @@ class UserController extends Controller {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
+        $isUserMinor = $request->boolean('is_user_minor');
+        $adultCutoffDate = date('Y-m-d', strtotime('-18 years'));
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'surname' => 'required|string|max:255',
+            'year' => 'required|integer|min:2006|max:'.date('Y'),
+            'nationality' => 'required|string|exists:nations,name',
+            'academy_id' => 'required|integer|exists:academies,id',
+            'is_user_minor' => 'nullable|boolean',
+            'birthday' => $isUserMinor
+                ? ['required', 'date', 'before:today', 'after:'.$adultCutoffDate]
+                : ['nullable', 'date', 'before_or_equal:'.$adultCutoffDate],
+            'gender' => $isUserMinor
+                ? ['required', 'string', 'in:male,female,other,notsay']
+                : ['nullable', 'string', 'in:male,female,other,notsay'],
+            'minor_documents' => $isUserMinor
+                ? ['required', 'file', 'mimes:pdf', 'max:10240']
+                : ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
         $roles = explode(',', $request->roles);
@@ -247,6 +264,11 @@ class UserController extends Controller {
             'subscription_year' => $request->year,
             'academy_id' => $request->academy_id ?? 1,
             'nation_id' => $nation->id,
+            'birthday' => $request->birthday,
+            'gender' => $request->gender,
+            'is_user_minor' => $isUserMinor,
+            'has_user_uploaded_documents' => false,
+            'has_admin_approved_minor' => false,
             // 'unique_code' => $unique_code,
         ]);
 
@@ -290,6 +312,20 @@ class UserController extends Controller {
                     $user->setPrimaryAcademy($academy->id);
                 }
                 break;
+            }
+        }
+
+        if ($isUserMinor && $request->hasFile('minor_documents')) {
+            $file = $request->file('minor_documents');
+            $fileExtension = $file->getClientOriginalExtension();
+            $fileName = time().'_minor_documents.'.$fileExtension;
+            $path = "/users/{$user->id}/approval_documents/{$fileName}";
+            $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
+
+            if ($storedFile) {
+                $user->replaceMinorApprovalDocument($path);
+                $user->has_admin_approved_minor = true;
+                $user->save();
             }
         }
 

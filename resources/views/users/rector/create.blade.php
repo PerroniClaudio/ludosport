@@ -11,7 +11,8 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-                <form action="{{ route('rector.users.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('rector.users.store') }}" method="POST" enctype="multipart/form-data"
+                    x-data="{ isMinor: @js((bool) old('is_user_minor')) }">
                     @csrf
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -40,6 +41,14 @@
 
                             <x-form.nationality-select selectedvalue="{{ old('nationality') }}" />
                             <x-form.academy-select :academies="$academies" />
+
+                            <label
+                                class="mt-2 flex items-center gap-3 rounded-lg border border-background-200 dark:border-background-700 px-4 py-3 text-sm text-background-800 dark:text-background-200">
+                                <input type="checkbox" name="is_user_minor" value="1" x-model="isMinor"
+                                    @checked(old('is_user_minor'))
+                                    class="rounded border-background-300 text-primary-600 focus:ring-primary-500">
+                                <span>{{ __('Minor user') }}</span>
+                            </label>
                         </div>
 
                         <div class="flex flex-col gap-2">
@@ -104,6 +113,44 @@
                             </div>
                         </div>
 
+                    </div>
+
+                    <div x-show="isMinor" x-cloak class="mt-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="flex flex-col gap-2">
+                                <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                    {{ __('Minor details') }}</h3>
+                                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                                <x-form.input name="birthday" label="Birthday" type="date" required="{{ false }}"
+                                    value="{{ old('birthday') }}" />
+                                <x-form.select name="gender" label="{{ __('Gender') }}" :options="[
+                                    ['value' => 'male', 'label' => 'Male'],
+                                    ['value' => 'female', 'label' => 'Female'],
+                                    ['value' => 'other', 'label' => 'Other'],
+                                    ['value' => 'notsay', 'label' => 'Prefer not to say'],
+                                ]" :shouldHaveEmptyOption="true" />
+                            </div>
+
+                            <div class="flex flex-col gap-2 sm:col-span-2">
+                                <h3 class="text-background-800 dark:text-background-200 text-2xl">
+                                    {{ __('Minor documents') }}</h3>
+                                <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+                                <label for="minor_documents"
+                                    class="text-sm font-medium text-background-700 dark:text-background-300">
+                                    {{ __('auth.minor_documents') }}
+                                </label>
+                                <p class="text-sm text-background-600 dark:text-background-400">
+                                    {{ __('auth.minor_documents_description') }}
+                                </p>
+                                <input id="minor_documents" name="minor_documents" type="file"
+                                    accept="application/pdf"
+                                    class="block w-full rounded-lg border border-background-200 bg-white px-4 py-3 text-sm text-background-700 shadow-sm file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100 dark:border-background-700 dark:bg-background-900 dark:text-background-200 dark:file:bg-primary-950/50 dark:file:text-primary-300" />
+                                <p class="text-xs text-background-500 dark:text-background-400">
+                                    {{ __('auth.minor_documents_help') }}
+                                </p>
+                                <x-input-error :messages="$errors->get('minor_documents')" class="mt-2" />
+                            </div>
+                        </div>
                     </div>
 
                     <div class="flex items-center justify-end gap-2 mt-8">
