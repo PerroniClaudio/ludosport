@@ -1489,6 +1489,7 @@ class EventController extends Controller
         //
 
         $canpurchase = false;
+        $isMinorPendingApproval = false;
         $isParticipating = false;
         $isInWaitingList = false;
         $isWaitingPayment = false;
@@ -1533,6 +1534,7 @@ class EventController extends Controller
             'block_subscriptions' => $event->block_subscriptions,
             'is_waiting_payment' => $isWaitingPayment,
             'academy_email' => $event->academy->email ?? null,
+            'isMinorPendingApproval' => $isMinorPendingApproval,
             'is_minor_pending' => $isMinorPendingApproval,
         ]);
     }

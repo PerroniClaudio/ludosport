@@ -152,9 +152,11 @@
         class="relative z-20 hidden sm:hidden bg-center bg-contain bg-no-repeat"
         style="background-image: url('{{ env('APP_URL') }}/logo-saber-k');">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('dashboard.title') }}
-            </x-responsive-nav-link>
+            @if (Auth::check())
+                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    {{ __('dashboard.title') }}
+                </x-responsive-nav-link>
+            @endif
 
             <x-responsive-nav-link :href="route('schools-map')" :active="request()->routeIs('schools-map')">
                 {{ __('website.schools_map') }}
@@ -168,11 +170,9 @@
             <x-responsive-nav-link :href="route('user-search')" :active="request()->routeIs('user-search')">
                 {{ __('website.user_search') }}
             </x-responsive-nav-link>
-            @if (Auth::check())
-                <x-responsive-nav-link :href="route('events-list')" :active="request()->routeIs('events-list')">
-                    {{ __('website.events_list') }}
-                </x-responsive-nav-link>
-            @endif
+            <x-responsive-nav-link :href="route('events-list')" :active="request()->routeIs('events-list')">
+                {{ __('website.events_list') }}
+            </x-responsive-nav-link>
 
         </div>
 
