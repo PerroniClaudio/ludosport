@@ -289,6 +289,7 @@ class EventController extends Controller
             'enablingResults' => $enablingResults,
             'weaponForms' => $weaponForms,
             'waitingList' => $waitingList,
+            'canEditPublishedEventName' => $authRole === 'admin' && $event->is_published,
         ]);
     }
 
@@ -365,7 +366,8 @@ class EventController extends Controller
         $authRole = $authUser->getRole();
 
 
-        // Se un evento è approvato non può essere modificato a eccezione di block subscriptions da parte degli admin
+        // Se un evento è approvato non può essere modificato.
+        // L'admin può sempre cambiare block_subscriptions e, se l'evento è pubblicato, anche il name.
 
         if ($event->is_approved) {
 
@@ -376,42 +378,61 @@ class EventController extends Controller
                 ]);
             }
 
-            $newValue = $request->block_subscriptions == 'on' ? true : false;
-
-            if ($event->block_subscriptions != $newValue) {
-                $event->block_subscriptions = $newValue;
-                $event->save();
-
-                return response()->json([
-                    'error' => false,
-                    'message' => 'Block subscriptions saved successfully'
+            if ($request->exists('name')) {
+                $request->validate([
+                    'name' => 'required',
                 ]);
             }
 
-            if ($request->hasAny(['name', 'event_type', 'start_date', 'end_date', 'price'])) {
-                if (
-                    $request->name !== $event->name ||
-                    $request->event_type !== $event->event_type ||
-                    $request->start_date !== $event->start_date ||
-                    $request->end_date !== $event->end_date ||
-                    $request->price !== $event->price
-                ) {
+            $canEditPublishedName = $event->is_published;
+
+            $disallowedChanges = [
+                'event_type' => (string) $event->event_type,
+                'start_date' => (string) $event->start_date,
+                'end_date' => (string) $event->end_date,
+                'price' => (string) $event->price,
+                'year' => (string) $event->year,
+                'waiting_list_close_date' => (string) $event->waiting_list_close_date,
+                'max_participants' => (string) $event->max_participants,
+                'weapon_form_id' => (string) $event->weapon_form_id,
+                'internal_shop' => $event->internal_shop ? '1' : '0',
+            ];
+
+            foreach ($disallowedChanges as $field => $currentValue) {
+                if ($request->exists($field) && (string) $request->input($field) !== $currentValue) {
+                    return response()->json([
+                        'error' => true,
+                        'message' => $canEditPublishedName
+                            ? 'After approval, you can only modify "block subscriptions" and the event name once it is published'
+                            : 'After approval, you can only modify "block subscriptions" value'
+                    ]);
+                }
+            }
+
+            if ($request->exists('name') && $request->name !== $event->name) {
+                if (!$canEditPublishedName) {
                     return response()->json([
                         'error' => true,
                         'message' => 'After approval, you can only modify "block subscriptions" value'
                     ]);
-                } else {
-                    return response()->json([
-                        'error' => false,
-                        'message' => 'Event saved successfully'
-                    ]);
                 }
-            } else {
-                return response()->json([
-                    'error' => false,
-                    'message' => 'Event saved successfully'
-                ]);
+
+                $event->name = $request->name;
             }
+
+            $newValue = $request->block_subscriptions == 'on' ? true : false;
+            if ($event->block_subscriptions != $newValue) {
+                $event->block_subscriptions = $newValue;
+            }
+
+            if ($event->isDirty()) {
+                $event->save();
+            }
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Event saved successfully'
+            ]);
         } else {
             $request->validate([
                 'name' => 'required',

@@ -117,7 +117,7 @@
 
                     <x-form.input name="name" label="Name" type="text" required="{{ true }}"
                         :value="$event->name" placeholder="{{ fake()->company() }}"
-                        disabled="{{ !!$event->is_approved }}" />
+                        disabled="{{ $event->is_approved && !$canEditPublishedEventName }}" />
 
                     <x-form.input name="start_date" label="Start Date" type="datetime-local"
                         required="{{ true }}" value="{{ $event->start_date }}"

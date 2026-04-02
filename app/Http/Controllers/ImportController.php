@@ -79,6 +79,7 @@ class ImportController extends Controller {
         //
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
+        $currentYear = (int) now()->year;
 
         if (!$authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
@@ -95,7 +96,16 @@ class ImportController extends Controller {
             ];
         }
 
-        $instructorEvents = Event::where('is_disabled', false)->get()->filter(function ($event) {
+        $availableEvents = Event::with('type')
+            ->where('is_disabled', false)
+            ->get()
+            ->filter(function ($event) use ($currentYear) {
+                $eventYear = $event->year ?? Event::calculateEventYear($event->start_date);
+
+                return $eventYear === $currentYear;
+            });
+
+        $instructorEvents = $availableEvents->filter(function ($event) {
             return $event->resultType() == 'enabling';
         })->map(function ($event) {
             return [
@@ -104,7 +114,7 @@ class ImportController extends Controller {
             ];
         });
 
-        $rankingEvents = Event::where('is_disabled', false)->get()->filter(function ($event) {
+        $rankingEvents = $availableEvents->filter(function ($event) {
             return ($event->resultType() == 'ranking' && in_array(strtolower($event->type->name), ["school tournament", "academy tournament", "national tournament"]));
         })->map(function ($event) {
             return [
