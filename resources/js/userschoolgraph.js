@@ -1,10 +1,16 @@
 import Chart from "chart.js/auto";
+import {
+    getUserMetricValue,
+    sortUserMetricData,
+} from "./dashboardUserMetrics.js";
 
 export const userschoolgraph = (academyId, role) => {
     return {
         academyId: academyId,
         schoolData: [],
         yearData: [],
+        displayMode: "active",
+        chart: null,
         colors: [
             "rgb(237,116,0)",
             "rgb(212, 145, 255)",
@@ -28,13 +34,30 @@ export const userschoolgraph = (academyId, role) => {
 
             return data;
         },
+        getMetricValue(item) {
+            return getUserMetricValue(item, this.displayMode);
+        },
+        getSortedSchoolData() {
+            return sortUserMetricData(this.schoolData, this.displayMode);
+        },
+        setDisplayMode(mode) {
+            if (!["active", "registered"].includes(mode)) {
+                return;
+            }
+
+            this.displayMode = mode;
+            this.refreshGraph();
+        },
         createGraph() {
             const ctx = document
                 .getElementById("userschoolgraph")
                 .getContext("2d");
 
-            const labels = this.schoolData.map((school) => school.name);
-            const dataCount = this.schoolData.map((school) => school.athletes);
+            const sortedSchoolData = this.getSortedSchoolData();
+            const labels = sortedSchoolData.map((school) => school.name);
+            const dataCount = sortedSchoolData.map((school) =>
+                this.getMetricValue(school)
+            );
 
             const data = {
                 labels: labels,
@@ -53,7 +76,20 @@ export const userschoolgraph = (academyId, role) => {
                 data: data,
             };
 
-            const chart = new Chart(ctx, config);
+            this.chart = new Chart(ctx, config);
+        },
+        refreshGraph() {
+            if (!this.chart) {
+                this.createGraph();
+                return;
+            }
+
+            const sortedSchoolData = this.getSortedSchoolData();
+            this.chart.data.labels = sortedSchoolData.map((school) => school.name);
+            this.chart.data.datasets[0].data = sortedSchoolData.map((school) =>
+                this.getMetricValue(school)
+            );
+            this.chart.update();
         },
 
         async init() {

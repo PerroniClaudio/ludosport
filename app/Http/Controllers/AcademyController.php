@@ -793,17 +793,24 @@ class AcademyController extends Controller {
     }
 
     public function athletesSchoolDataForAcademy(Academy $academy) {
-
         $schools = [];
 
         foreach ($academy->schools as $key => $school) {
+            $registeredAthletes = $school->athletes->where('is_disabled', false);
+            $activeAthletes = $registeredAthletes->where('has_paid_fee', true);
 
             $schools[] = [
                 'id' => $school->id,
                 'name' => $school->name,
-                'athletes' => $school->athletes->count(),
+                'athletes' => $activeAthletes->count(),
+                'active_athletes' => $activeAthletes->count(),
+                'registered_athletes' => $registeredAthletes->count(),
             ];
         }
+
+        usort($schools, function ($left, $right) {
+            return $right['active_athletes'] - $left['active_athletes'];
+        });
 
         return response()->json($schools);
     }

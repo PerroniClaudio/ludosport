@@ -10,6 +10,25 @@
                 x-text="`{{ __('dashboard.athletes_courses_title', ['school' => '${school.name}']) }}`">
             </h3>
             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+
+                <div class="inline-flex rounded-lg bg-background-100 p-1 dark:bg-background-700">
+                    <button type="button" @click="setDisplayMode('active')"
+                        class="rounded-md px-3 py-1.5 text-sm transition"
+                        :class="displayMode === 'active'
+                            ? 'bg-primary-500 text-white'
+                            : 'text-background-700 dark:text-background-200'">
+                        {{ __('dashboard.graph_active_users_current') }}
+                    </button>
+                    <button type="button" @click="setDisplayMode('registered')"
+                        class="rounded-md px-3 py-1.5 text-sm transition"
+                        :class="displayMode === 'registered'
+                            ? 'bg-primary-500 text-white'
+                            : 'text-background-700 dark:text-background-200'">
+                        {{ __('dashboard.graph_registered_users_total') }}
+                    </button>
+                </div>
+            </div>
             <div class="grid sm:grid-cols-2 gap-4">
                 <div>
                     <canvas id="usercoursegraph"></canvas>
@@ -32,7 +51,7 @@
                                 <li class="flex items-center justify-between">
                                     <div>
                                         <span x-text="course.name"></span>
-                                        <span x-text="course.athletes"></span>
+                                        <span x-text="getMetricValue(course)"></span>
                                     </div>
                                     <div class="flex gap-2">
                                         <x-primary-link-button-small x-bind:href="'/courses/' + course.id">

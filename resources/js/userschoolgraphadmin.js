@@ -1,4 +1,8 @@
 import Chart from "chart.js/auto";
+import {
+    getUserMetricValue,
+    sortUserMetricData,
+} from "./dashboardUserMetrics.js";
 
 export const userschoolgraphadmin = (role, academy, selectedAcademyData) => {
     return {
@@ -6,6 +10,8 @@ export const userschoolgraphadmin = (role, academy, selectedAcademyData) => {
         schoolData: [],
         filteredSchoolData: [],
         academyYearData: [],
+        displayMode: "active",
+        chart: null,
         currentSchoolsPage: 1,
         totalSchoolsPages: 1,
         paginatedSchools: [],
@@ -24,13 +30,31 @@ export const userschoolgraphadmin = (role, academy, selectedAcademyData) => {
 
             return data;
         },
+        getMetricValue(item) {
+            return getUserMetricValue(item, this.displayMode);
+        },
+        getSortedSchoolData(items = this.schoolData) {
+            return sortUserMetricData(items, this.displayMode);
+        },
+        setDisplayMode(mode) {
+            if (!["active", "registered"].includes(mode)) {
+                return;
+            }
+
+            this.displayMode = mode;
+            this.refreshGraph();
+            this.updateSchools();
+        },
         createGraph() {
             const ctx = document
                 .getElementById("userschoolgraph")
                 .getContext("2d");
 
-            const labels = this.schoolData.map((school) => school.name);
-            const dataCount = this.schoolData.map((school) => school.athletes);
+            const sortedSchoolData = this.getSortedSchoolData();
+            const labels = sortedSchoolData.map((school) => school.name);
+            const dataCount = sortedSchoolData.map((school) =>
+                this.getMetricValue(school)
+            );
 
             const data = {
                 labels: labels,
@@ -49,7 +73,20 @@ export const userschoolgraphadmin = (role, academy, selectedAcademyData) => {
                 data: data,
             };
 
-            const chart = new Chart(ctx, config);
+            this.chart = new Chart(ctx, config);
+        },
+        refreshGraph() {
+            if (!this.chart) {
+                this.createGraph();
+                return;
+            }
+
+            const sortedSchoolData = this.getSortedSchoolData();
+            this.chart.data.labels = sortedSchoolData.map((school) => school.name);
+            this.chart.data.datasets[0].data = sortedSchoolData.map((school) =>
+                this.getMetricValue(school)
+            );
+            this.chart.update();
         },
 
         searchSchoolByValue(e) {
@@ -80,10 +117,9 @@ export const userschoolgraphadmin = (role, academy, selectedAcademyData) => {
         },
         updateSchools() {
             const offset = (this.currentSchoolsPage - 1) * 10; // Assuming 10 items per page
-            // this.paginatedSchools = this.schoolData.slice(offset, offset + 10);
-
             this.totalSchoolsPages = Math.ceil(this.filteredSchoolData.length / 10);
-            this.paginatedSchools = this.filteredSchoolData.slice(offset, offset + 10);
+            const sortedSchoolData = this.getSortedSchoolData(this.filteredSchoolData);
+            this.paginatedSchools = sortedSchoolData.slice(offset, offset + 10);
         },
         
         async init() {

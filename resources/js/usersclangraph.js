@@ -1,10 +1,16 @@
 import Chart from "chart.js/auto";
+import {
+    getUserMetricValue,
+    sortUserMetricData,
+} from "./dashboardUserMetrics.js";
 
 export const usersclangraph = (schoolId, role) => {
     return {
         schoolId: schoolId,
         clanData: [],
         yearData: [],
+        displayMode: "active",
+        chart: null,
         colors: [
             "rgb(237,116,0)",
             "rgb(212, 145, 255)",
@@ -28,13 +34,30 @@ export const usersclangraph = (schoolId, role) => {
 
             return data;
         },
+        getMetricValue(item) {
+            return getUserMetricValue(item, this.displayMode);
+        },
+        getSortedClanData() {
+            return sortUserMetricData(this.clanData, this.displayMode);
+        },
+        setDisplayMode(mode) {
+            if (!["active", "registered"].includes(mode)) {
+                return;
+            }
+
+            this.displayMode = mode;
+            this.refreshGraph();
+        },
         createGraph() {
             const ctx = document
                 .getElementById("usersclangraph")
                 .getContext("2d");
 
-            const labels = this.clanData.map((clan) => clan.name);
-            const dataCount = this.clanData.map((clan) => clan.athletes);
+            const sortedClanData = this.getSortedClanData();
+            const labels = sortedClanData.map((clan) => clan.name);
+            const dataCount = sortedClanData.map((clan) =>
+                this.getMetricValue(clan)
+            );
 
             const data = {
                 labels: labels,
@@ -53,7 +76,20 @@ export const usersclangraph = (schoolId, role) => {
                 data: data,
             };
 
-            const chart = new Chart(ctx, config);
+            this.chart = new Chart(ctx, config);
+        },
+        refreshGraph() {
+            if (!this.chart) {
+                this.createGraph();
+                return;
+            }
+
+            const sortedClanData = this.getSortedClanData();
+            this.chart.data.labels = sortedClanData.map((clan) => clan.name);
+            this.chart.data.datasets[0].data = sortedClanData.map((clan) =>
+                this.getMetricValue(clan)
+            );
+            this.chart.update();
         },
 
         async init() {

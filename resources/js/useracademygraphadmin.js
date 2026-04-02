@@ -1,4 +1,8 @@
 import Chart from "chart.js/auto";
+import {
+    getUserMetricValue,
+    sortUserMetricData,
+} from "./dashboardUserMetrics.js";
 
 export const useracademygraphadmin = (role, nation, selectedNationData) => {
     return {
@@ -6,6 +10,8 @@ export const useracademygraphadmin = (role, nation, selectedNationData) => {
         academyData: [],
         filteredAcademyData: [],
         nationYearData: [],
+        displayMode: "active",
+        chart: null,
         currentAcademiesPage: 1,
         totalAcademiesPages: 1,
         paginatedAcademies: [],
@@ -24,13 +30,31 @@ export const useracademygraphadmin = (role, nation, selectedNationData) => {
 
             return data;
         },
+        getMetricValue(item) {
+            return getUserMetricValue(item, this.displayMode);
+        },
+        getSortedAcademyData(items = this.academyData) {
+            return sortUserMetricData(items, this.displayMode);
+        },
+        setDisplayMode(mode) {
+            if (!["active", "registered"].includes(mode)) {
+                return;
+            }
+
+            this.displayMode = mode;
+            this.refreshGraph();
+            this.updateAcademies();
+        },
         createGraph() {
             const ctx = document
                 .getElementById("useracademygraph")
                 .getContext("2d");
 
-            const labels = this.academyData.map((academy) => academy.name);
-            const dataCount = this.academyData.map((academy) => academy.athletes);
+            const sortedAcademyData = this.getSortedAcademyData();
+            const labels = sortedAcademyData.map((academy) => academy.name);
+            const dataCount = sortedAcademyData.map((academy) =>
+                this.getMetricValue(academy)
+            );
 
             const data = {
                 labels: labels,
@@ -49,7 +73,20 @@ export const useracademygraphadmin = (role, nation, selectedNationData) => {
                 data: data,
             };
 
-            const chart = new Chart(ctx, config);
+            this.chart = new Chart(ctx, config);
+        },
+        refreshGraph() {
+            if (!this.chart) {
+                this.createGraph();
+                return;
+            }
+
+            const sortedAcademyData = this.getSortedAcademyData();
+            this.chart.data.labels = sortedAcademyData.map((academy) => academy.name);
+            this.chart.data.datasets[0].data = sortedAcademyData.map((academy) =>
+                this.getMetricValue(academy)
+            );
+            this.chart.update();
         },
 
         searchAcademyByValue(e) {
@@ -80,10 +117,9 @@ export const useracademygraphadmin = (role, nation, selectedNationData) => {
         },
         updateAcademies() {
             const offset = (this.currentAcademiesPage - 1) * 10; // Assuming 10 items per page
-            // this.paginatedAcademies = this.academyData.slice(offset, offset + 10);
-
             this.totalAcademiesPages = Math.ceil(this.filteredAcademyData.length / 10);
-            this.paginatedAcademies = this.filteredAcademyData.slice(offset, offset + 10);
+            const sortedAcademyData = this.getSortedAcademyData(this.filteredAcademyData);
+            this.paginatedAcademies = sortedAcademyData.slice(offset, offset + 10);
         },
         
         async init() {

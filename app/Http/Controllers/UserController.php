@@ -2400,7 +2400,6 @@ class UserController extends Controller {
     }
 
     public function athletesDataWorldList() {
-
         $filledNations = Nation::whereHas('academies')->get();
 
         $nations = [];
@@ -2413,64 +2412,77 @@ class UserController extends Controller {
             $nationUniqueAthletes = collect();
 
             foreach ($validAcademies as $academy) {
-
-                $athletes = $academy->athletes->where('is_disabled', false);
-                $nationUniqueAthletes = $nationUniqueAthletes->merge($athletes);
+                $registeredAthletes = $academy->athletes->where('is_disabled', false);
+                $activeAthletes = $registeredAthletes->where('has_paid_fee', true);
+                $nationUniqueAthletes = $nationUniqueAthletes->merge($registeredAthletes);
 
                 $schools = [];
 
                 foreach ($academy->schools->where('is_disabled', false) as $key => $school) {
-
                     $courses = [];
+                    $schoolRegisteredAthletes = $school->athletes->where('is_disabled', false);
+                    $schoolActiveAthletes = $schoolRegisteredAthletes->where('has_paid_fee', true);
 
                     foreach ($school->clan->where('is_disabled', false) as $course) {
+                        $courseRegisteredAthletes = $course->users->where('is_disabled', false);
+                        $courseActiveAthletes = $courseRegisteredAthletes->where('has_paid_fee', true);
+
                         $courses[] = [
                             'id' => $course->id,
                             'name' => $course->name,
-                            'athletes' => $course->users->where('is_disabled', false)->count(),
+                            'athletes' => $courseActiveAthletes->count(),
+                            'active_athletes' => $courseActiveAthletes->count(),
+                            'registered_athletes' => $courseRegisteredAthletes->count(),
                         ];
                     }
 
                     usort($courses, function ($a, $b) {
-                        return $b['athletes'] - $a['athletes'];
+                        return $b['active_athletes'] - $a['active_athletes'];
                     });
 
                     $schools[] = [
                         'id' => $school->id,
                         'name' => $school->name,
-                        'athletes' => $school->athletes->where('is_disabled', false)->count(),
+                        'athletes' => $schoolActiveAthletes->count(),
+                        'active_athletes' => $schoolActiveAthletes->count(),
+                        'registered_athletes' => $schoolRegisteredAthletes->count(),
                         'courses' => $courses,
                     ];
                 }
 
                 usort($schools, function ($a, $b) {
-                    return $b['athletes'] - $a['athletes'];
+                    return $b['active_athletes'] - $a['active_athletes'];
                 });
 
                 $academies[] = [
                     'id' => $academy->id,
                     'name' => $academy->name,
-                    'athletes' => $athletes->count(),
+                    'athletes' => $activeAthletes->count(),
+                    'active_athletes' => $activeAthletes->count(),
+                    'registered_athletes' => $registeredAthletes->count(),
                     'schools' => $schools,
                 ];
             }
 
-            $nationUniqueAthletes = $nationUniqueAthletes->unique('id')->count();
+            $registeredNationAthletes = $nationUniqueAthletes->unique('id');
+            $activeNationAthletes = $registeredNationAthletes->where('has_paid_fee', true);
 
             usort($academies, function ($a, $b) {
-                return $b['athletes'] - $a['athletes'];
+                return $b['active_athletes'] - $a['active_athletes'];
             });
 
             $nations[] = [
                 'id' => $nation->id,
                 'name' => $nation->name,
-                'athletes' => $nationUniqueAthletes,
+                'athletes' => $activeNationAthletes->count(),
+                'active_athletes' => $activeNationAthletes->count(),
+                'registered_athletes' => $registeredNationAthletes->count(),
                 'academies' => $academies,
             ];
         }
 
         usort($nations, function ($a, $b) {
-            return $b['athletes'] - $a['athletes'];
+            return $b['active_athletes'] - $a['active_athletes'];
         });
 
         return response()->json($nations);

@@ -10,6 +10,25 @@
                 {{ __('dashboard.dean_athletes_courses_title') }}
             </h3>
             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+      
+                <div class="inline-flex rounded-lg bg-background-100 p-1 dark:bg-background-700">
+                    <button type="button" @click="setDisplayMode('active')"
+                        class="rounded-md px-3 py-1.5 text-sm transition"
+                        :class="displayMode === 'active'
+                            ? 'bg-primary-500 text-white'
+                            : 'text-background-700 dark:text-background-200'">
+                        {{ __('dashboard.graph_active_users_current') }}
+                    </button>
+                    <button type="button" @click="setDisplayMode('registered')"
+                        class="rounded-md px-3 py-1.5 text-sm transition"
+                        :class="displayMode === 'registered'
+                            ? 'bg-primary-500 text-white'
+                            : 'text-background-700 dark:text-background-200'">
+                        {{ __('dashboard.graph_registered_users_total') }}
+                    </button>
+                </div>
+            </div>
             <div class="grid sm:grid-cols-2 gap-4">
                 <div>
                     <canvas id="usersclangraph"></canvas>
@@ -20,10 +39,10 @@
                     </h3>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                     <ul class="flex flex-col gap-2 px-0">
-                        <template x-for="clan in clanData" :key="clan.id">
+                        <template x-for="clan in getSortedClanData()" :key="clan.id">
                             <li class="flex items-center justify-between">
                                 <span x-text="clan.name"></span>
-                                <span x-text="clan.athletes"></span>
+                                <span x-text="getMetricValue(clan)"></span>
                             </li>
                         </template>
                     </ul>

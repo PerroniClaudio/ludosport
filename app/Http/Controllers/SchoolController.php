@@ -1113,12 +1113,21 @@ class SchoolController extends Controller {
         $clans_data = [];
 
         foreach ($school->clan as $clan) {
+            $registeredAthletes = $clan->users->where('is_disabled', false);
+            $activeAthletes = $registeredAthletes->where('has_paid_fee', true);
+
             $clans_data[] = [
                 'id' => $clan->id,
                 'name' => $clan->name,
-                'athletes' => $clan->users->count(),
+                'athletes' => $activeAthletes->count(),
+                'active_athletes' => $activeAthletes->count(),
+                'registered_athletes' => $registeredAthletes->count(),
             ];
         }
+
+        usort($clans_data, function ($left, $right) {
+            return $right['active_athletes'] - $left['active_athletes'];
+        });
 
         return response()->json($clans_data);
     }

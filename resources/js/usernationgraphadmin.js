@@ -1,10 +1,16 @@
 import Chart from "chart.js/auto";
+import {
+    getUserMetricValue,
+    sortUserMetricData,
+} from "./dashboardUserMetrics.js";
 
 export const usernationgraphadmin = (role) => {
     return {
         nationData: [],
         filteredNationData: [],
         worldYearData: [],
+        displayMode: "active",
+        chart: null,
         currentNationsPage: 1,
         totalNationsPages: 1,
         paginatedNations: [],
@@ -31,13 +37,31 @@ export const usernationgraphadmin = (role) => {
 
             return data;
         },
+        getMetricValue(item) {
+            return getUserMetricValue(item, this.displayMode);
+        },
+        getSortedNationData(items = this.nationData) {
+            return sortUserMetricData(items, this.displayMode);
+        },
+        setDisplayMode(mode) {
+            if (!["active", "registered"].includes(mode)) {
+                return;
+            }
+
+            this.displayMode = mode;
+            this.refreshGraph();
+            this.updateNations();
+        },
         createGraph() {
             const ctx = document
                 .getElementById("usernationgraph")
                 .getContext("2d");
 
-            const labels = this.nationData.map((nation) => nation.name);
-            const dataCount = this.nationData.map((nation) => nation.athletes);
+            const sortedNationData = this.getSortedNationData();
+            const labels = sortedNationData.map((nation) => nation.name);
+            const dataCount = sortedNationData.map((nation) =>
+                this.getMetricValue(nation)
+            );
 
             const data = {
                 labels: labels,
@@ -56,7 +80,20 @@ export const usernationgraphadmin = (role) => {
                 data: data,
             };
 
-            const chart = new Chart(ctx, config);
+            this.chart = new Chart(ctx, config);
+        },
+        refreshGraph() {
+            if (!this.chart) {
+                this.createGraph();
+                return;
+            }
+
+            const sortedNationData = this.getSortedNationData();
+            this.chart.data.labels = sortedNationData.map((nation) => nation.name);
+            this.chart.data.datasets[0].data = sortedNationData.map((nation) =>
+                this.getMetricValue(nation)
+            );
+            this.chart.update();
         },
 
         searchNationByValue(e) {
@@ -88,17 +125,18 @@ export const usernationgraphadmin = (role) => {
         updateNations() {
             const offset = (this.currentNationsPage - 1) * 10; // Assuming 10 items per page
             this.totalNationsPages = Math.ceil(this.filteredNationData.length / 10);
-            this.paginatedNations = this.filteredNationData.slice(offset, offset + 10);
+            const sortedNationData = this.getSortedNationData(this.filteredNationData);
+            this.paginatedNations = sortedNationData.slice(offset, offset + 10);
         },
         
         async init() {
             console.log("usernationgraph initialized");
             this.nationData = await this.getNationData();
-            this.worldYearData = await this.getWorldYearData();
-            this.createGraph();
             this.filteredNationData = this.nationData;
             this.totalNationsPages = Math.ceil(this.filteredNationData.length / 10);
             this.updateNations();
+            this.worldYearData = await this.getWorldYearData();
+            this.createGraph();
 
             // Mando i dati al genitore, per evitare nuovi fetch inutili
             this.$dispatch("usernationgraph-data", this.nationData);
