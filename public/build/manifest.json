@@ -3,13 +3,17 @@
     "file": "assets/auto-CdBL8C_c.js",
     "name": "auto"
   },
+  "_dashboardUserMetrics-C33yvKIW.js": {
+    "file": "assets/dashboardUserMetrics-C33yvKIW.js",
+    "name": "dashboardUserMetrics"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-ByLAAEl4.css",
+    "file": "assets/app-D5317Jnp.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-DGPH1zTS.js",
+    "file": "assets/app-BOIFptgR.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -89,57 +93,63 @@
     "isDynamicEntry": true
   },
   "resources/js/useracademygraphadmin.js": {
-    "file": "assets/useracademygraphadmin-BYCv97Z5.js",
+    "file": "assets/useracademygraphadmin-cbQ-GRCY.js",
     "name": "useracademygraphadmin",
     "src": "resources/js/useracademygraphadmin.js",
     "isDynamicEntry": true,
     "imports": [
-      "_auto-CdBL8C_c.js"
+      "_auto-CdBL8C_c.js",
+      "_dashboardUserMetrics-C33yvKIW.js"
     ]
   },
   "resources/js/usercoursegraphadmin.js": {
-    "file": "assets/usercoursegraphadmin-vqOXKDWY.js",
+    "file": "assets/usercoursegraphadmin-e2jdvAbU.js",
     "name": "usercoursegraphadmin",
     "src": "resources/js/usercoursegraphadmin.js",
     "isDynamicEntry": true,
     "imports": [
-      "_auto-CdBL8C_c.js"
+      "_auto-CdBL8C_c.js",
+      "_dashboardUserMetrics-C33yvKIW.js"
     ]
   },
   "resources/js/usernationgraphadmin.js": {
-    "file": "assets/usernationgraphadmin-CNqPddjE.js",
+    "file": "assets/usernationgraphadmin-B8ZHpifL.js",
     "name": "usernationgraphadmin",
     "src": "resources/js/usernationgraphadmin.js",
     "isDynamicEntry": true,
     "imports": [
-      "_auto-CdBL8C_c.js"
+      "_auto-CdBL8C_c.js",
+      "_dashboardUserMetrics-C33yvKIW.js"
     ]
   },
   "resources/js/userschoolgraph.js": {
-    "file": "assets/userschoolgraph-DTTW1urs.js",
+    "file": "assets/userschoolgraph-B6egfAUW.js",
     "name": "userschoolgraph",
     "src": "resources/js/userschoolgraph.js",
     "isDynamicEntry": true,
     "imports": [
-      "_auto-CdBL8C_c.js"
+      "_auto-CdBL8C_c.js",
+      "_dashboardUserMetrics-C33yvKIW.js"
     ]
   },
   "resources/js/userschoolgraphadmin.js": {
-    "file": "assets/userschoolgraphadmin-XwfO8X8x.js",
+    "file": "assets/userschoolgraphadmin-CtqpdEZ-.js",
     "name": "userschoolgraphadmin",
     "src": "resources/js/userschoolgraphadmin.js",
     "isDynamicEntry": true,
     "imports": [
-      "_auto-CdBL8C_c.js"
+      "_auto-CdBL8C_c.js",
+      "_dashboardUserMetrics-C33yvKIW.js"
     ]
   },
   "resources/js/usersclangraph.js": {
-    "file": "assets/usersclangraph-D6YuXH6K.js",
+    "file": "assets/usersclangraph-BNvSRNDh.js",
     "name": "usersclangraph",
     "src": "resources/js/usersclangraph.js",
     "isDynamicEntry": true,
     "imports": [
-      "_auto-CdBL8C_c.js"
+      "_auto-CdBL8C_c.js",
+      "_dashboardUserMetrics-C33yvKIW.js"
     ]
   }
 }

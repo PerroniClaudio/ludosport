@@ -1,0 +1,1 @@
+const c=(e,t="active")=>t==="registered"?e.registered_athletes??e.athletes??0:e.active_athletes??e.athletes??0,n=(e,t="active")=>[...e].sort((r,a)=>{const s=c(a,t)-c(r,t);return s!==0?s:r.name.localeCompare(a.name)});export{c as g,n as s};
