@@ -13,10 +13,13 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-BOIFptgR.js",
+    "file": "assets/app-DKqZUXLl.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
+    "imports": [
+      "resources/js/cookie-policy-manager.js"
+    ],
     "dynamicImports": [
       "resources/js/editor.js",
       "resources/js/googlemap.js",
@@ -40,6 +43,12 @@
     "name": "calendar",
     "src": "resources/js/calendar.js",
     "isDynamicEntry": true
+  },
+  "resources/js/cookie-policy-manager.js": {
+    "file": "assets/cookie-policy-manager-hUC8UiYt.js",
+    "name": "cookie-policy-manager",
+    "src": "resources/js/cookie-policy-manager.js",
+    "isEntry": true
   },
   "resources/js/editor.js": {
     "file": "assets/editor-CmpbMrfy.js",
