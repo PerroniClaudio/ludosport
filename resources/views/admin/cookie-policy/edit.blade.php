@@ -151,7 +151,7 @@
         }
 
         .ProseMirror {
-            @apply min-h-96 outline-none;
+            @apply outline-none;
         }
     </style>
 </x-app-layout>

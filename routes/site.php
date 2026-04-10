@@ -124,10 +124,4 @@ Route::get('/events/{event}/description/image/{filename}', [App\Http\Controllers
 
 /** Statiche */
 
-Route::get('/cookie-policy', function () {
-    return view('website.cookie-policy');
-})->name('cookie-policy');
 
-Route::get('/privacy-policy', function () {
-    return view('website.privacy-policy');
-})->name('privacy-policy');

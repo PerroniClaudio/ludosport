@@ -68,7 +68,7 @@ export const editor = (content, isEditable = true, entityId = null, entityType =
                 autofocus: false,
                 editorProps: {
                     attributes: {
-                        class: "w-full min-h-[15rem] border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:outline-none focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm",
+                        class: "w-full min-h-[15rem] max-h-[35rem] overflow-auto border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:outline-none focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm",
                     },
                 },
                 onCreate({ editor }) {

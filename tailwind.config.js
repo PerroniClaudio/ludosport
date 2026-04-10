@@ -20,6 +20,8 @@ export default {
         'rounded-lg',
         'my-4',
         'min-h-[15rem]',
+        'max-h-[35rem]',
+        'overflow-auto',
     ],
 
     future: {

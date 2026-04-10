@@ -8,12 +8,12 @@
     "name": "dashboardUserMetrics"
   },
   "resources/css/app.css": {
-    "file": "assets/app-D5317Jnp.css",
+    "file": "assets/app-Bhese4_Z.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-DKqZUXLl.js",
+    "file": "assets/app-DseJys-k.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -51,7 +51,7 @@
     "isEntry": true
   },
   "resources/js/editor.js": {
-    "file": "assets/editor-CmpbMrfy.js",
+    "file": "assets/editor-CRfvpigR.js",
     "name": "editor",
     "src": "resources/js/editor.js",
     "isDynamicEntry": true
