@@ -32,17 +32,17 @@ class AggregateLogArchivesCommand extends Command
             $this->warn("DRY RUN MODE - No changes will be made");
         }
         
-        // Pattern: logs/YYYY/MM/DD/HH-MM-SS/laravel/*.log (include timestamps)
+        // Pattern: logs/YYYY/MM/DD/HH-MM-SS/*.log (without laravel subfolder)
         $searchPath = "{$prefix}/{$month->format('Y/m')}";
         
         try {
             $files = collect($disk->allFiles($searchPath))
-                ->filter(fn($file) => str_contains($file, '/laravel/') && str_ends_with($file, '.log'))
+                ->filter(fn($file) => str_ends_with($file, '.log'))
                 ->filter(fn($file) => !str_contains($file, '/monthly/')) // Exclude existing monthly archives
                 ->filter(function($file) {
-                    // Only include files with correct timestamp structure: logs/YYYY/MM/DD/HH-MM-SS/laravel/*.log
+                    // Only include files with correct timestamp structure: logs/YYYY/MM/DD/HH-MM-SS/*.log
                     $pathParts = explode('/', $file);
-                    $timestampPart = $pathParts[count($pathParts) - 3] ?? '';
+                    $timestampPart = $pathParts[count($pathParts) - 2] ?? ''; // Timestamp is 2nd from end
                     return preg_match('/^\d{2}-\d{2}-\d{2}$/', $timestampPart); // HH-MM-SS format
                 })
                 ->groupBy(function ($file) {
@@ -76,7 +76,7 @@ class AggregateLogArchivesCommand extends Command
         }
         
         $prefix = config('logging.archive.prefix', 'logs');
-        $aggregatedPath = "{$prefix}/{$month->format('Y/m')}/laravel/monthly/{$filename}";
+        $aggregatedPath = "{$prefix}/{$month->format('Y/m')}/monthly/{$filename}";
         
         $this->line("📦 Aggregating {$files->count()} daily files into: {$aggregatedPath}");
         
@@ -92,10 +92,10 @@ class AggregateLogArchivesCommand extends Command
             ->sort()
             ->map(function($file) use ($disk) {
                 $content = $disk->get($file);
-                // Extract date and time from path: logs/2026/04/15/14-30-25/laravel/user.log
+                // Extract date and time from path: logs/2026/04/15/14-30-25/user.log
                 $pathParts = explode('/', $file);
-                $day = $pathParts[count($pathParts) - 4]; // Extract day
-                $time = $pathParts[count($pathParts) - 3]; // Extract HH-MM-SS timestamp
+                $day = $pathParts[count($pathParts) - 3]; // Extract day
+                $time = $pathParts[count($pathParts) - 2]; // Extract HH-MM-SS timestamp
                 // Add day and time separator for better readability
                 return "=== Day {$day} at {$time} ===\n{$content}";
             })
@@ -116,7 +116,7 @@ class AggregateLogArchivesCommand extends Command
                 }
             } else {
                 $this->info("ℹ️  Keeping daily files (remove_daily_after_monthly=false)");
-                $this->line("   Daily files preserved at: {$prefix}/{$month->format('Y/m')}/*/laravel/{$filename}");
+                $this->line("   Daily files preserved at: {$prefix}/{$month->format('Y/m')}/*/".$filename);
             }
         } else {
             $this->error("❌ Failed to create monthly archive: {$aggregatedPath}");

@@ -220,7 +220,7 @@ class DailyLogArchiveUploader
     }
 
     /**
-     * Generate hierarchical remote path with timestamp: logs/YYYY/MM/DD/laravel/filename.log
+     * Generate hierarchical remote path with timestamp: logs/YYYY/MM/DD/HH-MM-SS/filename.log
      *
      * @param  string  $localPath
      * @param  CarbonInterface  $executionTime
@@ -236,13 +236,13 @@ class DailyLogArchiveUploader
         // Clean filename: remove date patterns (laravel-2026-04-13.log → laravel.log)
         $filename = $this->cleanLogFilename(basename($localPath));
 
-        // Standard daily archiving: logs/YYYY/MM/DD/laravel/channel.log
+        // Standard archiving with timestamp: logs/YYYY/MM/DD/HH-MM-SS/filename.log
         $segments = array_filter([
             $prefix,
             $timestamp->format('Y'),
             $timestamp->format('m'), 
             $timestamp->format('d'),
-            'laravel',
+            $timestamp->format('H-i-s'),
             $filename,
         ]);
 
