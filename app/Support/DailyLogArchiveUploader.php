@@ -71,7 +71,9 @@ class DailyLogArchiveUploader
                 Log::info($msg);
                 if ($outputCallback) $outputCallback($msg);
             } catch (\Throwable $e) {
-                Log::error("Failed to archive log for channel [{$channelName}]: {$e->getMessage()}");
+                $errorMsg = "❌ [{$channelName}] Failed: {$e->getMessage()}";
+                Log::error($errorMsg);
+                if ($outputCallback) $outputCallback($errorMsg);
                 // Continue with other channels
             }
         }
