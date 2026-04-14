@@ -16,31 +16,39 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-Artisan::command('logs:archive-daily {--date= : The log date to archive (Y-m-d)}', function (DailyLogArchiveUploader $uploader) {
+Artisan::command('logs:archive-daily {--date= : The execution timestamp (Y-m-d H:i:s)} {--force : Force archival of active log files}', function (DailyLogArchiveUploader $uploader) {
     $dateOption = $this->option('date');
+    $force = $this->option('force');
 
     try {
-        $date = $dateOption
-            ? CarbonImmutable::createFromFormat('Y-m-d', $dateOption)->startOfDay()
+        $executionTime = $dateOption
+            ? CarbonImmutable::createFromFormat('Y-m-d H:i:s', $dateOption)
             : null;
     } catch (\Throwable) {
-        $this->error('The --date option must be in Y-m-d format.');
+        $this->error('The --date option must be in Y-m-d H:i:s format.');
 
         return Command::INVALID;
     }
 
-    $remotePath = $uploader->archive($date);
+    if ($force) {
+        $this->warn('⚠️  Force mode enabled: archiving active log files!');
+    }
 
-    if ($remotePath === null) {
-        $this->info('No daily log file found to archive.');
+    $uploadedPaths = $uploader->archive($executionTime, $force);
+
+    if (empty($uploadedPaths)) {
+        $this->info('No log files found to archive.');
 
         return Command::SUCCESS;
     }
 
-    $this->info("Daily log uploaded to {$remotePath} and truncated locally.");
+    $this->info('✅ Uploaded ' . count($uploadedPaths) . ' log file(s):');
+    foreach ($uploadedPaths as $path) {
+        $this->line("  - {$path}");
+    }
 
     return Command::SUCCESS;
-})->purpose('Upload the previous daily Laravel log to Google Cloud Storage and truncate it locally.');
+})->purpose('Upload all channel logs to Google Cloud Storage with hierarchical timestamp structure.');
 
 Schedule::job(new CheckWaitingListJob())->daily();
 
