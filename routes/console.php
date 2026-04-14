@@ -16,9 +16,10 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-Artisan::command('logs:archive-daily {--date= : The execution timestamp (Y-m-d H:i:s)} {--force : Force archival of active log files}', function (DailyLogArchiveUploader $uploader) {
+Artisan::command('logs:archive-daily {--date= : The execution timestamp (Y-m-d H:i:s)} {--force : Force archival of active log files} {--v|verbose : Show verbose output}', function (DailyLogArchiveUploader $uploader) {
     $dateOption = $this->option('date');
     $force = $this->option('force');
+    $verbose = $this->option('verbose');
 
     try {
         $executionTime = $dateOption
@@ -34,7 +35,8 @@ Artisan::command('logs:archive-daily {--date= : The execution timestamp (Y-m-d H
         $this->warn('⚠️  Force mode enabled: archiving active log files!');
     }
 
-    $uploadedPaths = $uploader->archive($executionTime, $force);
+    $outputCallback = $verbose ? fn($msg) => $this->line($msg) : null;
+    $uploadedPaths = $uploader->archive($executionTime, $force, $outputCallback);
 
     if (empty($uploadedPaths)) {
         $this->info('No log files found to archive.');

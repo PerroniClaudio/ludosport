@@ -16,9 +16,10 @@ class DailyLogArchiveUploader
      *
      * @param  CarbonInterface|null  $date  Optional execution timestamp for remote path
      * @param  bool  $force  Force archival of active log files (bypasses today check)
+     * @param  callable|null  $outputCallback  Callback for verbose output (receives message string)
      * @return array<string> Array of uploaded remote paths
      */
-    public function archive(?CarbonInterface $date = null, bool $force = false): array
+    public function archive(?CarbonInterface $date = null, bool $force = false, ?callable $outputCallback = null): array
     {
         $executionTime = $date
             ? CarbonImmutable::instance($date)
@@ -27,31 +28,48 @@ class DailyLogArchiveUploader
         $channels = $this->getArchivableChannels();
         $uploaded = [];
 
+        if ($outputCallback) {
+            $outputCallback("Found " . count($channels) . " archivable channel(s): " . implode(', ', array_keys($channels)));
+        }
+
         foreach ($channels as $channelName => $channelConfig) {
             try {
                 $localPath = $this->getChannelLogPath($channelConfig);
 
                 if (! is_file($localPath)) {
-                    Log::debug("Log file not found for channel [{$channelName}]: {$localPath}");
+                    $msg = "⏭️  [{$channelName}] File not found: {$localPath}";
+                    Log::debug($msg);
+                    if ($outputCallback) $outputCallback($msg);
                     continue;
                 }
 
                 if (filesize($localPath) === 0) {
-                    Log::debug("Log file is empty for channel [{$channelName}]: {$localPath}");
+                    $msg = "⏭️  [{$channelName}] File is empty: {$localPath}";
+                    Log::debug($msg);
+                    if ($outputCallback) $outputCallback($msg);
                     continue;
                 }
 
                 // Skip active files unless --force is used
                 if (! $force && $this->isActiveLogFile($localPath)) {
-                    Log::debug("Skipping active log file for channel [{$channelName}]: {$localPath} (use --force to override)");
+                    $msg = "⏭️  [{$channelName}] Skipping active file (modified today): {$localPath}";
+                    Log::debug($msg);
+                    if ($outputCallback) $outputCallback($msg);
                     continue;
                 }
 
                 $remotePath = $this->remotePathForDate($localPath, $executionTime);
+                
+                if ($outputCallback) {
+                    $outputCallback("📤 [{$channelName}] Uploading: {$localPath} (" . $this->formatBytes(filesize($localPath)) . ")");
+                }
+                
                 $this->uploadLogFile($localPath, $remotePath);
 
                 $uploaded[] = $remotePath;
-                Log::info("Archived log for channel [{$channelName}] to [{$remotePath}]");
+                $msg = "✅ [{$channelName}] Archived to: {$remotePath}";
+                Log::info($msg);
+                if ($outputCallback) $outputCallback($msg);
             } catch (\Throwable $e) {
                 Log::error("Failed to archive log for channel [{$channelName}]: {$e->getMessage()}");
                 // Continue with other channels
@@ -214,5 +232,19 @@ class DailyLogArchiveUploader
     public function disk(): string
     {
         return (string) config('logging.archive.disk', 'gcs');
+    }
+
+    /**
+     * Format bytes to human-readable size.
+     *
+     * @param  int  $bytes
+     * @return string
+     */
+    protected function formatBytes(int $bytes): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $factor = floor((strlen((string) $bytes) - 1) / 3);
+        
+        return sprintf("%.2f %s", $bytes / pow(1024, $factor), $units[$factor] ?? 'TB');
     }
 }
