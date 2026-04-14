@@ -40,6 +40,9 @@ return [
         'disk' => env('LOG_ARCHIVE_DISK', 'gcs'),
         'prefix' => env('LOG_ARCHIVE_PREFIX', 'logs'),
         'time' => env('LOG_ARCHIVE_TIME', '00:10'),
+        'aggregate_monthly' => env('LOG_ARCHIVE_AGGREGATE_MONTHLY', true),
+        // IMPORTANT: Set to true only if you want to delete daily files after aggregation
+        'remove_daily_after_monthly' => env('LOG_ARCHIVE_REMOVE_DAILY_AFTER_MONTHLY', false),
     ],
 
     /*

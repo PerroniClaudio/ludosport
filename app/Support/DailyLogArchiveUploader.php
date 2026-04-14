@@ -27,6 +27,7 @@ class DailyLogArchiveUploader
 
         $channels = $this->getArchivableChannels();
         $uploaded = [];
+        $processedFiles = []; // Track processed physical files to avoid duplicates
 
         if ($outputCallback) {
             $outputCallback("Found " . count($channels) . " archivable channel(s): " . implode(', ', array_keys($channels)));
@@ -57,6 +58,18 @@ class DailyLogArchiveUploader
                     if ($outputCallback) $outputCallback($msg);
                     continue;
                 }
+
+                // Check if this physical file has already been processed
+                $realPath = realpath($localPath);
+                if (isset($processedFiles[$realPath])) {
+                    $msg = "⏭️  [{$channelName}] File already archived by channel '{$processedFiles[$realPath]}': {$localPath}";
+                    Log::debug($msg);
+                    if ($outputCallback) $outputCallback($msg);
+                    continue;
+                }
+                
+                // Mark this file as processed by this channel
+                $processedFiles[$realPath] = $channelName;
 
                 $remotePath = $this->remotePathForDate($localPath, $executionTime);
                 
@@ -165,23 +178,39 @@ class DailyLogArchiveUploader
     protected function uploadLogFile(string $localPath, string $remotePath): void
     {
         $disk = Storage::disk($this->disk());
-        $stream = fopen($localPath, 'r');
-
-        if ($stream === false) {
-            throw new RuntimeException("Unable to open log file [{$localPath}] for upload.");
-        }
-
+        
+        // Create a temporary copy to avoid issues with active files
+        $tempPath = $localPath . '.tmp.' . uniqid();
+        
         try {
-            $uploaded = $disk->put($remotePath, $stream);
-        } finally {
-            // Only close if still a valid resource (put() may have closed it)
-            if (is_resource($stream)) {
-                fclose($stream);
+            // Copy file to temp location to avoid reading from active file
+            if (!copy($localPath, $tempPath)) {
+                throw new RuntimeException("Failed to create temporary copy of [{$localPath}]");
             }
-        }
+            
+            // Upload normally (create new or overwrite)
+            $stream = fopen($tempPath, 'r');
+            if ($stream === false) {
+                throw new RuntimeException("Unable to open temporary file [{$tempPath}] for upload.");
+            }
 
-        if (! $uploaded) {
-            throw new RuntimeException("Unable to upload log file [{$localPath}] to [{$remotePath}].");
+            try {
+                $uploaded = $disk->put($remotePath, $stream);
+            } finally {
+                // Only close if still a valid resource (put() may have closed it)
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+            }
+
+            if (! $uploaded) {
+                throw new RuntimeException("Unable to upload log file [{$localPath}] to [{$remotePath}].");
+            }
+        } finally {
+            // Clean up: remove temp file
+            if (file_exists($tempPath)) {
+                unlink($tempPath);
+            }
         }
 
         // Truncate file after successful upload
@@ -191,7 +220,7 @@ class DailyLogArchiveUploader
     }
 
     /**
-     * Generate hierarchical remote path with timestamp: logs/YYYY/MM/DD/HH-MM-SS/filename.log
+     * Generate hierarchical remote path with timestamp: logs/YYYY/MM/DD/laravel/filename.log
      *
      * @param  string  $localPath
      * @param  CarbonInterface  $executionTime
@@ -201,15 +230,19 @@ class DailyLogArchiveUploader
     {
         $prefix = trim((string) config('logging.archive.prefix', 'logs'), '/');
         
+        // Use same timezone as nginx script (+2 hours for Europe/Rome) 
+        $timestamp = $executionTime->addHours(2);
+        
         // Clean filename: remove date patterns (laravel-2026-04-13.log → laravel.log)
         $filename = $this->cleanLogFilename(basename($localPath));
 
+        // Standard daily archiving: logs/YYYY/MM/DD/laravel/channel.log
         $segments = array_filter([
             $prefix,
-            $executionTime->format('Y'),
-            $executionTime->format('m'),
-            $executionTime->format('d'),
-            $executionTime->format('H-i-s'),
+            $timestamp->format('Y'),
+            $timestamp->format('m'), 
+            $timestamp->format('d'),
+            'laravel',
             $filename,
         ]);
 

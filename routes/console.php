@@ -52,6 +52,19 @@ Artisan::command('logs:archive-daily {--date= : The execution timestamp (Y-m-d H
     return Command::SUCCESS;
 })->purpose('Upload all channel logs to Google Cloud Storage with hierarchical timestamp structure.');
 
+// Aggregate daily log archives into monthly files for better searchability  
+Artisan::command('logs:aggregate-monthly {month? : Month to aggregate (Y-m format)} {--channel= : Specific channel} {--dry-run : Show what would be done}', function () {
+    $month = $this->argument('month') 
+        ? Carbon\Carbon::createFromFormat('Y-m', $this->argument('month'))
+        : Carbon\Carbon::now()->subMonth();
+        
+    $channel = $this->option('channel');
+    $dryRun = $this->option('dry-run');
+    
+    $command = app(\App\Console\Commands\AggregateLogArchivesCommand::class);
+    return $command->handle();
+})->purpose('Aggregate daily log archives into monthly files for easier long-term analysis');
+
 Schedule::job(new CheckWaitingListJob())->daily();
 
 Schedule::job(new CheckPrimaryAcademyJob())->daily();
@@ -61,6 +74,13 @@ Schedule::job(new CheckUsersComingOfAgeJob())->daily();
 Schedule::command('logs:archive-daily')
     ->dailyAt(config('logging.archive.time', '00:10'))
     ->name('logs:archive-daily')
+    ->onOneServer()
+    ->withoutOverlapping();
+
+// Aggregate previous month's daily archives on the 1st of each month
+Schedule::command('logs:aggregate-monthly', [Carbon\Carbon::now()->subMonth()->format('Y-m')])
+    ->monthlyOn(1, '02:00')
+    ->name('logs:aggregate-monthly')
     ->onOneServer()
     ->withoutOverlapping();
 
