@@ -174,7 +174,10 @@ class DailyLogArchiveUploader
         try {
             $uploaded = $disk->put($remotePath, $stream);
         } finally {
-            fclose($stream);
+            // Only close if still a valid resource (put() may have closed it)
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
         }
 
         if (! $uploaded) {
