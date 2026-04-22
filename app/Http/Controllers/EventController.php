@@ -399,12 +399,14 @@ class EventController extends Controller
             ];
 
             foreach ($disallowedChanges as $field => $currentValue) {
-                if ($request->exists($field) && (string) $request->input($field) !== $currentValue) {
+                if ($request->exists($field) && (string) $request->input($field) !== $currentValue && !(
+                    $field === "weapon_form_id" && in_array($currentValue, [null, '', '0', 0], true) && in_array($request->input($field), [null, '', '0', 0], true)
+                )) {
                     return response()->json([
                         'error' => true,
-                        'message' => $canEditPublishedName
+                        'message' => ($canEditPublishedName
                             ? 'After approval, you can only modify "block subscriptions" and the event name once it is published'
-                            : 'After approval, you can only modify "block subscriptions" value'
+                            : 'After approval, you can only modify "block subscriptions" value') . json_encode($field) . ': ' . json_encode($request->input($field)) . ' (current: ' . json_encode($currentValue) . ')'
                     ]);
                 }
             }
