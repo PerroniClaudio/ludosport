@@ -109,11 +109,32 @@ class ExportController extends Controller {
      */
     public function store(Request $request) {
         //  
+        $authUser = User::find(auth()->user()->id);
+        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to perform this action');
+        }
 
         $export = new Export();
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
+        $authRoleId = $authUser->getActiveRoleId();
         $exportTypes = Export::getAvailableExportsByRole($authRole);
+
+        $authAcademy = null;
+        $authSchool = null;
+        switch ($authRole) {
+            case 'admin':
+                break;
+            case 'rector':
+            case 'manager':
+                $authAcademy = $authUser->getActiveInstitution();
+                break;
+            case 'dean':
+                $authSchool = $authUser->getActiveInstitution();
+                break;
+            default:
+                break;
+        }
 
         $request->validate([
             'type' => 'required|string|in:' . implode(',', $exportTypes)
@@ -256,6 +277,9 @@ class ExportController extends Controller {
         $export->filters = json_encode($filters);
         $export->file = '';
         $export->log = "['Export requested at " . now()->format('Y-m-d H:i:s') . "']";
+        $export->user_role_id = $authRoleId;
+        $export->user_academy_id = $authAcademy?->id;
+        $export->user_school_id = $authSchool?->id;
 
         $export->save();
 

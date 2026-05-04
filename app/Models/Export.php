@@ -15,6 +15,9 @@ class Export extends Model {
         'log',
         'filters',
         'user_id',
+        'user_role_id',
+        'user_academy_id',
+        'user_school_id',
     ];
 
     private $export_types = [
@@ -32,9 +35,21 @@ class Export extends Model {
         'orders',
     ];
 
-
+    // Utente che ha richiesto l'export
     public function user() {
         return $this->belongsTo(User::class);
+    }
+    // Ruolo dell'utente che ha richiesto l'export
+    public function userRole() {
+        return $this->belongsTo(Role::class, 'user_role_id');
+    }
+    // Accademia dell'utente che ha richiesto l'export
+    public function userAcademy() {
+        return $this->belongsTo(Academy::class, 'user_academy_id');
+    }
+    // Scuola dell'utente che ha richiesto l'export
+    public function userSchool() {
+        return $this->belongsTo(School::class, 'user_school_id');
     }
 
     public function getExportTypes() {

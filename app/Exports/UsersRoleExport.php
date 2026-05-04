@@ -17,22 +17,24 @@ class UsersRoleExport implements FromArray {
 
         $selected_roles = json_decode($this->export->filters)->selected_roles;
         $requestingUser = User::find($this->export->user_id);
-        $requestingRole = $requestingUser?->getRole();
+        $requestingRole = $this->export->userRole?->name;
 
         $users = User::whereHas('roles', function ($query) use ($selected_roles) {
             $query->whereIn('role_id', $selected_roles);
         })->when(in_array($requestingRole, ['rector', 'manager', 'dean']), function ($query) use ($requestingUser, $requestingRole) {
             $scopeId = match ($requestingRole) {
-                'rector', 'manager' => $requestingUser?->getActiveInstitutionId(),
-                'dean' => $requestingUser?->getActiveInstitutionId(),
+                'rector', 'manager' => $this->export->userAcademy?->id,
+                'dean' => $this->export->userSchool?->id,
                 default => null,
             };
 
+            // Si ferma se scopeId è null
             if (!$scopeId) {
                 $query->whereRaw('1 = 0');
                 return;
             }
 
+            // Restituisce questi dati se l'utente è un rettore o manager
             if (in_array($requestingRole, ['rector', 'manager'])) {
                 $query->where(function ($academyQuery) use ($scopeId) {
                     $academyQuery->whereHas('academies', function ($q) use ($scopeId) {
@@ -48,6 +50,7 @@ class UsersRoleExport implements FromArray {
                 return;
             }
 
+            // Restituisce questi dati se l'utente è un preside
             $query->where(function ($schoolQuery) use ($scopeId) {
                 $schoolQuery->whereHas('schools', function ($q) use ($scopeId) {
                     $q->where('school_id', $scopeId);
