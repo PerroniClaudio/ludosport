@@ -9,17 +9,26 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-class UsersAcademyExport implements WithMultipleSheets {
+class UsersAcademyExport implements WithMultipleSheets
+{
     use Exportable;
 
     private $export;
 
-    public function __construct($export) {
+    private $exportUser;
+
+    private $exportUserRole;
+
+    public function __construct($export)
+    {
         $this->export = $export;
+        $this->exportUser = User::find($this->export->user_id);
+        $this->exportUserRole = $this->export->userRole?->name;
     }
 
     public function sheets(): array
     {
+        $includeGender = $this->exportUserRole === 'admin';
         $filters = json_decode($this->export->filters);
         $academies = collect($filters->academies)->pluck('id')->toArray();
         $users_type = $filters->users_type ?? null;
@@ -28,20 +37,23 @@ class UsersAcademyExport implements WithMultipleSheets {
 
         foreach (Academy::whereIn('id', $academies)->get() as $academy) {
             // Prendi gli utenti in base al tipo richiesto
-            if ($users_type === "athletes") {
+            if ($users_type === 'athletes') {
                 $users = $academy->athletes->map(function ($user) {
-                    $user->detected_as = "athlete";
+                    $user->detected_as = 'athlete';
+
                     return $user;
                 });
-            } elseif ($users_type === "personnel") {
+            } elseif ($users_type === 'personnel') {
                 $users = $academy->personnel->map(function ($user) {
-                    $user->detected_as = "personnel";
+                    $user->detected_as = 'personnel';
+
                     return $user;
                 });
             } else {
                 // entrambi
                 $athletes = $academy->athletes->map(function ($user) {
-                    $user->detected_as = "athlete";
+                    $user->detected_as = 'athlete';
+
                     return $user;
                 });
                 $personnel = $academy->personnel;
@@ -53,14 +65,14 @@ class UsersAcademyExport implements WithMultipleSheets {
                             $existing->detected_as .= ', personnel';
                         }
                     } else {
-                        $user->detected_as = "personnel";
+                        $user->detected_as = 'personnel';
                         $users->push($user);
                     }
                 }
             }
 
             // Mappa i dati degli utenti
-            $usersArray = $users->map(function ($user) use ($academy, $users_type) {
+            $usersArray = $users->map(function ($user) use ($academy, $users_type, $includeGender) {
                 $eventResults = $user->eventResults()
                     ->whereHas('event', function ($query) {
                         $query->where('end_date', '<', now()->format('Y-m-d'))
@@ -70,7 +82,7 @@ class UsersAcademyExport implements WithMultipleSheets {
                 $total_war_points = $eventResults->sum('total_war_points');
                 $total_style_points = $eventResults->sum('total_style_points');
 
-                return [
+                $row = [
                     $academy->name,
                     $user->unique_code,
                     $user->name,
@@ -79,28 +91,35 @@ class UsersAcademyExport implements WithMultipleSheets {
                     $user->roles->pluck('name')->implode(', '),
                     $user->created_at,
                     $user->updated_at,
-                    $user->how_found_us ?? "",
+                    $user->how_found_us ?? '',
                     $user->detected_as,
-                    $users_type != "personnel"
+                    $users_type != 'personnel'
                         ? ($user->schoolAthletes
                             ? $user->schoolAthletes->filter(function ($school) use ($academy) {
                                 return $school->academy_id == $academy->id;
                             })->pluck('name')->implode(', ')
-                            : "")
-                        : "",
-                    $users_type != "athletes"
+                            : '')
+                        : '',
+                    $users_type != 'athletes'
                         ? ($user->schoolPersonnel
                             ? $user->schoolPersonnel->filter(function ($school) use ($academy) {
                                 return $school->academy_id == $academy->id;
                             })->pluck('name')->implode(', ')
-                            : "")
-                        : "",
+                            : '')
+                        : '',
                     $total_war_points,
-                    $total_style_points
+                    $total_style_points,
                 ];
+
+                // Aggiunge condizionalmente il genere dopo l'email
+                if ($includeGender) {
+                    array_splice($row, 5, 0, $user->gender ?? '');
+                }
+
+                return $row;
             })->toArray();
 
-            $sheets[] = new UsersAcademySheet($usersArray, $academy->name);
+            $sheets[] = new UsersAcademySheet($usersArray, $academy->name, $includeGender);
         }
 
         return $sheets;
@@ -110,33 +129,43 @@ class UsersAcademyExport implements WithMultipleSheets {
 class UsersAcademySheet implements FromArray, WithTitle
 {
     private $users;
+
     private $academyName;
 
-    public function __construct($users, $academyName)
+    private $includeGender;
+
+    public function __construct($users, $academyName, $includeGender = false)
     {
         $this->users = $users;
         $this->academyName = $academyName;
+        $this->includeGender = $includeGender;
     }
 
     public function array(): array
     {
+        $headers = [
+            'Academy',
+            'Code',
+            'Name',
+            'Surname',
+            'Email',
+            'Roles',
+            'Created At',
+            'Updated At',
+            'How found us',
+            'Athlete/Personnel',
+            'Schools as athlete',
+            'Schools as personnel',
+            'Total Arena Points',
+            'Total Style Points',
+        ];
+        // Aggiunge condizionalmente l'intestazione del genere dopo l'email
+        if ($this->includeGender) {
+            array_splice($headers, 5, 0, 'Gender');
+        }
+
         return array_merge([
-            [
-                "Academy",
-                "Code",
-                "Name",
-                "Surname",
-                "Email",
-                "Roles",
-                "Created At",
-                "Updated At",
-                "How found us",
-                "Athlete/Personnel",
-                "Schools as athlete",
-                "Schools as personnel",
-                "Total Arena Points",
-                "Total Style Points"
-            ]
+            $headers,
         ], $this->users);
     }
 

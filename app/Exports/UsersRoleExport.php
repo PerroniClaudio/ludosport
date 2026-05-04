@@ -1,27 +1,35 @@
 <?php
+
 namespace App\Exports;
 
-use App\Models\School;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromArray;
 
-class UsersRoleExport implements FromArray {
-
+class UsersRoleExport implements FromArray
+{
     private $export;
 
-    public function __construct($export) {
+    private $exportUser;
+
+    private $exportUserRole;
+
+    public function __construct($export)
+    {
         $this->export = $export;
+        $this->exportUser = User::find($this->export->user_id);
+        $this->exportUserRole = $this->export->userRole?->name;
     }
 
-    public function array(): array {
+    public function array(): array
+    {
 
         $selected_roles = json_decode($this->export->filters)->selected_roles;
-        $requestingUser = User::find($this->export->user_id);
-        $requestingRole = $this->export->userRole?->name;
+        $requestingRole = $this->exportUserRole;
+        $includeGender = $requestingRole === 'admin';
 
         $users = User::whereHas('roles', function ($query) use ($selected_roles) {
             $query->whereIn('role_id', $selected_roles);
-        })->when(in_array($requestingRole, ['rector', 'manager', 'dean']), function ($query) use ($requestingUser, $requestingRole) {
+        })->when(in_array($requestingRole, ['rector', 'manager', 'dean'], true), function ($query) use ($requestingRole) {
             $scopeId = match ($requestingRole) {
                 'rector', 'manager' => $this->export->userAcademy?->id,
                 'dean' => $this->export->userSchool?->id,
@@ -29,8 +37,9 @@ class UsersRoleExport implements FromArray {
             };
 
             // Si ferma se scopeId è null
-            if (!$scopeId) {
+            if (! $scopeId) {
                 $query->whereRaw('1 = 0');
+
                 return;
             }
 
@@ -47,6 +56,7 @@ class UsersRoleExport implements FromArray {
                         $q->where('academy_id', $scopeId);
                     });
                 });
+
                 return;
             }
 
@@ -62,8 +72,9 @@ class UsersRoleExport implements FromArray {
                     $q->where('school_id', $scopeId);
                 });
             });
-        })->with('roles')->get()->map(function ($user) {
-            return [
+        })->with('roles')->get()->map(function ($user) use ($includeGender) {
+            // Crea la riga dell'utente, includendo o escludendo il genere in base al ruolo dell'utente che sta esportando
+            $row = [
                 $user->unique_code,
                 $user->name,
                 $user->surname,
@@ -73,22 +84,31 @@ class UsersRoleExport implements FromArray {
                 })->implode(', '),
                 $user->created_at,
                 $user->updated_at,
-                $user->how_found_us ?? ""
+                $user->how_found_us ?? '',
             ];
+            if ($includeGender) {
+                array_splice($row, 4, 0, $user->gender ?? '');
+            }
+
+            return $row;
         })->toArray();
 
-        return [
-            [
-                "Code",
-                "Name",
-                "Surname",
-                "Email",
-                "Roles",
-                "Created At",
-                "Updated At",
-                "How found us"
-            ],
-            $users
+        $headers = [
+            'Code',
+            'Name',
+            'Surname',
+            'Email',
+            'Roles',
+            'Created At',
+            'Updated At',
+            'How found us',
         ];
+        if ($includeGender) {
+            array_splice($headers, 4, 0, 'Gender');
+        }
+
+        return array_merge([
+            $headers,
+        ], $users);
     }
 }

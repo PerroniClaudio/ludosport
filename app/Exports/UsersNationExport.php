@@ -2,21 +2,29 @@
 
 namespace App\Exports;
 
-use App\Models\Nation;
 use App\Models\Academy;
+use App\Models\Nation;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-class UsersNationExport implements WithMultipleSheets {
+class UsersNationExport implements WithMultipleSheets
+{
     use Exportable;
 
     private $export;
 
-    public function __construct($export) {
+    private $exportUser;
+
+    private $exportUserRole;
+
+    public function __construct($export)
+    {
         $this->export = $export;
+        $this->exportUser = User::find($this->export->user_id);
+        $this->exportUserRole = $this->export->userRole?->name;
     }
 
     public function sheets(): array
@@ -24,6 +32,7 @@ class UsersNationExport implements WithMultipleSheets {
         $filters = json_decode($this->export->filters);
         $nations = collect($filters->nations)->pluck('id')->toArray();
         $users_type = $filters->users_type ?? null;
+        $includeGender = $this->exportUserRole === 'admin';
 
         $sheets = [];
 
@@ -34,20 +43,20 @@ class UsersNationExport implements WithMultipleSheets {
             // Collezioni utenti
             $users = collect();
 
-            if ($users_type === "athletes") {
+            if ($users_type === 'athletes') {
                 foreach ($academies as $academy) {
                     foreach ($academy->athletes as $user) {
-                        $user->detected_as = "athlete";
+                        $user->detected_as = 'athlete';
                         $users->push($user);
                     }
                 }
-            } elseif ($users_type === "personnel") {
+            } elseif ($users_type === 'personnel') {
                 foreach ($academies as $academy) {
                     foreach ($academy->personnel as $user) {
                         $existing = $users->firstWhere('unique_code', $user->unique_code);
-                        if (!$existing) {
-                          $user->detected_as = "personnel";
-                          $users->push($user);
+                        if (! $existing) {
+                            $user->detected_as = 'personnel';
+                            $users->push($user);
                         }
                     }
                 }
@@ -55,7 +64,7 @@ class UsersNationExport implements WithMultipleSheets {
                 // entrambi
                 foreach ($academies as $academy) {
                     foreach ($academy->athletes as $user) {
-                        $user->detected_as = "athlete";
+                        $user->detected_as = 'athlete';
                         $users->push($user);
                     }
                 }
@@ -67,7 +76,7 @@ class UsersNationExport implements WithMultipleSheets {
                                 $existing->detected_as .= ', personnel';
                             }
                         } else {
-                            $user->detected_as = "personnel";
+                            $user->detected_as = 'personnel';
                             $users->push($user);
                         }
                     }
@@ -78,14 +87,14 @@ class UsersNationExport implements WithMultipleSheets {
             $uniqueUsers = $users->unique('unique_code')->values();
 
             // Mappa i dati degli utenti
-            $usersArray = $uniqueUsers->map(function ($user) use ($academies, $users_type, $nation) {
+            $usersArray = $uniqueUsers->map(function ($user) use ($nation, $includeGender) {
                 // Trova le accademie in cui è atleta/personale nella nazione
                 $academiesAsAthlete = $user->academyAthletes
                     ? $user->academyAthletes->where('nation_id', $nation->id)->pluck('name')->implode(', ')
-                    : "";
+                    : '';
                 $academiesAsPersonnel = $user->academies
                     ? $user->academies->where('nation_id', $nation->id)->pluck('name')->implode(', ')
-                    : "";
+                    : '';
 
                 // Calcola i punti totali
                 $eventResults = $user->eventResults()
@@ -97,7 +106,7 @@ class UsersNationExport implements WithMultipleSheets {
                 $total_war_points = $eventResults->sum('total_war_points');
                 $total_style_points = $eventResults->sum('total_style_points');
 
-                return [
+                $row = [
                     $nation->name,
                     $user->unique_code,
                     $user->name,
@@ -106,16 +115,21 @@ class UsersNationExport implements WithMultipleSheets {
                     $user->roles->pluck('name')->implode(', '),
                     $user->created_at,
                     $user->updated_at,
-                    $user->how_found_us ?? "",
-                    $user->detected_as ?? "",
+                    $user->how_found_us ?? '',
+                    $user->detected_as ?? '',
                     $academiesAsAthlete,
                     $academiesAsPersonnel,
                     $total_war_points,
-                    $total_style_points
+                    $total_style_points,
                 ];
+                if ($includeGender) {
+                    array_splice($row, 5, 0, $user->gender ?? '');
+                }
+
+                return $row;
             })->toArray();
 
-            $sheets[] = new UsersNationSheet($usersArray, $nation->name);
+            $sheets[] = new UsersNationSheet($usersArray, $nation->name, $includeGender);
         }
 
         return $sheets;
@@ -125,33 +139,42 @@ class UsersNationExport implements WithMultipleSheets {
 class UsersNationSheet implements FromArray, WithTitle
 {
     private $users;
+
     private $nationName;
 
-    public function __construct($users, $nationName)
+    private $includeGender;
+
+    public function __construct($users, $nationName, $includeGender)
     {
         $this->users = $users;
         $this->nationName = $nationName;
+        $this->includeGender = $includeGender;
     }
 
     public function array(): array
     {
+        $headers = [
+            'Nation',
+            'Code',
+            'Name',
+            'Surname',
+            'Email',
+            'Roles',
+            'Created At',
+            'Updated At',
+            'How found us',
+            'Athlete/Personnel',
+            'Academy as athlete',
+            'Academies as personnel',
+            'Total Arena Points',
+            'Total Style Points',
+        ];
+        if ($this->includeGender) {
+            array_splice($headers, 5, 0, 'Gender');
+        }
+
         return array_merge([
-            [
-                "Nation",
-                "Code",
-                "Name",
-                "Surname",
-                "Email",
-                "Roles",
-                "Created At",
-                "Updated At",
-                "How found us",
-                "Athlete/Personnel",
-                "Academy as athlete",
-                "Academies as personnel",
-                "Total Arena Points",
-                "Total Style Points"
-            ]
+            $headers,
         ], $this->users);
     }
 
