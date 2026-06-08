@@ -13,6 +13,13 @@ use Illuminate\Support\Facades\Http;
 class AssetController extends Controller {
     //
 
+    private function weaponFormVariantAssetPath(WeaponForm $weapon, string $variant): string {
+        $assetName = explode(' ', $weapon->name);
+        $asset = $assetName[0] . "_" . $assetName[1] . ".svg";
+
+        return "/weapon-forms/{$variant}/{$asset}";
+    }
+
     private function retrieveAsset(string $assetName) {
         /** 
          * @disregard Intelephense non rileva il metodo temporaryurl
@@ -155,24 +162,20 @@ class AssetController extends Controller {
 
 
     public function weaponFormFor(WeaponForm $weapon, User $user) {
-
-        $asset_name = explode(' ', $weapon->name);
-        $asset = $asset_name[0] . "_" . $asset_name[1] . ".svg";
-
         $hasFoundCompletition = false;
 
         if ($user->weaponForms()->pluck('weapon_forms.id')->contains($weapon->id)) {
-            $url = $this->retrieveAsset("/weapon-forms/athlete/{$asset}");
+            $url = $this->retrieveAsset($this->weaponFormVariantAssetPath($weapon, 'athlete'));
             $hasFoundCompletition = true;
         }
         
         if ($user->weaponFormsPersonnel()->pluck('weapon_forms.id')->contains($weapon->id)) {
-            $url = $this->retrieveAsset("/weapon-forms/instructor/{$asset}");
+            $url = $this->retrieveAsset($this->weaponFormVariantAssetPath($weapon, 'instructor'));
             $hasFoundCompletition = true;
         }
 
         if ($user->weaponFormsTechnician()->pluck('weapon_forms.id')->contains($weapon->id)) {
-            $url = $this->retrieveAsset("/weapon-forms/technician/{$asset}");
+            $url = $this->retrieveAsset($this->weaponFormVariantAssetPath($weapon, 'technician'));
             $hasFoundCompletition = true;
         } 
                 
@@ -182,6 +185,25 @@ class AssetController extends Controller {
 
         $response = Http::get($url);
         $image = $response->body();
+        $headers = [
+            'Content-Type' => 'image/svg+xml',
+            'Content-Length' => strlen($image),
+        ];
+
+        return response($image, 200, $headers);
+    }
+
+    public function weaponFormVariantImage(WeaponForm $weapon, string $variant) {
+        abort_unless(in_array($variant, ['athlete', 'instructor', 'technician'], true), 404);
+
+        try {
+            $url = $this->retrieveAsset($this->weaponFormVariantAssetPath($weapon, $variant));
+            $response = Http::get($url);
+            $image = $response->body();
+        } catch (\Throwable $th) {
+            $image = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" rx="12" fill="#E5E7EB"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#6B7280" font-size="10">Missing</text></svg>';
+        }
+
         $headers = [
             'Content-Type' => 'image/svg+xml',
             'Content-Length' => strlen($image),

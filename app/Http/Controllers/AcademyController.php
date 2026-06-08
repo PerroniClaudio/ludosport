@@ -1032,14 +1032,8 @@ class AcademyController extends Controller {
                 $associated_personnel[$key]->battle_name = '';
             }
         }
-
-        $academy->setRelation('athletes', $academy->athletes->map(function ($athlete) use ($viewer) {
-            if (!$athlete->canViewerSeeMinorBattleName($viewer)) {
-                $athlete->battle_name = '';
-            }
-
-            return $athlete;
-        }));
+        $athletes = $this->formatPublicMemberRows($academy->athletes, $viewer);
+        $personnel = $this->formatPublicMemberRows($associated_personnel, $viewer, true);
 
         $rectors = $academy->personnel()->whereHas('roles', function ($query) {
             $query->where('name', 'rector');
@@ -1049,8 +1043,8 @@ class AcademyController extends Controller {
         return view('website.academy-profile', [
             'academy' => $academy,
             'rectors' => $rectors,
-            'athletes' => $academy->athletes,
-            'personnel' => $associated_personnel,
+            'athletes' => $athletes,
+            'personnel' => $personnel,
             'academy_email' => $academy->email ?? "",
         ]);
     }

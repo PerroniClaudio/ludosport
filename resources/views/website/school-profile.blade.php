@@ -87,7 +87,7 @@
                             'columnClasses' => '', // classes to style table th
                             'rowClasses' => '', // classes to style table td
                         ],
-                    ]" :rows="$school->athletes">
+                    ]" :rows="$athletes">
 
                     </x-table>
 

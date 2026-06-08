@@ -8,6 +8,12 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class WeaponFormController extends Controller {
+    private function weaponFormVariantAssetName(WeaponForm $weaponForm): string {
+        $assetName = explode(' ', $weaponForm->name);
+
+        return $assetName[0] . "_" . $assetName[1] . '.svg';
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -262,25 +268,22 @@ class WeaponFormController extends Controller {
     }
 
     public function image(WeaponForm $weaponForm, Request $request) {
-        if ($request->file('weaponformlogo') != null) {
-            $file = $request->file('weaponformlogo');
+        $request->validate([
+            'weaponformlogo' => ['required', 'file', 'mimetypes:image/svg+xml', 'max:512'],
+        ]);
 
-            $file_extension = $file->getClientOriginalExtension();
-            $file_name = time() . '_logo.' . $file_extension;
-            $path = "/weapon-forms/" . $weaponForm->id . "/" . $file_name;
-            $storeFile = $file->storeAs("/weapon-forms/" . $weaponForm->id . "/", $file_name, "gcs");
+        $file = $request->file('weaponformlogo');
+        $fileName = $this->weaponFormVariantAssetName($weaponForm);
+        $variants = ['athlete', 'instructor', 'technician'];
 
-            if ($storeFile) {
-                $weaponForm->update([
-                    'image' => $path,
-                ]);
+        foreach ($variants as $variant) {
+            $storedFile = $file->storeAs("/weapon-forms/{$variant}/", $fileName, 'gcs');
 
-                return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('success', 'Weapon form picture uploaded successfully!');
-            } else {
-                ddd($storeFile);
+            if (!$storedFile) {
+                return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('error', 'Error uploading weapon form picture!');
             }
-        } else {
-            return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('error', 'Error uploading weapon form picture!');
         }
+
+        return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('success', 'Weapon form picture uploaded successfully!');
     }
 }

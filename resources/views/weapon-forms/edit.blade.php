@@ -49,37 +49,51 @@
                 <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-6"
                     x-data="{}">
                     <div class="flex justify-between">
-                        <h3 class="text-background-800 dark:text-background-200 text-2xl">{{ __('academies.logo') }}
+                        <h3 class="text-background-800 dark:text-background-200 text-2xl">Weapon form assets
                         </h3>
-
-                        <div>
-                            <form method="POST" action="{{ route('weapon-forms.image.update', $weaponForm->id) }}"
-                                enctype="multipart/form-data" x-ref="pfpform">
-                                @csrf
-                                @method('PUT')
-
-                                <div class="flex flex-col gap-4">
-                                    <div class="flex flex-col gap-2">
-                                        <input type="file" name="weaponformlogo" id="weaponformlogo" class="hidden"
-                                            x-on:change="$refs.pfpform.submit()" />
-                                        <x-primary-button type="button"
-                                            onclick="document.getElementById('weaponformlogo').click()">
-                                            {{ __('users.upload_picture') }}
-                                        </x-primary-button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+                        <form method="POST" action="{{ route('weapon-forms.image.update', $weaponForm->id) }}"
+                            enctype="multipart/form-data" x-ref="weaponFormAssetUpload">
+                            @csrf
+                            @method('PUT')
+                            <input type="file" name="weaponformlogo" id="weaponformlogo" class="hidden"
+                                accept=".svg,image/svg+xml" x-on:change="$refs.weaponFormAssetUpload.submit()" />
+                            <x-primary-button type="button"
+                                onclick="document.getElementById('weaponformlogo').click()">
+                                {{ __('users.upload_picture') }}
+                            </x-primary-button>
+                        </form>
                     </div>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
-                    <div class="flex flex-col items-center justify-center flex-1 h-full">
+                    <p class="text-sm text-background-600 dark:text-background-300 mb-4">
+                        Upload one SVG. Same file will be saved for athlete, instructor, technician.
+                    </p>
 
-                        @if ($weaponForm->image)
-                            <img src="{{ route('weapon-form-image', $weaponForm->id) }}" alt="{{ $weaponForm->name }}"
-                                class="w-1/2 rounded-lg">
-                        @endif
+                    @php
+                        $assetVariants = [
+                            'athlete' => 'Athlete form',
+                            'instructor' => 'Instructor form',
+                            'technician' => 'Technician form',
+                        ];
+                    @endphp
 
+                    <div class="grid grid-cols-1 gap-4">
+                        @foreach ($assetVariants as $assetVariant => $assetLabel)
+                            <div class="rounded-lg border border-background-200 dark:border-background-700 p-4">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-background-800 dark:text-background-200">
+                                            {{ $assetLabel }}
+                                        </h4>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 flex items-center justify-center rounded-lg bg-background-50 dark:bg-background-900/40 p-4">
+                                    <img src="{{ route('weapon-form-variant-image', ['weapon' => $weaponForm->id, 'variant' => $assetVariant]) }}"
+                                        alt="{{ $weaponForm->name }} {{ $assetVariant }}" class="h-20 w-20">
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
