@@ -343,7 +343,7 @@ Route::group(['middleware' => ['auth', 'privacy.policy', 'role.institution.selec
     Route::post('/weapon-forms/{weaponForm}/athletes', [App\Http\Controllers\WeaponFormController::class, 'addAthletes'])->name('weapon-forms.athletes.store');
     Route::post('/weapon-forms/{weaponForm}', [App\Http\Controllers\WeaponFormController::class, 'update'])->name('weapon-forms.update');
 
-    Route::put('/weapon-forms/{weaponForm}/image', [App\Http\Controllers\AcademyController::class, 'image'])->name('weapon-forms.image.update');
+    Route::put('/weapon-forms/{weaponForm}/image', [App\Http\Controllers\WeaponFormController::class, 'image'])->name('weapon-forms.image.update');
 });
 
 /** Script */

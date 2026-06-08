@@ -261,26 +261,26 @@ class WeaponFormController extends Controller {
         return redirect()->route('weapon-forms.edit', $weaponForm)->with('success', 'Athletes added successfully');
     }
 
-    public function image(WeaponForm $weaponform, Request $request) {
+    public function image(WeaponForm $weaponForm, Request $request) {
         if ($request->file('weaponformlogo') != null) {
             $file = $request->file('weaponformlogo');
 
             $file_extension = $file->getClientOriginalExtension();
             $file_name = time() . '_logo.' . $file_extension;
-            $path = "/weapon-forms/" . $weaponform->id . "/" . $file_name;
-            $storeFile = $file->storeAs("/weapon-forms/" . $weaponform->id . "/", $file_name, "gcs");
+            $path = "/weapon-forms/" . $weaponForm->id . "/" . $file_name;
+            $storeFile = $file->storeAs("/weapon-forms/" . $weaponForm->id . "/", $file_name, "gcs");
 
             if ($storeFile) {
+                $weaponForm->update([
+                    'image' => $path,
+                ]);
 
-                $weaponform->image = $path;
-                $weaponform->save();
-
-                return redirect()->route('weapon-forms.edit', $weaponform->id)->with('success', 'Weapon form picture uploaded successfully!');
+                return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('success', 'Weapon form picture uploaded successfully!');
             } else {
                 ddd($storeFile);
             }
         } else {
-            return redirect()->route('weapon-forms.edit', $weaponform->id)->with('error', 'Error uploading weapon form picture!');
+            return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('error', 'Error uploading weapon form picture!');
         }
     }
 }
