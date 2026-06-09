@@ -269,21 +269,37 @@ class WeaponFormController extends Controller {
 
     public function image(WeaponForm $weaponForm, Request $request) {
         $request->validate([
-            'weaponformlogo' => ['required', 'file', 'mimetypes:image/svg+xml', 'max:512'],
+            'weaponformlogo' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:512'],
+            'weaponformdefaultlogo' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:512'],
         ]);
 
-        $file = $request->file('weaponformlogo');
         $fileName = $this->weaponFormVariantAssetName($weaponForm);
-        $variants = ['athlete', 'instructor', 'technician'];
 
-        foreach ($variants as $variant) {
-            $storedFile = $file->storeAs("/weapon-forms/{$variant}/", $fileName, 'gcs');
+        if ($request->file('weaponformlogo') !== null) {
+            $file = $request->file('weaponformlogo');
+            $variants = ['athlete', 'instructor', 'technician'];
 
-            if (!$storedFile) {
-                return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('error', 'Error uploading weapon form picture!');
+            foreach ($variants as $variant) {
+                $storedFile = $file->storeAs("/weapon-forms/{$variant}/", $fileName, 'gcs');
+
+                if (!$storedFile) {
+                    return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('error', 'Error uploading weapon form picture!');
+                }
             }
+
+            return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('success', 'Weapon form picture uploaded successfully!');
         }
 
-        return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('success', 'Weapon form picture uploaded successfully!');
+        if ($request->file('weaponformdefaultlogo') !== null) {
+            $storedFile = $request->file('weaponformdefaultlogo')->storeAs("/weapon-forms/default/", $fileName, 'gcs');
+
+            if (!$storedFile) {
+                return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('error', 'Error uploading default weapon form picture!');
+            }
+
+            return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('success', 'Default weapon form picture uploaded successfully!');
+        }
+
+        return redirect()->route('weapon-forms.edit', $weaponForm->id)->with('error', 'No weapon form picture selected.');
     }
 }

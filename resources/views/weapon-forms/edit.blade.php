@@ -51,17 +51,31 @@
                     <div class="flex justify-between">
                         <h3 class="text-background-800 dark:text-background-200 text-2xl">Weapon form assets
                         </h3>
-                        <form method="POST" action="{{ route('weapon-forms.image.update', $weaponForm->id) }}"
-                            enctype="multipart/form-data" x-ref="weaponFormAssetUpload">
-                            @csrf
-                            @method('PUT')
-                            <input type="file" name="weaponformlogo" id="weaponformlogo" class="hidden"
-                                accept=".svg,image/svg+xml" x-on:change="$refs.weaponFormAssetUpload.submit()" />
-                            <x-primary-button type="button"
-                                onclick="document.getElementById('weaponformlogo').click()">
-                                {{ __('users.upload_picture') }}
-                            </x-primary-button>
-                        </form>
+                        <div class="flex gap-2">
+                            <form method="POST" action="{{ route('weapon-forms.image.update', $weaponForm->id) }}"
+                                enctype="multipart/form-data" x-ref="weaponFormAssetUpload">
+                                @csrf
+                                @method('PUT')
+                                <input type="file" name="weaponformlogo" id="weaponformlogo" class="hidden"
+                                    accept=".svg,image/svg+xml" x-on:change="$refs.weaponFormAssetUpload.submit()" />
+                                <x-primary-button type="button"
+                                    onclick="document.getElementById('weaponformlogo').click()">
+                                    {{ __('users.upload_picture') }}
+                                </x-primary-button>
+                            </form>
+
+                            <form method="POST" action="{{ route('weapon-forms.image.update', $weaponForm->id) }}"
+                                enctype="multipart/form-data" x-ref="weaponFormDefaultAssetUpload">
+                                @csrf
+                                @method('PUT')
+                                <input type="file" name="weaponformdefaultlogo" id="weaponformdefaultlogo" class="hidden"
+                                    accept=".svg,image/svg+xml" x-on:change="$refs.weaponFormDefaultAssetUpload.submit()" />
+                                <x-secondary-button type="button"
+                                    onclick="document.getElementById('weaponformdefaultlogo').click()">
+                                    Upload default form
+                                </x-secondary-button>
+                            </form>
+                        </div>
                     </div>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
@@ -74,6 +88,7 @@
                             'athlete' => 'Athlete form',
                             'instructor' => 'Instructor form',
                             'technician' => 'Technician form',
+                            'default' => 'Default form',
                         ];
                     @endphp
 
@@ -88,7 +103,7 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-4 flex items-center justify-center rounded-lg bg-background-50 dark:bg-background-900/40 p-4">
+                                <div class="mt-4 flex items-center justify-center rounded-lg border border-background-300 dark:border-background-700 bg-slate-700 dark:bg-slate-900 p-4">
                                     <img src="{{ route('weapon-form-variant-image', ['weapon' => $weaponForm->id, 'variant' => $assetVariant]) }}"
                                         alt="{{ $weaponForm->name }} {{ $assetVariant }}" class="h-20 w-20">
                                 </div>

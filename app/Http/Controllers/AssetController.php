@@ -13,9 +13,14 @@ use Illuminate\Support\Facades\Http;
 class AssetController extends Controller {
     //
 
-    private function weaponFormVariantAssetPath(WeaponForm $weapon, string $variant): string {
+    private function weaponFormAssetName(WeaponForm $weapon): string {
         $assetName = explode(' ', $weapon->name);
-        $asset = $assetName[0] . "_" . $assetName[1] . ".svg";
+
+        return $assetName[0] . "_" . $assetName[1] . ".svg";
+    }
+
+    private function weaponFormVariantAssetPath(WeaponForm $weapon, string $variant): string {
+        $asset = $this->weaponFormAssetName($weapon);
 
         return "/weapon-forms/{$variant}/{$asset}";
     }
@@ -180,7 +185,7 @@ class AssetController extends Controller {
         } 
                 
         if (!$hasFoundCompletition) {
-            $url = $this->retrieveAsset("/weapon-forms/default/{$asset}");
+            $url = $this->retrieveAsset($this->weaponFormVariantAssetPath($weapon, 'default'));
         }
 
         $response = Http::get($url);
@@ -194,7 +199,7 @@ class AssetController extends Controller {
     }
 
     public function weaponFormVariantImage(WeaponForm $weapon, string $variant) {
-        abort_unless(in_array($variant, ['athlete', 'instructor', 'technician'], true), 404);
+        abort_unless(in_array($variant, ['athlete', 'instructor', 'technician', 'default'], true), 404);
 
         try {
             $url = $this->retrieveAsset($this->weaponFormVariantAssetPath($weapon, $variant));
