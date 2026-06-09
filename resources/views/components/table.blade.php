@@ -7,117 +7,143 @@
     'isDialogTable' => false,
 ])
 
+@php
+    $initialColumns = collect($columns)->values()->all();
+    $initialRows = collect($rows)->values()->all();
+@endphp
 
+@once
+    <script>
+        if (!window.ludosportTable) {
+            window.ludosportTable = function (element) {
+                return {
+                    columns: [],
+                    rows: [],
+                    initialRows: [],
+                    isStriped: element.dataset.striped === 'true',
+                    sortColumn: null,
+                    sortNestedColumn: null,
+                    sortDirection: 'asc',
+                    page: 1,
+                    pageLength: 10,
+                    init() {
+                        this.columns = JSON.parse(element.querySelector('[data-table-columns]').textContent);
+                        this.rows = JSON.parse(element.querySelector('[data-table-rows]').textContent);
+                        this.initialRows = [...this.rows];
+                    },
+                    getSortableValue(value, column = {}) {
+                        if (column.sortType === 'date') {
+                            if (value == null || value === '') {
+                                return Number.NEGATIVE_INFINITY;
+                            }
 
-<div x-data="{
-    columns: {{ collect($columns) }},
-    rows: {{ collect($rows) }},
-    isStriped: Boolean({{ $striped }}),
-    sortColumn: null,
-    sortNestedColumn:null,
-    sortDirection: 'asc',
-    getSortableValue: function(value, column = {}) {
-        if (column.sortType === 'date') {
-            if (value == null || value === '') {
-                return Number.NEGATIVE_INFINITY;
-            }
+                            if (typeof value === 'string') {
+                                const match = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
 
-            if (typeof value === 'string') {
-                const match = value.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})$/);
+                                if (match) {
+                                    const [, day, month, year] = match;
 
-                if (match) {
-                    const [, day, month, year] = match;
-                    return new Date(Number(year), Number(month) - 1, Number(day)).getTime();
-                }
-            }
+                                    return new Date(Number(year), Number(month) - 1, Number(day)).getTime();
+                                }
+                            }
 
-            const parsed = new Date(value).getTime();
+                            const parsed = new Date(value).getTime();
 
-            return Number.isNaN(parsed) ? Number.NEGATIVE_INFINITY : parsed;
+                            return Number.isNaN(parsed) ? Number.NEGATIVE_INFINITY : parsed;
+                        }
+
+                        if (!isNaN(value) && value !== null && value !== '') {
+                            return Number(value);
+                        }
+
+                        return String(value ?? '');
+                    },
+                    sort(columnIndex, isNested = false, nestedIndex = null) {
+                        if (!isNested) {
+                            this.sortNestedColumn = null;
+
+                            if (this.sortColumn === columnIndex) {
+                                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                            } else {
+                                this.sortColumn = columnIndex;
+                                this.sortDirection = 'asc';
+                            }
+
+                            this.rows = [...this.rows].sort((a, b) => {
+                                const column = this.columns[columnIndex];
+                                const aValue = this.getSortableValue(a[column.field], column);
+                                const bValue = this.getSortableValue(b[column.field], column);
+
+                                if (typeof aValue === 'number' && typeof bValue === 'number') {
+                                    return this.sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+                                }
+
+                                return this.sortDirection === 'asc'
+                                    ? String(aValue).localeCompare(String(bValue))
+                                    : String(bValue).localeCompare(String(aValue));
+                            });
+
+                            return;
+                        }
+
+                        if (this.sortColumn === columnIndex && this.sortNestedColumn === nestedIndex) {
+                            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                        } else {
+                            this.sortColumn = columnIndex;
+                            this.sortNestedColumn = nestedIndex;
+                            this.sortDirection = 'asc';
+                        }
+
+                        this.rows = [...this.rows].sort((a, b) => {
+                            const column = this.columns[columnIndex].nestedColumns[nestedIndex];
+                            const aValue = this.getSortableValue(a[column.field], column);
+                            const bValue = this.getSortableValue(b[column.field], column);
+
+                            if (typeof aValue === 'number' && typeof bValue === 'number') {
+                                return this.sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+                            }
+
+                            return this.sortDirection === 'asc'
+                                ? String(aValue).localeCompare(String(bValue))
+                                : String(bValue).localeCompare(String(aValue));
+                        });
+                    },
+                    searchByValue(event) {
+                        const search = event.target.value.toLowerCase();
+
+                        if (search === '') {
+                            this.rows = [...this.initialRows];
+                        } else {
+                            this.rows = this.initialRows.filter((row) => {
+                                return Object.values(row).some((value) => {
+                                    return String(value).toLowerCase().includes(search);
+                                });
+                            });
+                        }
+
+                        this.page = 1;
+                    },
+                    totalPages() {
+                        return Math.max(1, Math.ceil(this.rows.length / this.pageLength));
+                    },
+                    paginatedRows() {
+                        const start = (this.page - 1) * this.pageLength;
+                        const end = start + this.pageLength;
+
+                        return this.rows.slice(start, end);
+                    },
+                };
+            };
         }
+    </script>
+@endonce
 
-        if (!isNaN(value) && value !== null && value !== '') {
-            return Number(value);
-        }
+<div x-data="window.ludosportTable($el)" x-cloak id="" data-striped="{{ $striped ? 'true' : 'false' }}">
 
-        return String(value ?? '');
-    },
-    sort: function(columnIndex, isNested = false, nestedIndex = null) {
-        if(!isNested){
-            this.sortNestedColumn = null;
-    
-            if (this.sortColumn === columnIndex) {
-                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                this.sortColumn = columnIndex;
-                this.sortDirection = 'asc';
-            }
-            this.rows = [...this.rows].sort((a, b) => {
-                const column = this.columns[columnIndex];
-                const aValue = this.getSortableValue(a[column.field], column);
-                const bValue = this.getSortableValue(b[column.field], column);
+    <script type="application/json" data-table-columns>@json($initialColumns)</script>
+    <script type="application/json" data-table-rows>@json($initialRows)</script>
 
-                if (typeof aValue === 'number' && typeof bValue === 'number') {
-                    return this.sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-                }
-
-                return this.sortDirection === 'asc'
-                    ? String(aValue).localeCompare(String(bValue))
-                    : String(bValue).localeCompare(String(aValue));
-            });
-        } else {
-            if (this.sortColumn == columnIndex && this.sortNestedColumn == nestedIndex) {
-                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                this.sortColumn = columnIndex;
-                this.sortNestedColumn = nestedIndex;
-                this.sortDirection = 'asc';
-            }
-            this.rows = [...this.rows].sort((a, b) => {
-                const column = this.columns[columnIndex].nestedColumns[nestedIndex];
-                const aValue = this.getSortableValue(a[column.field], column);
-                const bValue = this.getSortableValue(b[column.field], column);
-
-                if (typeof aValue === 'number' && typeof bValue === 'number') {
-                    return this.sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-                }
-
-                return this.sortDirection === 'asc'
-                    ? String(aValue).localeCompare(String(bValue))
-                    : String(bValue).localeCompare(String(aValue));
-            });
-        }
-
-    },
-
-    searchByValue: function(e) {
-        const search = e.target.value.toLowerCase();
-        if (search === '') {
-            this.rows = {{ collect($rows) }};
-        } else {
-            this.rows = {{ collect($rows) }}.filter(row => {
-                return Object.values(row).some(value => {
-                    return String(value).toLowerCase().includes(search);
-                });
-            });
-        }
-        this.page = 1; // Reset to first page after search
-    },
-    page: 1,
-    pageLength: 10,
-    totalPages: function() {
-        return Math.ceil(this.rows.length / this.pageLength);
-    },
-    paginatedRows: function() {
-        const start = (this.page - 1) * this.pageLength;
-        const end = start + this.pageLength;
-        return this.rows.slice(start, end);
-    },
-
-
-}" x-cloak id="">
-
-    <p x-text="rows.count"></p>
+    <p x-text="rows.length" class="hidden"></p>
 
     <div
         class="mb-5 bg-white dark:bg-background-900 rounded-lg shadow relative {{ $isDialogTable ? 'min-h-[600px] flex flex-col justify-between' : '' }}">
@@ -195,7 +221,7 @@
                         @endisset
                     </template>
     
-                    <template x-for="(row, rowIndex) in paginatedRows" :key="'row-' + rowIndex">
+                    <template x-for="(row, rowIndex) in paginatedRows()" :key="'row-' + rowIndex">
                         <tr
                             :class="{ 'relative bg-background-200 dark:bg-background-900': isStriped === true && ((rowIndex + 1) % 2 === 0) }">
                             @isset($tableRows)
