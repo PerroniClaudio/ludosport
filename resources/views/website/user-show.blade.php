@@ -238,6 +238,7 @@
                     [
                         'name' => 'Date',
                         'field' => 'date',
+                        'sortType' => 'date',
                         'columnClasses' => '', // classes to style table th
                         'rowClasses' => '', // classes to style table td
                     ],

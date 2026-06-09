@@ -16,9 +16,35 @@
     sortColumn: null,
     sortNestedColumn:null,
     sortDirection: 'asc',
+    getSortableValue: function(value, column = {}) {
+        if (column.sortType === 'date') {
+            if (value == null || value === '') {
+                return Number.NEGATIVE_INFINITY;
+            }
+
+            if (typeof value === 'string') {
+                const match = value.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})$/);
+
+                if (match) {
+                    const [, day, month, year] = match;
+                    return new Date(Number(year), Number(month) - 1, Number(day)).getTime();
+                }
+            }
+
+            const parsed = new Date(value).getTime();
+
+            return Number.isNaN(parsed) ? Number.NEGATIVE_INFINITY : parsed;
+        }
+
+        if (!isNaN(value) && value !== null && value !== '') {
+            return Number(value);
+        }
+
+        return String(value ?? '');
+    },
     sort: function(columnIndex, isNested = false, nestedIndex = null) {
         if(!isNested){
-            sortNestedColumn = null;
+            this.sortNestedColumn = null;
     
             if (this.sortColumn === columnIndex) {
                 this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
@@ -28,57 +54,37 @@
             }
             this.rows = [...this.rows].sort((a, b) => {
                 const column = this.columns[columnIndex];
-                const aValue = a[column.field];
-                const bValue = b[column.field];
+                const aValue = this.getSortableValue(a[column.field], column);
+                const bValue = this.getSortableValue(b[column.field], column);
 
-                if (!isNaN(aValue) && !isNaN(bValue)) {
-                    if (this.sortDirection === 'asc') {
-                        return aValue - bValue;
-                    } else {
-                        return bValue - aValue;
-                    }
-                } else {
-                    const aStr = String(aValue);
-                    const bStr = String(bValue);
-
-                    if (this.sortDirection === 'asc') {
-                        return aStr.localeCompare(bStr);
-                    } else {
-                        return bStr.localeCompare(aStr);
-                    }
+                if (typeof aValue === 'number' && typeof bValue === 'number') {
+                    return this.sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
                 }
+
+                return this.sortDirection === 'asc'
+                    ? String(aValue).localeCompare(String(bValue))
+                    : String(bValue).localeCompare(String(aValue));
             });
         } else {
             if (this.sortColumn == columnIndex && this.sortNestedColumn == nestedIndex) {
-                console.log('Saaame');
                 this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
             } else {
-                console.log('Not same', this.sortColumn, columnIndex, this.sortNestedColumn, nestedIndex);
                 this.sortColumn = columnIndex;
                 this.sortNestedColumn = nestedIndex;
                 this.sortDirection = 'asc';
             }
             this.rows = [...this.rows].sort((a, b) => {
                 const column = this.columns[columnIndex].nestedColumns[nestedIndex];
-                const aValue = a[column.field];
-                const bValue = b[column.field];
+                const aValue = this.getSortableValue(a[column.field], column);
+                const bValue = this.getSortableValue(b[column.field], column);
 
-                if (!isNaN(aValue) && !isNaN(bValue)) {
-                    if (this.sortDirection === 'asc') {
-                        return aValue - bValue;
-                    } else {
-                        return bValue - aValue;
-                    }
-                } else {
-                    const aStr = String(aValue);
-                    const bStr = String(bValue);
-
-                    if (this.sortDirection === 'asc') {
-                        return aStr.localeCompare(bStr);
-                    } else {
-                        return bStr.localeCompare(aStr);
-                    }
+                if (typeof aValue === 'number' && typeof bValue === 'number') {
+                    return this.sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
                 }
+
+                return this.sortDirection === 'asc'
+                    ? String(aValue).localeCompare(String(bValue))
+                    : String(bValue).localeCompare(String(aValue));
             });
         }
 
