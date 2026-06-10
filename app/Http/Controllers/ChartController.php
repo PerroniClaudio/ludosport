@@ -7,19 +7,27 @@ use App\Models\Event;
 use App\Models\EventResult;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
-class ChartController extends Controller {
+class ChartController extends Controller
+{
     /**
      * Display a listing of the resource.
      */
-    public function index() {
+    public function index()
+    {
         //
 
-        $latest_chart = Chart::orderBy('created_at', 'desc')->first();
+        $latestCreatedAt = Chart::query()->max('created_at');
 
-        if (!$latest_chart) {
+        $latest_chart = $latestCreatedAt
+            ? Chart::query()
+                ->where('created_at', $latestCreatedAt)
+                ->latest('id')
+                ->first()
+            : null;
+
+        if (! $latest_chart) {
             $latest_chart = $this->create();
         }
 
@@ -31,24 +39,24 @@ class ChartController extends Controller {
         ]);
     }
 
-    public function updatedChart() {
+    public function updatedChart()
+    {
         $this->create();
 
         return redirect()->route('rankings.index');
     }
 
-
-
     /**
      * Show the form for creating a new resource.
      */
-    private function create() {
+    private function create()
+    {
         //
 
         $date = Carbon::now()->format('Y-m-d H:i:s');
 
-        $start_date = "";
-        $end_date = "";
+        $start_date = '';
+        $end_date = '';
 
         if (Carbon::now()->month < 8) {
             $start_date = Carbon::now()->subYear()->startOfYear()->addMonths(8)->startOfMonth();
@@ -62,14 +70,13 @@ class ChartController extends Controller {
             $start_date,
             $end_date,
         ])->where('is_disabled', false)
-        ->whereHas('type', function ($q) {
-            $q->whereIn('name', [
-                'School Tournament',
-                'Academy Tournament',
-                'National Tournament'
-            ]);
-        })->get();
-
+            ->whereHas('type', function ($q) {
+                $q->whereIn('name', [
+                    'School Tournament',
+                    'Academy Tournament',
+                    'National Tournament',
+                ]);
+            })->get();
 
         $results = [];
 
@@ -78,13 +85,13 @@ class ChartController extends Controller {
 
             foreach ($event_result as $key => $value) {
 
-                if (!isset($results[$value->user_id])) {
+                if (! isset($results[$value->user_id])) {
 
                     $primaryAcademyAthlete = $value->user->primaryAcademyAthlete();
 
                     $results[$value->user_id] = [
                         'user_id' => $value->user_id,
-                        'user_name' => $value->user->name . ' ' . $value->user->surname,
+                        'user_name' => $value->user->name.' '.$value->user->surname,
                         'user_battle_name' => $value->user->battle_name,
                         'user_academy' => $primaryAcademyAthlete ? $primaryAcademyAthlete->name : '',
                         'user_school' => $value->user->primarySchoolAthlete()->name ?? '',
@@ -104,13 +111,15 @@ class ChartController extends Controller {
             $aTotal = $a['total_war_points'] + $a['total_style_points'];
             $bTotal = $b['total_war_points'] + $b['total_style_points'];
             if ($bTotal === $aTotal) {
-                if($a['total_style_points'] === $b['total_style_points']) {
+                if ($a['total_style_points'] === $b['total_style_points']) {
                     // If total points are equal, sort by user name
                     return strcasecmp($a['user_name'], $b['user_name']);
                 }
+
                 // If total points are equal, sort by style points
                 return $b['total_style_points'] - $a['total_style_points'];
             }
+
             return $bTotal - $aTotal;
         });
 
@@ -122,7 +131,7 @@ class ChartController extends Controller {
         }
 
         $chart = Chart::create([
-            'note' => Carbon::now()->year . " chart",
+            'note' => Carbon::now()->year.' chart',
             'data' => $results,
             'created_at' => $date,
         ]);
@@ -133,43 +142,49 @@ class ChartController extends Controller {
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         //
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Chart $chart) {
+    public function show(Chart $chart)
+    {
         //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Chart $chart) {
+    public function edit(Chart $chart)
+    {
         //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Chart $chart) {
+    public function update(Request $request, Chart $chart)
+    {
         //
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Chart $chart) {
+    public function destroy(Chart $chart)
+    {
         //
     }
 
-    public function generateChart() {
+    public function generateChart()
+    {
 
         for ($i = 2; $i <= 6; $i++) {
 
-            $current_year = date('Y') . "-0{$i}";
+            $current_year = date('Y')."-0{$i}";
 
             $data = [];
             // Aggiungo la condizione anche se sembra che questa funzione non venga usata
@@ -178,7 +193,7 @@ class ChartController extends Controller {
                     $q->whereIn('name', [
                         'School Tournament',
                         'Academy Tournament',
-                        'National Tournament'
+                        'National Tournament',
                     ]);
                 })
                 ->get();
@@ -217,6 +232,7 @@ class ChartController extends Controller {
                 if ($a['total_war_points'] == $b['total_war_points']) {
                     return $b['total_style_points'] - $a['total_style_points'];
                 }
+
                 return $b['total_war_points'] - $a['total_war_points'];
             });
 
@@ -225,7 +241,7 @@ class ChartController extends Controller {
             Chart::create([
                 'note' => "$current_year chart",
                 'data' => $total_chart_data,
-                'created_at' =>  $fake_date,
+                'created_at' => $fake_date,
             ]);
         }
     }
