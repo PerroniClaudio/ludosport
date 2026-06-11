@@ -23,6 +23,10 @@
                         <x-form.input label="Name" name="name" />
                     </div>
 
+                    <div class="mt-4">
+                        @include('weapon-forms._position-fields')
+                    </div>
+
                     <div class="flex items-center justify-end gap-2">
                         <x-primary-button type="submit">
                             {{ __('weaponf.create') }}

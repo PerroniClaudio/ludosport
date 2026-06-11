@@ -37,6 +37,20 @@
 
                         <x-form.input label="Name" name="name" :value="$weaponForm->name" />
 
+                        @if (!$weaponForm->isDefaultLayoutForm())
+                            <div class="mt-4">
+                                @include('weapon-forms._position-fields', [
+                                    'selectedPosition' => collect(\App\Models\WeaponForm::POSITION_FIELDS)->first(fn ($field) => $weaponForm->{$field}),
+                                ])
+                            </div>
+                        @else
+                            <div class="mt-4 rounded-lg border border-background-100 dark:border-background-700 p-4">
+                                <p class="text-sm text-background-600 dark:text-background-300">
+                                    Hardcoded default form. Position handled by existing layout.
+                                </p>
+                            </div>
+                        @endif
+
 
                         <div class="fixed bottom-8 right-32">
                             <x-primary-button type="submit">
@@ -51,36 +65,22 @@
                     <div class="flex justify-between">
                         <h3 class="text-background-800 dark:text-background-200 text-2xl">Weapon form assets
                         </h3>
-                        <div class="flex gap-2">
-                            <form method="POST" action="{{ route('weapon-forms.image.update', $weaponForm->id) }}"
-                                enctype="multipart/form-data" x-ref="weaponFormAssetUpload">
-                                @csrf
-                                @method('PUT')
-                                <input type="file" name="weaponformlogo" id="weaponformlogo" class="hidden"
-                                    accept=".svg,image/svg+xml" x-on:change="$refs.weaponFormAssetUpload.submit()" />
-                                <x-primary-button type="button"
-                                    onclick="document.getElementById('weaponformlogo').click()">
-                                    {{ __('users.upload_picture') }}
-                                </x-primary-button>
-                            </form>
-
-                            <form method="POST" action="{{ route('weapon-forms.image.update', $weaponForm->id) }}"
-                                enctype="multipart/form-data" x-ref="weaponFormDefaultAssetUpload">
-                                @csrf
-                                @method('PUT')
-                                <input type="file" name="weaponformdefaultlogo" id="weaponformdefaultlogo" class="hidden"
-                                    accept=".svg,image/svg+xml" x-on:change="$refs.weaponFormDefaultAssetUpload.submit()" />
-                                <x-secondary-button type="button"
-                                    onclick="document.getElementById('weaponformdefaultlogo').click()">
-                                    Upload default form
-                                </x-secondary-button>
-                            </form>
-                        </div>
+                        <form method="POST" action="{{ route('weapon-forms.image.update', $weaponForm->id) }}"
+                            enctype="multipart/form-data" x-ref="weaponFormAssetUpload">
+                            @csrf
+                            @method('PUT')
+                            <input type="file" name="weaponformlogo" id="weaponformlogo" class="hidden"
+                                accept=".svg,image/svg+xml" x-on:change="$refs.weaponFormAssetUpload.submit()" />
+                            <x-primary-button type="button"
+                                onclick="document.getElementById('weaponformlogo').click()">
+                                Upload SVG
+                            </x-primary-button>
+                        </form>
                     </div>
                     <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
                     <p class="text-sm text-background-600 dark:text-background-300 mb-4">
-                        Upload one SVG. Same file will be saved for athlete, instructor, technician.
+                        Upload one SVG. Same file will be saved for athlete, instructor, technician, default.
                     </p>
 
                     @php
