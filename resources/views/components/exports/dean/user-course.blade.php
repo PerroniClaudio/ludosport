@@ -61,6 +61,20 @@
         this.paginatedSelectedCourses = this.selectedCourses;
         this.updateFilterJson()
     },
+    selectAllCourses: function() {
+        this.availableCourses.forEach(course => {
+            if (!this.selectedCourses.find(selectedCourse => selectedCourse.id === course.id)) {
+                this.selectedCourses.push(course);
+            }
+        });
+        this.paginatedSelectedCourses = this.selectedCourses;
+        this.updateFilterJson();
+    },
+    deselectAllCourses: function() {
+        this.selectedCourses = [];
+        this.paginatedSelectedCourses = [];
+        this.updateFilterJson();
+    },
     goToPage: function(page) {
         if (page < 1 || page > this.totalPages) {
             return;
@@ -134,7 +148,11 @@
                             {{ __('clan.school') }}</th>
                         <th
                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('users.actions') }}</th>
+                            <button type="button" @click="selectAllCourses()"
+                                class="px-3 py-1 bg-primary-500 hover:bg-primary-600 dark:bg-primary-400 dark:hover:bg-primary-500 text-white rounded text-xs font-semibold transition-colors">
+                                {{ __('exports.select_all') }}
+                            </button>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -214,7 +232,11 @@
                             {{ __('clan.school') }}</th>
                         <th
                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('users.actions') }}</th>
+                            <button type="button" @click="deselectAllCourses()"
+                                class="px-3 py-1 bg-primary-500 hover:bg-primary-600 dark:bg-primary-400 dark:hover:bg-primary-500 text-white rounded text-xs font-semibold transition-colors">
+                                {{ __('exports.deselect_all') }}
+                            </button>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>

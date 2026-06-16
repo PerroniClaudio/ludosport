@@ -59,6 +59,20 @@
         this.paginatedselectedAcademies = this.selectedAcademies;
         this.updateFilterJson()
     },
+    selectAllAcademies: function() {
+        this.availableAcademies.forEach(academy => {
+            if (!this.selectedAcademies.find(selectedAcademy => selectedAcademy.id === academy.id)) {
+                this.selectedAcademies.push(academy);
+            }
+        });
+        this.paginatedselectedAcademies = this.selectedAcademies;
+        this.updateFilterJson();
+    },
+    deselectAllAcademies: function() {
+        this.selectedAcademies = [];
+        this.paginatedselectedAcademies = [];
+        this.updateFilterJson();
+    },
     goToPage: function(page) {
         if (page < 1 || page > this.totalPages) {
             return;
@@ -135,7 +149,11 @@
                             {{ __('academies.nation') }}</th>
                         <th
                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('users.actions') }}</th>
+                            <button type="button" @click="selectAllAcademies()"
+                                class="px-3 py-1 bg-primary-500 hover:bg-primary-600 dark:bg-primary-400 dark:hover:bg-primary-500 text-white rounded text-xs font-semibold transition-colors">
+                                {{ __('exports.select_all') }}
+                            </button>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -215,7 +233,11 @@
                             {{ __('academies.nation') }}</th>
                         <th
                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('users.actions') }}</th>
+                            <button type="button" @click="deselectAllAcademies()"
+                                class="px-3 py-1 bg-primary-500 hover:bg-primary-600 dark:bg-primary-400 dark:hover:bg-primary-500 text-white rounded text-xs font-semibold transition-colors">
+                                {{ __('exports.deselect_all') }}
+                            </button>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>

@@ -76,6 +76,23 @@
         }
         this.isSubmitEnabled = false;
     },
+    isNationSelected: function(id) {
+        return this.selectedNations.find(nation => nation.id === id) !== undefined;
+    },
+    selectAllNations: function() {
+        this.availableNations.forEach(nation => {
+            if (!this.isNationSelected(nation.id)) {
+                this.selectedNations.push(nation);
+            }
+        });
+        this.paginatedselectedNations = this.selectedNations;
+        this.updateFilterJson();
+    },
+    deselectAllNations: function() {
+        this.selectedNations = [];
+        this.paginatedselectedNations = [];
+        this.updateFilterJson();
+    },
     init: function() {
         this.getavailableNations();
         $watch('usersType', value => {
@@ -122,17 +139,25 @@
                             Nome Nazione
                         </th>
                         <th class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            Azioni
+                            <button type="button" @click="selectAllNations()"
+                                class="px-3 py-1 bg-primary-500 hover:bg-primary-600 dark:bg-primary-400 dark:hover:bg-primary-500 text-white rounded text-xs font-semibold transition-colors">
+                                {{ __('exports.select_all') }}
+                            </button>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <template x-for="(row, index) in paginatedNations">
-                        <tr>
+                        <tr :class="{ 'bg-primary-100 dark:bg-primary-900': isNationSelected(row.id) }">
                             <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.name"></td>
                             <td class="text-background-500 dark:text-background-300 text-sm text-right p-1">
-                                <button type="button" @click="addNation(row.id)">
+                                <button type="button" @click="addNation(row.id)" x-bind:disabled="isNationSelected(row.id)"
+                                    :class="{ 'opacity-40 cursor-not-allowed': isNationSelected(row.id) }">
                                     <x-lucide-plus
+                                        class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
+                                </button>
+                                <button type="button" class="ml-2" x-show="isNationSelected(row.id)" @click="removeNation(row.id)">
+                                    <x-lucide-minus
                                         class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
                                 </button>
                             </td>
@@ -191,7 +216,10 @@
                             Nome Nazione
                         </th>
                         <th class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            Azioni
+                            <button type="button" @click="deselectAllNations()"
+                                class="px-3 py-1 bg-primary-500 hover:bg-primary-600 dark:bg-primary-400 dark:hover:bg-primary-500 text-white rounded text-xs font-semibold transition-colors">
+                                {{ __('exports.deselect_all') }}
+                            </button>
                         </th>
                     </tr>
                 </thead>

@@ -35,10 +35,6 @@
                         <div x-show="selectedType == 'users_academy'">
                             <x-exports.user-academy />
                         </div>
-
-                        <div x-show="selectedType == 'schools'">
-                            <x-exports.schools />
-                        </div>
                         
                         <div x-show="selectedType == 'users_school'">
                             <x-exports.user-school />
@@ -46,6 +42,14 @@
                         
                         <div x-show="selectedType == 'users_course'">
                             <x-exports.user-course />
+                        </div>
+
+                        <div x-show="selectedType == 'schools_all'">
+                            <x-exports.schools-all />
+                        </div>
+
+                        <div x-show="selectedType == 'schools'">
+                            <x-exports.schools />
                         </div>
 
                         <div x-show="selectedType == 'event_participants'">

@@ -1,0 +1,15 @@
+<form action="{{ route('exports.store') }}" method="POST">
+    @csrf
+
+    <input name="type" type="hidden" value="schools_all">
+    <input name="filters" type="hidden" value="[]">
+
+    <p class="my-4">{{ __('exports.schools_all_filter_message') }}</p>
+
+    <div class="flex justify-end w-full my-4">
+        <button type="submit"
+            class="inline-flex items-center px-4 py-2 bg-primary-800 dark:bg-primary-400 border border-transparent rounded-md font-semibold text-xs text-white dark:text-background-800 uppercase tracking-widest hover:bg-background-700 dark:hover:bg-primary-600 focus:bg-background-700 dark:focus:bg-primary-500 active:bg-background-900 dark:active:bg-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-background-800 transition ease-in-out duration-150">
+            {{ __('exports.submit') }}
+        </button>
+    </div>
+</form>

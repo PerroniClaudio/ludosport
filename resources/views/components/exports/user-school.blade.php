@@ -59,6 +59,9 @@
         this.paginatedselectedSchools = this.selectedSchools;
         this.updateFilterJson()
     },
+    isSchoolSelected: function(id) {
+        return this.selectedSchools.some(school => school.id === id);
+    },
     goToPage: function(page) {
         if (page < 1 || page > this.totalPages) {
             return;
@@ -81,7 +84,20 @@
 
         this.isSubmitEnabled = false;
     },
-
+    selectAllSchools: function() {
+        this.availableSchools.forEach(school => {
+            if (!this.isSchoolSelected(school.id)) {
+                this.selectedSchools.push(school);
+            }
+        });
+        this.paginatedselectedSchools = this.selectedSchools;
+        this.updateFilterJson();
+    },
+    deselectAllSchools: function() {
+        this.selectedSchools = [];
+        this.paginatedselectedSchools = [];
+        this.updateFilterJson();
+    },
     init: function() {
         this.getavailableSchools();
 
@@ -135,17 +151,26 @@
                             {{ __('school.academy') }}</th>
                         <th
                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('users.actions') }}</th>
+                            <button type="button" @click="selectAllSchools()"
+                                class="px-3 py-1 bg-primary-500 hover:bg-primary-600 dark:bg-primary-400 dark:hover:bg-primary-500 text-white rounded text-xs font-semibold transition-colors">
+                                {{ __('exports.select_all') }}
+                            </button>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     <template x-for="(row, index) in paginatedSchools">
-                        <tr>
+                        <tr :class="{ 'bg-primary-100 dark:bg-primary-900': isSchoolSelected(row.id) }">
                             <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.name"></td>
                             <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.academy"></td>
                             <td class="text-background-500 dark:text-background-300 text-sm text-right p-1">
-                                <button type="button" @click="addSchool(row.id)">
+                                <button type="button" @click="addSchool(row.id)" x-bind:disabled="isSchoolSelected(row.id)"
+                                    :class="{ 'opacity-40 cursor-not-allowed': isSchoolSelected(row.id) }">
                                     <x-lucide-plus
+                                        class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
+                                </button>
+                                <button type="button" class="ml-2" x-show="isSchoolSelected(row.id)" @click="removeSchool(row.id)">
+                                    <x-lucide-minus
                                         class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
                                 </button>
                             </td>
@@ -215,7 +240,11 @@
                             {{ __('school.academy') }}</th>
                         <th
                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('users.actions') }}</th>
+                            <button type="button" @click="deselectAllSchools()"
+                                class="px-3 py-1 bg-primary-500 hover:bg-primary-600 dark:bg-primary-400 dark:hover:bg-primary-500 text-white rounded text-xs font-semibold transition-colors">
+                                {{ __('exports.deselect_all') }}
+                            </button>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>

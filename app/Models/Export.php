@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Export extends Model {
+class Export extends Model
+{
     use HasFactory;
 
     protected $fillable = [
@@ -26,6 +27,7 @@ class Export extends Model {
         'users_nation',
         'users_academy',
         'schools',
+        'schools_all',
         'users_school',
         'users_course',
         'event_participants',
@@ -36,32 +38,41 @@ class Export extends Model {
     ];
 
     // Utente che ha richiesto l'export
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
+
     // Ruolo dell'utente che ha richiesto l'export
-    public function userRole() {
+    public function userRole()
+    {
         return $this->belongsTo(Role::class, 'user_role_id');
     }
+
     // Accademia dell'utente che ha richiesto l'export
-    public function userAcademy() {
+    public function userAcademy()
+    {
         return $this->belongsTo(Academy::class, 'user_academy_id');
     }
+
     // Scuola dell'utente che ha richiesto l'export
-    public function userSchool() {
+    public function userSchool()
+    {
         return $this->belongsTo(School::class, 'user_school_id');
     }
 
-    public function getExportTypes() {
+    public function getExportTypes()
+    {
         return collect($this->export_types);
     }
 
-    public static function getAvailableExportsByRole($role) {
+    public static function getAvailableExportsByRole($role)
+    {
         switch ($role) {
             case 'admin':
-                return ['users', 'user_roles', 'users_nation', 'users_academy', 'schools', 'users_school', 'users_course', 'event_participants', 'instructor_event_results', 'event_war', 'event_style', 'orders'];
+                return ['users', 'user_roles', 'users_nation', 'users_academy', 'users_school', 'users_course', 'schools_all', 'schools', 'event_participants', 'instructor_event_results', 'event_war', 'event_style', 'orders'];
             case 'rector':
-                return ['user_roles', 'users_academy', 'schools', 'users_school', 'users_course', 'event_participants'];
+                return ['user_roles', 'users_academy', 'users_school', 'users_course', 'schools', 'event_participants'];
             case 'manager':
                 return ['user_roles', 'users_academy', 'users_school', 'users_course', 'event_participants'];
             case 'dean':

@@ -14,25 +14,27 @@ use App\Exports\UsersExport;
 use App\Exports\UsersNationExport;
 use App\Exports\UsersRoleExport;
 use App\Exports\UsersSchoolExport;
-use App\Models\Export;
 use App\Models\Event;
+use App\Models\Export;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
-class ExportController extends Controller {
+class ExportController extends Controller
+{
     /**
      * Display a listing of the resource.
      */
-    public function index() {
+    public function index()
+    {
 
         //
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
+        if (! $authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
         }
 
@@ -50,71 +52,74 @@ class ExportController extends Controller {
                 ->get();
         }
 
-        $addToRoute = $authRole == 'admin' ? '' : $authRole . '.';
+        $addToRoute = $authRole == 'admin' ? '' : $authRole.'.';
 
         foreach ($exports as $key => $export) {
 
-            if ($export->status == "finished") {
-                $exports[$key]->url = route($addToRoute . 'exports.download', $export);
+            if ($export->status == 'finished') {
+                $exports[$key]->url = route($addToRoute.'exports.download', $export);
             }
 
-            $exports[$key]->type = __('exports.' . $export->type);
-            $exports[$key]->status = __('exports.' . $export->status);
+            $exports[$key]->type = __('exports.'.$export->type);
+            $exports[$key]->status = __('exports.'.$export->status);
         }
 
         return view('export.index', [
-            'exports' => $exports
+            'exports' => $exports,
         ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create() {
+    public function create()
+    {
         //
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
 
-        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
+        if (! $authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page');
         }
 
-        $export = new Export();
+        $export = new Export;
         $types = $export->getAvailableExportsByRole($authRole);
         $typesSelect = [];
 
         foreach ($types as $type) {
             $typesSelect[] = [
                 'value' => $type,
-                'label' => __('exports.' . $type)
+                'label' => __('exports.'.$type),
             ];
         }
 
         $roles = Role::all();
 
         foreach ($roles as $key => $role) {
-            $roles[$key]->name = __('users.' . $role->name);
+            $roles[$key]->name = __('users.'.$role->name);
         }
 
         $authRole = User::find(auth()->user()->id)->getRole();
-        $viewPath = $authRole == 'admin' ? 'export.create' : 'export.' . $authRole . '.create';
+        $viewPath = $authRole == 'admin' ? 'export.create' : 'export.'.$authRole.'.create';
+
         return view($viewPath, [
             'types' => $typesSelect,
-            'roles' => $roles
+            'roles' => $roles,
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {
-        //  
+    public function store(Request $request)
+    {
+        //
         $authUser = User::find(auth()->user()->id);
-        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
+        if (! $authUser->validatePrimaryInstitutionPersonnel()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to perform this action');
         }
 
-        $export = new Export();
+        $export = new Export;
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
         $authRoleId = $authUser->getActiveRoleId();
@@ -137,7 +142,7 @@ class ExportController extends Controller {
         }
 
         $request->validate([
-            'type' => 'required|string|in:' . implode(',', $exportTypes)
+            'type' => 'required|string|in:'.implode(',', $exportTypes),
         ]);
 
         $filters = [];
@@ -146,13 +151,13 @@ class ExportController extends Controller {
             case 'users':
                 $filters = [
                     'start_date' => $request->start_date,
-                    'end_date' => $request->end_date
+                    'end_date' => $request->end_date,
                 ];
                 break;
             case 'orders':
                 $filters = [
                     'start_date' => $request->start_date,
-                    'end_date' => $request->end_date
+                    'end_date' => $request->end_date,
                 ];
                 break;
             case 'user_roles':
@@ -162,15 +167,15 @@ class ExportController extends Controller {
                 break;
             case 'users_nation':
                 $filters = [
-                    "users_type" => $request->users_type,
-                    "nations" => json_decode($request->filters, true),
+                    'users_type' => $request->users_type,
+                    'nations' => json_decode($request->filters, true),
                 ];
                 break;
             case 'users_academy':
                 $academies = collect(json_decode($request->filters, true));
                 $allowedAcademyIds = $this->getControllableAcademyIds($authUser);
                 $selectedAcademies = $academies
-                    ->filter(fn($academy) => in_array($academy['id'] ?? null, $allowedAcademyIds, true))
+                    ->filter(fn ($academy) => in_array($academy['id'] ?? null, $allowedAcademyIds, true))
                     ->values()
                     ->all();
 
@@ -179,9 +184,33 @@ class ExportController extends Controller {
                 }
 
                 $filters = [
-                    "users_type" => $request->users_type,
-                    "academies" => $selectedAcademies,
+                    'users_type' => $request->users_type,
+                    'academies' => $selectedAcademies,
                 ];
+                break;
+            case 'schools_all':
+                $authRole = User::find(auth()->user()->id)->getRole();
+
+                if ($authRole === 'admin') {
+                    // Admin può esportare tutte le scuole
+                    $filters = [
+                        'academies' => [],
+                    ];
+                } else {
+                    // Non-admin usa la logica di rector (scuole della sua academy)
+                    $allowedAcademyIds = $this->getControllableAcademyIds($authUser);
+                    $activeInstitutionId = $authUser->getActiveInstitutionId();
+
+                    if (! $activeInstitutionId || ! in_array($activeInstitutionId, $allowedAcademyIds, true)) {
+                        return back()->with('error', 'You are not authorized to export schools.');
+                    }
+
+                    $filters = [
+                        'academies' => [[
+                            'id' => $activeInstitutionId,
+                        ]],
+                    ];
+                }
                 break;
             case 'schools':
                 $allowedAcademyIds = $this->getControllableAcademyIds($authUser);
@@ -189,34 +218,44 @@ class ExportController extends Controller {
                 if ($authRole === 'admin') {
                     $academies = collect(json_decode($request->filters, true));
                     $selectedAcademies = $academies
-                        ->filter(fn($academy) => in_array($academy['id'] ?? null, $allowedAcademyIds, true))
+                        ->filter(fn ($academy) => in_array($academy['id'] ?? null, $allowedAcademyIds, true))
                         ->values()
                         ->all();
 
                     if (count($selectedAcademies) === 0) {
                         return back()->with('error', 'You are not authorized to export schools for the selected academies.');
                     }
+
+                    // Auto-switch to schools_all if all academies are selected
+                    if (count($selectedAcademies) === count($allowedAcademyIds)) {
+                        $request->type = 'schools_all';
+                        $filters = ['academies' => []];
+                        $export->type = 'schools_all';
+                        session()->flash('status', 'All academies were selected. Automatically using "Export all schools" type.');
+                    } else {
+                        $filters = ['academies' => $selectedAcademies];
+                    }
                 } else {
                     $activeInstitutionId = $authUser->getActiveInstitutionId();
 
-                    if (!$activeInstitutionId || !in_array($activeInstitutionId, $allowedAcademyIds, true)) {
+                    if (! $activeInstitutionId || ! in_array($activeInstitutionId, $allowedAcademyIds, true)) {
                         return back()->with('error', 'You are not authorized to export schools for the selected academy.');
                     }
 
                     $selectedAcademies = [[
                         'id' => $activeInstitutionId,
                     ]];
-                }
 
-                $filters = [
-                    'academies' => $selectedAcademies,
-                ];
+                    $filters = [
+                        'academies' => $selectedAcademies,
+                    ];
+                }
                 break;
             case 'users_school':
                 $schools = collect(json_decode($request->filters, true));
                 $allowedSchoolIds = $this->getControllableSchoolIds($authUser);
                 $selectedSchools = $schools
-                    ->filter(fn($school) => in_array($school['id'] ?? null, $allowedSchoolIds, true))
+                    ->filter(fn ($school) => in_array($school['id'] ?? null, $allowedSchoolIds, true))
                     ->values()
                     ->all();
 
@@ -225,15 +264,15 @@ class ExportController extends Controller {
                 }
 
                 $filters = [
-                    "users_type" => $request->users_type,
-                    "schools" => $selectedSchools,
+                    'users_type' => $request->users_type,
+                    'schools' => $selectedSchools,
                 ];
                 break;
             case 'users_course':
                 $courses = collect(json_decode($request->filters, true));
                 $allowedCourseIds = $this->getControllableCourseIds($authUser);
                 $selectedCourses = $courses
-                    ->filter(fn($course) => in_array($course['id'] ?? null, $allowedCourseIds, true))
+                    ->filter(fn ($course) => in_array($course['id'] ?? null, $allowedCourseIds, true))
                     ->values()
                     ->all();
 
@@ -242,8 +281,8 @@ class ExportController extends Controller {
                 }
 
                 $filters = [
-                    "users_type" => $request->users_type,
-                    "courses" => $selectedCourses,
+                    'users_type' => $request->users_type,
+                    'courses' => $selectedCourses,
                 ];
                 break;
 
@@ -254,7 +293,7 @@ class ExportController extends Controller {
                 $events = collect(json_decode($request->filters, true));
                 $allowedEventIds = $this->getControllableEventIds($authUser);
                 $selectedEvents = $events
-                    ->filter(fn($event) => in_array($event['id'] ?? null, $allowedEventIds, true))
+                    ->filter(fn ($event) => in_array($event['id'] ?? null, $allowedEventIds, true))
                     ->values()
                     ->all();
 
@@ -263,7 +302,7 @@ class ExportController extends Controller {
                 }
 
                 $filters = [
-                    "filters" => $selectedEvents,
+                    'filters' => $selectedEvents,
                 ];
                 break;
             default:
@@ -276,14 +315,15 @@ class ExportController extends Controller {
         $export->user_id = auth()->id();
         $export->filters = json_encode($filters);
         $export->file = '';
-        $export->log = "['Export requested at " . now()->format('Y-m-d H:i:s') . "']";
+        $export->log = "['Export requested at ".now()->format('Y-m-d H:i:s')."']";
         $export->user_role_id = $authRoleId;
         $export->user_academy_id = $authAcademy?->id;
         $export->user_school_id = $authSchool?->id;
 
         $export->save();
 
-        $redirectRoute = $authRole == 'admin' ? 'exports.index' : $authRole . '.exports.index';
+        $redirectRoute = $authRole == 'admin' ? 'exports.index' : $authRole.'.exports.index';
+
         return redirect()->route($redirectRoute);
     }
 
@@ -385,32 +425,37 @@ class ExportController extends Controller {
     /**
      * Display the specified resource.
      */
-    public function show(Export $export) {
+    public function show(Export $export)
+    {
         //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Export $export) {
+    public function edit(Export $export)
+    {
         //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Export $export) {
+    public function update(Request $request, Export $export)
+    {
         //
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Export $export) {
+    public function destroy(Export $export)
+    {
         //
     }
 
-    public function resolvePendingExports() {
+    public function resolvePendingExports()
+    {
 
         $exports = Export::where('status', 'pending')->get();
 
@@ -419,94 +464,101 @@ class ExportController extends Controller {
             $log = json_decode($export->log);
             $export->save();
 
-            $log[] = "['Export started at " . now()->format('Y-m-d H:i:s') . "']";
+            $log[] = "['Export started at ".now()->format('Y-m-d H:i:s')."']";
 
             try {
                 switch ($export->type) {
                     case 'users':
                         $log[] = "['Exporting users']";
-                        $file_path = 'exports/' . $export->id . '/users.xlsx';
+                        $file_path = 'exports/'.$export->id.'/users.xlsx';
                         Excel::store(new UsersExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
                     case 'orders':
                         $log[] = "['Exporting orders']";
-                        $file_path = 'exports/' . $export->id . '/orders.xlsx';
+                        $file_path = 'exports/'.$export->id.'/orders.xlsx';
                         Excel::store(new OrdersExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
 
                     case 'user_roles':
                         $log[] = "['Exporting user roles']";
-                        $file_path = 'exports/' . $export->id . '/user_roles.xlsx';
+                        $file_path = 'exports/'.$export->id.'/user_roles.xlsx';
                         Excel::store(new UsersRoleExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
                     case 'users_course':
                         $log[] = "['Exporting users course']";
-                        $file_path = 'exports/' . $export->id . '/users_course.xlsx';
+                        $file_path = 'exports/'.$export->id.'/users_course.xlsx';
                         Excel::store(new UsersCourseExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
                     case 'users_nation':
                         $log[] = "['Exporting users nation']";
-                        $file_path = 'exports/' . $export->id . '/users_nation.xlsx';
+                        $file_path = 'exports/'.$export->id.'/users_nation.xlsx';
                         Excel::store(new UsersNationExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
                     case 'users_academy':
                         $log[] = "['Exporting users academy']";
-                        $file_path = 'exports/' . $export->id . '/users_academy.xlsx';
+                        $file_path = 'exports/'.$export->id.'/users_academy.xlsx';
                         Excel::store(new UsersAcademyExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
+                        break;
+                    case 'schools_all':
+                        $log[] = "['Exporting all schools']";
+                        $file_path = 'exports/'.$export->id.'/schools_all.xlsx';
+                        Excel::store(new SchoolsExport($export), $file_path, 'gcs');
+                        $export->file = $file_path;
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
                     case 'schools':
                         $log[] = "['Exporting schools']";
-                        $file_path = 'exports/' . $export->id . '/schools.xlsx';
+                        $file_path = 'exports/'.$export->id.'/schools.xlsx';
                         Excel::store(new SchoolsExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
                     case 'users_school':
                         $log[] = "['Exporting users school']";
-                        $file_path = 'exports/' . $export->id . '/users_school.xlsx';
+                        $file_path = 'exports/'.$export->id.'/users_school.xlsx';
                         Excel::store(new UsersSchoolExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
                     case 'event_participants':
                         $log[] = "['Exporting event participants']";
-                        $file_path = 'exports/' . $export->id . '/event_participants.xlsx';
+                        $file_path = 'exports/'.$export->id.'/event_participants.xlsx';
                         Excel::store(new EventsParticipantsExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
                     case 'instructor_event_results':
                         $log[] = "['Exporting event results']";
-                        $file_path = 'exports/' . $export->id . '/event_results.xlsx';
+                        $file_path = 'exports/'.$export->id.'/event_results.xlsx';
                         Excel::store(new EventsInstructorResultsExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
                     case 'event_war':
                         $log[] = "['Exporting event arena points']";
-                        $file_path = 'exports/' . $export->id . '/event_arena_points.xlsx';
+                        $file_path = 'exports/'.$export->id.'/event_arena_points.xlsx';
                         Excel::store(new EventsWarExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
                     case 'event_style':
                         $log[] = "['Exporting event style points']";
-                        $file_path = 'exports/' . $export->id . '/event_style_points.xlsx';
+                        $file_path = 'exports/'.$export->id.'/event_style_points.xlsx';
                         Excel::store(new EventsStyleExport($export), $file_path, 'gcs');
                         $export->file = $file_path;
-                        $log[] = "['Export finished at " . now()->format('Y-m-d H:i:s') . "']";
+                        $log[] = "['Export finished at ".now()->format('Y-m-d H:i:s')."']";
                         break;
                     default:
                         break;
@@ -517,7 +569,7 @@ class ExportController extends Controller {
                 $export->save();
             } catch (\Exception $e) {
                 $log[] = "['Error exporting file']";
-                $log[] = "['" . $e->getMessage() . "']";
+                $log[] = "['".$e->getMessage()."']";
                 $export->log = json_encode($log);
                 $export->status = 'error';
                 $export->save();
@@ -525,7 +577,8 @@ class ExportController extends Controller {
         }
     }
 
-    public function download(Export $export) {
+    public function download(Export $export)
+    {
         // Solo admin o autore può scaricare
         $authUser = User::find(auth()->user()->id);
         $authRole = $authUser->getRole();
@@ -543,6 +596,6 @@ class ExportController extends Controller {
 
         return response($file2)
             ->header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 }

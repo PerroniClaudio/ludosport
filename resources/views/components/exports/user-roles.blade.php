@@ -29,6 +29,18 @@
         this.selectedRoles = this.selectedRoles.filter(role => role.id !== id);
         this.valuateRoles();
     },
+    isRoleSelected: function(id) {
+        return this.selectedRoles.some(role => role.id === id);
+    },
+    selectAllRoles: function() {
+        const notSelected = this.roles.filter(role => !this.isRoleSelected(role.id));
+        this.selectedRoles.push(...notSelected);
+        this.valuateRoles();
+    },
+    deselectAllRoles: function() {
+        this.selectedRoles = [];
+        this.valuateRoles();
+    },
 
 }">
 
@@ -51,16 +63,25 @@
                             {{ __('exports.roles_name') }}</th>
                         <th
                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('exports.actions') }}</th>
+                            <button type="button" @click="selectAllRoles()"
+                                class="px-3 py-1 bg-primary-500 hover:bg-primary-600 dark:bg-primary-400 dark:hover:bg-primary-500 text-white rounded text-xs font-semibold transition-colors">
+                                {{ __('exports.select_all') }}
+                            </button>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     <template x-for="(row, index) in roles">
-                        <tr>
+                        <tr :class="{ 'bg-primary-100 dark:bg-primary-900': isRoleSelected(row.id) }">
                             <td class="text-background-500 dark:text-background-300 text-sm" x-text="row.name"></td>
                             <td class="text-background-500 dark:text-background-300 text-sm text-right p-1">
-                                <button type="button" @click="addRole(row.id)">
+                                <button type="button" @click="addRole(row.id)" x-bind:disabled="isRoleSelected(row.id)"
+                                    :class="{ 'opacity-40 cursor-not-allowed': isRoleSelected(row.id) }">
                                     <x-lucide-plus
+                                        class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
+                                </button>
+                                <button type="button" class="ml-2" x-show="isRoleSelected(row.id)" @click="removeRole(row.id)">
+                                    <x-lucide-minus
                                         class="w-4 h-4 text-primary-500 dark:text-primary-400 hover:text-primary-700" />
                                 </button>
                             </td>
@@ -82,7 +103,11 @@
                             {{ __('roles.name') }}</th>
                         <th
                             class="text-right bg-background-100 dark:bg-background-900 sticky top-0 border-b border-background-100 dark:border-background-700 py-2 text-primary-500 dark:text-primary-400 font-bold tracking-wider uppercase text-xs truncate">
-                            {{ __('roles.actions') }}</th>
+                            <button type="button" @click="deselectAllRoles()"
+                                class="px-3 py-1 bg-primary-500 hover:bg-primary-600 dark:bg-primary-400 dark:hover:bg-primary-500 text-white rounded text-xs font-semibold transition-colors">
+                                {{ __('exports.deselect_all') }}
+                            </button>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
