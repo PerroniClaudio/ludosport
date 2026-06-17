@@ -45,6 +45,13 @@
                     </span>
                 </button>
             </div>
+
+            <p class="mt-6 text-center text-sm text-background-600 dark:text-background-300">
+                Already have an account?
+                <a href="{{ route('login') }}" class="font-semibold text-primary-600 transition hover:text-primary-500">
+                    Login
+                </a>
+            </p>
         </div>
 
         <div x-show="registrationType === 'adult'" x-cloak>
