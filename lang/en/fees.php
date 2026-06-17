@@ -21,6 +21,7 @@ return [
     'invoice_zip' => 'ZIP Code',
     'invoice_vat' => 'VAT',
     'invoice_sdi' => 'SDI',
+    'invoice_fiscal_code' => 'Fiscal Code - mandatory field for Italy',
     'invoice_city' => 'City',
     'invoice_country' => 'Country',
     'fees_success_title' => 'Fees purchased successfully',

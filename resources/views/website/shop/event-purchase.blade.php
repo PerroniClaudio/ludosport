@@ -5,6 +5,11 @@
     $stripeUrl = route('shop.events.stripe-checkout', ['event' => $event]);
     $paypalUrl = route('shop.events.paypal-checkout', ['event' => $event]);
     $waitingListUrl = route('shop.events.waiting-list-checkout', ['event' => $event]);
+    $invoiceAddress = json_decode($invoice->address);
+    $invoiceAddressLine = $invoiceAddress->address ?? '';
+    $invoiceZip = $invoiceAddress->zip ?? '';
+    $invoiceCity = $invoiceAddress->city ?? '';
+    $invoiceCountry = $invoiceAddress->country ?? '';
 
     // Questo risale alla preautorizzazione. Adesso nnon è più utilizzato
     // $stripeUrl = '';
@@ -24,35 +29,56 @@
         <section class="col-span-12 py-12">
             <div x-data="{
                 birthday: '',
-                invoice_id: '{{ $invoice->id }}',
+                invoice_id: @js($invoice->id),
                 totalPrice: {{ $event->price }},
-                name: '{{ $invoice->name ? $invoice->name : '' }}',
-                surname: '{{ $invoice->surname ? $invoice->surname : '' }}',
-                address: '{{ json_decode($invoice->address)->address ?? false ? json_decode($invoice->address)->address : '' }}',
-                zip: '{{ json_decode($invoice->address)->zip ?? false ? json_decode($invoice->address)->zip : '' }}',
-                city: '{{ json_decode($invoice->address)->city ?? false ? json_decode($invoice->address)->city : '' }}',
-                country: '{{ json_decode($invoice->address)->country ?? false ? json_decode($invoice->address)->country : '' }}',
-                vat: '{{ $invoice->vat ? ($invoice->vat == 'VAT' ? '' : $invoice->vat ) : '' }}',
-                sdi: '{{ $invoice->sdi ? $invoice->sdi : '' }}',
-                business_name: '{{ $invoice->business_name ? $invoice->business_name : '' }}',
+                name: @js($invoice->name ?: ''),
+                surname: @js($invoice->surname ?: ''),
+                address: @js($invoiceAddressLine),
+                zip: @js($invoiceZip),
+                city: @js($invoiceCity),
+                country: @js($invoiceCountry),
+                vat: @js($invoice->vat && $invoice->vat !== 'VAT' ? $invoice->vat : ''),
+                sdi: @js($invoice->sdi ?: ''),
+                fiscal_code: @js($invoice->fiscal_code ?: ''),
+                business_name: @js($invoice->business_name ?: ''),
                 is_business: '{{ $invoice->is_business ? true : false }}' == 'true' ? true : false,
-                want_invoice: '{{ $invoice->want_invoice ? true : false }}' == 'true' ? true : false,
-                shouldShowPayment: false,
+                want_invoice: true,
+                invoiceSaved: false,
+                shouldShowPayment: true,
                 shouldShowSdi: false,
+                shouldShowFiscalCode: false,
+                isItaly: function() {
+                    return ['it', 'italy', 'italia'].includes((this.country || '').trim().toLowerCase())
+                },
                 updateSdi: function() {
-                    if (this.want_invoice && ((/^IT/.test(this.vat)) || (this.country.toLowerCase() === 'italy') || (this.country.toLowerCase() === 'italia'))) {
+                    this.shouldShowFiscalCode = this.isItaly()
+                    if ((/^IT/.test(this.vat || '')) || this.shouldShowFiscalCode) {
                         this.shouldShowSdi = true
                     } else {
                         this.shouldShowSdi = false
                     }
                 },
-                shouldShowPayment: true,
+                markInvoiceDirty() {
+                    this.invoiceSaved = false
+                    this.updateSdi()
+                },
+                validateInvoiceForm() {
+                    this.updateSdi()
+                    if (!this.$refs.invoiceForm.checkValidity()) {
+                        this.$refs.invoiceForm.reportValidity()
+                        return false
+                    }
+                    return true
+                },
                 showResSuccessMessage: false,
                 showResErrorMessage: false,
                 successMessage: '',
                 errorMessage: '',
                 event_id: '{{ $event->id }}',
                 async saveInvoiceData(onlyInvoice = false) {
+                    if (!this.validateInvoiceForm()) {
+                        return false
+                    }
                     const url = `/invoices/update`
                     
                     const body = new FormData()
@@ -66,9 +92,10 @@
                     body.append('country', this.country)
                     body.append('vat', this.vat)
                     body.append('sdi', this.sdi)
+                    body.append('fiscal_code', this.fiscal_code)
                     body.append('is_business', this.is_business)
                     body.append('business_name', this.business_name)
-                    body.append('want_invoice', this.want_invoice)
+                    body.append('want_invoice', true)
 
                     let invoiceResponse = {};
 
@@ -83,12 +110,15 @@
                         .then(data => {
                             console.log(data)
                             invoiceResponse = {...data}
+                            this.invoiceSaved = !!data.success
                         })
                         .catch(err => {
                             console.error(err)
                             invoiceResponse = {
+                                success: false,
                                 error: 'An error occurred'
                             }
+                            this.invoiceSaved = false
                         })
                         .finally(() => {
                             if(!onlyInvoice) {
@@ -102,8 +132,7 @@
                     return invoiceResponse.success ? true : false;
                 },
                 async startStripeCheckout() {
-                    let ok = await this.saveInvoiceData()
-                    if(ok){
+                    if(this.invoiceSaved){
                         const url = `{{ $stripeUrl }}`
                         let items = [];
                 
@@ -122,9 +151,7 @@
                     }
                 },
                 async startPaypalCheckout() {
-                    let ok = await this.saveInvoiceData();
-                    console.log({ok})
-                    if(ok){
+                    if(this.invoiceSaved){
                         const url = `{{ $paypalUrl }}`
                         let items = [];
                 
@@ -152,9 +179,7 @@
                     }
                 },
                 async startWaitingListCheckout() {
-                    let ok = await this.saveInvoiceData();
-                    console.log({ok})
-                    if(ok){
+                    if(this.invoiceSaved){
                         const url = `{{ $waitingListUrl }}`
                         let items = [];
                 
@@ -182,9 +207,7 @@
                     }
                 },
                 async startFreeCheckout() {
-                    let ok = await this.saveInvoiceData();
-                    console.log({ok})
-                    if(ok){
+                    if(this.invoiceSaved){
                         const url = `{{ $freeUrl }}`
                         let items = [];
                 
@@ -212,8 +235,7 @@
                     }
                 },
                 async startWireCheckout() {
-                    let ok = await this.saveInvoiceData()
-                    if(ok){
+                    if(this.invoiceSaved){
                         const url = `/shop/fees/wire-transfer`
                         let items = [];
                 
@@ -277,30 +299,21 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
+                            <form x-ref="invoiceForm" @submit.prevent="saveInvoiceData(true)"
+                                @input="markInvoiceDirty" @change="markInvoiceDirty"
+                                class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
                                 <div class="flex justify-between items-center">
                                     <h3 class="text-background-800 dark:text-background-200 text-2xl">
                                         {{ __('fees.invoice') }}
                                     </h3>
                                     <div>
-                                        <x-primary-button @click="()=>saveInvoiceData(true)">
+                                        <x-primary-button>
                                             <x-lucide-save class="h-6 w-6 text-white" />
                                         </x-primary-button>
                                     </div>
                                 </div>
 
                                 <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-
-                                <div class="block mt-4">
-                                    <label for="want_invoice" class="inline-flex items-center">
-                                        <input id="want_invoice" type="checkbox"
-                                            class="rounded dark:bg-background-900 border-background-300 dark:border-background-700 text-primary-600 shadow-sm focus:ring-primary-500 dark:focus:ring-primary-600 dark:focus:ring-offset-background-800"
-                                            name="want_invoice" x-model="want_invoice"
-                                            @change="updateSdi">
-                                        <span
-                                            class="ms-2 text-sm text-background-600 dark:text-background-400">{{ __('fees.want_invoice') }}</span>
-                                    </label>
-                                </div>
 
                                 <div class="block mt-4">
                                     <label for="is_business" class="inline-flex items-center">
@@ -317,28 +330,22 @@
                                         <x-form.input-model name="invoice_id" label="{{ __('fees.invoice_id') }}" />
                                     </div>
                                     <div class="col-span-2">
-                                        <x-form.input-model name="name" label="{{ __('fees.invoice_name') }}" placeholder="Name" />
+                                        <x-form.input-model name="name" label="{{ '* ' . __('fees.invoice_name') }}" placeholder="Name" required="true" />
                                     </div>
                                     <div class="col-span-2">
-                                        <x-form.input-model name="surname" label="{{ __('fees.invoice_surname') }}" placeholder="Surname" />
+                                        <x-form.input-model name="surname" label="{{ '* ' . __('fees.invoice_surname') }}" placeholder="Surname" required="true" />
                                     </div>
                                     <div class="col-span-3">
-                                        <x-form.input-model name="address" label="{{ __('fees.invoice_address') }}" placeholder="Address" />
+                                        <x-form.input-model name="address" label="{{ '* ' . __('fees.invoice_address') }}" placeholder="Address" required="true" />
                                     </div>
                                     <div class="col-span-1">
-                                        <x-form.input-model name="zip" label="{{ __('fees.invoice_zip') }}" placeholder="Zip code" />
+                                        <x-form.input-model name="zip" label="{{ '* ' . __('fees.invoice_zip') }}" placeholder="Zip code" required="true" />
                                     </div>
                                     <div class="col-span-2">
-                                        <x-form.input-model name="city" label="{{ __('fees.invoice_city') }}" placeholder="City" />
+                                        <x-form.input-model name="city" label="{{ '* ' . __('fees.invoice_city') }}" placeholder="City" required="true" />
                                     </div>
                                     <div class="col-span-2">
-                                        {{-- <x-form.input-model name="country" label="{{ __('fees.invoice_country') }}" placeholder="Country" /> --}}
-                                        <x-input-label value="{{ __('fees.invoice_country') }}" />
-                                        <input name="country" type="text"
-                                            value="country" placeholder="Country"
-                                            x-model="country" @input="updateSdi"
-                                            class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
-                                        <x-input-error :messages="$errors->get('country')" class="mt-2" />
+                                        <x-form.invoice-country-select selectedvalue="{{ $invoiceCountry }}" required="true" />
                                     </div>
                                     <div class="col-span-4" x-show="is_business">
                                         <x-form.input-model name="business_name"
@@ -353,11 +360,18 @@
                                             class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
                                         <x-input-error :messages="$errors->get('vat')" class="mt-2" />
                                     </div>
-                                    <div class="col-span-4" x-show="shouldShowSdi">
+                                    <div class="col-span-4 md:col-span-2" x-show="shouldShowSdi">
                                         <x-form.input-model name="sdi" label="{{ __('fees.invoice_sdi') }}" placeholder="SDI" />
                                     </div>
+                                    <div class="col-span-4 md:col-span-2" x-show="shouldShowFiscalCode">
+                                        <x-input-label value="{{ '* ' . __('fees.invoice_fiscal_code') }}" />
+                                        <input name="fiscal_code" type="text" x-model="fiscal_code"
+                                            x-bind:required="shouldShowFiscalCode"
+                                            class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
+                                        <x-input-error :messages="$errors->get('fiscal_code')" class="mt-2" />
+                                    </div>
                                 </div>
-                            </div>
+                            </form>
                         
                             <div x-show="showResSuccessMessage">
                                 <div class="fixed bg-success-500 text-white py-2 px-4 rounded-xl bottom-8 left-32 text-sm">
@@ -386,7 +400,7 @@
 
                                 @if ($isWaitingList)
                                     @if(!(isset($event->waiting_list_close_date) && ($event->waiting_list_close_date < now())))
-                                        <div x-show="shouldShowPayment" class="mt-4">
+                                        <div x-show="shouldShowPayment && invoiceSaved" class="mt-4">
                                             <div @click="startWaitingListCheckout"
                                                 class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer">
                                                 <span>Join the waiting list</span>
@@ -394,20 +408,20 @@
                                         </div>
                                     @endif
                                 @elseif ($isFreeCheckout)
-                                    <div x-show="shouldShowPayment" class="mt-4">
+                                    <div x-show="shouldShowPayment && invoiceSaved" class="mt-4">
                                         <div @click="startFreeCheckout"
                                             class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer">
                                             <span>Book now</span>
                                         </div>
                                     </div>
                                 @else
-                                    <div x-show="shouldShowPayment" class="mt-4">
+                                    <div x-show="shouldShowPayment && invoiceSaved" class="mt-4">
                                         <div @click="startPaypalCheckout"
                                             class="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-1 text-center cursor-pointer">
                                             <span>PayPal</span>
                                         </div>
                                     </div>
-                                    <div x-show="shouldShowPayment" class="mt-4">
+                                    <div x-show="shouldShowPayment && invoiceSaved" class="mt-4">
                                         <div class="rounded-full bg-gray-200 dark:bg-white hover:bg-gray-400 dark:hover:bg-gray-200 text-black font-bold p-1 text-center cursor-pointer"
                                             @click="startStripeCheckout">
 

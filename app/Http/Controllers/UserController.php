@@ -2047,13 +2047,24 @@ class UserController extends Controller {
                 ],
                 'vat' => '',
                 'sdi' => '',
+                'fiscal_code' => '',
                 'is_business' => false,
+                'want_invoice' => true,
                 'business_name' => '',
             ]);
         }
     }
 
     public function saveInvoice(Request $request) {
+        $validator = Validator::make($request->all(), $this->invoiceValidationRules($request));
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'error' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
         $address = json_encode([
             'address' => $request->address,
@@ -2067,9 +2078,10 @@ class UserController extends Controller {
             'surname' => $request->surname,
             'vat' => $request->vat ?? '',
             'sdi' => $request->sdi ?? '',
+            'fiscal_code' => $request->fiscal_code ?? '',
             'address' => $address,
             'is_business' => $request->is_business === 'true' ? true : false,
-            'want_invoice' => $request->want_invoice === 'true' ? true : false,
+            'want_invoice' => true,
             'business_name' => $request->business_name ?? '',
             'user_id' => Auth()->user()->id
         ]);
@@ -2082,20 +2094,17 @@ class UserController extends Controller {
     }
 
     public function updateInvoice(Request $request) {
+        $validator = Validator::make($request->all(), array_merge(
+            ['invoice_id' => ['required', 'integer', 'exists:invoices,id']],
+            $this->invoiceValidationRules($request)
+        ));
 
-        if ($request->want_invoice == 'true') {
-            if ($request->is_business == 'true' && (!$request->vat || !$request->business_name)) {
-                return response()->json([
-                    'error' => 'Business invoice requires VAT and Business Name!',
-                ]);
-            }
-            if (((preg_match('/^IT/', $request->vat) || strtolower($request->country) === 'italy' || strtolower($request->country) === 'italia'))
-                && !$request->sdi
-            ) {
-                return response()->json([
-                    'error' => 'For Italy SDI code is required!',
-                ]);
-            }
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'error' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
         $invoice = Invoice::find($request->invoice_id);
@@ -2127,9 +2136,10 @@ class UserController extends Controller {
         $invoice->surname = $request->surname;
         $invoice->vat = $request->vat ? $request->vat : 'VAT';
         $invoice->sdi = $request->sdi;
+        $invoice->fiscal_code = $request->fiscal_code ?? '';
         $invoice->address = $address;
         $invoice->is_business = $request->is_business === 'true' ? true : false;
-        $invoice->want_invoice = $request->want_invoice === 'true' ? true : false;
+        $invoice->want_invoice = true;
         $invoice->business_name = $request->business_name;
 
         $invoice->save();
@@ -2137,6 +2147,24 @@ class UserController extends Controller {
         return response()->json([
             'success' => true,
         ]);
+    }
+
+    private function invoiceValidationRules(Request $request): array {
+        $isBusiness = $request->is_business === 'true' || $request->is_business === true || $request->is_business === '1';
+        $isItaly = in_array(strtolower(trim((string) $request->country)), ['it', 'italy', 'italia']);
+
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'surname' => ['required', 'string', 'max:255'],
+            'address' => ['required', 'string', 'max:255'],
+            'zip' => ['required', 'string', 'max:50'],
+            'city' => ['required', 'string', 'max:255'],
+            'country' => ['required', 'string', 'exists:nations,name'],
+            'business_name' => [$isBusiness ? 'required' : 'nullable', 'string', 'max:255'],
+            'vat' => [$isBusiness ? 'required' : 'nullable', 'string', 'max:255'],
+            'sdi' => ['nullable', 'string', 'max:255'],
+            'fiscal_code' => [$isItaly ? 'required' : 'nullable', 'string', 'max:255'],
+        ];
     }
 
     public function testUserTest() {
