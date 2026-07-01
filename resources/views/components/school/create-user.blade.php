@@ -13,12 +13,26 @@
 
 <div x-data="{
     selected: [],
+    birthday: @js(old('birthday')),
     selectRole(role) {
         if (this.selected.includes(role)) {
             this.selected = this.selected.filter(item => item !== role);
         } else {
             this.selected.push(role);
         }
+    },
+    isMinorBirthday() {
+        if (!this.birthday) {
+            return false;
+        }
+        const birthDate = new Date(this.birthday);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age < 18;
     }
 }">
 
@@ -36,7 +50,7 @@
             $authRole = auth()->user()->getRole();
             $formRoute = $authRole === 'admin' ? 'schools.users.create' : $authRole . '.schools.users.create';
         @endphp
-        <form action="{{ route($formRoute, $school) }}" method="post" class="p-6 flex flex-col gap-4">
+        <form action="{{ route($formRoute, $school) }}" method="post" enctype="multipart/form-data" class="p-6 flex flex-col gap-4">
 
             @csrf
 
@@ -66,6 +80,26 @@
 
             <x-form.input name="email" label="{{ __('users.email') }}" type="email" required
                 placeholder="{{ __('users.email') }}" />
+
+            @if ($type === 'athlete')
+                <x-form.input name="birthday" label="{{ __('Birthday') }}" type="date" required x-model="birthday" />
+
+                <div x-show="isMinorBirthday()" x-cloak class="flex flex-col gap-2">
+                    {{-- <x-form.select name="gender" label="{{ __('Gender') }}" :options="[
+                        ['value' => 'male', 'label' => 'Male'],
+                        ['value' => 'female', 'label' => 'Female'],
+                        ['value' => 'other', 'label' => 'Other'],
+                        ['value' => 'notsay', 'label' => 'Prefer not to say'],
+                    ]" :shouldHaveEmptyOption="true" /> --}}
+
+                    <label for="minor_documents" class="text-sm font-medium text-background-700 dark:text-background-300">
+                        {{ __('auth.minor_documents') }}
+                    </label>
+                    <input id="minor_documents" name="minor_documents" type="file" accept="application/pdf"
+                        class="block w-full rounded-lg border border-background-200 bg-white px-4 py-3 text-sm text-background-700 shadow-sm file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100 dark:border-background-700 dark:bg-background-900 dark:text-background-200 dark:file:bg-primary-950/50 dark:file:text-primary-300" />
+                    <x-input-error :messages="$errors->get('minor_documents')" class="mt-2" />
+                </div>
+            @endif
 
 
             <div>

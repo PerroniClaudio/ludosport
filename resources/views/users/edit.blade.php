@@ -143,6 +143,9 @@
                                 placeholder="{{ date('Y') }}"
                                 description="The year of the first registration to LudoSport" />
 
+                            <x-form.input name="birthday" label="Birthday" type="date"
+                                :value="$user->birthday" />
+
                             <div>
                                 <x-input-label for="nationality" value="Nationality" />
                                 <select name="nationality" id="nationality"

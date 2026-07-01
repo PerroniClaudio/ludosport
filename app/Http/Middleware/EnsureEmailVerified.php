@@ -6,25 +6,30 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureMinorUserIsApproved
+class EnsureEmailVerified
 {
     /**
-     * Handle an incoming request.
+     * Controlla se l'utente ha verificato la propria email.
+     * Se no, lo reindirizza alla pagina di verifica email.
+     * Applica solo agli utenti auto-registrati (email_verified_at è null ma non è stato creato da admin).
      */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
 
-        if (! $user || ! $user->isMinorPendingApproval()) {
+        if (! $user || $user->hasVerifiedEmail()) {
             return $next($request);
         }
 
+        // Permettere solo email verification routes
         $allowedRoutes = [
-            'dashboard',
-            'users.update-minor-documents',
             'verification.notice',
             'verification.verify',
             'verification.send',
+            'password.request',
+            'password.email',
+            'password.reset',
+            'password.store',
             'logout',
         ];
 
@@ -32,6 +37,6 @@ class EnsureMinorUserIsApproved
             return $next($request);
         }
 
-        return redirect(route('dashboard', absolute: false))->with('error', 'Your account is waiting for minor approval.');
+        return redirect(route('verification.notice', absolute: false));
     }
 }

@@ -1,15 +1,15 @@
 <?php
 
-use App\Support\DailyLogArchiveUploader;
-use Carbon\CarbonImmutable;
-use App\Jobs\CheckUsersComingOfAgeJob;
 use App\Jobs\CheckPrimaryAcademyJob;
+use App\Jobs\CheckUsersComingOfAgeJob;
 use App\Jobs\CheckWaitingListJob;
 use App\Models\Academy;
 use App\Models\School;
-use Illuminate\Support\Facades\Schedule;
+use App\Support\DailyLogArchiveUploader;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 use Symfony\Component\Console\Command\Command;
 
 Artisan::command('inspire', function () {
@@ -35,7 +35,7 @@ Artisan::command('logs:archive-daily {--date= : The execution timestamp (Y-m-d H
         $this->warn('⚠️  Force mode enabled: archiving active log files!');
     }
 
-    $outputCallback = $debug ? fn($msg) => $this->line($msg) : null;
+    $outputCallback = $debug ? fn ($msg) => $this->line($msg) : null;
     $uploadedPaths = $uploader->archive($executionTime, $force, $outputCallback);
 
     if (empty($uploadedPaths)) {
@@ -44,7 +44,7 @@ Artisan::command('logs:archive-daily {--date= : The execution timestamp (Y-m-d H
         return Command::SUCCESS;
     }
 
-    $this->info('✅ Uploaded ' . count($uploadedPaths) . ' log file(s):');
+    $this->info('✅ Uploaded '.count($uploadedPaths).' log file(s):');
     foreach ($uploadedPaths as $path) {
         $this->line("  - {$path}");
     }
@@ -52,24 +52,25 @@ Artisan::command('logs:archive-daily {--date= : The execution timestamp (Y-m-d H
     return Command::SUCCESS;
 })->purpose('Upload all channel logs to Google Cloud Storage with hierarchical timestamp structure.');
 
-// Aggregate daily log archives into monthly files for better searchability  
+// Aggregate daily log archives into monthly files for better searchability
 Artisan::command('logs:aggregate-monthly {month? : Month to aggregate (Y-m format)} {--channel= : Specific channel} {--dry-run : Show what would be done}', function () {
-    $month = $this->argument('month') 
+    $month = $this->argument('month')
         ? Carbon\Carbon::createFromFormat('Y-m', $this->argument('month'))
         : Carbon\Carbon::now()->subMonth();
-        
+
     $channel = $this->option('channel');
     $dryRun = $this->option('dry-run');
-    
+
     $command = app(\App\Console\Commands\AggregateLogArchivesCommand::class);
+
     return $command->handle();
 })->purpose('Aggregate daily log archives into monthly files for easier long-term analysis');
 
-Schedule::job(new CheckWaitingListJob())->daily();
+Schedule::job(new CheckWaitingListJob)->daily();
 
-Schedule::job(new CheckPrimaryAcademyJob())->daily();
+Schedule::job(new CheckPrimaryAcademyJob)->daily();
 
-Schedule::job(new CheckUsersComingOfAgeJob())->daily();
+Schedule::job(new CheckUsersComingOfAgeJob)->daily();
 
 Schedule::command('logs:archive-daily')
     ->dailyAt(config('logging.archive.time', '00:10'))
@@ -85,12 +86,12 @@ Schedule::command('logs:aggregate-monthly', [Carbon\Carbon::now()->subMonth()->f
     ->withoutOverlapping();
 
 Schedule::call(function () {
-    $importController = new \App\Http\Controllers\ImportController();
+    $importController = new \App\Http\Controllers\ImportController;
     $importController->resolvePendingImports();
 })->everyMinute();
 
 Schedule::call(function () {
-    $exportController = new \App\Http\Controllers\ExportController();
+    $exportController = new \App\Http\Controllers\ExportController;
     $exportController->resolvePendingExports();
 })->everyMinute();
 
@@ -133,3 +134,9 @@ Artisan::command('fix:main-dean-rector', function () {
 
     $this->info("Fatto. Accademie aggiornate: $countA, Scuole aggiornate: $countS");
 })->describe('Trova scuole e accademie senza main_dean/main_rector e li assegna ad un utente con ruolo appropriato');
+
+Schedule::command('temp:clean-minor-documents')
+    ->cron('0 0,8,16 * * *') // 00:00, 08:00, 16:00 (3 times daily)
+    ->name('temp:clean-minor-documents')
+    ->onOneServer()
+    ->withoutOverlapping();

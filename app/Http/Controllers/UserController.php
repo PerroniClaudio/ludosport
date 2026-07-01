@@ -19,20 +19,19 @@ use App\Models\User;
 use App\Models\UserDocumentHistory;
 use App\Models\WeaponForm;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Password;
 
-class UserController extends Controller {
-
+class UserController extends Controller
+{
     // public function index() {
     //     $authUser = User::find(Auth::user()->id);
     //     $authUserRole = $authUser->getRole();
@@ -62,7 +61,6 @@ class UserController extends Controller {
     //             foreach ($no_roles_users as $user) {
     //                 $users_without_roles[] = $user;
     //             }
-
 
     //             break;
     //         case 'manager':
@@ -115,7 +113,6 @@ class UserController extends Controller {
     //                     });
     //                 })->get();
 
-
     //             break;
     //         default:
     //             return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
@@ -123,8 +120,6 @@ class UserController extends Controller {
     //     }
 
     //     $viewPath = $authUserRole === 'admin' ? 'users.index' : 'users.' . $authUserRole . '.index';
-
-
 
     //     foreach ($roles as $role) {
     //         $filtered = $users->filter(function ($user) use ($role) {
@@ -180,16 +175,17 @@ class UserController extends Controller {
     //     ]);
     // }
 
-    public function create() {
+    public function create()
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (! in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
-        if (!$authUser->validatePrimaryInstitutionPersonnel()) {
-            return redirect()->route("dashboard")->with('error', 'You are not authorized to access this page!');
+        if (! $authUser->validatePrimaryInstitutionPersonnel()) {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to access this page!');
         }
 
         $roles = $authUser->getEditableRoles();
@@ -212,24 +208,42 @@ class UserController extends Controller {
                 return back()->with('error', 'You do not have the required role to access this page!');
         }
 
-        $viewPath = $authRole === 'admin' ? 'users.create' :  'users.' . $authRole . '.create';
+        // Recupero il file temporaneo solo nel ciclo di redirect con errori
+        $tempMinorDocumentPath = session('minor_documents_temp_path');
+        $cachedFileName = null;
+        if ($tempMinorDocumentPath && Storage::disk('local')->exists($tempMinorDocumentPath)) {
+            $cachedFileName = basename($tempMinorDocumentPath);
+        }
+
+        $viewPath = $authRole === 'admin' ? 'users.create' : 'users.'.$authRole.'.create';
 
         return view($viewPath, [
             'roles' => $roles,
             'academies' => $academies,
+            'cachedFileName' => $cachedFileName,
         ]);
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (! in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
-        $isUserMinor = $request->boolean('is_user_minor');
         $adultCutoffDate = date('Y-m-d', strtotime('-18 years'));
+
+        $birthDate = Carbon::parse($request->birthday);
+        $isUserMinor = $birthDate->diffInYears(now()) < 18;
+
+        // Salvo il file temporaneo in sessione flash, valido solo per il redirect successivo
+        if ($request->hasFile('minor_documents')) {
+            $file = $request->file('minor_documents');
+            $temporaryPath = $file->store('temp/minor_documents', 'local');
+            $request->session()->flash('minor_documents_temp_path', $temporaryPath);
+        }
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -238,22 +252,17 @@ class UserController extends Controller {
             'year' => 'required|integer|min:2006|max:'.date('Y'),
             'nationality' => 'required|string|exists:nations,name',
             'academy_id' => 'required|integer|exists:academies,id',
-            'is_user_minor' => 'nullable|boolean',
+            'roles' => 'required|string|min:3',
             'birthday' => $isUserMinor
                 ? ['required', 'date', 'before:today', 'after:'.$adultCutoffDate]
-                : ['nullable', 'date', 'before_or_equal:'.$adultCutoffDate],
-            'gender' => $isUserMinor
-                ? ['required', 'string', 'in:male,female,other,notsay']
-                : ['nullable', 'string', 'in:male,female,other,notsay'],
-            'minor_documents' => $isUserMinor
-                ? ['required', 'file', 'mimes:pdf', 'max:10240']
-                : ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+                : ['required', 'date', 'before_or_equal:'.$adultCutoffDate],
+            // 'gender' => $isUserMinor
+            //     ? ['required', 'string', 'in:male,female,other,notsay']
+            //     : ['nullable', 'string', 'in:male,female,other,notsay'],
+            'minor_documents' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
         $roles = explode(',', $request->roles);
-        if (count($roles) < 1 || ($roles[0] === '')) {
-            return back()->with('error', 'You must assign at least one role to the user!');
-        }
 
         $nation = Nation::where('name', $request->nationality)->first();
         $user = User::create([
@@ -270,11 +279,12 @@ class UserController extends Controller {
             'has_user_uploaded_documents' => false,
             'has_admin_approved_minor' => false,
             'profile_completed' => false,
+            'email_verified_at' => now(),
             // 'unique_code' => $unique_code,
         ]);
 
         foreach ($roles as $role) {
-            if (!$authUser->canModifyRole($role)) {
+            if (! $authUser->canModifyRole($role)) {
                 continue;
             }
             $roleElement = Role::where('label', $role)->first();
@@ -297,7 +307,7 @@ class UserController extends Controller {
                 $school = $authUser->getActiveInstitution();
                 $school->athletes()->syncWithoutDetaching($user->id);
                 $user->setPrimarySchoolAthlete($school->id);
-            } else if ($noSchool) {
+            } elseif ($noSchool) {
                 $user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
             }
         } else {
@@ -309,15 +319,31 @@ class UserController extends Controller {
             if (in_array($role, ['rector', 'dean', 'instructor', 'manager', 'technician'])) {
                 $academy->personnel()->syncWithoutDetaching($user->id);
                 // Se non c'è nessuna accademia segnata come primary, la si imposta.
-                if (!$user->primaryAcademy()) {
+                if (! $user->primaryAcademy()) {
                     $user->setPrimaryAcademy($academy->id);
                 }
                 break;
             }
         }
 
-        if ($isUserMinor && $request->hasFile('minor_documents')) {
+        // Usa il file temporaneo dal redirect precedente se non è stato caricato uno nuovo
+        $file = null;
+        $tempMinorDocumentPath = session('minor_documents_temp_path');
+
+        if ($request->hasFile('minor_documents')) {
             $file = $request->file('minor_documents');
+            $temporaryPath = $file->store('temp/minor_documents', 'local');
+            $request->session()->flash('minor_documents_temp_path', $temporaryPath);
+        } elseif ($isUserMinor && $tempMinorDocumentPath && Storage::disk('local')->exists($tempMinorDocumentPath)) {
+            // Creo un UploadedFile dal file temporaneo memorizzato localmente
+            $file = new \Illuminate\Http\UploadedFile(
+                Storage::disk('local')->path($tempMinorDocumentPath),
+                basename($tempMinorDocumentPath),
+                Storage::disk('local')->mimeType($tempMinorDocumentPath)
+            );
+        }
+
+        if ($isUserMinor && $file) {
             $fileExtension = $file->getClientOriginalExtension();
             $fileName = time().'_minor_documents.'.$fileExtension;
             $path = "/users/{$user->id}/approval_documents/{$fileName}";
@@ -327,43 +353,53 @@ class UserController extends Controller {
                 $user->replaceMinorApprovalDocument($path);
                 $user->has_admin_approved_minor = true;
                 $user->save();
+
+                if ($tempMinorDocumentPath && Storage::disk('local')->exists($tempMinorDocumentPath)) {
+                    Storage::disk('local')->delete($tempMinorDocumentPath);
+                }
+
+                $request->session()->forget('minor_documents_temp_path');
             }
         }
 
         Mail::to($user->email)
             ->send(new CreatedUserEmail($user));
 
-        $redirectRoute = $authRole === 'admin' ? 'users.edit' :  $authRole . '.users.edit';
+        $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole.'.users.edit';
+
         return redirect()->route($redirectRoute, $user)->with('success', 'User created successfully!');
     }
 
-    public function storeForAcademy(Request $request) {
+    public function storeForAcademy(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (! in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'surname' => 'required|string|max:255',
-        ]);
+            'birthday' => 'required|date|before:today',
+            'minor_documents' => 'nullable|file|mimes:pdf|max:10240',
+        ];
 
-        // Controlla il ruolo prima di creare l'utente. se la richiesta non è di tipo atleta deve avere almeno un altro ruolo
-        if ($request->type !== "athlete") {
-            $roles = explode(',', $request->roles);
-            if (count($roles) < 1 || ($roles[0] === '')) {
-                return back()->with('error', 'You must assign at least one role to the user!');
-            }
+        if ($request->type !== 'athlete') {
+            $rules['roles'] = 'required|string|min:3';
         }
 
+        $request->validate($rules);
+
+        $birthDate = Carbon::parse($request->birthday);
+        $isUserMinor = $birthDate->diffInYears(now()) < 18;
 
         $code_valid = false;
 
-        while (!$code_valid) {
-            $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
+        while (! $code_valid) {
+            $unique_code = Str::random(4).'-'.Str::random(4).'-'.Str::random(4).'-'.Str::random(4);
             $code_valid = User::where('unique_code', $unique_code)->count() == 0;
         }
 
@@ -378,11 +414,14 @@ class UserController extends Controller {
             'academy_id' => $academy->id,
             'nation_id' => $academy->nation->id,
             'unique_code' => $unique_code,
+            'birthday' => $request->birthday,
+            'is_user_minor' => $isUserMinor,
+            'has_user_uploaded_documents' => false,
+            'has_admin_approved_minor' => false,
             'profile_completed' => false,
         ]);
 
-
-        if ($request->type == "athlete") {
+        if ($request->type == 'athlete') {
 
             $role = Role::where('label', 'athlete')->first();
             $user->roles()->syncWithoutDetaching($role->id);
@@ -393,12 +432,26 @@ class UserController extends Controller {
             if ($noSchool) {
                 $user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
             }
+
+            if ($isUserMinor && $request->hasFile('minor_documents')) {
+                $file = $request->file('minor_documents');
+                $fileExtension = $file->getClientOriginalExtension();
+                $fileName = time().'_minor_documents.'.$fileExtension;
+                $path = "/users/{$user->id}/approval_documents/{$fileName}";
+                $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
+
+                if ($storedFile) {
+                    $user->replaceMinorApprovalDocument($path);
+                    $user->has_admin_approved_minor = true;
+                    $user->save();
+                }
+            }
         } else {
 
             $roles = explode(',', $request->roles);
 
             foreach ($roles as $role) {
-                if (!$authUser->canModifyRole($role)) {
+                if (! $authUser->canModifyRole($role)) {
                     continue;
                 }
                 $roleElement = Role::where('label', $role)->first();
@@ -410,46 +463,50 @@ class UserController extends Controller {
             $user->setPrimaryAcademy($academy->id);
         }
 
-
         Mail::to($user->email)
             ->send(new CreatedUserEmail($user));
 
-
         if ($request->go_to_edit === 'on') {
-            $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
+            $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole.'.users.edit';
+
             return redirect()->route($redirectRoute, $user->id)->with('success', 'User created successfully!');
         } else {
-            $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole . '.academies.edit';
+            $redirectRoute = $authRole === 'admin' ? 'academies.edit' : $authRole.'.academies.edit';
+
             return redirect()->route($redirectRoute, $academy->id)->with('success', 'User created successfully!');
         }
     }
 
-    public function  storeForSchool(Request $request) {
+    public function storeForSchool(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (! in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'surname' => 'required|string|max:255',
-        ]);
+            'birthday' => 'required|date|before:today',
+            'minor_documents' => 'nullable|file|mimes:pdf|max:10240',
+        ];
 
-        // Controlla il ruolo prima di creare l'utente. se la richiesta non è di tipo atleta deve avere almeno un altro ruolo
-        if ($request->type !== "athlete") {
-            $roles = explode(',', $request->roles);
-            if (count($roles) < 1 || ($roles[0] === '')) {
-                return back()->with('error', 'You must assign at least one role to the user!');
-            }
+        if ($request->type !== 'athlete') {
+            $rules['roles'] = 'required|string|min:3';
         }
+
+        $request->validate($rules);
+
+        $birthDate = Carbon::parse($request->birthday);
+        $isUserMinor = $birthDate->diffInYears(now()) < 18;
 
         $code_valid = false;
 
-        while (!$code_valid) {
-            $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
+        while (! $code_valid) {
+            $unique_code = Str::random(4).'-'.Str::random(4).'-'.Str::random(4).'-'.Str::random(4);
             $code_valid = User::where('unique_code', $unique_code)->count() == 0;
         }
 
@@ -466,10 +523,14 @@ class UserController extends Controller {
             'nation_id' => $academy->nation->id,
             'school_id' => $school->id,
             'unique_code' => $unique_code,
+            'birthday' => $request->birthday,
+            'is_user_minor' => $isUserMinor,
+            'has_user_uploaded_documents' => false,
+            'has_admin_approved_minor' => false,
             'profile_completed' => false,
         ]);
 
-        if ($request->type == "athlete") {
+        if ($request->type == 'athlete') {
 
             $role = Role::where('label', 'athlete')->first();
             $user->roles()->syncWithoutDetaching($role->id);
@@ -477,12 +538,26 @@ class UserController extends Controller {
             $school->athletes()->syncWithoutDetaching($user->id);
             $user->setPrimaryAcademyAthlete($academy->id);
             $user->setPrimarySchoolAthlete($school->id);
+
+            if ($isUserMinor && $request->hasFile('minor_documents')) {
+                $file = $request->file('minor_documents');
+                $fileExtension = $file->getClientOriginalExtension();
+                $fileName = time().'_minor_documents.'.$fileExtension;
+                $path = "/users/{$user->id}/approval_documents/{$fileName}";
+                $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
+
+                if ($storedFile) {
+                    $user->replaceMinorApprovalDocument($path);
+                    $user->has_admin_approved_minor = true;
+                    $user->save();
+                }
+            }
         } else {
 
             $roles = explode(',', $request->roles);
 
             foreach ($roles as $role) {
-                if (!$authUser->canModifyRole($role)) {
+                if (! $authUser->canModifyRole($role)) {
                     continue;
                 }
                 $roleElement = Role::where('label', $role)->first();
@@ -496,46 +571,50 @@ class UserController extends Controller {
             $user->setPrimarySchool($school->id);
         }
 
-
         Mail::to($user->email)
             ->send(new CreatedUserEmail($user));
 
-
         if ($request->go_to_edit === 'on') {
-            $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
+            $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole.'.users.edit';
+
             return redirect()->route($redirectRoute, $user->id)->with('success', 'User created successfully!');
         } else {
-            $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole . '.schools.edit';
+            $redirectRoute = $authRole === 'admin' ? 'schools.edit' : $authRole.'.schools.edit';
+
             return redirect()->route($redirectRoute, $school->id)->with('success', 'User created successfully!');
         }
     }
 
-    public function  storeForClan(Request $request) {
+    public function storeForClan(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (! in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'surname' => 'required|string|max:255',
-        ]);
+            'birthday' => 'required|date|before:today',
+            'minor_documents' => 'nullable|file|mimes:pdf|max:10240',
+        ];
 
-        // Controlla il ruolo prima di creare l'utente. se la richiesta non è di tipo atleta deve avere almeno un altro ruolo
-        if ($request->type !== "athlete") {
-            $roles = explode(',', $request->roles);
-            if (count($roles) < 1 || ($roles[0] === '')) {
-                return back()->with('error', 'You must assign at least one role to the user!');
-            }
+        if ($request->type !== 'athlete') {
+            $rules['roles'] = 'required|string|min:3';
         }
+
+        $request->validate($rules);
+
+        $birthDate = Carbon::parse($request->birthday);
+        $isUserMinor = $birthDate->diffInYears(now()) < 18;
 
         $code_valid = false;
 
-        while (!$code_valid) {
-            $unique_code = Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4) . "-" . Str::random(4);
+        while (! $code_valid) {
+            $unique_code = Str::random(4).'-'.Str::random(4).'-'.Str::random(4).'-'.Str::random(4);
             $code_valid = User::where('unique_code', $unique_code)->count() == 0;
         }
 
@@ -553,10 +632,14 @@ class UserController extends Controller {
             'nation_id' => $academy->nation->id,
             'school_id' => $school->id,
             'unique_code' => $unique_code,
+            'birthday' => $request->birthday,
+            'is_user_minor' => $isUserMinor,
+            'has_user_uploaded_documents' => false,
+            'has_admin_approved_minor' => false,
             'profile_completed' => false,
         ]);
 
-        if ($request->type == "athlete") {
+        if ($request->type == 'athlete') {
 
             $role = Role::where('label', 'athlete')->first();
             $user->roles()->syncWithoutDetaching($role->id);
@@ -565,12 +648,26 @@ class UserController extends Controller {
             $clan->users()->syncWithoutDetaching($user->id);
             $user->setPrimaryAcademyAthlete($academy->id);
             $user->setPrimarySchoolAthlete($school->id);
+
+            if ($isUserMinor && $request->hasFile('minor_documents')) {
+                $file = $request->file('minor_documents');
+                $fileExtension = $file->getClientOriginalExtension();
+                $fileName = time().'_minor_documents.'.$fileExtension;
+                $path = "/users/{$user->id}/approval_documents/{$fileName}";
+                $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
+
+                if ($storedFile) {
+                    $user->replaceMinorApprovalDocument($path);
+                    $user->has_admin_approved_minor = true;
+                    $user->save();
+                }
+            }
         } else {
 
             $roles = explode(',', $request->roles);
 
             foreach ($roles as $role) {
-                if (!$authUser->canModifyRole($role)) {
+                if (! $authUser->canModifyRole($role)) {
                     continue;
                 }
                 $roleElement = Role::where('label', $role)->first();
@@ -585,23 +682,25 @@ class UserController extends Controller {
             $user->setPrimarySchool($school->id);
         }
 
-
         Mail::to($user->email)
             ->send(new CreatedUserEmail($user));
 
         if ($request->go_to_edit === 'on') {
-            $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole . '.users.edit';
+            $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole.'.users.edit';
+
             return redirect()->route($redirectRoute, $user->id)->with('success', 'User created successfully!');
         } else {
-            $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole . '.clans.edit';
+            $redirectRoute = $authRole === 'admin' ? 'clans.edit' : $authRole.'.clans.edit';
+
             return redirect()->route($redirectRoute, $request->clan_id)->with('success', 'User created successfully!');
         }
     }
 
-    public function edit(User $user) {
+    public function edit(User $user)
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (! in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
@@ -615,14 +714,14 @@ class UserController extends Controller {
 
         if ($isRectorOrManager) {
             $rectorOrManagerCannotAccess = $isRectorOrManager &&
-                !in_array($authUser->getActiveInstitutionId(), $user->academyAthletes->pluck('id')->toArray()) &&
-                !in_array($authUser->getActiveInstitutionId(), $user->academies->pluck('id')->toArray());
+                ! in_array($authUser->getActiveInstitutionId(), $user->academyAthletes->pluck('id')->toArray()) &&
+                ! in_array($authUser->getActiveInstitutionId(), $user->academies->pluck('id')->toArray());
         }
 
         if ($isDean) {
             $deanCannotAccess = $isDean &&
-                !in_array($authUser->getActiveInstitutionId(), $user->schoolAthletes()->pluck('school_id')->toArray()) &&
-                !in_array($authUser->getActiveInstitutionId(), $user->schools()->pluck('school_id')->toArray());
+                ! in_array($authUser->getActiveInstitutionId(), $user->schoolAthletes()->pluck('school_id')->toArray()) &&
+                ! in_array($authUser->getActiveInstitutionId(), $user->schools()->pluck('school_id')->toArray());
         }
 
         if ($rectorOrManagerCannotAccess || $deanCannotAccess) {
@@ -659,9 +758,9 @@ class UserController extends Controller {
         $user->roles = $user->roles->pluck('label')->toArray();
 
         if ($user->profile_picture !== null) {
-            /** 
+            /**
              * @disregard Intelephense non rileva il metodo temporaryurl
-             * 
+             *
              * @see https://github.com/spatie/laravel-google-cloud-storage
              */
             $user->profile_picture = Storage::disk('gcs')->temporaryUrl(
@@ -677,7 +776,7 @@ class UserController extends Controller {
         // Per select-institutions
         $allAcademies = Academy::all();
         $authRole = User::find(Auth::user()->id)->getRole();
-        $viewPath = $authRole === 'admin' ? 'users.edit' :  'users.' . $authRole . '.edit';
+        $viewPath = $authRole === 'admin' ? 'users.edit' : 'users.'.$authRole.'.edit';
         $filteredSchoolsPersonnel = School::whereIn('academy_id', $user->academies->pluck('id'))->whereNotIn('id', $user->schools->pluck('id'))->where('is_disabled', '0')->with(['nation'])->get();
         $filteredSchoolsAthlete = School::whereIn('academy_id', $user->academyAthletes->pluck('id'))->whereNotIn('id', $user->schoolAthletes->pluck('id'))->where('is_disabled', '0')->with(['nation'])->get();
 
@@ -696,7 +795,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function show(Request $request, User $user) {
+    public function show(Request $request, User $user)
+    {
 
         $viewer = $request->user();
         $minorPrivacy = $request->attributes->get('minor_privacy', []);
@@ -704,16 +804,16 @@ class UserController extends Controller {
         $roles = Role::all();
         $user->roles = $user->roles->pluck('label')->toArray();
 
-        if (!$user->nation()->exists()) {
+        if (! $user->nation()->exists()) {
             $user->nation = Nation::find(2);
         }
 
-        if (!$user->rank()->exists()) {
+        if (! $user->rank()->exists()) {
             $user->rank = Rank::find(1);
         }
 
-        // Risultati eventi 
-        $date = Carbon::now(); 
+        // Risultati eventi
+        $date = Carbon::now();
 
         $user_event_results = $user->eventResults()
             ->whereHas('event', function ($q) use ($date) {
@@ -725,7 +825,7 @@ class UserController extends Controller {
                         $q->whereIn('name', [
                             'School Tournament',
                             'Academy Tournament',
-                            'National Tournament'
+                            'National Tournament',
                         ]);
                     });
             })
@@ -755,16 +855,16 @@ class UserController extends Controller {
 
         $user->events = $events_formatted;
 
-        if (!($minorPrivacy['can_view_bio'] ?? true)) {
+        if (! ($minorPrivacy['can_view_bio'] ?? true)) {
             $user->bio = '';
         }
 
-        if (!($minorPrivacy['can_view_social'] ?? true)) {
+        if (! ($minorPrivacy['can_view_social'] ?? true)) {
             $user->instagram = '';
             $user->telegram = '';
         }
 
-        if (!($minorPrivacy['can_view_battle_name'] ?? true)) {
+        if (! ($minorPrivacy['can_view_battle_name'] ?? true)) {
             $user->battle_name = '';
         }
 
@@ -776,17 +876,18 @@ class UserController extends Controller {
         ]);
     }
 
-    public function propic(Request $request, User $user) {
+    public function propic(Request $request, User $user)
+    {
 
         $minorPrivacy = $request->attributes->get('minor_privacy', []);
 
-        $cacheKey = 'propic-' . $user->id;
+        $cacheKey = 'propic-'.$user->id;
 
-        $image = Cache::remember($cacheKey . '-' . (($minorPrivacy['can_view_avatar'] ?? true) ? 'visible' : 'hidden'), now()->addMinutes(5), function () use ($user, $minorPrivacy) {
+        $image = Cache::remember($cacheKey.'-'.(($minorPrivacy['can_view_avatar'] ?? true) ? 'visible' : 'hidden'), now()->addMinutes(5), function () use ($user, $minorPrivacy) {
             if (($minorPrivacy['can_view_avatar'] ?? true) && $user->profile_picture !== null) {
-                /** 
+                /**
                  * @disregard Intelephense non rileva il metodo temporaryurl
-                 * 
+                 *
                  * @see https://github.com/spatie/laravel-google-cloud-storage
                  */
                 $url = Storage::disk('gcs')->temporaryUrl(
@@ -794,7 +895,7 @@ class UserController extends Controller {
                     now()->addMinutes(5)
                 );
             } else {
-                $url = 'https://ui-avatars.com/api/?name=' . $user->name . '+' . $user->surname . '&size=256';
+                $url = 'https://ui-avatars.com/api/?name='.$user->name.'+'.$user->surname.'&size=256';
             }
 
             $response = Http::get($url);
@@ -810,11 +911,12 @@ class UserController extends Controller {
         return response($image, 200, $headers);
     }
 
-    public function update(Request $request, User $user) {
+    public function update(Request $request, User $user)
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (! in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
@@ -824,7 +926,7 @@ class UserController extends Controller {
                 break;
             case 'rector':
             case 'manager':
-                if (!in_array(
+                if (! in_array(
                     $authUser->getActiveInstitutionId(),
                     array_merge(
                         $user->academies()->pluck('academy_id')->toArray(),
@@ -835,7 +937,7 @@ class UserController extends Controller {
                 }
                 break;
             case 'dean':
-                if (!in_array(
+                if (! in_array(
                     $authUser->getActiveInstitutionId(),
                     array_merge(
                         $user->schools()->pluck('school_id')->toArray(),
@@ -848,15 +950,16 @@ class UserController extends Controller {
             default:
                 return back()->with('error', 'You do not have the required role to access this page!');
         }
-        if (!$canUpdate) {
+        if (! $canUpdate) {
             return back()->with('error', 'You are not authorized to edit this user!');
         }
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'year' => ['required', 'int', 'min:' . 2006, 'max:' . (date('Y'))],
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'year' => ['required', 'int', 'min:'. 2006, 'max:'.(date('Y'))],
             'nationality' => 'required|string|exists:nations,id',
+            'birthday' => 'required|date|before:today',
         ]);
 
         // La modifica dei ruoli è stata spostata in updateRoles
@@ -873,7 +976,7 @@ class UserController extends Controller {
 
         if ($authRole === 'admin') {
             $newRank = Rank::find($request->rank)->id ?? $user->rank_id;
-            $newHasPaidFee = ($request->has_paid_fee == 'on' ?  1 :  0);
+            $newHasPaidFee = ($request->has_paid_fee == 'on' ? 1 : 0);
 
             if ($oldHasPaidFee == 0 && $newHasPaidFee == 1) {
 
@@ -915,7 +1018,7 @@ class UserController extends Controller {
                     'quantity' => 1,
                     'price' => 0,
                     'vat' => 0,
-                    'total' => 0
+                    'total' => 0,
                 ]);
 
                 $fee = Fee::create([
@@ -923,12 +1026,19 @@ class UserController extends Controller {
                     'academy_id' => $user->primaryAcademyAthlete()->id ?? 1,
                     'type' => 3,
                     'start_date' => now(),
-                    'end_date' => now()->addYear()->endOfYear()->format('Y') . '-08-31',
+                    'end_date' => now()->addYear()->endOfYear()->format('Y').'-08-31',
                     'auto_renew' => 0,
                     'unique_id' => Str::orderedUuid(),
                     'used' => 1,
                 ]);
             }
+        }
+
+        // Determina se l'utente è minorenne
+        $isUserMinor = false;
+        if ($request->has('birthday') && $request->birthday) {
+            $birthDate = Carbon::parse($request->birthday);
+            $isUserMinor = $birthDate->diffInYears(now()) < 18;
         }
 
         $user->update([
@@ -937,6 +1047,8 @@ class UserController extends Controller {
             'email' => $request->email,
             'subscription_year' => $request->year,
             'nation_id' => $request->nationality,
+            'birthday' => $request->birthday,
+            'is_user_minor' => $isUserMinor,
             'has_paid_fee' => $newHasPaidFee,
             'rank_id' => $newRank,
         ]);
@@ -960,16 +1072,17 @@ class UserController extends Controller {
         }
 
         $authUserRole = User::find(Auth::user()->id)->getRole();
-        $redirectRoute = $authUserRole === 'admin' ? 'users.edit' :  $authUserRole . '.users.edit';
+        $redirectRoute = $authUserRole === 'admin' ? 'users.edit' : $authUserRole.'.users.edit';
 
         return redirect()->route($redirectRoute, $user->id)->with('success', 'User updated successfully!');
     }
 
-    public function updateRoles(Request $request, User $user) {
+    public function updateRoles(Request $request, User $user)
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
-        if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (! in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
             // return back()->with('error', 'You do not have the required role to access this page!');
             return response()->json(['error' => 'You do not have the required role to access this page!'], 403);
         }
@@ -980,7 +1093,7 @@ class UserController extends Controller {
                 break;
             case 'rector':
             case 'manager':
-                if (!in_array(
+                if (! in_array(
                     $authUser->getActiveInstitutionId(),
                     array_merge(
                         $user->academies()->pluck('academy_id')->toArray(),
@@ -991,7 +1104,7 @@ class UserController extends Controller {
                 }
                 break;
             case 'dean':
-                if (!in_array(
+                if (! in_array(
                     $authUser->getActiveInstitutionId(),
                     array_merge(
                         $user->schools()->pluck('school_id')->toArray(),
@@ -1005,7 +1118,7 @@ class UserController extends Controller {
                 // return back()->with('error', 'You do not have the required role to access this page!');
                 return response()->json(['error' => 'You do not have the required role to access this page!'], 403);
         }
-        if (!$canUpdate) {
+        if (! $canUpdate) {
             // return back()->with('error', 'You are not authorized to edit this user!');
             return response()->json(['error' => 'You are not authorized to edit this user!'], 403);
         }
@@ -1037,7 +1150,7 @@ class UserController extends Controller {
         $shouldLogRolesChange = false;
 
         // Check if $rolesToAdd has any items
-        if (!empty($rolesToAdd)) {
+        if (! empty($rolesToAdd)) {
             $shouldLogRolesChange = true;
             foreach ($rolesToAdd as $roleLabel) {
                 $roleElement = Role::where('label', $roleLabel)->first();
@@ -1049,7 +1162,7 @@ class UserController extends Controller {
             // Se è stato aggiunto il ruolo da utente si deve assegnare l'accademia primaria da atleta
             // Se ce l'ha ok, altrimenti si mette come primaria la prima accademia a cui è associato (solo una per atleta), altrimenti si assegna no academy
             if (in_array('athlete', $rolesToAdd)) {
-                if (!$user->primaryAcademyAthlete()) {
+                if (! $user->primaryAcademyAthlete()) {
                     if ($user->academyAthletes()->first()) {
                         $academy = $user->academyAthletes()->first();
                         $user->setPrimaryAcademyAthlete($academy->id);
@@ -1063,10 +1176,10 @@ class UserController extends Controller {
             // Se ha un ruolo da personale deve avere almeno un'accademia associata (anche se non primaria).
             // Cerca prima tra le associazioni da personale, poi da atleta, altrimenti si associa a no academy
             if (array_intersect($rolesToAdd, ['rector', 'dean', 'manager', 'instructor', 'technician'])) {
-                if (!$user->primaryAcademy()) {
-                    if (!!$user->academies()->first()) {
+                if (! $user->primaryAcademy()) {
+                    if ((bool) $user->academies()->first()) {
                         $user->setPrimaryAcademy($user->academies()->first()->id);
-                    } else if (!!$user->primaryAcademyAthlete()) {
+                    } elseif ((bool) $user->primaryAcademyAthlete()) {
                         $user->academies()->syncWithoutDetaching($user->primaryAcademyAthlete()->id);
                         $user->setPrimaryAcademy($user->primaryAcademyAthlete()->id);
                     } else {
@@ -1076,11 +1189,11 @@ class UserController extends Controller {
                 }
                 // Nel caso di dean, manager e instructor si assegna anche la scuola in automatico
                 if (array_intersect($rolesToAdd, ['dean', 'manager', 'instructor'])) {
-                    if (!$user->primarySchool()) {
+                    if (! $user->primarySchool()) {
                         // Se ne ha già una da personale imposta quella come primaria, altrimenti prende quella da atleta e la imposta come primaria anche da personale.
-                        if (!!$user->schools()->first()) {
+                        if ((bool) $user->schools()->first()) {
                             $user->setPrimarySchool($user->schools()->first()->id);
-                        } else if (!!$user->primarySchoolAthlete()) {
+                        } elseif ((bool) $user->primarySchoolAthlete()) {
                             $user->schools()->syncWithoutDetaching($user->primarySchoolAthlete()->id);
                             $user->setPrimarySchool($user->primarySchoolAthlete()->id);
                         }
@@ -1090,7 +1203,7 @@ class UserController extends Controller {
         }
 
         // Check if $rolesToRemove has any items
-        if (!empty($rolesToRemove)) {
+        if (! empty($rolesToRemove)) {
             $shouldLogRolesChange = true;
             foreach ($rolesToRemove as $roleLabel) {
                 $roleElement = Role::where('label', $roleLabel)->first();
@@ -1120,7 +1233,7 @@ class UserController extends Controller {
 
             // Se è stato rimosso il ruolo da personale e non ha più nessun altro ruolo tale, si deve rimuovere l'accademia da personale (anche primaria), così come tutti i collegamenti con corsi e scuole
             if (array_intersect($rolesToRemove, ['rector', 'dean', 'manager', 'instructor', 'technician'])) {
-                if (!array_intersect($newRoles, ['rector', 'dean', 'manager', 'instructor', 'technician'])) {
+                if (! array_intersect($newRoles, ['rector', 'dean', 'manager', 'instructor', 'technician'])) {
                     $removedCourses = $user->clansPersonnel()->get();
                     $removedSchools = $user->schools()->get();
                     $removedAcademies = $user->academies()->get();
@@ -1156,22 +1269,25 @@ class UserController extends Controller {
         ]);
     }
 
-    public function destroy(User $user) {
+    public function destroy(User $user)
+    {
         $authRole = User::find(Auth::user()->id)->getRole();
 
         // if (!in_array($authRole, ['admin', 'rector', 'dean', 'manager'])) {
-        if (!in_array($authRole, ['admin'])) {
+        if (! in_array($authRole, ['admin'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
         $user->is_disabled = true;
         $user->save();
 
-        $redirectRoute = $authRole === 'admin' ? 'users.index' :  $authRole . '.users.index';
+        $redirectRoute = $authRole === 'admin' ? 'users.index' : $authRole.'.users.index';
+
         return redirect()->route($redirectRoute)->with('success', 'User disabled successfully!');
     }
 
-    public function search(Request $request) {
+    public function search(Request $request)
+    {
 
         $request->validate([
             'search' => 'required|string',
@@ -1187,7 +1303,7 @@ class UserController extends Controller {
             case 'technician':
                 $users = User::query()
                     ->when($request->search, function (Builder $q, $value) {
-                        /** 
+                        /**
                          * @disregard Intelephense non rileva il metodo whereIn
                          */
                         return $q->whereIn('id', User::search($value)->keys());
@@ -1198,12 +1314,12 @@ class UserController extends Controller {
                 break;
             case 'rector':
             case 'manager':
-                if (!$authUser->getActiveInstitution()) {
+                if (! $authUser->getActiveInstitution()) {
                     return back()->with('error', 'You are not authorized to access this page!');
                 }
                 $users = User::query()
                     ->when($request->search, function (Builder $q, $value) {
-                        /** 
+                        /**
                          * @disregard Intelephense non rileva il metodo whereIn
                          */
                         return $q->whereIn('id', User::search($value)->keys());
@@ -1219,12 +1335,12 @@ class UserController extends Controller {
                     ->get();
                 break;
             case 'dean':
-                if (!$authUser->getActiveInstitution()) {
+                if (! $authUser->getActiveInstitution()) {
                     return back()->with('error', 'You are not authorized to access this page!');
                 }
                 $users = User::query()
                     ->when($request->search, function (Builder $q, $value) {
-                        /** 
+                        /**
                          * @disregard Intelephense non rileva il metodo whereIn
                          */
                         return $q->whereIn('id', User::search($value)->keys());
@@ -1240,7 +1356,7 @@ class UserController extends Controller {
                     ->get();
                 break;
             case 'instructor':
-                if (!$authUser->primarySchool()) {
+                if (! $authUser->primarySchool()) {
                     return back()->with('error', 'You are not authorized to access this page!');
                 }
                 $schoolsIds = $authUser->clansPersonnel->map(function ($clan) {
@@ -1248,7 +1364,7 @@ class UserController extends Controller {
                 })->toArray();
                 $users = User::query()
                     ->when($request->search, function (Builder $q, $value) {
-                        /** 
+                        /**
                          * @disregard Intelephense non rileva il metodo whereIn
                          */
                         return $q->whereIn('id', User::search($value)->keys());
@@ -1267,13 +1383,15 @@ class UserController extends Controller {
                 return back()->with('error', 'You are not authorized to access this page!');
         }
 
-        $viewPath = $authRole === 'admin' ? 'users.search-result' :  'users.' . $authRole . '.search-result';
+        $viewPath = $authRole === 'admin' ? 'users.search-result' : 'users.'.$authRole.'.search-result';
+
         return view($viewPath, [
             'users' => $users,
         ]);
     }
 
-    public function searchJson(Request $request) {
+    public function searchJson(Request $request)
+    {
 
         $request->validate([
             'search' => 'required|string',
@@ -1281,7 +1399,7 @@ class UserController extends Controller {
 
         $users = User::query()
             ->when($request->search, function (Builder $q, $value) {
-                /** 
+                /**
                  * @disregard Intelephense non rileva il metodo whereIn
                  */
                 return $q->whereIn('id', User::search($value)->keys());
@@ -1292,7 +1410,7 @@ class UserController extends Controller {
 
         $viewer = $request->user();
         $users = $users->map(function (User $user) use ($viewer) {
-            if (!$user->canViewerSeeMinorBattleName($viewer)) {
+            if (! $user->canViewerSeeMinorBattleName($viewer)) {
                 $user->battle_name = null;
             }
 
@@ -1312,7 +1430,8 @@ class UserController extends Controller {
         return response()->json($users);
     }
 
-    public function filter() {
+    public function filter()
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
 
@@ -1331,9 +1450,9 @@ class UserController extends Controller {
             case 'dean':
                 $academies = collect(($authUser->getActiveInstitution()->academy ?? null) ? [$authUser->getActiveInstitution()->academy] : []);
                 break;
-            // case 'technician':
-            //     $academies = Academy::where('is_disabled', false)->with('nation')->get();
-            //     break;
+                // case 'technician':
+                //     $academies = Academy::where('is_disabled', false)->with('nation')->get();
+                //     break;
             case 'instructor':
                 $academies = collect([$authUser->primaryAcademy()]);
                 break;
@@ -1341,19 +1460,21 @@ class UserController extends Controller {
                 return back()->with('error', 'You do not have the required role to access this page!');
         }
 
-        $viewPath = $authRole === 'admin' ? 'users.filter' :  'users.' . $authRole . '.filter';
+        $viewPath = $authRole === 'admin' ? 'users.filter' : 'users.'.$authRole.'.filter';
+
         return view($viewPath, [
             'academies' => $academies,
         ]);
     }
 
-    public function filterResult(Request $request) {
+    public function filterResult(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
         $users = [];
 
-        // Stabilire il tipo di precisione 
+        // Stabilire il tipo di precisione
 
         if (strlen($request->selectedCoursesJson) > 0) {
             $selectedCourses = json_decode($request->selectedCoursesJson);
@@ -1400,7 +1521,7 @@ class UserController extends Controller {
                         }
                     }
                 } else {
-                    // Applica solo gli altri filtri 
+                    // Applica solo gli altri filtri
                     $users = User::where('is_disabled', false)->get();
                 }
             }
@@ -1416,11 +1537,11 @@ class UserController extends Controller {
 
         // Filtro per fee_status
         if ($feeStatus === 'fee') {
-            $users = $users->filter(function($user) {
+            $users = $users->filter(function ($user) {
                 return $user->has_paid_fee == true;
             })->values();
         } elseif ($feeStatus === 'fee_not_paid') {
-            $users = $users->filter(function($user) {
+            $users = $users->filter(function ($user) {
                 return $user->has_paid_fee == false;
             })->values();
         }
@@ -1508,23 +1629,21 @@ class UserController extends Controller {
             }
 
             $user->role = implode(', ', $user->roles->pluck('name')->map(function ($role) {
-                return __('users.' . $role);
+                return __('users.'.$role);
             })->toArray());
         }
 
-        $viewPath = $authUserRole === 'admin' ? 'users.filter-result' :  'users.' . $authUserRole . '.filter-result';
+        $viewPath = $authUserRole === 'admin' ? 'users.filter-result' : 'users.'.$authUserRole.'.filter-result';
+
         return view($viewPath, [
             'users' => $filteredUsers,
         ]);
     }
 
-
-
-
-
-    public function picture($id, Request $request) {
+    public function picture($id, Request $request)
+    {
         $authRole = $request->user()->getRole();
-        $redirectRoute = $authRole === 'admin' ? 'users.edit' :  $authRole . '.users.edit';
+        $redirectRoute = $authRole === 'admin' ? 'users.edit' : $authRole.'.users.edit';
         if ($request->file('profilepicture') != null) {
 
             // Validate the uploaded image
@@ -1535,9 +1654,9 @@ class UserController extends Controller {
             $file = $request->file('profilepicture');
 
             $file_extension = $file->getClientOriginalExtension();
-            $file_name = time() . '_avatar.' . $file_extension;
-            $path = "users/" . $id . "/" . $file_name;
-            $storeFile = $file->storeAs("users/" . $id . "/", $file_name, "gcs");
+            $file_name = time().'_avatar.'.$file_extension;
+            $path = 'users/'.$id.'/'.$file_name;
+            $storeFile = $file->storeAs('users/'.$id.'/', $file_name, 'gcs');
 
             if ($storeFile) {
                 $user = User::find($id);
@@ -1553,7 +1672,8 @@ class UserController extends Controller {
         }
     }
 
-    public function userUploadPicture($id, Request $request) {
+    public function userUploadPicture($id, Request $request)
+    {
 
         if ($request->file('profilepicture') != null) {
             $file = $request->file('profilepicture');
@@ -1564,9 +1684,9 @@ class UserController extends Controller {
             ]);
 
             $file_extension = $file->getClientOriginalExtension();
-            $file_name = time() . '_avatar.' . $file_extension;
-            $path = "users/" . $id . "/" . $file_name;
-            $storeFile = $file->storeAs("users/" . $id . "/", $file_name, "gcs");
+            $file_name = time().'_avatar.'.$file_extension;
+            $path = 'users/'.$id.'/'.$file_name;
+            $storeFile = $file->storeAs('users/'.$id.'/', $file_name, 'gcs');
 
             if ($storeFile) {
                 $user = User::find($id);
@@ -1582,14 +1702,15 @@ class UserController extends Controller {
         }
     }
 
-    public function uploadMinorApprovalDocuments($id, Request $request) {
+    public function uploadMinorApprovalDocuments($id, Request $request)
+    {
         $authUser = $request->user();
 
         if ((int) $authUser->id !== (int) $id) {
             return redirect()->route('dashboard')->with('error', 'Not authorized.');
         }
 
-        if (!$authUser->is_user_minor) {
+        if (! $authUser->is_user_minor) {
             return redirect()->route('dashboard')->with('error', 'This upload is only available for minor users.');
         }
 
@@ -1599,11 +1720,11 @@ class UserController extends Controller {
 
         $file = $request->file('minor_documents');
         $fileExtension = $file->getClientOriginalExtension();
-        $fileName = time() . '_minor_documents.' . $fileExtension;
+        $fileName = time().'_minor_documents.'.$fileExtension;
         $path = "/users/{$authUser->id}/approval_documents/{$fileName}";
         $storedFile = $file->storeAs("/users/{$authUser->id}/approval_documents/", $fileName, 'gcs');
 
-        if (!$storedFile) {
+        if (! $storedFile) {
             return redirect()->route('dashboard')->with('error', 'Error uploading approval documents.');
         }
 
@@ -1613,7 +1734,8 @@ class UserController extends Controller {
         return redirect()->route('dashboard')->with('success', 'Approval documents uploaded successfully.');
     }
 
-    public function approveMinorUsersIndex(Request $request) {
+    public function approveMinorUsersIndex(Request $request)
+    {
         $authUser = User::find(Auth::id());
 
         if ($authUser->getRole() !== 'rector') {
@@ -1621,7 +1743,7 @@ class UserController extends Controller {
         }
 
         $academyId = $authUser->getActiveInstitutionId();
-        if (!$academyId) {
+        if (! $academyId) {
             return redirect()->route('dashboard')->with('error', 'You don\'t have an academy assigned!');
         }
 
@@ -1648,7 +1770,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function uploadMinorApprovalDocumentAsRector(User $user, Request $request) {
+    public function uploadMinorApprovalDocumentAsRector(User $user, Request $request)
+    {
         $authUser = User::find(Auth::id());
         $redirect = back();
 
@@ -1657,11 +1780,11 @@ class UserController extends Controller {
         }
 
         $academyId = $authUser->getActiveInstitutionId();
-        if (!$academyId || !$user->academyAthletes()->where('academy_id', $academyId)->exists()) {
+        if (! $academyId || ! $user->academyAthletes()->where('academy_id', $academyId)->exists()) {
             return $redirect->with('error', 'You are not authorized to upload a document for this user!');
         }
 
-        if (!$user->is_user_minor) {
+        if (! $user->is_user_minor) {
             return $redirect->with('error', 'This upload is only available for minor users.');
         }
 
@@ -1671,11 +1794,11 @@ class UserController extends Controller {
 
         $file = $request->file('minor_documents');
         $fileExtension = $file->getClientOriginalExtension();
-        $fileName = time() . '_minor_documents.' . $fileExtension;
+        $fileName = time().'_minor_documents.'.$fileExtension;
         $path = "/users/{$user->id}/approval_documents/{$fileName}";
         $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
 
-        if (!$storedFile) {
+        if (! $storedFile) {
             return $redirect->with('error', 'Error uploading approval documents.');
         }
 
@@ -1686,7 +1809,8 @@ class UserController extends Controller {
         return $redirect->with('success', 'Approval documents uploaded and user approved successfully.');
     }
 
-    public function uploadMinorApprovalDocumentForEditAsRector(User $user, Request $request) {
+    public function uploadMinorApprovalDocumentForEditAsRector(User $user, Request $request)
+    {
         $authUser = User::find(Auth::id());
         $redirect = back();
 
@@ -1695,11 +1819,11 @@ class UserController extends Controller {
         }
 
         $academyId = $authUser->getActiveInstitutionId();
-        if (!$academyId || !$user->academyAthletes()->where('academy_id', $academyId)->exists()) {
+        if (! $academyId || ! $user->academyAthletes()->where('academy_id', $academyId)->exists()) {
             return $redirect->with('error', 'You are not authorized to upload a document for this user!');
         }
 
-        if (!$user->is_user_minor) {
+        if (! $user->is_user_minor) {
             return $redirect->with('error', 'This upload is only available for minor users.');
         }
 
@@ -1709,11 +1833,11 @@ class UserController extends Controller {
 
         $file = $request->file('minor_documents');
         $fileExtension = $file->getClientOriginalExtension();
-        $fileName = time() . '_minor_documents.' . $fileExtension;
+        $fileName = time().'_minor_documents.'.$fileExtension;
         $path = "/users/{$user->id}/approval_documents/{$fileName}";
         $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
 
-        if (!$storedFile) {
+        if (! $storedFile) {
             return $redirect->with('error', 'Error uploading approval documents.');
         }
 
@@ -1723,14 +1847,15 @@ class UserController extends Controller {
         return $redirect->with('success', 'Approval document uploaded successfully.');
     }
 
-    public function viewMinorApprovalDocument(User $user, Request $request) {
+    public function viewMinorApprovalDocument(User $user, Request $request)
+    {
         $authUser = User::find(Auth::id());
 
         if (! $this->canAccessMinorDocument($authUser, $user)) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to access this document!');
         }
 
-        if (!$user->uploaded_documents_path || !Storage::disk('gcs')->exists($user->uploaded_documents_path)) {
+        if (! $user->uploaded_documents_path || ! Storage::disk('gcs')->exists($user->uploaded_documents_path)) {
             return back()->with('error', 'Approval document not found.');
         }
 
@@ -1739,7 +1864,7 @@ class UserController extends Controller {
             now()->addMinutes(5),
             [
                 'ResponseContentType' => 'application/pdf',
-                'ResponseContentDisposition' => 'inline; filename="approval-document-' . $user->id . '.pdf"',
+                'ResponseContentDisposition' => 'inline; filename="approval-document-'.$user->id.'.pdf"',
             ]
         );
 
@@ -1763,14 +1888,15 @@ class UserController extends Controller {
             now()->addMinutes(5),
             [
                 'ResponseContentType' => 'application/pdf',
-                'ResponseContentDisposition' => 'attachment; filename="approval-document-history-' . $user->id . '-' . $history->id . '.pdf"',
+                'ResponseContentDisposition' => 'attachment; filename="approval-document-history-'.$user->id.'-'.$history->id.'.pdf"',
             ]
         );
 
         return redirect()->away($url);
     }
 
-    public function approveMinorUser(User $user, Request $request) {
+    public function approveMinorUser(User $user, Request $request)
+    {
         $authUser = User::find(Auth::id());
 
         if ($authUser->getRole() !== 'rector') {
@@ -1778,11 +1904,11 @@ class UserController extends Controller {
         }
 
         $academyId = $authUser->getActiveInstitutionId();
-        if (!$academyId || !$user->academyAthletes()->where('academy_id', $academyId)->exists()) {
+        if (! $academyId || ! $user->academyAthletes()->where('academy_id', $academyId)->exists()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to approve this user!');
         }
 
-        if (!$user->is_user_minor || !$user->has_user_uploaded_documents) {
+        if (! $user->is_user_minor || ! $user->has_user_uploaded_documents) {
             return redirect()->route('rector.users.approve.index')->with('error', 'This user is not ready for approval.');
         }
 
@@ -1792,7 +1918,8 @@ class UserController extends Controller {
         return redirect()->route('rector.users.approve.index')->with('success', 'User approved successfully.');
     }
 
-    public function denyMinorUser(User $user, Request $request) {
+    public function denyMinorUser(User $user, Request $request)
+    {
         $authUser = User::find(Auth::id());
 
         if ($authUser->getRole() !== 'rector') {
@@ -1800,11 +1927,11 @@ class UserController extends Controller {
         }
 
         $academyId = $authUser->getActiveInstitutionId();
-        if (!$academyId || !$user->academyAthletes()->where('academy_id', $academyId)->exists()) {
+        if (! $academyId || ! $user->academyAthletes()->where('academy_id', $academyId)->exists()) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized to deny this user!');
         }
 
-        if (!$user->is_user_minor || !$user->has_user_uploaded_documents) {
+        if (! $user->is_user_minor || ! $user->has_user_uploaded_documents) {
             return redirect()->route('rector.users.approve.index')->with('error', 'This user is not ready for review.');
         }
 
@@ -1821,7 +1948,8 @@ class UserController extends Controller {
         return redirect()->route('rector.users.approve.index')->with('success', 'User denied successfully. The user has been notified by email.');
     }
 
-    public function dashboard(Request $request) {
+    public function dashboard(Request $request)
+    {
         $user = Auth::user()->id;
         $user = User::find($user);
         $role = $user->getRole();
@@ -1837,12 +1965,14 @@ class UserController extends Controller {
             case 'athlete':
                 return $this->handleAthlete($user);
             default:
-                $view = 'dashboard.' . $role . '.index';
+                $view = 'dashboard.'.$role.'.index';
+
                 return view($view);
         }
     }
 
-    private function handleInstructor($user, $course_id = 0) {
+    private function handleInstructor($user, $course_id = 0)
+    {
         if ($course_id != 0) {
             $course = Clan::find($course_id);
             $users = $course->users;
@@ -1853,20 +1983,19 @@ class UserController extends Controller {
             foreach ($users as $key => $atl) {
                 $users[$key]->course_name = $course->name;
 
-                if (!$atl->has_paid_fee) {
+                if (! $atl->has_paid_fee) {
                     $inactive_users_count++;
                 } else {
                     $active_users_count++;
                 }
             }
 
-
             return view('dashboard.instructor.index', [
                 'users' => $users,
                 'courses' => $user->clansPersonnel()->get(),
                 'course_id' => $course->id,
                 'active_users_count' => $active_users_count,
-                'inactive_users_count' => $inactive_users_count
+                'inactive_users_count' => $inactive_users_count,
             ]);
         } else {
             $courses = $user->clansPersonnel()->get();
@@ -1879,10 +2008,10 @@ class UserController extends Controller {
             foreach ($courses as $course) {
                 foreach ($course->users as $athlete) {
 
-                    if (!in_array($athlete->id, $athletes_ids)) {
+                    if (! in_array($athlete->id, $athletes_ids)) {
                         $athletes_ids[] = $athlete->id;
 
-                        if (!$athlete->has_paid_fee) {
+                        if (! $athlete->has_paid_fee) {
                             $inactive_users_count++;
                         } else {
                             $active_users_count++;
@@ -1893,25 +2022,25 @@ class UserController extends Controller {
                     } else {
 
                         $athlete = $athletes[array_search($athlete->id, array_column($athletes, 'id'))];
-                        $athlete->course_name .= ", " . $course->name;
+                        $athlete->course_name .= ', '.$course->name;
 
                         continue;
                     }
                 }
             }
 
-
             return view('dashboard.instructor.index', [
                 'courses' => $courses,
                 'users' => $athletes,
                 'course_id' => 0,
                 'active_users_count' => $active_users_count,
-                'inactive_users_count' => $inactive_users_count
+                'inactive_users_count' => $inactive_users_count,
             ]);
         }
     }
 
-    private function handleAthlete($user) {
+    private function handleAthlete($user)
+    {
 
         $seen_announcements = $user->seenAnnouncements()->get();
         $announcements = Announcement::where('is_deleted', false)->where('type', '!=', '4')->orderBy('created_at', 'desc')->get();
@@ -1927,7 +2056,7 @@ class UserController extends Controller {
             $allowed_roles = $announcement->roles != null ? json_decode($announcement->roles) : null;
 
             if ($nations != null) {
-                if (!in_array($user->nation_id, $nations)) {
+                if (! in_array($user->nation_id, $nations)) {
                     return false;
                 }
             }
@@ -1936,7 +2065,7 @@ class UserController extends Controller {
 
                 if ($allowed_roles == null) {
                     $allAcademies = $user->academies->pluck('id')->merge($user->primaryAcademyAthlete() ? [$user->primaryAcademyAthlete()->id] : []);
-                    if (!array_intersect($allAcademies->toArray(), $academies)) {
+                    if (! array_intersect($allAcademies->toArray(), $academies)) {
                         return false;
                     }
                 } else {
@@ -1956,7 +2085,7 @@ class UserController extends Controller {
                         }
                     }
 
-                    if (!$canSee) {
+                    if (! $canSee) {
                         return false;
                     }
                 }
@@ -1964,12 +2093,11 @@ class UserController extends Controller {
 
             if ($allowed_roles != null) {
 
-                /** 
-                 * 09/12/2024 - cambio funzione, adesso vede solo gli annunci per il ruolo scelto nella sessione attiva. 
+                /**
+                 * 09/12/2024 - cambio funzione, adesso vede solo gli annunci per il ruolo scelto nella sessione attiva.
                  * 16/12/2024 - modifica revertata
                  */
-
-                if (!array_intersect($user->roles->pluck('id')->toArray(), $allowed_roles)) {
+                if (! array_intersect($user->roles->pluck('id')->toArray(), $allowed_roles)) {
                     return false;
                 }
             }
@@ -1989,20 +2117,21 @@ class UserController extends Controller {
                 }
             }
 
-            if (!$found) {
+            if (! $found) {
                 $not_seen[] = $announcement;
             }
         }
 
-
         $view = 'dashboard.athlete.index';
+
         return view($view, [
             'announcements' => $not_seen,
 
         ]);
     }
 
-    public function languages(User $user, Request $request) {
+    public function languages(User $user, Request $request)
+    {
 
         $loggedUser = User::find(Auth::user()->id);
 
@@ -2011,8 +2140,6 @@ class UserController extends Controller {
                 'error' => 'You do not have permission for this data!',
             ]);
         }
-
-
 
         $user->languages()->detach();
 
@@ -2027,7 +2154,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function invoicedata(User $user) {
+    public function invoicedata(User $user)
+    {
         $authUser = User::find(Auth::user()->id);
         if ($authUser->getRole() == 'athlete' && ($authUser->id != $user->id)) {
             return response()->json([
@@ -2059,7 +2187,8 @@ class UserController extends Controller {
         }
     }
 
-    public function saveInvoice(Request $request) {
+    public function saveInvoice(Request $request)
+    {
         $validator = Validator::make($request->all(), $this->invoiceValidationRules($request));
 
         if ($validator->fails()) {
@@ -2087,7 +2216,7 @@ class UserController extends Controller {
             'is_business' => $request->is_business === 'true' ? true : false,
             'want_invoice' => true,
             'business_name' => $request->business_name ?? '',
-            'user_id' => Auth()->user()->id
+            'user_id' => Auth()->user()->id,
         ]);
 
         $invoice->save();
@@ -2097,7 +2226,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function updateInvoice(Request $request) {
+    public function updateInvoice(Request $request)
+    {
         $validator = Validator::make($request->all(), array_merge(
             ['invoice_id' => ['required', 'integer', 'exists:invoices,id']],
             $this->invoiceValidationRules($request)
@@ -2113,7 +2243,7 @@ class UserController extends Controller {
 
         $invoice = Invoice::find($request->invoice_id);
 
-        if (!$invoice) {
+        if (! $invoice) {
             return response()->json([
                 'error' => 'Invoice not found',
             ]);
@@ -2153,7 +2283,8 @@ class UserController extends Controller {
         ]);
     }
 
-    private function invoiceValidationRules(Request $request): array {
+    private function invoiceValidationRules(Request $request): array
+    {
         $isBusiness = $request->is_business === 'true' || $request->is_business === true || $request->is_business === '1';
         $isItaly = in_array(strtolower(trim((string) $request->country)), ['it', 'italy', 'italia']);
 
@@ -2171,14 +2302,16 @@ class UserController extends Controller {
         ];
     }
 
-    public function testUserTest() {
-        return response()->json("hi there");
+    public function testUserTest()
+    {
+        return response()->json('hi there');
     }
 
-    public function setMainInstitution(Request $request) {
+    public function setMainInstitution(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authRole = $authUser->getRole();
-        if (!in_array($authRole, ['admin', 'rector', 'manager'])) {
+        if (! in_array($authRole, ['admin', 'rector', 'manager'])) {
             return back()->with('error', 'You do not have the required role to access this page!');
         }
 
@@ -2194,17 +2327,17 @@ class UserController extends Controller {
 
         $user = User::find($request->user_id);
 
-        if ($request->role_type == "personnel") {
+        if ($request->role_type == 'personnel') {
 
             // In teoria queste le setta solo l'admin. quindi può restare così, perchè lui vede tutte le accademie.
-            if ($request->institution_type == "academy") {
+            if ($request->institution_type == 'academy') {
                 foreach ($user->academies as $academy) {
                     $user->academies()->updateExistingPivot($academy->id, ['is_primary' => false]);
                 }
 
                 foreach ($request->all() as $key => $value) {
                     if (str_contains($key, 'academy_id')) {
-                        if ($value == "on") {
+                        if ($value == 'on') {
                             $selectedAcademyId = str_replace('academy_id_', '', $key);
                             $user->academies()->updateExistingPivot($selectedAcademyId, ['is_primary' => true]);
                         }
@@ -2212,11 +2345,11 @@ class UserController extends Controller {
                 }
             } else {
                 // Questa funzione non la usa solo l'admin. Quindi non si possono togliere tutte le scuole primarie, perchè verrebbero tolte tutte quelle che l'utente (es. il rettore) non può vedere.
-                switch($authRole) {
+                switch ($authRole) {
                     case 'manager':
                     case 'rector':
                         $academy = $authUser->getActiveInstitution();
-                        if (!$academy) {
+                        if (! $academy) {
                             return back()->with('error', 'Academy not found!');
                         }
                         foreach ($academy->schools as $school) {
@@ -2234,7 +2367,7 @@ class UserController extends Controller {
 
                 foreach ($request->all() as $key => $value) {
                     if (str_contains($key, 'school_id')) {
-                        if ($value == "on") {
+                        if ($value == 'on') {
                             $selectedSchoolId = str_replace('school_id_', '', $key);
                             $user->schools()->updateExistingPivot($selectedSchoolId, ['is_primary' => true]);
                         }
@@ -2242,9 +2375,9 @@ class UserController extends Controller {
                 }
             }
         } else {
-            if ($request->institution_type == "academy") {
+            if ($request->institution_type == 'academy') {
                 $academy = Academy::find($request->academy_id);
-                if (!$academy) {
+                if (! $academy) {
                     return back()->with('error', 'Academy not found!');
                 }
                 $user->setPrimaryAcademyAthlete($academy->id);
@@ -2254,7 +2387,7 @@ class UserController extends Controller {
                 }
             } else {
                 $school = School::find($request->school_id);
-                if (!$school) {
+                if (! $school) {
                     return back()->with('error', 'School not found!');
                 }
                 $user->setPrimarySchoolAthlete($school->id);
@@ -2265,19 +2398,21 @@ class UserController extends Controller {
             }
         }
 
-        return back()->with('success', 'Main ' . $request->institution_type . ' as ' . $request->role_type . ' set successfully!');
+        return back()->with('success', 'Main '.$request->institution_type.' as '.$request->role_type.' set successfully!');
     }
 
-    public function roleSelector() {
+    public function roleSelector()
+    {
         $user = User::find(Auth::user()->id);
         $roles = $user->roles()->get();
 
         return view('role-selector', [
-            'roles' => $roles
+            'roles' => $roles,
         ]);
     }
 
-    public function setUserRoleForSession(Request $request) {
+    public function setUserRoleForSession(Request $request)
+    {
         $request->validate([
             'role' => 'required|string|exists:roles,label',
         ]);
@@ -2304,7 +2439,7 @@ class UserController extends Controller {
                     return redirect()->route('institution-selector');
                 }
             }
-        } else if ($authUser->getRole() === 'dean') {
+        } elseif ($authUser->getRole() === 'dean') {
 
             $primarySchools = $authUser->schools->where('pivot.is_primary', 1);
             if ($primarySchools->count() > 1) {
@@ -2312,7 +2447,7 @@ class UserController extends Controller {
             } else {
                 $primarySchool = $primarySchools->first();
                 if ($primarySchool) {
-                        session(['institution' => $primarySchool]);
+                    session(['institution' => $primarySchool]);
                 } else {
                     return redirect()->route('institution-selector');
                 }
@@ -2322,14 +2457,16 @@ class UserController extends Controller {
         return redirect()->route('dashboard');
     }
 
-    public function institutionSelector() {
+    public function institutionSelector()
+    {
         $user = User::find(Auth::user()->id);
 
         if ($user->getRole() === 'rector' || $user->getRole() === 'manager') {
             $academies = $user->academies()->wherePivot('is_primary', 1)->get();
-        } else if ($user->getRole() === 'dean') {
+        } elseif ($user->getRole() === 'dean') {
             $schools = $user->schools()->wherePivot('is_primary', 1)->get();
         }
+
         return view('institution-selector', [
             'user' => $user,
             'academies' => $academies ?? [],
@@ -2337,7 +2474,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function setUserInstitutionForSession(Request $request) {
+    public function setUserInstitutionForSession(Request $request)
+    {
         $user = User::find(Auth::user()->id);
 
         if ($user->getRole() === 'rector' || $user->getRole() === 'manager') {
@@ -2354,7 +2492,7 @@ class UserController extends Controller {
             } else {
                 return back()->with('error', 'You do not have the required institution to access this page!');
             }
-        } else if ($user->getRole() === 'dean') {
+        } elseif ($user->getRole() === 'dean') {
             $request->validate([
                 'institution_id' => 'required|exists:schools,id',
             ]);
@@ -2372,8 +2510,8 @@ class UserController extends Controller {
         return redirect()->route('dashboard');
     }
 
-
-    public function athletesDataForWorld() {
+    public function athletesDataForWorld()
+    {
         $data = \Illuminate\Support\Facades\Cache::remember('athletes-world-data', now()->addDay(), function () {
             $athletes = User::where('is_disabled', false)
                 ->whereHas('roles', function ($q) {
@@ -2390,7 +2528,7 @@ class UserController extends Controller {
             $now = now();
             $currentMonth = $now->month;
             $currentYear = $now->year;
-            
+
             // Se siamo prima del 1 settembre, l'anno accademico è iniziato l'anno scorso
             if ($currentMonth <= 8) {
                 $academicYearStart = \Carbon\Carbon::create($currentYear - 1, 9, 1, 0, 0, 0);
@@ -2411,7 +2549,7 @@ class UserController extends Controller {
                     $active_users_no_course++;
                 }
 
-                if ((!$athlete->has_paid_fee) && ($athlete->clans_count > 0)) {
+                if ((! $athlete->has_paid_fee) && ($athlete->clans_count > 0)) {
                     $users_course_not_active++;
                 }
 
@@ -2431,7 +2569,8 @@ class UserController extends Controller {
         return response()->json($data);
     }
 
-    public function athletesDataWorldList() {
+    public function athletesDataWorldList()
+    {
         $filledNations = Nation::whereHas('academies')->get();
 
         $nations = [];
@@ -2520,7 +2659,8 @@ class UserController extends Controller {
         return response()->json($nations);
     }
 
-    public function getWorldAthletesNumberPerYear() {
+    public function getWorldAthletesNumberPerYear()
+    {
         $data = \Illuminate\Support\Facades\Cache::remember('athletes-world-data-per-year', now()->addDay(), function () {
             $athletes = User::where('is_disabled', false)->whereHas('roles', function ($q) {
                 $q->where('label', 'athlete');
@@ -2532,7 +2672,7 @@ class UserController extends Controller {
             $now = now();
             $currentMonth = $now->month;
             $currentYear = $now->year;
-            
+
             // Se siamo prima del 1 settembre, l'anno accademico è iniziato l'anno scorso
             if ($currentMonth <= 8) {
                 $academicYearStart = \Carbon\Carbon::create($currentYear - 1, 9, 1, 0, 0, 0);
@@ -2552,7 +2692,7 @@ class UserController extends Controller {
             foreach ($athletes as $athlete) {
                 if ($athlete->created_at >= $academicYearStart && $athlete->created_at <= $academicYearEnd) {
                     $athletes_this_year++;
-                } else if ($athlete->created_at >= $previousAcademicYearStart && $athlete->created_at <= $previousAcademicYearEnd) {
+                } elseif ($athlete->created_at >= $previousAcademicYearStart && $athlete->created_at <= $previousAcademicYearEnd) {
                     $athletes_last_year++;
                 }
             }
@@ -2566,30 +2706,31 @@ class UserController extends Controller {
         return response()->json($data);
     }
 
-    public function editWeaponFormsAthlete(Request $request, User $user) {
+    public function editWeaponFormsAthlete(Request $request, User $user)
+    {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
-        if (!in_array($authUserRole, ['admin', 'rector', 'dean', 'manager'])) {
+        if (! in_array($authUserRole, ['admin', 'rector', 'dean', 'manager'])) {
             return response()->json([
                 'error' => 'You are not authorized to edit user\'s weapon forms!',
             ], 401);
         }
 
-        if ($authUserRole == 'rector' && (!$authUser->getActiveInstitution() || !$user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
+        if ($authUserRole == 'rector' && (! $authUser->getActiveInstitution() || ! $user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ], 401);
         }
-        if ($authUserRole == 'manager' && (!$authUser->getActiveInstitution() || !$user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
+        if ($authUserRole == 'manager' && (! $authUser->getActiveInstitution() || ! $user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ], 401);
         }
 
-        if ($authUserRole == 'dean' && (!$authUser->getActiveInstitution() || !$user->schoolAthletes->contains($authUser->getActiveInstitutionId()))) {
+        if ($authUserRole == 'dean' && (! $authUser->getActiveInstitution() || ! $user->schoolAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
-                'error' => 'You are not authorized to edit this user\'s weapon forms!' . 'primarySchool: ' . $authUser->getActiveInstitutionId() . ' - userContainsSchool: ' . ($user->schoolAthletes->contains($authUser->getActiveInstitutionId()) ? 'true' : 'false'),
+                'error' => 'You are not authorized to edit this user\'s weapon forms!'.'primarySchool: '.$authUser->getActiveInstitutionId().' - userContainsSchool: '.($user->schoolAthletes->contains($authUser->getActiveInstitutionId()) ? 'true' : 'false'),
             ], 401);
         }
 
@@ -2597,7 +2738,7 @@ class UserController extends Controller {
         $requestForms = explode(',', $request->weapon_forms);
 
         $toRemove = $previousForms->whereNotIn('id', $requestForms);
-        if ($authUserRole != 'admin' && !$toRemove->isEmpty()) {
+        if ($authUserRole != 'admin' && ! $toRemove->isEmpty()) {
             return response()->json([
                 'error' => 'You are not authorized to remove already associated weapon forms!',
             ], 401);
@@ -2610,7 +2751,6 @@ class UserController extends Controller {
             ]);
             $form->users()->detach($user->id);
         }
-
 
         $toAdd = $previousForms ? collect($requestForms)->diff($previousForms->pluck('id')) : $requestForms;
         foreach ($toAdd as $formId) {
@@ -2630,7 +2770,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function editWeaponFormsPersonnel(Request $request, User $user) {
+    public function editWeaponFormsPersonnel(Request $request, User $user)
+    {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
@@ -2653,7 +2794,6 @@ class UserController extends Controller {
             $form->personnel()->detach($user->id);
         }
 
-
         $toAdd = $previousForms ? collect($requestForms)->diff($previousForms->pluck('id')) : $requestForms;
         foreach ($toAdd as $formId) {
             $form = WeaponForm::find($formId);
@@ -2672,7 +2812,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function editWeaponFormsTechnician(Request $request, User $user) {
+    public function editWeaponFormsTechnician(Request $request, User $user)
+    {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
         if ($authUserRole !== 'admin') {
@@ -2711,22 +2852,23 @@ class UserController extends Controller {
         ]);
     }
 
-    public function editWeaponFormsAwardingDate(User $user, Request $request) {
+    public function editWeaponFormsAwardingDate(User $user, Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
-        if (!in_array($authUserRole, ['admin', 'rector', 'manager', 'dean'])) {
+        if (! in_array($authUserRole, ['admin', 'rector', 'manager', 'dean'])) {
             return response()->json([
                 'error' => 'You are not authorized to edit user\'s weapon forms!',
             ], 401);
         }
         // Se la richiesta è del rettore ed è diversa da athlete o l'utente non è nell'accademia del rettore non si può modificare
-        if (in_array($authUserRole, ['rector', 'manager']) && (($request->type != 'athlete') || !$user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
+        if (in_array($authUserRole, ['rector', 'manager']) && (($request->type != 'athlete') || ! $user->academyAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ], 401);
         }
         // Se la richiesta è del preside ed è diversa da athlete o l'utente non è nella scuola del preside non si può modificare
-        if ($authUserRole == 'dean' && (($request->type != 'athlete') || !$user->schoolAthletes->contains($authUser->getActiveInstitutionId()))) {
+        if ($authUserRole == 'dean' && (($request->type != 'athlete') || ! $user->schoolAthletes->contains($authUser->getActiveInstitutionId()))) {
             return response()->json([
                 'error' => 'You are not authorized to edit this user\'s weapon forms!',
             ], 401);
@@ -2740,7 +2882,7 @@ class UserController extends Controller {
 
         switch ($request->type) {
             case 'athlete':
-                $user->weaponForms()->updateExistingPivot($request->form_id, ['awarded_at' =>  \Carbon\Carbon::parse($request->awarded_at)]);
+                $user->weaponForms()->updateExistingPivot($request->form_id, ['awarded_at' => \Carbon\Carbon::parse($request->awarded_at)]);
                 break;
             case 'personnel':
                 $user->weaponFormsPersonnel()->updateExistingPivot($request->form_id, ['awarded_at' => \Carbon\Carbon::parse($request->awarded_at)]);
@@ -2756,20 +2898,21 @@ class UserController extends Controller {
         // ]);
     }
 
-    public function resetPassword(User $user) {
+    public function resetPassword(User $user)
+    {
 
         $status = Password::sendResetLink(
             ['email' => $user->email]
         );
 
-
         return $status == Password::RESET_LINK_SENT
             ? back()->with('status', __($status))
             : back()->withInput($user->email)
-            ->withErrors(['email' => __($status)]);
+                ->withErrors(['email' => __($status)]);
     }
 
-    public function associateAcademy(Request $request) {
+    public function associateAcademy(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
@@ -2782,7 +2925,7 @@ class UserController extends Controller {
         $user = User::find($request->user_id);
         $academy = Academy::find($request->academy_id);
 
-        if (!$academy) {
+        if (! $academy) {
             return response()->json([
                 'error' => 'Academy not found!',
             ]);
@@ -2804,7 +2947,7 @@ class UserController extends Controller {
             if ($user->academies->count() == 1) {
                 $user->setPrimaryAcademy($academy->id);
             }
-        } else if ($request->type == 'athlete') {
+        } elseif ($request->type == 'athlete') {
             if ($user->academyAthletes->contains($academy->id)) {
                 return response()->json([
                     'error' => 'User is already associated with this academy!',
@@ -2847,14 +2990,15 @@ class UserController extends Controller {
         ]);
     }
 
-    public function associateSchool(Request $request) {
+    public function associateSchool(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
         $user = User::find($request->user_id);
         $school = School::find($request->school_id);
 
-        if ($authUserRole !== 'admin' && !(in_array($authUserRole, ["rector", "manager"]) && ($authUser->getActiveInstitutionId() === $school->academy->id))) {
+        if ($authUserRole !== 'admin' && ! (in_array($authUserRole, ['rector', 'manager']) && ($authUser->getActiveInstitutionId() === $school->academy->id))) {
             return response()->json([
                 'error' => 'You are not authorized to associate this user with this school!',
             ], 401);
@@ -2868,10 +3012,10 @@ class UserController extends Controller {
                 'made_by' => $authUser->id,
             ]);
             // Se l'utente (personale) non ha la scuola principale, la assegna
-            if (!$user->primarySchool()) {
+            if (! $user->primarySchool()) {
                 $user->schools()->updateExistingPivot($school->id, ['is_primary' => true]);
             }
-        } else if ($request->type == 'athlete') {
+        } elseif ($request->type == 'athlete') {
             $user->schoolAthletes()->syncWithoutDetaching($school->id);
             Log::channel('school')->info('Athlete associated with school', [
                 'user_id' => $user->id,
@@ -2879,7 +3023,7 @@ class UserController extends Controller {
                 'made_by' => $authUser->id,
             ]);
             // Se l'atleta non ha la scuola principale, la assegna
-            if (!$user->primarySchoolAthlete()) {
+            if (! $user->primarySchoolAthlete()) {
                 $user->setPrimarySchoolAthlete($school->id);
             }
             // Se ha un'associazione con una scuola diversa da No school, rimuove quella con No school
@@ -2898,7 +3042,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function removeAcademy(Request $request) {
+    public function removeAcademy(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
@@ -2911,7 +3056,7 @@ class UserController extends Controller {
         $user = User::find($request->user_id);
         $academy = Academy::find($request->academy_id);
 
-        if (!$academy) {
+        if (! $academy) {
             return response()->json([
                 'error' => 'Academy not found!',
             ]);
@@ -2954,7 +3099,7 @@ class UserController extends Controller {
             //         ]);
             //     }
             // }
-        } else if ($request->type == 'athlete') {
+        } elseif ($request->type == 'athlete') {
             // Dato che un atleta può essere associato ad una sola accademia possiamo usare la funzione che toglie l'associazione da tutte le accademie e crea il log
             // L'argomento è l'accademia che fa eccezione (se serve)
             $user->removeAcademiesAthleteAssociations();
@@ -2969,7 +3114,7 @@ class UserController extends Controller {
                         'academy_id' => 1,
                         'made_by' => $authUser->id,
                     ]);
-                } else if ($user->academyAthletes->count() == 0) {
+                } elseif ($user->academyAthletes->count() == 0) {
                     // Se non ha accademie come atleta viene assegnato a No academy
                     $user->academyAthletes()->syncWithoutDetaching(1);
                     $user->setPrimaryAcademyAthlete(1);
@@ -3000,20 +3145,21 @@ class UserController extends Controller {
         ]);
     }
 
-    public function removeSchool(Request $request) {
+    public function removeSchool(Request $request)
+    {
         $authUser = User::find(Auth::user()->id);
         $authUserRole = $authUser->getRole();
 
         $user = User::find($request->user_id);
         $school = School::find($request->school_id);
 
-        if ($authUserRole !== 'admin' && !(in_array($authUserRole, ["rector", "manager"]) && ($authUser->getActiveInstitutionId() === $school->academy->id))) {
+        if ($authUserRole !== 'admin' && ! (in_array($authUserRole, ['rector', 'manager']) && ($authUser->getActiveInstitutionId() === $school->academy->id))) {
             return response()->json([
                 'error' => 'You are not authorized to remove this user from this school!',
             ], 401);
         }
 
-        if (!$school) {
+        if (! $school) {
             return response()->json([
                 'error' => 'School not found!',
             ]);
@@ -3030,7 +3176,7 @@ class UserController extends Controller {
             //         $user->setPrimarySchool($newSchool->id);
             //     }
             // }
-        } else if ($request->type == 'athlete') {
+        } elseif ($request->type == 'athlete') {
             // Rimuove tutte le associazioni (athlete) a corsi e scuola indicata e crea i log
             $user->removeSchoolAthleteAssociations($school);
 

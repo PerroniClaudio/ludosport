@@ -22,6 +22,9 @@ class EnsurePrivacyPolicyAccepted
             'privacy-policy.accept',
             'privacy-policy.decline',
             'logout',
+            'verification.notice',
+            'verification.verify',
+            'verification.send',
         ];
 
         if ($request->routeIs($allowedRoutes)) {
@@ -35,9 +38,13 @@ class EnsurePrivacyPolicyAccepted
         }
 
         if (Auth::check() && ! Auth::user()->hasAcceptedLatestPrivacyPolicy()) {
-            session(['privacy_policy_redirect_to' => $request->url()]);
+            if (Auth::user()->isMinorPendingApproval()) {
+                return $next($request);
+            }
 
-            return redirect(route('privacy-policy.show'));
+            session(['privacy_policy_redirect_to' => $request->getRequestUri()]);
+
+            return redirect(route('privacy-policy.show', absolute: false));
         }
 
         return $next($request);

@@ -17,10 +17,10 @@ class PrivacyPolicyController extends Controller
     public function edit(): View
     {
         // Verifica che l'utente sia admin
-        if (!Auth::user()->hasRole('admin')) {
+        if (! Auth::user()->hasRole('admin')) {
             abort(403, 'Unauthorized action.');
         }
-        
+
         $policy = PrivacyPolicy::getOrCreate();
 
         return view('admin.privacy-policy.edit', [
@@ -34,10 +34,10 @@ class PrivacyPolicyController extends Controller
     public function update(UpdatePrivacyPolicyRequest $request): RedirectResponse
     {
         // Verifica che l'utente sia admin
-        if (!Auth::user()->hasRole('admin')) {
+        if (! Auth::user()->hasRole('admin')) {
             abort(403, 'Unauthorized action.');
         }
-        
+
         $policy = PrivacyPolicy::find(1) ?? PrivacyPolicy::getOrCreate();
 
         // Sanitizza l'HTML permettendo tag e attributi safe compatibili con TipTap
@@ -171,11 +171,11 @@ class PrivacyPolicyController extends Controller
         $user = User::find(Auth::id());
         $user->acceptPrivacyPolicy();
 
-        $redirectTo = session()->pull('privacy_policy_redirect_to', route('dashboard'));
+        $redirectTo = session()->pull('privacy_policy_redirect_to', route('dashboard', absolute: false));
 
         // Validazione URL sicura - previene open redirect
-        if (! str_starts_with($redirectTo, url('/'))) {
-            $redirectTo = route('dashboard');
+        if (! str_starts_with($redirectTo, '/')) {
+            $redirectTo = route('dashboard', absolute: false);
         }
 
         return redirect($redirectTo);

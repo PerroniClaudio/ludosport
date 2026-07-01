@@ -7,16 +7,20 @@
             'name' => $academy->name,
         ];
     });
+    $selectedAcademy = null;
+    if ($selectedvalue) {
+        $selectedAcademy = $academies->firstWhere('id', (int) $selectedvalue);
+    }
 @endphp
 
 <div x-data="{
     isDialogOpen: false,
-    selectedAcademy: {{ $selectedvalue ? "'" . $selectedvalue . "'" : "'Select an academy'" }},
-    selectedAcademyId: null,
+    selectedAcademy: {{ $selectedAcademy ? "'" . addslashes($selectedAcademy['name']) . "'" : "'Select an academy'" }},
+    selectedAcademyId: {{ $selectedvalue ? (int) $selectedvalue : 'null' }},
     academies: {{ $academies }},
 }">
     <x-input-label for="academy" value="{{ __('users.academy') }}" />
-    <div class="flex w-full gap-2 mt-1">
+    <div class="flex w-full gap-2">
         <input type="hidden" name="academy_id" x-model="selectedAcademyId">
         <x-text-input disabled name="academy" class="flex-1" type="text" x-model="selectedAcademy" />
         <div class="text-primary-500 hover:bg-background-500 dark:hover:bg-background-900 p-2 rounded-full cursor-pointer"
@@ -25,7 +29,7 @@
 
         </div>
     </div>
-    <x-input-error :messages="$errors->get('academy')" class="mt-2" />
+    <x-input-error :messages="$errors->get('academy_id')" class="mt-2" />
 
     <div class="modal" role="dialog" tabindex="-1" x-show="isDialogOpen" x-on:click.away="isDialogOpen = false"
         x-cloak x-transition>

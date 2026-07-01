@@ -12,11 +12,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
-class ProfileController extends Controller {
+class ProfileController extends Controller
+{
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): View {
+    public function edit(Request $request): View
+    {
         return view('profile.edit', [
             'languages' => Language::all(),
             'user' => $request->user(),
@@ -27,7 +29,8 @@ class ProfileController extends Controller {
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse {
+    public function update(ProfileUpdateRequest $request): RedirectResponse
+    {
 
         $request->user()->fill($request->validated());
 
@@ -37,8 +40,8 @@ class ProfileController extends Controller {
         // Dato che viene usato per vedere il profilo dell'utente, il battle name deve essere unico.
         // Se esiste già gli lascia il suo (se non è doppio) oppure ne genera uno nuovo.
         $battleNameError = false;
-        if(User::where('battle_name', $battle_name)->whereNot('id', $request->user()->id)->exists()) {
-            if($battle_name != $request->user()->battle_name && !User::where('battle_name', $request->user()->battle_name)->whereNot('id', $request->user()->id)->exists()) {
+        if (User::where('battle_name', $battle_name)->whereNot('id', $request->user()->id)->exists()) {
+            if ($battle_name != $request->user()->battle_name && ! User::where('battle_name', $request->user()->battle_name)->whereNot('id', $request->user()->id)->exists()) {
                 $battle_name = $request->user()->battle_name;
             } else {
                 $battle_name = $request->user()->generateBattleName();
@@ -55,20 +58,22 @@ class ProfileController extends Controller {
             $request->user()->email_verified_at = null;
         }
 
-        if (!$request->user()->profile_completed) {
+        if (! $request->user()->profile_completed) {
             $request->user()->profile_completed = true;
 
             if ($request->user()->birthday && Carbon::parse($request->user()->birthday)->gt(now()->subYears(18))) {
                 $request->user()->is_user_minor = true;
-                $request->user()->has_user_uploaded_documents = false;
-                $request->user()->has_admin_approved_minor = false;
-                $request->user()->uploaded_documents_path = null;
+
+                if (! $request->user()->has_admin_approved_minor) {
+                    $request->user()->has_user_uploaded_documents = false;
+                    $request->user()->uploaded_documents_path = null;
+                }
             }
         }
 
         $request->user()->save();
 
-        if($battleNameError) {
+        if ($battleNameError) {
             return Redirect::route('profile.edit')->with('status', 'Profile updated! Battle name already exists.');
         }
 
@@ -78,7 +83,8 @@ class ProfileController extends Controller {
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request): RedirectResponse {
+    public function destroy(Request $request): RedirectResponse
+    {
         $request->validateWithBag('userDeletion', [
             'password' => ['required', 'current_password'],
         ]);

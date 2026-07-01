@@ -115,3 +115,39 @@ test('incomplete athlete profile redirects to profile and minor birthday starts 
     $this->assertFalse($user->has_user_uploaded_documents);
     $this->assertFalse($user->has_admin_approved_minor);
 });
+
+test('approved minor completing profile keeps approval and document flags', function () {
+    config(['scout.driver' => 'null']);
+    Rank::create(['name' => 'Novice']);
+    foreach (range(1, 10) as $id) {
+        Nation::create(['id' => $id, 'name' => "Nation {$id}", 'code' => str_pad((string) $id, 2, '0', STR_PAD_LEFT)]);
+    }
+
+    $role = Role::create(['name' => 'athlete', 'prefix' => 'athlete', 'label' => 'athlete']);
+    $user = User::factory()->create([
+        'profile_completed' => false,
+        'is_user_minor' => true,
+        'has_user_uploaded_documents' => true,
+        'has_admin_approved_minor' => true,
+        'uploaded_documents_path' => '/users/1/approval_documents/test.pdf',
+        'birthday' => now()->subYears(16)->toDateString(),
+    ]);
+    $user->roles()->sync($role->id);
+
+    $this->actingAs($user)
+        ->patch('/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'gender' => 'male',
+            'birthday' => now()->subYears(16)->toDateString(),
+        ])
+        ->assertRedirect('/profile');
+
+    $user->refresh();
+
+    $this->assertTrue($user->profile_completed);
+    $this->assertTrue($user->is_user_minor);
+    $this->assertTrue($user->has_user_uploaded_documents);
+    $this->assertTrue($user->has_admin_approved_minor);
+    $this->assertSame('/users/1/approval_documents/test.pdf', $user->uploaded_documents_path);
+});

@@ -113,7 +113,8 @@ $canEdit = in_array($authUser->getActiveInstitutionId(), $user->academyAthletes-
                             <x-form.input name="year" label="First subscription year" type="text"
                                 required="{{ true }}" value="{{ $user->subscription_year }}"
                                 placeholder="{{ date('Y') }}" :disabled="!$canEdit" />
-
+                            <x-form.input name="birthday" label="Birthday" type="date"
+                                :value="$user->birthday" :readonly="!$canEdit" />
                             <div>
                                 <x-input-label for="nationality" value="Nationality" />
                                 <select name="nationality" id="nationality" {{ !$canEdit ? 'disabled' : '' }}

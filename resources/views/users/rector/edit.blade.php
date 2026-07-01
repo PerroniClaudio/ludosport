@@ -122,6 +122,9 @@ $canSeeMinorDocuments = $canManageMinorDocuments || $user->uploaded_documents_pa
                                 required="{{ true }}" value="{{ $user->subscription_year }}"
                                 placeholder="{{ date('Y') }}" :readonly="!$canEdit" />
 
+                            <x-form.input name="birthday" label="Birthday" type="date"
+                                :value="$user->birthday" :readonly="!$canEdit" />
+
                             <div>
                                 <x-input-label for="nationality" value="Nationality" />
                                 <select name="nationality" id="nationality"

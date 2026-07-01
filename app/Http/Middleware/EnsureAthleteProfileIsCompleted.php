@@ -12,16 +12,13 @@ class EnsureAthleteProfileIsCompleted
     {
         $user = $request->user();
 
-        if (!$user || $user->profile_completed || !$user->hasRole('athlete')) {
+        if (! $user || $user->profile_completed || ! $user->hasRole('athlete') || $user->isMinorPendingApproval()) {
             return $next($request);
         }
 
         $allowedRoutes = [
             'profile.edit',
             'profile.update',
-            'verification.notice',
-            'verification.verify',
-            'verification.send',
             'logout',
         ];
 
@@ -29,6 +26,6 @@ class EnsureAthleteProfileIsCompleted
             return $next($request);
         }
 
-        return redirect()->route('profile.edit')->with('error', 'Complete your profile before continuing.');
+        return redirect(route('profile.edit', absolute: false))->with('error', 'Complete your profile before continuing.');
     }
 }
