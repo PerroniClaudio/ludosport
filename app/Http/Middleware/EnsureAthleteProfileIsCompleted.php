@@ -19,6 +19,12 @@ class EnsureAthleteProfileIsCompleted
         $allowedRoutes = [
             'profile.edit',
             'profile.update',
+            'privacy-policy.show',
+            'privacy-policy.accept',
+            'privacy-policy.decline',
+            'verification.notice',
+            'verification.verify',
+            'verification.send',
             'logout',
         ];
 

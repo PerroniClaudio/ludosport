@@ -21,6 +21,8 @@ class EnsurePrivacyPolicyAccepted
             'privacy-policy.show',
             'privacy-policy.accept',
             'privacy-policy.decline',
+            'cookie-policy.show',
+            'cookie-policy.info',
             'logout',
             'verification.notice',
             'verification.verify',
@@ -31,18 +33,16 @@ class EnsurePrivacyPolicyAccepted
             return $next($request);
         }
 
-        // Se la privacy policy non esiste, salta il controllo
-        $policy = PrivacyPolicy::find(1);
-        if (! $policy) {
-            return $next($request);
-        }
+        $policy = PrivacyPolicy::getOrCreate();
 
         if (Auth::check() && ! Auth::user()->hasAcceptedLatestPrivacyPolicy()) {
             if (Auth::user()->isMinorPendingApproval()) {
                 return $next($request);
             }
 
-            session(['privacy_policy_redirect_to' => $request->getRequestUri()]);
+            if (! session()->has('privacy_policy_redirect_to') && $request->method() === 'GET' && ! $request->expectsJson()) {
+                session(['privacy_policy_redirect_to' => $request->getRequestUri()]);
+            }
 
             return redirect(route('privacy-policy.show', absolute: false));
         }

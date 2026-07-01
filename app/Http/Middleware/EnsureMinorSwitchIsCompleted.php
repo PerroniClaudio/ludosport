@@ -15,7 +15,7 @@ class EnsureMinorSwitchIsCompleted
     {
         $user = $request->user();
 
-        if (!$user || !$user->has_to_switch_from_minor) {
+        if (! $user || ! $user->has_to_switch_from_minor) {
             return $next($request);
         }
 
@@ -32,6 +32,6 @@ class EnsureMinorSwitchIsCompleted
             return $next($request);
         }
 
-        return redirect()->route('minor-switch.edit')->with('error', 'You must confirm your adult account email before continuing.');
+        return redirect(route('minor-switch.edit', absolute: false))->with('error', 'You must confirm your adult account email before continuing.');
     }
 }

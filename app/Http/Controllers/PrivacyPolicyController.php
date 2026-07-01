@@ -58,7 +58,7 @@ class PrivacyPolicyController extends Controller
      */
     public function show(): View
     {
-        $policy = PrivacyPolicy::find(1);
+        $policy = PrivacyPolicy::getOrCreate();
 
         // Se non esiste policy, non richiedere approvazione
         $requiresAcceptance = false;
@@ -173,8 +173,12 @@ class PrivacyPolicyController extends Controller
 
         $redirectTo = session()->pull('privacy_policy_redirect_to', route('dashboard', absolute: false));
 
-        // Validazione URL sicura - previene open redirect
+        // Validazione URL sicura - previene open redirect e redirect inattesi
         if (! str_starts_with($redirectTo, '/')) {
+            $redirectTo = route('dashboard', absolute: false);
+        }
+
+        if (str_contains($redirectTo, '://')) {
             $redirectTo = route('dashboard', absolute: false);
         }
 

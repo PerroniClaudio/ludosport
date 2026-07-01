@@ -10,18 +10,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
-class AuthenticatedSessionController extends Controller {
+class AuthenticatedSessionController extends Controller
+{
     /**
      * Display the login view.
      */
-    public function create(): View {
+    public function create(): View
+    {
         return view('auth.login');
     }
 
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse {
+    public function store(LoginRequest $request): RedirectResponse
+    {
         $user = User::where('email', $request->email)->first();
 
         if ($user && $user->is_disabled) {
@@ -36,13 +39,13 @@ class AuthenticatedSessionController extends Controller {
         $user = User::find($user->id);
 
         if ($user->has_to_switch_from_minor) {
-            return redirect()->route('minor-switch.edit');
+            return redirect(route('minor-switch.edit', absolute: false));
         }
 
         $roles = $user->roles()->get();
 
         if ($roles->count() > 1) {
-            return redirect()->route('role-selector');
+            return redirect(route('role-selector', absolute: false));
         } else {
 
             // Stesso codice anche in userController setUserRoleForSession
@@ -50,26 +53,26 @@ class AuthenticatedSessionController extends Controller {
 
                 $primaryAcademies = $user->academies->where('pivot.is_primary', 1);
                 if ($primaryAcademies->count() > 1) {
-                    return redirect()->route('institution-selector');
+                    return redirect(route('institution-selector', absolute: false));
                 } else {
                     $primaryAcademy = $primaryAcademies->first();
                     if ($primaryAcademy) {
-                         session(['institution' => $primaryAcademy]);
+                        session(['institution' => $primaryAcademy]);
                     } else {
-                        return redirect()->route('institution-selector');
+                        return redirect(route('institution-selector', absolute: false));
                     }
                 }
-            } else if ($user->getRole() === 'dean') {
+            } elseif ($user->getRole() === 'dean') {
 
                 $primarySchools = $user->schools->where('pivot.is_primary', 1);
                 if ($primarySchools->count() > 1) {
-                    return redirect()->route('institution-selector');
+                    return redirect(route('institution-selector', absolute: false));
                 } else {
                     $primarySchool = $primarySchools->first();
                     if ($primarySchool) {
-                         session(['institution' => $primarySchool]);
+                        session(['institution' => $primarySchool]);
                     } else {
-                        return redirect()->route('institution-selector');
+                        return redirect(route('institution-selector', absolute: false));
                     }
                 }
             }
@@ -80,13 +83,14 @@ class AuthenticatedSessionController extends Controller {
 
     /**
      * Destroy an authenticated session.
-     * Questa route è stata lasciata fuori dal controllo CSRF globale 
-     * per reindirizzare gli utenti non autenticati alla home al posto di fargli vedere la pagina di errore 419. 
+     * Questa route è stata lasciata fuori dal controllo CSRF globale
+     * per reindirizzare gli utenti non autenticati alla home al posto di fargli vedere la pagina di errore 419.
      * Il controllo CSRF viene fatto manualmente nel controller, verificando se l'utente è autenticato o meno.
      */
-    public function destroy(Request $request): RedirectResponse {
+    public function destroy(Request $request): RedirectResponse
+    {
         // Se non autenticato, redirect senza verificare CSRF
-        if(!Auth::check()) {
+        if (! Auth::check()) {
             return redirect('/');
         }
 
