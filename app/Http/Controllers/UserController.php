@@ -433,19 +433,6 @@ class UserController extends Controller
                 $user->schoolAthletes()->syncWithoutDetaching($noSchool->id);
             }
 
-            if ($isUserMinor && $request->hasFile('minor_documents')) {
-                $file = $request->file('minor_documents');
-                $fileExtension = $file->getClientOriginalExtension();
-                $fileName = time().'_minor_documents.'.$fileExtension;
-                $path = "/users/{$user->id}/approval_documents/{$fileName}";
-                $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
-
-                if ($storedFile) {
-                    $user->replaceMinorApprovalDocument($path);
-                    $user->has_admin_approved_minor = true;
-                    $user->save();
-                }
-            }
         } else {
 
             $roles = explode(',', $request->roles);
@@ -461,6 +448,20 @@ class UserController extends Controller
             }
             $academy->personnel()->syncWithoutDetaching($user->id);
             $user->setPrimaryAcademy($academy->id);
+        }
+
+        if ($isUserMinor && $request->hasFile('minor_documents')) {
+            $file = $request->file('minor_documents');
+            $fileExtension = $file->getClientOriginalExtension();
+            $fileName = time().'_minor_documents.'.$fileExtension;
+            $path = "/users/{$user->id}/approval_documents/{$fileName}";
+            $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
+
+            if ($storedFile) {
+                $user->replaceMinorApprovalDocument($path);
+                $user->has_admin_approved_minor = true;
+                $user->save();
+            }
         }
 
         Mail::to($user->email)
@@ -539,19 +540,6 @@ class UserController extends Controller
             $user->setPrimaryAcademyAthlete($academy->id);
             $user->setPrimarySchoolAthlete($school->id);
 
-            if ($isUserMinor && $request->hasFile('minor_documents')) {
-                $file = $request->file('minor_documents');
-                $fileExtension = $file->getClientOriginalExtension();
-                $fileName = time().'_minor_documents.'.$fileExtension;
-                $path = "/users/{$user->id}/approval_documents/{$fileName}";
-                $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
-
-                if ($storedFile) {
-                    $user->replaceMinorApprovalDocument($path);
-                    $user->has_admin_approved_minor = true;
-                    $user->save();
-                }
-            }
         } else {
 
             $roles = explode(',', $request->roles);
@@ -569,6 +557,20 @@ class UserController extends Controller
             $school->personnel()->syncWithoutDetaching($user->id);
             $user->setPrimaryAcademy($academy->id);
             $user->setPrimarySchool($school->id);
+        }
+
+        if ($isUserMinor && $request->hasFile('minor_documents')) {
+            $file = $request->file('minor_documents');
+            $fileExtension = $file->getClientOriginalExtension();
+            $fileName = time().'_minor_documents.'.$fileExtension;
+            $path = "/users/{$user->id}/approval_documents/{$fileName}";
+            $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
+
+            if ($storedFile) {
+                $user->replaceMinorApprovalDocument($path);
+                $user->has_admin_approved_minor = true;
+                $user->save();
+            }
         }
 
         Mail::to($user->email)
@@ -649,19 +651,6 @@ class UserController extends Controller
             $user->setPrimaryAcademyAthlete($academy->id);
             $user->setPrimarySchoolAthlete($school->id);
 
-            if ($isUserMinor && $request->hasFile('minor_documents')) {
-                $file = $request->file('minor_documents');
-                $fileExtension = $file->getClientOriginalExtension();
-                $fileName = time().'_minor_documents.'.$fileExtension;
-                $path = "/users/{$user->id}/approval_documents/{$fileName}";
-                $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
-
-                if ($storedFile) {
-                    $user->replaceMinorApprovalDocument($path);
-                    $user->has_admin_approved_minor = true;
-                    $user->save();
-                }
-            }
         } else {
 
             $roles = explode(',', $request->roles);
@@ -680,6 +669,20 @@ class UserController extends Controller
             $clan->personnel()->syncWithoutDetaching($user->id);
             $user->setPrimaryAcademy($academy->id);
             $user->setPrimarySchool($school->id);
+        }
+
+        if ($isUserMinor && $request->hasFile('minor_documents')) {
+            $file = $request->file('minor_documents');
+            $fileExtension = $file->getClientOriginalExtension();
+            $fileName = time().'_minor_documents.'.$fileExtension;
+            $path = "/users/{$user->id}/approval_documents/{$fileName}";
+            $storedFile = $file->storeAs("/users/{$user->id}/approval_documents/", $fileName, 'gcs');
+
+            if ($storedFile) {
+                $user->replaceMinorApprovalDocument($path);
+                $user->has_admin_approved_minor = true;
+                $user->save();
+            }
         }
 
         Mail::to($user->email)
