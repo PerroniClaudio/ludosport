@@ -42,43 +42,7 @@ class AuthenticatedSessionController extends Controller
             return redirect(route('minor-switch.edit', absolute: false));
         }
 
-        $roles = $user->roles()->get();
-
-        if ($roles->count() > 1) {
-            return redirect(route('role-selector', absolute: false));
-        } else {
-
-            // Stesso codice anche in userController setUserRoleForSession
-            if ($user->getRole() === 'rector' || $user->getRole() === 'manager') {
-
-                $primaryAcademies = $user->academies->where('pivot.is_primary', 1);
-                if ($primaryAcademies->count() > 1) {
-                    return redirect(route('institution-selector', absolute: false));
-                } else {
-                    $primaryAcademy = $primaryAcademies->first();
-                    if ($primaryAcademy) {
-                        session(['institution' => $primaryAcademy]);
-                    } else {
-                        return redirect(route('institution-selector', absolute: false));
-                    }
-                }
-            } elseif ($user->getRole() === 'dean') {
-
-                $primarySchools = $user->schools->where('pivot.is_primary', 1);
-                if ($primarySchools->count() > 1) {
-                    return redirect(route('institution-selector', absolute: false));
-                } else {
-                    $primarySchool = $primarySchools->first();
-                    if ($primarySchool) {
-                        session(['institution' => $primarySchool]);
-                    } else {
-                        return redirect(route('institution-selector', absolute: false));
-                    }
-                }
-            }
-
-            return redirect()->intended(route('dashboard', absolute: false));
-        }
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**
