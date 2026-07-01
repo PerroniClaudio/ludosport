@@ -13,6 +13,12 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-debug}
       - REDIS_HOST=redis
       - MEILISEARCH_HOST=http://meilisearch:7700
+      - MAIL_MAILER=${MAIL_MAILER:-smtp}
+      - MAIL_HOST=${MAIL_HOST:-mailpit}
+      - MAIL_PORT=${MAIL_PORT:-1025}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-}
     volumes:
       - ./docker/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
       - app_logs:/var/www/html/storage/logs
@@ -21,6 +27,7 @@ services:
     depends_on:
       - redis
       - meilisearch
+      - mailpit
 
   # Servizio Nginx
   nginx:
@@ -60,6 +67,16 @@ services:
       - meilisearch_data:/data.ms
     ports:
       - "7700:7700"
+    networks:
+      - app-network
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
     networks:
       - app-network
 
