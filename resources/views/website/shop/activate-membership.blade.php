@@ -5,25 +5,21 @@
     <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
         <section class="col-span-12 py-12">
             <div x-data="{
-                birthday: '',
-                fees: 0,
+                fees: 1,
                 feesPrice: {{$feePrice}},
-                totalPrice: 0,
-                name: '',
-                surname: '',
-                address: '',
-                zip: '',
-                city: '',
-                vat: '',
-                sdi: '',
-                fiscal_code: '',
+                totalPrice: {{$feePrice}},
+                name: 'Name',
+                surname: 'Surname',
+                address: 'Address',
+                zip: 'Zip',
+                city: 'City',
+                vat: 'VAT',
+                sdi: 'SDI',
                 country: '',
                 business_name: '',
                 is_business: false,
-                want_invoice: true,
-                invoiceSaved: false,
-                invoiceError: '',
-                shouldShowPayment: false,
+                want_invoice: false,
+                shouldShowPayment: true,
                 shouldShowSdi: false,
                 shouldShowFiscalCode: false,
                 isItaly: function() {
@@ -36,48 +32,6 @@
                     } else {
                         this.shouldShowSdi = false
                     }
-                },
-                markInvoiceDirty() {
-                    this.invoiceSaved = false
-                    this.invoiceError = ''
-                    this.updateSdi()
-                },
-                validateInvoiceForm() {
-                    this.updateSdi()
-                    if (!this.$refs.invoiceForm.checkValidity()) {
-                        this.$refs.invoiceForm.reportValidity()
-                        return false
-                    }
-                    return true
-                },
-                differenzaInAnni(dataInizio, dataFine) {
-                    var anni = dataFine.getFullYear() - dataInizio.getFullYear();
-                    var meseFine = dataFine.getMonth();
-                    var giornoFine = dataFine.getDate();
-                    var meseInizio = dataInizio.getMonth();
-                    var giornoInizio = dataInizio.getDate();
-            
-                    if (meseFine < meseInizio || (meseFine === meseInizio && giornoFine < giornoInizio)) {
-                        anni--;
-                    }
-                    return anni;
-                },
-                calculateFeePrice() {
-                    let date = new Date(this.birthday)
-                    let age = Math.abs(this.differenzaInAnni(new Date(), date))
-            
-                    if (age < 99) {
-                        this.fees = 1
-                        this.totalPrice = this.feesPrice
-            
-                        this.shouldShowPayment = true
-            
-                    } else {
-                        this.fees = 0
-                        this.totalPrice = 0
-                        this.shouldShowPayment = false
-                    }
-            
                 },
                 fetchInvoiceData() {
                     const url = `/shop/invoices/user-data/{{ Auth()->user()->id }}`
@@ -199,21 +153,6 @@
                     <div class="grid grid-cols-4 gap-4">
                         <div class="col-span-3 flex flex-col gap-4">
                             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg p-8">
-
-                                <div>
-                                    <label for="fees" class="text-background-800 dark:text-background-200">
-                                        {{ '* ' . __('website.birthday') }}
-                                    </label>
-                                    <input type="date" name="birthday" id="fees" x-model="birthday"
-                                        max="{{ date('Y-m-d', strtotime('-0 years')) }}" min="{{ date('Y-m-d', strtotime('-99 years')) }}"
-                                        x-on:input="calculateFeePrice" required
-                                        class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm" />
-                                </div>
-
-                                {{-- <p class="text-background-800 dark:text-background-200 mt-4">
-                                    {{ __('website.membership_age') }}
-                                </p> --}}
-
                                 <p class="text-background-800 dark:text-background-200 mt-4">
                                     {{ __('website.membership_expiration_text') }}
                                 </p>

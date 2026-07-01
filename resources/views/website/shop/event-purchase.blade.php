@@ -28,8 +28,7 @@
     <div class="grid grid-cols-12 gap-x-3 px-8 pb-16  container mx-auto max-w-7xl">
         <section class="col-span-12 py-12">
             <div x-data="{
-                birthday: '',
-                invoice_id: @js($invoice->id),
+                invoice_id: '{{ $invoice->id }}',
                 totalPrice: {{ $event->price }},
                 name: @js($invoice->name ?: ''),
                 surname: @js($invoice->surname ?: ''),

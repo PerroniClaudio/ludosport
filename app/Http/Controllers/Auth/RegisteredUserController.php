@@ -77,6 +77,7 @@ class RegisteredUserController extends Controller
             'is_user_minor' => $isUserMinor,
             'has_user_uploaded_documents' => false,
             'privacy_policy_accepted_at' => now(),
+            'profile_completed' => true,
         ]);
 
         if ($isUserMinor && $request->hasFile('minor_documents')) {

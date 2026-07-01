@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Nation;
+use App\Models\Rank;
+use App\Models\Role;
 use App\Models\User;
 
 test('profile page is displayed', function () {
@@ -82,4 +85,33 @@ test('correct password must be provided to delete account', function () {
         ->assertRedirect('/profile');
 
     $this->assertNotNull($user->fresh());
+});
+
+test('incomplete athlete profile redirects to profile and minor birthday starts approval flow', function () {
+    config(['scout.driver' => 'null']);
+    Rank::create(['name' => 'Novice']);
+    foreach (range(1, 10) as $id) {
+        Nation::create(['id' => $id, 'name' => "Nation {$id}", 'code' => str_pad((string) $id, 2, '0', STR_PAD_LEFT)]);
+    }
+
+    $role = Role::create(['name' => 'athlete', 'prefix' => 'athlete', 'label' => 'athlete']);
+    $user = User::factory()->create(['profile_completed' => false]);
+    $user->roles()->sync($role->id);
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertRedirect('/profile');
+
+    $this->patch('/profile', [
+        'name' => $user->name,
+        'email' => $user->email,
+        'birthday' => now()->subYears(16)->toDateString(),
+    ])->assertRedirect('/profile');
+
+    $user->refresh();
+
+    $this->assertTrue($user->profile_completed);
+    $this->assertTrue($user->is_user_minor);
+    $this->assertFalse($user->has_user_uploaded_documents);
+    $this->assertFalse($user->has_admin_approved_minor);
 });

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureMinorSwitchIsCompleted;
+use App\Http\Middleware\EnsureAthleteProfileIsCompleted;
 use App\Http\Middleware\EnsureMinorUserIsApproved;
 use App\Http\Middleware\EnsurePrivacyPolicyAccepted;
 use App\Http\Middleware\HandleMinorUserPrivacy;
@@ -32,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->web(append: [
             EnsureMinorSwitchIsCompleted::class,
+            EnsureAthleteProfileIsCompleted::class,
         ]);
         // Escludi logout dal CSRF - verrà verificato manualmente nel controller
         $middleware->validateCsrfTokens(except: [

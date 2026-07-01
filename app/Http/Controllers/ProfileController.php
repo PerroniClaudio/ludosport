@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Language;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,6 +53,17 @@ class ProfileController extends Controller {
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
+        }
+
+        if (!$request->user()->profile_completed) {
+            $request->user()->profile_completed = true;
+
+            if ($request->user()->birthday && Carbon::parse($request->user()->birthday)->gt(now()->subYears(18))) {
+                $request->user()->is_user_minor = true;
+                $request->user()->has_user_uploaded_documents = false;
+                $request->user()->has_admin_approved_minor = false;
+                $request->user()->uploaded_documents_path = null;
+            }
         }
 
         $request->user()->save();

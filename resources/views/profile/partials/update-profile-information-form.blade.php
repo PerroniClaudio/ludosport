@@ -64,6 +64,23 @@
             @endif
         </div>
 
+        <div>
+            <x-input-label for="birthday" :value="__('Birthday')" />
+            <x-text-input id="birthday" name="birthday" type="date" class="mt-1 block w-full" :value="old('birthday', $user->birthday)"
+                :required="!$user->profile_completed && $user->hasRole('athlete')" autocomplete="birthday" />
+            <x-input-error class="mt-2" :messages="$errors->get('birthday')" />
+        </div>
+
+        <div>
+            <x-form.select name="gender" label="{{ __('Gender') }}" :options="[
+                ['value' => 'male', 'label' => 'Male'],
+                ['value' => 'female', 'label' => 'Female'],
+                ['value' => 'other', 'label' => 'Other'],
+                ['value' => 'notsay', 'label' => 'Prefer not to say'],
+            ]" :shouldHaveEmptyOption="true" :required="true" :value="old('gender', $user->gender)" />
+            <x-input-error class="mt-2" :messages="$errors->get('gender')" />
+        </div>
+
         @if ($minorPrivacy['can_edit_restricted_profile_fields'] ?? true)
             <x-form.input name="instagram" label="{{ __('users.instagram_field') }}" type="text" required="{{ false }}"
                 :value="$user->instagram" placeholder="{{ fake()->username() }}" />

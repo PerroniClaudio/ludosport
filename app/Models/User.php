@@ -50,6 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'has_to_switch_from_minor',
         'uploaded_documents_path',
         'privacy_policy_accepted_at',
+        'profile_completed',
     ];
 
     public function toSearchableArray()
@@ -150,6 +151,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'has_user_uploaded_documents' => 'boolean',
             'has_admin_approved_minor' => 'boolean',
             'has_to_switch_from_minor' => 'boolean',
+            'profile_completed' => 'boolean',
         ];
     }
 

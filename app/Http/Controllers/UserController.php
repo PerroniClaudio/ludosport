@@ -269,6 +269,7 @@ class UserController extends Controller {
             'is_user_minor' => $isUserMinor,
             'has_user_uploaded_documents' => false,
             'has_admin_approved_minor' => false,
+            'profile_completed' => false,
             // 'unique_code' => $unique_code,
         ]);
 
@@ -377,6 +378,7 @@ class UserController extends Controller {
             'academy_id' => $academy->id,
             'nation_id' => $academy->nation->id,
             'unique_code' => $unique_code,
+            'profile_completed' => false,
         ]);
 
 
@@ -464,6 +466,7 @@ class UserController extends Controller {
             'nation_id' => $academy->nation->id,
             'school_id' => $school->id,
             'unique_code' => $unique_code,
+            'profile_completed' => false,
         ]);
 
         if ($request->type == "athlete") {
@@ -550,6 +553,7 @@ class UserController extends Controller {
             'nation_id' => $academy->nation->id,
             'school_id' => $school->id,
             'unique_code' => $unique_code,
+            'profile_completed' => false,
         ]);
 
         if ($request->type == "athlete") {
