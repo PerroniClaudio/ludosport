@@ -101,7 +101,7 @@
                 
                 document.head.appendChild(script);
             }
-        }" x-init="init()">>
+        }" x-init="init()">
             <h1
                 class="text-6xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-300">
                 {{ __('website.schools_map') }}
