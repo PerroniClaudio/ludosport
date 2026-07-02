@@ -36,21 +36,21 @@
                             <h3 class="text-background-800 dark:text-background-200 text-2xl">
                                 {{ __('users.personal_details_message') }}</h3>
                             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
-                            <x-form.input name="name" label="Name" type="text" required="{{ true }}"
+                            <x-form.input name="name" label="* Name" type="text" required="{{ true }}"
                                 value="{{ old('name') }}" placeholder="{!! fake()->firstName() !!}" />
-                            <x-form.input name="surname" label="Surname" type="text" required="{{ true }}"
+                            <x-form.input name="surname" label="* Surname" type="text" required="{{ true }}"
                                 value="{{ old('surname') }}" placeholder="{!! fake()->lastName() !!}" />
-                            <x-form.input name="email" label="Email" type="email" required="{{ true }}"
+                            <x-form.input name="email" label="* Email" type="email" required="{{ true }}"
                                 value="{{ old('email') }}" placeholder="{{ fake()->email() }}" />
-                            <x-form.input name="year" label="First subscription year" type="text"
+                            <x-form.input name="year" label="* First subscription year" type="text"
                                 required="{{ true }}" value="{{ old('year') }}"
                                 placeholder="{{ date('Y') }}" />
-                            {{-- <x-form.select name="gender" label="{{ __('Gender') }}" :options="[
+                            <x-form.select name="gender" label="Gender" :options="[
                                 ['value' => 'male', 'label' => 'Male'],
                                 ['value' => 'female', 'label' => 'Female'],
                                 ['value' => 'other', 'label' => 'Other'],
                                 ['value' => 'notsay', 'label' => 'Prefer not to say'],
-                            ]" :shouldHaveEmptyOption="true" /> --}}
+                            ]" :shouldHaveEmptyOption="true" :value="old('gender')" />
                             <small
                                 class="text-background-800 dark:text-background-200"><i>{{ __('users.password_creation_message') }}</i></small>
                         </div>
@@ -61,8 +61,8 @@
                             <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
 
                             <x-form.nationality-select selectedvalue="{{ old('nationality') }}" required="{{ true }}" />
-                            <x-form.academy-select :academies="$academies" selectedvalue="{{ old('academy_id') }}" />
-                            <x-form.input name="birthday" label="Birthday" type="date" required="{{ true }}"
+                            <x-form.academy-select :academies="$academies" selectedvalue="{{ old('academy_id') }}" required="{{ true }}" />
+                            <x-form.input name="birthday" label="* Birthday" type="date" required="{{ true }}"
                                 value="{{ old('birthday') }}" x-model="birthday" />
                         </div>
 

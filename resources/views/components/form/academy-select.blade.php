@@ -1,4 +1,4 @@
-@props(['academies' => [], 'selectedvalue' => null])
+@props(['academies' => [], 'selectedvalue' => null, 'required' => false])
 
 @php
     $academies = $academies->map(function ($academy) {
@@ -19,7 +19,7 @@
     selectedAcademyId: {{ $selectedvalue ? (int) $selectedvalue : 'null' }},
     academies: {{ $academies }},
 }">
-    <x-input-label for="academy" value="{{ __('users.academy') }}" />
+    <x-input-label for="academy" value="{{ $required ? '* ' . __('users.academy') : __('users.academy') }}" />
     <div class="flex w-full gap-2">
         <input type="hidden" name="academy_id" x-model="selectedAcademyId">
         <x-text-input disabled name="academy" class="flex-1" type="text" x-model="selectedAcademy" />

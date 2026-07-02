@@ -79,25 +79,25 @@
 
             <input type="hidden" name="type" value="{{ $type }}">
 
-            <x-form.input name="name" label="{{ __('users.name') }}" type="text" required
+            <x-form.input name="name" label="* {{ __('users.name') }}" type="text" required
                 placeholder="{{ __('users.name') }}" />
 
-            <x-form.input name="surname" label="{{ __('users.surname') }}" type="text" required
+            <x-form.input name="surname" label="* {{ __('users.surname') }}" type="text" required
                 placeholder="{{ __('users.surname') }}" />
 
-            <x-form.input name="email" label="{{ __('users.email') }}" type="email" required
+            <x-form.input name="email" label="* {{ __('users.email') }}" type="email" required
                 placeholder="{{ __('users.email') }}" />
 
-            <x-form.input name="birthday" label="{{ __('Birthday') }}" type="date" required x-model="birthday" />
+            <x-form.input name="birthday" label="* {{ __('Birthday') }}" type="date" required x-model="birthday" />
+
+            <x-form.select name="gender" label="{{ __('Gender') }}" :options="[
+                ['value' => 'male', 'label' => 'Male'],
+                ['value' => 'female', 'label' => 'Female'],
+                ['value' => 'other', 'label' => 'Other'],
+                ['value' => 'notsay', 'label' => 'Prefer not to say'],
+            ]" :shouldHaveEmptyOption="true" :value="old('gender')" />
 
             <div x-show="isMinorBirthday()" x-cloak class="flex flex-col gap-2">
-                {{-- <x-form.select name="gender" label="{{ __('Gender') }}" :options="[
-                    ['value' => 'male', 'label' => 'Male'],
-                    ['value' => 'female', 'label' => 'Female'],
-                    ['value' => 'other', 'label' => 'Other'],
-                    ['value' => 'notsay', 'label' => 'Prefer not to say'],
-                ]" :shouldHaveEmptyOption="true" /> --}}
-
                 <label for="minor_documents" class="text-sm font-medium text-background-700 dark:text-background-300">
                     {{ __('auth.minor_documents') }}
                 </label>
@@ -112,7 +112,7 @@
 
 
                 @if ($type === 'personnel')
-                    <x-input-label value="Role" />
+                    <x-input-label value="* Role" />
                     <div class="grid grid-cols-3 gap-4 text-background-800 dark:text-background-200">
                         @foreach ($roles as $role)
                             @if ($role->label === 'athlete' || $role->label === 'admin')

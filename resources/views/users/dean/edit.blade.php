@@ -102,19 +102,25 @@
                             {{ __('users.personal_details_message') }}</h3>
                         <div class="border-b border-background-100 dark:border-background-700 my-2"></div>
                         <div class="flex flex-col gap-2">
-                            <x-form.input name="name" label="Name" type="text" required="{{ true }}"
+                            <x-form.input name="name" label="* Name" type="text" required="{{ true }}"
                                 :value="$user->name" placeholder="{{ fake()->firstName() }}" :disabled="!$canEdit" />
-                            <x-form.input name="surname" label="Surname" type="text" required="{{ true }}"
+                            <x-form.input name="surname" label="* Surname" type="text" required="{{ true }}"
                                 :value="$user->surname" placeholder="{{ fake()->lastName() }}" :disabled="!$canEdit" />
-                            <x-form.input name="email" label="Email" type="email" required="{{ true }}"
+                            <x-form.input name="email" label="* Email" type="email" required="{{ true }}"
                                 value="{{ $user->email }}" placeholder="{{ fake()->email() }}" :disabled="!$canEdit" />
-                            <x-form.input name="year" label="First subscription year" type="text"
+                            <x-form.input name="year" label="* First subscription year" type="text"
                                 required="{{ true }}" value="{{ $user->subscription_year }}"
                                 placeholder="{{ date('Y') }}" :disabled="!$canEdit" />
-                            <x-form.input name="birthday" label="Birthday" type="date"
+                            <x-form.input name="birthday" label="* Birthday" type="date"
                                 :value="$user->birthday" :readonly="!$canEdit" />    
+                            <x-form.select name="gender" label="Gender" :options="[
+                                ['value' => 'male', 'label' => 'Male'],
+                                ['value' => 'female', 'label' => 'Female'],
+                                ['value' => 'other', 'label' => 'Other'],
+                                ['value' => 'notsay', 'label' => 'Prefer not to say'],
+                            ]" :shouldHaveEmptyOption="true" :value="old('gender', $user->gender)" />
                             <div>
-                                <x-input-label for="nationality" value="Nationality" />
+                                <x-input-label for="nationality" value="* Nationality" />
                                 <select name="nationality" id="nationality" {{ !$canEdit ? 'disabled' : '' }}
                                     class="w-full border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 dark:focus:border-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 rounded-md shadow-sm">
                                     @foreach ($nations as $key => $nation)

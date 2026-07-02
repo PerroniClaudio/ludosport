@@ -256,9 +256,7 @@ class UserController extends Controller
             'birthday' => $isUserMinor
                 ? ['required', 'date', 'before:today', 'after:'.$adultCutoffDate]
                 : ['required', 'date', 'before_or_equal:'.$adultCutoffDate],
-            // 'gender' => $isUserMinor
-            //     ? ['required', 'string', 'in:male,female,other,notsay']
-            //     : ['nullable', 'string', 'in:male,female,other,notsay'],
+            'gender' => ['nullable', 'string', 'in:male,female,other,notsay'],
             'minor_documents' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
@@ -384,6 +382,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'surname' => 'required|string|max:255',
             'birthday' => 'required|date|before:today',
+            'gender' => 'nullable|string|in:male,female,other,notsay',
             'minor_documents' => 'nullable|file|mimes:pdf|max:10240',
         ];
 
@@ -415,6 +414,7 @@ class UserController extends Controller
             'nation_id' => $academy->nation->id,
             'unique_code' => $unique_code,
             'birthday' => $request->birthday,
+            'gender' => $request->gender,
             'is_user_minor' => $isUserMinor,
             'has_user_uploaded_documents' => false,
             'has_admin_approved_minor' => false,
@@ -492,6 +492,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'surname' => 'required|string|max:255',
             'birthday' => 'required|date|before:today',
+            'gender' => 'nullable|string|in:male,female,other,notsay',
             'minor_documents' => 'nullable|file|mimes:pdf|max:10240',
         ];
 
@@ -525,6 +526,7 @@ class UserController extends Controller
             'school_id' => $school->id,
             'unique_code' => $unique_code,
             'birthday' => $request->birthday,
+            'gender' => $request->gender,
             'is_user_minor' => $isUserMinor,
             'has_user_uploaded_documents' => false,
             'has_admin_approved_minor' => false,
@@ -601,6 +603,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'surname' => 'required|string|max:255',
             'birthday' => 'required|date|before:today',
+            'gender' => 'nullable|string|in:male,female,other,notsay',
             'minor_documents' => 'nullable|file|mimes:pdf|max:10240',
         ];
 
@@ -635,6 +638,7 @@ class UserController extends Controller
             'school_id' => $school->id,
             'unique_code' => $unique_code,
             'birthday' => $request->birthday,
+            'gender' => $request->gender,
             'is_user_minor' => $isUserMinor,
             'has_user_uploaded_documents' => false,
             'has_admin_approved_minor' => false,
@@ -963,6 +967,7 @@ class UserController extends Controller
             'year' => ['required', 'int', 'min:'. 2006, 'max:'.(date('Y'))],
             'nationality' => 'required|string|exists:nations,id',
             'birthday' => 'required|date|before:today',
+            'gender' => ['nullable', 'string', 'in:male,female,other,notsay'],
         ]);
 
         // La modifica dei ruoli è stata spostata in updateRoles
@@ -1051,6 +1056,7 @@ class UserController extends Controller
             'subscription_year' => $request->year,
             'nation_id' => $request->nationality,
             'birthday' => $request->birthday,
+            'gender' => $request->gender,
             'is_user_minor' => $isUserMinor,
             'has_paid_fee' => $newHasPaidFee,
             'rank_id' => $newRank,

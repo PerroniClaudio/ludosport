@@ -292,7 +292,7 @@
 @endphp
 
 <div>
-    <x-form.select name="nationality" label="{{ __('users.nationality') }}" :options="$default" :optgroups="$continents"
+    <x-form.select name="nationality" label="{{ $required ? '* ' . __('users.nationality') : __('users.nationality') }}" :options="$default" :optgroups="$continents"
         value="{{ $selectedvalue }}" required="{{ $required }}" />
     <x-input-error :messages="$errors->get('nationality')" class="mt-2" />
 </div>
