@@ -4,6 +4,7 @@ FROM php:8.3-fpm-alpine
 # Install system dependencies
 RUN apk add --no-cache \
     nginx \
+    ghostscript \
     supervisor \
     redis \
     meilisearch \

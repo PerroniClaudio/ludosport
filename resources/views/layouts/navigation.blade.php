@@ -84,6 +84,7 @@
                         </x-nav-link>
                         <x-nav-link-parent :href="'#'" :active="request()->routeIs('imports.*') ||
                             request()->routeIs('exports.*') ||
+                            request()->routeIs('documents.*') ||
                             request()->routeIs('deleted-elements.*') ||
                             request()->routeIs('privacy-policy.*') ||
                             request()->routeIs('cookie-policy.*')">
@@ -92,6 +93,8 @@
                                 <a href="{{ route('imports.index') }}">{{ __('navigation.imports') }}</a>
                                 <span class="separator"></span>
                                 <a href="{{ route('exports.index') }}">{{ __('navigation.exports') }}</a>
+                                <span class="separator"></span>
+                                <a href="{{ route('documents.index') }}">{{ __('navigation.documents') }}</a>
                                 <span class="separator"></span>
                                 <a
                                     href="{{ route('deleted-elements.index') }}">{{ __('navigation.deleted_elements') }}</a>
@@ -161,6 +164,12 @@
                                 </x-nav-link>
                             @endif
                         @endforeach
+                    @endif
+
+                    @if ($authRole !== 'admin' && !$isMinorPendingApproval)
+                        <x-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.*')">
+                            {{ __('navigation.documents') }}
+                        </x-nav-link>
                     @endif
 
                     @if (!$isMinorPendingApproval)
@@ -286,6 +295,9 @@
                 <x-responsive-nav-link :href="route('exports.index')" :active="request()->routeIs('exports.*')">
                     {{ __('navigation.exports') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.*')">
+                    {{ __('navigation.documents') }}
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('deleted-elements.index')" :active="request()->routeIs('deleted-elements.*')">
                     {{ __('navigation.deleted_elements') }}
                 </x-responsive-nav-link>
@@ -377,6 +389,11 @@
                         </x-responsive-nav-link>
                     @endif
                 @endforeach
+            @endif
+            @if ($authRole !== 'admin' && !$isMinorPendingApproval)
+                <x-responsive-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.*')">
+                    {{ __('navigation.documents') }}
+                </x-responsive-nav-link>
             @endif
             @if (!$isMinorPendingApproval)
                 <x-responsive-nav-link :href="route('homepage')" :active="request()->routeIs('homepage')">

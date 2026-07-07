@@ -48,6 +48,19 @@ Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role
     Route::post('/deleted-elements', [App\Http\Controllers\DeletedElementController::class, 'restore'])->name('deleted-elements.restore');
 });
 
+Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected']], function () {
+    Route::get('/documents', [App\Http\Controllers\DocumentController::class, 'index'])->name('documents.index');
+    Route::get('/documents/{document}/download', [App\Http\Controllers\DocumentController::class, 'download'])->middleware('role:admin')->name('documents.download');
+    Route::post('/documents/{document}/terms-viewed', [App\Http\Controllers\DocumentController::class, 'termsViewed'])->name('documents.terms-viewed');
+    Route::post('/documents/{document}/accept-terms', [App\Http\Controllers\DocumentController::class, 'acceptTerms'])->name('documents.accept-terms');
+});
+
+Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
+    Route::get('/documents/create', [App\Http\Controllers\DocumentController::class, 'create'])->name('documents.create');
+    Route::post('/documents', [App\Http\Controllers\DocumentController::class, 'store'])->name('documents.store');
+    Route::delete('/documents/{document}', [App\Http\Controllers\DocumentController::class, 'destroy'])->name('documents.destroy');
+});
+
 /** Users */
 Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/users', [App\Http\Controllers\PaginatedUserController::class, 'index'])->name('users.index');

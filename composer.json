@@ -10,6 +10,7 @@
     "require": {
         "php": "^8.2",
         "blade-ui-kit/blade-icons": "^1.6",
+        "fakerphp/faker": "^1.23",
         "http-interop/http-factory-guzzle": "^1.2",
         "laravel/breeze": "^2.0",
         "laravel/cashier": "^15.4",
@@ -23,9 +24,9 @@
         "mallardduck/blade-lucide-icons": "^1.23",
         "meilisearch/meilisearch-php": "^1.9",
         "opcodesio/log-viewer": "^3.9",
+        "setasign/fpdi-fpdf": "^2.3",
         "spatie/laravel-google-cloud-storage": "^2.3",
-        "srmklive/paypal": "^3.0",
-        "fakerphp/faker": "^1.23"
+        "srmklive/paypal": "^3.0"
     },
     "require-dev": {
         "laravel/boost": "^1.0",
