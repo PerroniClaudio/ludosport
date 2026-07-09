@@ -2,28 +2,42 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\DocumentEventsExport;
 use App\Models\Document;
 use App\Models\DocumentEvent;
+use App\Models\DocumentTerm;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 use setasign\Fpdi\Fpdi;
 use Symfony\Component\Process\Process;
 use Throwable;
 
 class DocumentController extends Controller
 {
-    private const TERMS_VERSION = 'v1';
-
     private const WATERMARK_FIELDS = [
         'name' => 'Name',
         'email' => 'Email',
         'user_id' => 'User ID',
         'downloaded_at' => 'Downloaded at',
         'network' => 'LudoSport International Network',
+    ];
+
+    private const EVENT_LABELS = [
+        'reserved_area_accessed' => 'Reserved area accessed',
+        'terms_viewed' => 'Terms viewed',
+        'terms_accepted' => 'Terms accepted',
+        'document_downloaded' => 'Document downloaded',
+    ];
+
+    private const RESULT_LABELS = [
+        'success' => 'Success',
+        'failed' => 'Failed',
     ];
 
     public function index(): View
@@ -47,6 +61,8 @@ class DocumentController extends Controller
 
         return view('admin.documents.index', [
             'documents' => $documents,
+            'terms' => DocumentTerm::query()->with('uploader')->latest('version')->get(),
+            'latestTerms' => $this->latestTerms(),
             'isAdmin' => $this->isAdmin(),
         ]);
     }
@@ -56,6 +72,35 @@ class DocumentController extends Controller
         return view('admin.documents.create', [
             'watermarkFields' => self::WATERMARK_FIELDS,
         ]);
+    }
+
+    public function events(Request $request): View
+    {
+        return view('admin.documents.events', [
+            'events' => $this->filteredEvents($request)->get()->map(fn (DocumentEvent $event) => [
+                'created_at_formatted' => $event->created_at?->format('d/m/Y H:i'),
+                'user_name' => $event->user_name,
+                'user_email' => $event->user?->email,
+                'document_name' => $event->document?->original_name,
+                'event_type' => self::EVENT_LABELS[$event->event_type] ?? Str::headline($event->event_type),
+                'operation_result' => self::RESULT_LABELS[$event->operation_result] ?? Str::headline($event->operation_result),
+                'terms_version' => 'V'.$event->terms_version,
+                'ip_address' => $event->ip_address,
+            ]),
+            'documents' => Document::query()->orderBy('original_name')->get(['id', 'original_name']),
+            'users' => User::query()->orderBy('name')->orderBy('surname')->get(['id', 'name', 'surname', 'email']),
+            'eventTypes' => DocumentEvent::query()->select('event_type')->distinct()->orderBy('event_type')->pluck('event_type')->mapWithKeys(fn ($type) => [$type => self::EVENT_LABELS[$type] ?? Str::headline($type)]),
+            'results' => DocumentEvent::query()->select('operation_result')->distinct()->orderBy('operation_result')->pluck('operation_result')->mapWithKeys(fn ($result) => [$result => self::RESULT_LABELS[$result] ?? Str::headline($result)]),
+            'filters' => $request->only(['user_id', 'document_id', 'date_from', 'date_to', 'event_type', 'operation_result']),
+        ]);
+    }
+
+    public function exportEvents(Request $request)
+    {
+        return Excel::download(
+            new DocumentEventsExport($this->filteredEvents($request)->get(), self::EVENT_LABELS, self::RESULT_LABELS),
+            'document-events-'.now()->format('YmdHis').'.xlsx'
+        );
     }
 
     public function store(Request $request): RedirectResponse
@@ -93,6 +138,51 @@ class DocumentController extends Controller
         ]);
 
         return redirect()->route('documents.index')->with('success', 'Document uploaded successfully.');
+    }
+
+    public function storeTerms(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'terms' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
+
+        $file = $request->file('terms');
+        // ponytail: admin-only upload; DB unique catches rare concurrent version race. Add retry if needed.
+        $version = ((int) DocumentTerm::query()->max('version')) + 1;
+        $storedName = 'v'.$version.'_'.now()->format('YmdHis').'_'.Str::lower(Str::random(8)).'.pdf';
+        $path = $file->storeAs('documents/terms', $storedName, 'gcs');
+
+        if (! $path) {
+            return redirect()->route('documents.index')->with('error', 'Error uploading terms.');
+        }
+
+        DocumentTerm::create([
+            'version' => $version,
+            'original_name' => $file->getClientOriginalName(),
+            'stored_name' => $storedName,
+            'path' => $path,
+            'disk' => 'gcs',
+            'mime_type' => $file->getClientMimeType() ?: 'application/pdf',
+            'size_bytes' => $file->getSize(),
+            'uploaded_by' => $request->user()->id,
+        ]);
+
+        return redirect()->route('documents.index')->with('success', 'Terms uploaded successfully.');
+    }
+
+    public function downloadTerms()
+    {
+        $terms = $this->latestTerms();
+        abort_unless($terms, 404);
+
+        return Storage::disk($terms->disk)->download(
+            $terms->path,
+            'terms-of-service-v'.$terms->version.'.pdf',
+            [
+                'ResponseContentType' => $terms->mime_type,
+                'Content-Type' => $terms->mime_type,
+            ]
+        );
     }
 
     public function download(Document $document, Request $request): RedirectResponse
@@ -178,16 +268,34 @@ class DocumentController extends Controller
             'user_id' => $user->id,
             'user_name' => trim($user->name.' '.$user->surname),
             'document_id' => $documentId,
-            'terms_version' => self::TERMS_VERSION,
+            'terms_version' => $this->latestTerms()?->version ?? 1,
             'operation_result' => $result,
             'ip_address' => $request->ip(),
             'session_id' => $request->session()->getId(),
         ]);
     }
 
+    private function filteredEvents(Request $request)
+    {
+        return DocumentEvent::query()
+            ->with(['user:id,name,surname,email', 'document:id,original_name'])
+            ->when($request->filled('user_id'), fn ($query) => $query->where('user_id', $request->integer('user_id')))
+            ->when($request->filled('document_id'), fn ($query) => $query->where('document_id', $request->integer('document_id')))
+            ->when($request->filled('date_from'), fn ($query) => $query->whereDate('created_at', '>=', $request->date('date_from')))
+            ->when($request->filled('date_to'), fn ($query) => $query->whereDate('created_at', '<=', $request->date('date_to')))
+            ->when($request->filled('event_type'), fn ($query) => $query->where('event_type', $request->input('event_type')))
+            ->when($request->filled('operation_result'), fn ($query) => $query->where('operation_result', $request->input('operation_result')))
+            ->latest();
+    }
+
     private function isAdmin(): bool
     {
         return auth()->user()?->getRole() === 'admin';
+    }
+
+    private function latestTerms(): ?DocumentTerm
+    {
+        return DocumentTerm::query()->latest('version')->first();
     }
 
     private function watermarkLines(Document $document, Request $request, $downloadedAt): array

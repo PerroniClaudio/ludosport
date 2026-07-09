@@ -14,6 +14,56 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-background-900 dark:text-background-100" x-data="{ selectedDocument: null }">
+                    @if ($isAdmin)
+                        <div class="mb-6 grid gap-4 md:grid-cols-2">
+                            <form method="POST" action="{{ route('documents.terms.store') }}" enctype="multipart/form-data"
+                                class="rounded border border-background-200 dark:border-background-700 p-4"
+                                x-data="{ uploading: false }">
+                                @csrf
+                                <h3 class="font-semibold text-background-900 dark:text-background-100">Upload terms of service</h3>
+                                <div class="flex items-center justify-between gap-3">
+                                    <div>
+                                        <x-input-label for="terms" value="Terms of Service PDF" />
+                                        <input id="terms" name="terms" type="file" accept="application/pdf,.pdf"
+                                            class="hidden" x-ref="termsInput"
+                                            x-on:change="if ($event.target.files.length) { uploading = true; $root.submit(); }">
+                                        <x-input-error class="mt-2" :messages="$errors->get('terms')" />
+                                    </div>
+                                    <x-primary-button type="button" x-on:click="$refs.termsInput.click()" x-bind:disabled="uploading">
+                                        <span x-text="uploading ? 'Uploading...' : 'Upload'"></span>
+                                    </x-primary-button>
+                                </div>
+                                @if ($latestTerms)
+                                    <p class="mt-3 text-sm text-background-600 dark:text-background-300">
+                                        Latest: V{{ $latestTerms->version }} - {{ $latestTerms->original_name }}
+                                    </p>
+                                @endif
+                            </form>
+
+                            <div class="rounded border border-background-200 dark:border-background-700 p-4">
+                                <h3 class="font-semibold text-background-900 dark:text-background-100">Terms versions</h3>
+                                <div class="mt-3 space-y-2 text-sm">
+                                    @forelse ($terms as $term)
+                                        <div class="flex justify-between gap-3">
+                                            <span>V{{ $term->version }} - {{ $term->original_name }}</span>
+                                            <span class="text-background-500">{{ $term->created_at->format('d/m/Y H:i') }}</span>
+                                        </div>
+                                    @empty
+                                        <p class="text-background-500">No terms uploaded.</p>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 flex justify-end">
+                            <a href="{{ route('documents.events') }}"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-600 focus:bg-primary-600 active:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-background-800 transition ease-in-out duration-150">
+                                <x-lucide-list class="w-4 h-4" />
+                                Event logs
+                            </a>
+                        </div>
+                    @endif
+
                     <x-table :columns="[
                         ['name' => 'File name', 'field' => 'original_name'],
                         ['name' => 'Uploaded at', 'field' => 'created_at_formatted', 'sortType' => 'date'],
@@ -80,7 +130,7 @@
                                     Before continuing you must accept the Terms of Access for this document.
                                 </p>
 
-                                <a href="" class="mt-4 inline-flex text-sm text-primary-600 dark:text-primary-400 underline">
+                                <a href="{{ $latestTerms ? route('documents.terms.download') : '#' }}" class="mt-4 inline-flex text-sm text-primary-600 dark:text-primary-400 underline">
                                     Download Terms of Access
                                 </a>
 

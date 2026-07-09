@@ -50,6 +50,7 @@ Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role
 
 Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected']], function () {
     Route::get('/documents', [App\Http\Controllers\DocumentController::class, 'index'])->name('documents.index');
+    Route::get('/documents/terms/download', [App\Http\Controllers\DocumentController::class, 'downloadTerms'])->name('documents.terms.download');
     Route::get('/documents/{document}/download', [App\Http\Controllers\DocumentController::class, 'download'])->middleware('role:admin')->name('documents.download');
     Route::post('/documents/{document}/terms-viewed', [App\Http\Controllers\DocumentController::class, 'termsViewed'])->name('documents.terms-viewed');
     Route::post('/documents/{document}/accept-terms', [App\Http\Controllers\DocumentController::class, 'acceptTerms'])->name('documents.accept-terms');
@@ -57,6 +58,9 @@ Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role
 
 Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/documents/create', [App\Http\Controllers\DocumentController::class, 'create'])->name('documents.create');
+    Route::get('/documents/events', [App\Http\Controllers\DocumentController::class, 'events'])->name('documents.events');
+    Route::get('/documents/events/export', [App\Http\Controllers\DocumentController::class, 'exportEvents'])->name('documents.events.export');
+    Route::post('/documents/terms', [App\Http\Controllers\DocumentController::class, 'storeTerms'])->name('documents.terms.store');
     Route::post('/documents', [App\Http\Controllers\DocumentController::class, 'store'])->name('documents.store');
     Route::delete('/documents/{document}', [App\Http\Controllers\DocumentController::class, 'destroy'])->name('documents.destroy');
 });

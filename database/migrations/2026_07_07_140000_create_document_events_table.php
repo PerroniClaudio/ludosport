@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('user_name');
             $table->foreignId('document_id')->constrained()->cascadeOnDelete();
-            $table->string('terms_version')->default('v1');
+            $table->string('terms_version')->default('1');
             $table->string('operation_result');
             $table->string('ip_address', 45)->nullable();
             $table->string('session_id')->nullable();
