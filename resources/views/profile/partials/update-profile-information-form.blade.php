@@ -67,7 +67,7 @@
         <div>
             <x-input-label for="birthday" :value="__('Birthday')" />
             <x-text-input id="birthday" name="birthday" type="date" class="mt-1 block w-full" :value="old('birthday', $user->birthday)"
-                :required="!$user->profile_completed && $user->hasRole('athlete')" autocomplete="birthday" />
+                :required="!$user->profile_completed" autocomplete="birthday" />
             <x-input-error class="mt-2" :messages="$errors->get('birthday')" />
         </div>
 

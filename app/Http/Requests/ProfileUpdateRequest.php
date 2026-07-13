@@ -13,7 +13,7 @@ class ProfileUpdateRequest extends FormRequest {
      * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
     public function rules(): array {
-        $mustCompleteAthleteProfile = !$this->user()->profile_completed && $this->user()->hasRole('athlete');
+        $mustCompleteProfile = ! $this->user()->profile_completed;
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -22,7 +22,7 @@ class ProfileUpdateRequest extends FormRequest {
             'instagram' => ['nullable', 'string', 'max:255'],
             'telegram' => ['nullable', 'string', 'max:255'],
             'bio' => ['nullable', 'string'],
-            'birthday' => [$mustCompleteAthleteProfile ? 'required' : 'nullable', 'date', 'before:today'],
+            'birthday' => [$mustCompleteProfile ? 'required' : 'nullable', 'date', 'before:today'],
         ];
     }
 }

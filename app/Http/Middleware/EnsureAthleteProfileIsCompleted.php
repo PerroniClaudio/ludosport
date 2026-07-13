@@ -12,7 +12,7 @@ class EnsureAthleteProfileIsCompleted
     {
         $user = $request->user();
 
-        if (! $user || $user->profile_completed || $user->getRole() !== 'athlete' || $user->isMinorPendingApproval()) {
+        if (! $user || $user->profile_completed || $user->isMinorPendingApproval()) {
             return $next($request);
         }
 

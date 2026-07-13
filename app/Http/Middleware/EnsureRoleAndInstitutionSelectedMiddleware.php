@@ -23,7 +23,7 @@ class EnsureRoleAndInstitutionSelectedMiddleware
 
         $onboardingPending = ! $authUser->hasVerifiedEmail()
             || ! $authUser->hasAcceptedLatestPrivacyPolicy()
-            || ($authUser->hasRole('athlete') && ! $authUser->profile_completed)
+            || ! $authUser->profile_completed
             || $authUser->isMinorPendingApproval();
 
         // Controllo ruolo in sessione
