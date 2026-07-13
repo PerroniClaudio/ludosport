@@ -15,10 +15,13 @@
                 city: 'City',
                 vat: 'VAT',
                 sdi: 'SDI',
+                fiscal_code: '',
                 country: '',
                 business_name: '',
                 is_business: false,
                 want_invoice: false,
+                invoiceSaved: false,
+                invoiceError: '',
                 shouldShowPayment: true,
                 shouldShowSdi: false,
                 shouldShowFiscalCode: false,
@@ -32,6 +35,19 @@
                     } else {
                         this.shouldShowSdi = false
                     }
+                },
+                markInvoiceDirty() {
+                    this.invoiceSaved = false
+                    this.invoiceError = ''
+                    this.updateSdi()
+                },
+                validateInvoiceForm() {
+                    this.updateSdi()
+                    if (!this.$refs.invoiceForm.checkValidity()) {
+                        this.$refs.invoiceForm.reportValidity()
+                        return false
+                    }
+                    return true
                 },
                 fetchInvoiceData() {
                     const url = `/shop/invoices/user-data/{{ Auth()->user()->id }}`
