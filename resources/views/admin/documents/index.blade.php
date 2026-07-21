@@ -13,49 +13,14 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="bg-white dark:bg-background-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-background-900 dark:text-background-100" x-data="{ selectedDocument: null }">
+                <div class="p-6 text-background-900 dark:text-background-100" x-data="{ selectedDocument: null, selectedWatermarkFields: [], selectedWatermarkSide: 'left' }">
                     @if ($isAdmin)
-                        <div class="mb-6 grid gap-4 md:grid-cols-2">
-                            <form method="POST" action="{{ route('documents.terms.store') }}" enctype="multipart/form-data"
-                                class="rounded border border-background-200 dark:border-background-700 p-4"
-                                x-data="{ uploading: false }">
-                                @csrf
-                                <h3 class="font-semibold text-background-900 dark:text-background-100">Upload terms of service</h3>
-                                <div class="flex items-center justify-between gap-3">
-                                    <div>
-                                        <x-input-label for="terms" value="Terms of Service PDF" />
-                                        <input id="terms" name="terms" type="file" accept="application/pdf,.pdf"
-                                            class="hidden" x-ref="termsInput"
-                                            x-on:change="if ($event.target.files.length) { uploading = true; $root.submit(); }">
-                                        <x-input-error class="mt-2" :messages="$errors->get('terms')" />
-                                    </div>
-                                    <x-primary-button type="button" x-on:click="$refs.termsInput.click()" x-bind:disabled="uploading">
-                                        <span x-text="uploading ? 'Uploading...' : 'Upload'"></span>
-                                    </x-primary-button>
-                                </div>
-                                @if ($latestTerms)
-                                    <p class="mt-3 text-sm text-background-600 dark:text-background-300">
-                                        Latest: V{{ $latestTerms->version }} - {{ $latestTerms->original_name }}
-                                    </p>
-                                @endif
-                            </form>
-
-                            <div class="rounded border border-background-200 dark:border-background-700 p-4">
-                                <h3 class="font-semibold text-background-900 dark:text-background-100">Terms versions</h3>
-                                <div class="mt-3 space-y-2 text-sm">
-                                    @forelse ($terms as $term)
-                                        <div class="flex justify-between gap-3">
-                                            <span>V{{ $term->version }} - {{ $term->original_name }}</span>
-                                            <span class="text-background-500">{{ $term->created_at->format('d/m/Y H:i') }}</span>
-                                        </div>
-                                    @empty
-                                        <p class="text-background-500">No terms uploaded.</p>
-                                    @endforelse
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4 flex justify-end">
+                        <div class="mb-4 flex justify-end gap-3">
+                            <a href="{{ route('documents.terms.edit') }}"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-600 focus:bg-primary-600 active:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-background-800 transition ease-in-out duration-150">
+                                <x-lucide-file-text class="w-4 h-4" />
+                                Terms of Access
+                            </a>
                             <a href="{{ route('documents.events') }}"
                                 class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-600 focus:bg-primary-600 active:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-background-800 transition ease-in-out duration-150">
                                 <x-lucide-list class="w-4 h-4" />
@@ -100,6 +65,17 @@
                                     @endif
                                 </div>
                                 @if ($isAdmin)
+                                    <div class="has-tooltip">
+                                        <span
+                                            class="tooltip rounded shadow-lg p-1 bg-background-100 text-background-800 text-sm -mt-6 -translate-y-full">
+                                            Edit watermark
+                                        </span>
+                                        <button type="button" title="Edit watermark"
+                                            x-on:click="selectedDocument = row; selectedWatermarkFields = [...(row.watermark_fields || [])]; selectedWatermarkSide = row.watermark_side; $dispatch('open-modal', 'edit-watermark-modal')"
+                                            class="inline-flex items-center justify-center p-2 text-primary-500 dark:text-primary-400 hover:text-background-700 dark:hover:text-primary-300 transition">
+                                            <x-lucide-pencil class="w-5 h-5" />
+                                        </button>
+                                    </div>
                                     <form method="POST" x-bind:action="'/documents/' + row.id">
                                         @csrf
                                         @method('DELETE')
@@ -119,6 +95,50 @@
                         </x-slot>
                     </x-table>
 
+                    @if ($isAdmin)
+                        <x-modal name="edit-watermark-modal" focusable>
+                            <form method="POST" class="p-6 space-y-6"
+                                x-bind:action="selectedDocument ? '/documents/' + selectedDocument.id : '#'">
+                                @csrf
+                                @method('PUT')
+
+                                <h2 class="text-lg font-medium text-background-900 dark:text-background-100">
+                                    Edit watermark
+                                </h2>
+
+                                <div>
+                                    <x-input-label value="{{ __('Watermark information') }}" />
+                                    <div class="mt-2 space-y-2">
+                                        @foreach ($watermarkFields as $value => $label)
+                                            <label class="flex items-center gap-2">
+                                                <input type="checkbox" name="watermark_fields[]" value="{{ $value }}"
+                                                    x-model="selectedWatermarkFields"
+                                                    class="rounded border-background-300 text-primary-600 shadow-sm focus:ring-primary-500">
+                                                <span>{{ __($label) }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <x-input-label for="watermark_side" value="{{ __('Watermark side') }}" />
+                                    <select id="watermark_side" name="watermark_side" x-model="selectedWatermarkSide" required
+                                        class="mt-1 block w-full rounded-md border-background-300 dark:border-background-700 dark:bg-background-900 dark:text-background-300 focus:border-primary-500 focus:ring-primary-500">
+                                        <option value="left">{{ __('Left margin') }}</option>
+                                        <option value="right">{{ __('Right margin') }}</option>
+                                    </select>
+                                </div>
+
+                                <div class="flex justify-end gap-3">
+                                    <x-secondary-button type="button" x-on:click="$dispatch('close-modal', 'edit-watermark-modal')">
+                                        {{ __('Cancel') }}
+                                    </x-secondary-button>
+                                    <x-primary-button>{{ __('Save') }}</x-primary-button>
+                                </div>
+                            </form>
+                        </x-modal>
+                    @endif
+
                     @unless ($isAdmin)
                         <x-modal name="document-terms-modal" focusable>
                             <div class="p-6">
@@ -130,8 +150,8 @@
                                     Before continuing you must accept the Terms of Access for this document.
                                 </p>
 
-                                <a href="{{ $latestTerms ? route('documents.terms.download') : '#' }}" class="mt-4 inline-flex text-sm text-primary-600 dark:text-primary-400 underline">
-                                    Download Terms of Access
+                                <a href="{{ route('terms-of-access.show') }}" target="_blank" class="mt-4 inline-flex text-sm text-primary-600 dark:text-primary-400 underline">
+                                    Read Terms of Access
                                 </a>
 
                                 <form method="POST" target="_blank" class="mt-6"

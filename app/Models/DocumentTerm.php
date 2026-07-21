@@ -15,6 +15,7 @@ class DocumentTerm extends Model
         'disk',
         'mime_type',
         'size_bytes',
+        'content',
         'uploaded_by',
     ];
 

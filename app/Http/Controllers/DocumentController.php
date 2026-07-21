@@ -6,9 +6,10 @@ use App\Exports\DocumentEventsExport;
 use App\Models\Document;
 use App\Models\DocumentEvent;
 use App\Models\DocumentTerm;
+use App\Models\TermsOfAccessContent;
 use App\Models\User;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -61,9 +62,8 @@ class DocumentController extends Controller
 
         return view('admin.documents.index', [
             'documents' => $documents,
-            'terms' => DocumentTerm::query()->with('uploader')->latest('version')->get(),
-            'latestTerms' => $this->latestTerms(),
             'isAdmin' => $this->isAdmin(),
+            'watermarkFields' => self::WATERMARK_FIELDS,
         ]);
     }
 
@@ -71,6 +71,22 @@ class DocumentController extends Controller
     {
         return view('admin.documents.create', [
             'watermarkFields' => self::WATERMARK_FIELDS,
+        ]);
+    }
+
+    public function editTerms(): View
+    {
+        return view('admin.documents.terms', [
+            'terms' => DocumentTerm::query()->with('uploader')->latest('version')->get(),
+            'content' => TermsOfAccessContent::query()->latest()->value('content') ?? '',
+        ]);
+    }
+
+    public function showTerms(): View
+    {
+        return view('terms-of-access', [
+            'terms' => $this->latestTerms(),
+            'content' => TermsOfAccessContent::query()->latest()->value('content'),
         ]);
     }
 
@@ -140,6 +156,22 @@ class DocumentController extends Controller
         return redirect()->route('documents.index')->with('success', 'Document uploaded successfully.');
     }
 
+    public function update(Request $request, Document $document): RedirectResponse
+    {
+        $validated = $request->validate([
+            'watermark_fields' => ['required', 'array', 'min:1'],
+            'watermark_fields.*' => ['required', 'in:'.implode(',', array_keys(self::WATERMARK_FIELDS))],
+            'watermark_side' => ['required', 'in:left,right'],
+        ]);
+
+        $document->update([
+            'watermark_fields' => array_values($validated['watermark_fields']),
+            'watermark_side' => $validated['watermark_side'],
+        ]);
+
+        return redirect()->route('documents.index')->with('success', 'Watermark updated successfully.');
+    }
+
     public function storeTerms(Request $request): RedirectResponse
     {
         $request->validate([
@@ -167,7 +199,22 @@ class DocumentController extends Controller
             'uploaded_by' => $request->user()->id,
         ]);
 
-        return redirect()->route('documents.index')->with('success', 'Terms uploaded successfully.');
+        return redirect()->route('documents.terms.edit')->with('success', 'Terms of Access uploaded successfully.');
+    }
+
+    public function storeTermsContent(Request $request): RedirectResponse
+    {
+        $request->validate(['content' => ['required', 'string']]);
+
+        TermsOfAccessContent::query()->updateOrCreate(
+            ['id' => 1],
+            [
+                'content' => $this->sanitizeTermsHtml(html_entity_decode($request->string('content')->toString())),
+                'updated_by' => $request->user()->id,
+            ]
+        );
+
+        return redirect()->route('documents.terms.edit')->with('success', 'Terms of Access HTML saved successfully.');
     }
 
     public function downloadTerms()
@@ -177,7 +224,7 @@ class DocumentController extends Controller
 
         return Storage::disk($terms->disk)->download(
             $terms->path,
-            'terms-of-service-v'.$terms->version.'.pdf',
+            'terms-of-access-v'.$terms->version.'.pdf',
             [
                 'ResponseContentType' => $terms->mime_type,
                 'Content-Type' => $terms->mime_type,
@@ -296,6 +343,37 @@ class DocumentController extends Controller
     private function latestTerms(): ?DocumentTerm
     {
         return DocumentTerm::query()->latest('version')->first();
+    }
+
+    private function sanitizeTermsHtml(string $html): string
+    {
+        $dom = new \DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
+        libxml_clear_errors();
+
+        $allowed = ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'hr', 'a'];
+        $body = $dom->getElementsByTagName('body')->item(0);
+        $elements = iterator_to_array((new \DOMXPath($dom))->query('.//*', $body));
+
+        foreach ($elements as $element) {
+            if (! in_array(strtolower($element->nodeName), $allowed, true)) {
+                while ($element->firstChild) {
+                    $element->parentNode->insertBefore($element->firstChild, $element);
+                }
+                $element->parentNode?->removeChild($element);
+
+                continue;
+            }
+
+            foreach (iterator_to_array($element->attributes) as $attribute) {
+                if ($element->nodeName !== 'a' || $attribute->nodeName !== 'href' || ! preg_match('~^(https?://|mailto:|/)~i', $attribute->nodeValue)) {
+                    $element->removeAttribute($attribute->nodeName);
+                }
+            }
+        }
+
+        return trim(implode('', array_map(fn ($node) => $dom->saveHTML($node), iterator_to_array($body->childNodes))));
     }
 
     private function watermarkLines(Document $document, Request $request, $downloadedAt): array

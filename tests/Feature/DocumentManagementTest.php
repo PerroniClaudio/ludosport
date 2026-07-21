@@ -7,6 +7,7 @@ use App\Models\Nation;
 use App\Models\PrivacyPolicy;
 use App\Models\Rank;
 use App\Models\Role;
+use App\Models\TermsOfAccessContent;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -27,6 +28,7 @@ function makeUserWithRole(string $roleName): User
     $user = User::factory()->create([
         'nation_id' => 1,
         'privacy_policy_accepted_at' => now(),
+        'profile_completed' => true,
     ]);
 
     $role = Role::where('name', $roleName)->firstOrFail();
@@ -94,7 +96,34 @@ test('admin uploads valid pdf document', function () {
     Storage::disk('gcs')->assertExists($document->path);
 });
 
-test('admin uploads versioned terms and users download latest terms', function () {
+test('admin updates document watermark', function () {
+    $admin = makeUserWithRole('admin');
+    $document = Document::create([
+        'original_name' => 'manual.pdf',
+        'stored_name' => 'manual.pdf',
+        'path' => 'documents/manual.pdf',
+        'disk' => 'gcs',
+        'mime_type' => 'application/pdf',
+        'extension' => 'pdf',
+        'size_bytes' => 8,
+        'uploaded_by' => $admin->id,
+        'watermark_fields' => ['email'],
+        'watermark_side' => 'left',
+    ]);
+
+    $this->actingAs($admin)
+        ->withSession(['role' => 'admin'])
+        ->put(route('documents.update', $document), [
+            'watermark_fields' => ['name', 'downloaded_at'],
+            'watermark_side' => 'right',
+        ])
+        ->assertRedirect(route('documents.index', absolute: false));
+
+    expect($document->fresh()->watermark_fields)->toBe(['name', 'downloaded_at'])
+        ->and($document->fresh()->watermark_side)->toBe('right');
+});
+
+test('admin uploads versioned terms of access and public reads latest version', function () {
     Storage::fake('gcs');
     Storage::disk('gcs')->buildTemporaryUrlsUsing(function (string $path) {
         return 'https://example.test/temp/'.$path;
@@ -104,26 +133,51 @@ test('admin uploads versioned terms and users download latest terms', function (
 
     $this->actingAs($admin)
         ->withSession(['role' => 'admin'])
+        ->post(route('documents.terms.content.store'), [
+            'content' => '<h2>Version two</h2><script>alert(1)</script>',
+        ])
+        ->assertRedirect(route('documents.terms.edit', absolute: false));
+
+    $this->actingAs($admin)
+        ->withSession(['role' => 'admin'])
         ->post(route('documents.terms.store'), [
             'terms' => UploadedFile::fake()->create('terms-1.pdf', 20, 'application/pdf'),
         ])
-        ->assertRedirect(route('documents.index', absolute: false));
+        ->assertRedirect(route('documents.terms.edit', absolute: false));
 
     $this->actingAs($admin)
         ->withSession(['role' => 'admin'])
         ->post(route('documents.terms.store'), [
             'terms' => UploadedFile::fake()->create('terms-2.pdf', 20, 'application/pdf'),
         ])
-        ->assertRedirect(route('documents.index', absolute: false));
+        ->assertRedirect(route('documents.terms.edit', absolute: false));
 
     expect(DocumentTerm::pluck('version')->all())->toBe([1, 2]);
 
     $latest = DocumentTerm::latest('version')->first();
 
+    expect(TermsOfAccessContent::first()->content)
+        ->toContain('Version two')
+        ->not->toContain('<script');
+
+    $this->get(route('terms-of-access.show'))
+        ->assertOk()
+        ->assertSee('Version two')
+        ->assertSee(route('terms-of-access.download'));
+
+    $this->get(route('terms-of-access.download'))
+        ->assertDownload('terms-of-access-v'.$latest->version.'.pdf');
+});
+
+test('admin has dedicated terms of access page', function () {
+    $admin = makeUserWithRole('admin');
+
     $this->actingAs($admin)
         ->withSession(['role' => 'admin'])
-        ->get(route('documents.terms.download'))
-        ->assertDownload('terms-of-service-v'.$latest->version.'.pdf');
+        ->get(route('documents.terms.edit'))
+        ->assertOk()
+        ->assertSee('Terms of Access PDF')
+        ->assertSee('Uploaded versions');
 });
 
 test('admin cannot upload non pdf document', function () {
@@ -359,6 +413,13 @@ test('non admin cannot access admin document routes', function () {
 
     $this->actingAs($user)->withSession(['role' => 'technician'])
         ->get(route('documents.download', $document))
+        ->assertRedirect(route('dashboard', absolute: false));
+
+    $this->actingAs($user)->withSession(['role' => 'technician'])
+        ->put(route('documents.update', $document), [
+            'watermark_fields' => ['name'],
+            'watermark_side' => 'right',
+        ])
         ->assertRedirect(route('dashboard', absolute: false));
 
     $this->actingAs($user)->withSession(['role' => 'technician'])

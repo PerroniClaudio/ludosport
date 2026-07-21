@@ -3,6 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/terms-of-access', [App\Http\Controllers\DocumentController::class, 'showTerms'])->name('terms-of-access.show');
+Route::get('/terms-of-access/download', [App\Http\Controllers\DocumentController::class, 'downloadTerms'])->name('terms-of-access.download');
+
 Route::get('/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->middleware(['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected', 'verified'])->name('dashboard');
 Route::get('/role-select', [App\Http\Controllers\UserController::class, 'roleSelector'])->middleware(['auth', 'privacy.policy', 'minor.approved', 'verified'])->name('role-selector');
 Route::get('/institution-select', [App\Http\Controllers\UserController::class, 'institutionSelector'])->middleware(['auth', 'privacy.policy', 'minor.approved', 'verified'])->name('institution-selector');
@@ -50,7 +53,6 @@ Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role
 
 Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected']], function () {
     Route::get('/documents', [App\Http\Controllers\DocumentController::class, 'index'])->name('documents.index');
-    Route::get('/documents/terms/download', [App\Http\Controllers\DocumentController::class, 'downloadTerms'])->name('documents.terms.download');
     Route::get('/documents/{document}/download', [App\Http\Controllers\DocumentController::class, 'download'])->middleware('role:admin')->name('documents.download');
     Route::post('/documents/{document}/terms-viewed', [App\Http\Controllers\DocumentController::class, 'termsViewed'])->name('documents.terms-viewed');
     Route::post('/documents/{document}/accept-terms', [App\Http\Controllers\DocumentController::class, 'acceptTerms'])->name('documents.accept-terms');
@@ -58,10 +60,13 @@ Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role
 
 Route::group(['middleware' => ['auth', 'privacy.policy', 'minor.approved', 'role.institution.selected', 'role:admin']], function () {
     Route::get('/documents/create', [App\Http\Controllers\DocumentController::class, 'create'])->name('documents.create');
+    Route::get('/documents/terms-of-access', [App\Http\Controllers\DocumentController::class, 'editTerms'])->name('documents.terms.edit');
     Route::get('/documents/events', [App\Http\Controllers\DocumentController::class, 'events'])->name('documents.events');
     Route::get('/documents/events/export', [App\Http\Controllers\DocumentController::class, 'exportEvents'])->name('documents.events.export');
     Route::post('/documents/terms', [App\Http\Controllers\DocumentController::class, 'storeTerms'])->name('documents.terms.store');
+    Route::post('/documents/terms-of-access/content', [App\Http\Controllers\DocumentController::class, 'storeTermsContent'])->name('documents.terms.content.store');
     Route::post('/documents', [App\Http\Controllers\DocumentController::class, 'store'])->name('documents.store');
+    Route::put('/documents/{document}', [App\Http\Controllers\DocumentController::class, 'update'])->name('documents.update');
     Route::delete('/documents/{document}', [App\Http\Controllers\DocumentController::class, 'destroy'])->name('documents.destroy');
 });
 
