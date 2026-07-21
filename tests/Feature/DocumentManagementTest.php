@@ -75,7 +75,7 @@ test('admin uploads valid pdf document', function () {
     $response = $this->actingAs($admin)
         ->withSession(['role' => 'admin'])
         ->post(route('documents.store'), [
-            'document' => UploadedFile::fake()->create('manual.pdf', 120, 'application/pdf'),
+            'document' => UploadedFile::fake()->create('manual.pdf', 20480, 'application/pdf'),
             'watermark_fields' => ['email', 'user_id'],
             'watermark_side' => 'right',
         ]);

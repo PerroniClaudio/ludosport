@@ -106,7 +106,7 @@ class DocumentController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'document' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+            'document' => ['required', 'file', 'mimes:pdf', 'max:20480'],
             'watermark_fields' => ['required', 'array', 'min:1'],
             'watermark_fields.*' => ['required', 'in:'.implode(',', array_keys(self::WATERMARK_FIELDS))],
             'watermark_side' => ['required', 'in:left,right'],
@@ -143,7 +143,7 @@ class DocumentController extends Controller
     public function storeTerms(Request $request): RedirectResponse
     {
         $request->validate([
-            'terms' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+            'terms' => ['required', 'file', 'mimes:pdf', 'max:20480'],
         ]);
 
         $file = $request->file('terms');

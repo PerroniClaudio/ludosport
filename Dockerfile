@@ -23,9 +23,9 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 # Installa l'estensione Redis
 RUN pecl install redis && docker-php-ext-enable redis
 
-# Imposta la max filesize a 20MB su php.ini
-RUN echo "upload_max_filesize = 20M" >> /usr/local/etc/php/php.ini
-RUN echo "post_max_size = 20M" >> /usr/local/etc/php/php.ini
+# Consenti file da 20MB più overhead multipart della richiesta
+RUN echo "upload_max_filesize = 64M" >> /usr/local/etc/php/php.ini
+RUN echo "post_max_size = 64M" >> /usr/local/etc/php/php.ini
 
 
 
